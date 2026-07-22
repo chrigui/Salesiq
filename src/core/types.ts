@@ -63,6 +63,44 @@ export interface InventoryItem {
   highlights: string[];
   gallery?: string[];
   appreciation?: number; // % — used by investment scoring
+  /** Lifestyle-map data — powers the Interactive Lifestyle Map hero. */
+  lifestyle?: Lifestyle;
+}
+
+/** A point of interest floating on the lifestyle map. x/y are 0..100 (% of stage). */
+export interface Poi {
+  id: string;
+  icon: string;
+  label: string;
+  detail: string; // e.g. "5 min", "6 min walk"
+  x: number;
+  y: number;
+  kind: "school" | "park" | "shopping" | "health" | "transport" | "leisure" | "water";
+}
+
+export interface LifestyleMetric {
+  icon: string;
+  label: string;
+  detail: string;
+}
+
+/**
+ * Everything the Interactive Lifestyle Map needs to turn an inventory item into
+ * a living scene: the district, its character, the amenities around it, and
+ * where the property sits on the stage.
+ */
+export interface Lifestyle {
+  district: string;
+  tags: string[]; // ["Family", "Calm", "Connected"]
+  summary: string;
+  beds?: number;
+  sqm?: number;
+  /** Property position on the map stage, 0..100. */
+  at: { x: number; y: number };
+  metrics: LifestyleMetric[];
+  pois: Poi[];
+  /** Three headline stats for the "Why we recommend" card. */
+  headline: LifestyleMetric[];
 }
 
 /**

@@ -1,4 +1,4 @@
-import type { IndustryPack } from "@/core/types";
+import type { IndustryPack, Poi } from "@/core/types";
 import {
   atLeastRule,
   budgetRule,
@@ -6,6 +6,29 @@ import {
   investmentRule,
   proximityRule,
 } from "./rules";
+
+/**
+ * Shared placement for the lifestyle-map amenities. Every property reuses the
+ * same pleasing layout so the camera glides between scenes while the labels and
+ * distances change — a calm, cinematic transition rather than a jump.
+ */
+const POI_LAYOUT: Omit<Poi, "label" | "detail">[] = [
+  { id: "school", icon: "GraduationCap", x: 53, y: 30, kind: "school" },
+  { id: "park", icon: "Trees", x: 26, y: 35, kind: "park" },
+  { id: "mall", icon: "ShoppingBag", x: 37, y: 18, kind: "shopping" },
+  { id: "health", icon: "HeartPulse", x: 69, y: 22, kind: "health" },
+  { id: "cafe", icon: "Coffee", x: 20, y: 49, kind: "leisure" },
+  { id: "beach", icon: "Waves", x: 78, y: 44, kind: "water" },
+  { id: "centre", icon: "TrainFront", x: 73, y: 64, kind: "transport" },
+];
+
+function pois(content: Record<string, [string, string]>): Poi[] {
+  return POI_LAYOUT.map((p) => ({
+    ...p,
+    label: content[p.id][0],
+    detail: content[p.id][1],
+  }));
+}
 
 export const realEstatePack: IndustryPack = {
   id: "real-estate",
@@ -135,6 +158,36 @@ export const realEstatePack: IndustryPack = {
         "Larger plots than comparable projects",
         "18% appreciation over 3 years",
       ],
+      lifestyle: {
+        district: "Green Hills, Larnaca",
+        tags: ["Family", "Green", "Connected"],
+        summary:
+          "A calm, family-first enclave where schools, parks and everyday essentials are all within a short walk.",
+        beds: 4,
+        sqm: 420,
+        at: { x: 45, y: 43 },
+        metrics: [
+          { icon: "GraduationCap", label: "Schools", detail: "3 within 5 min" },
+          { icon: "Trees", label: "Parks", detail: "4 within 10 min" },
+          { icon: "ShoppingCart", label: "Groceries", detail: "5 within 5 min" },
+          { icon: "HeartPulse", label: "Hospitals", detail: "2 within 10 min" },
+          { icon: "Waves", label: "Beach", detail: "12 min drive" },
+        ],
+        headline: [
+          { icon: "GraduationCap", label: "School", detail: "5 min walk" },
+          { icon: "Trees", label: "Park", detail: "4 min walk" },
+          { icon: "Car", label: "Commute", detail: "20 min to centre" },
+        ],
+        pois: pois({
+          school: ["International School", "5 min walk"],
+          park: ["Green Valley Park", "4 min walk"],
+          mall: ["Larnaca Mall", "8 min"],
+          health: ["City Clinic", "9 min"],
+          cafe: ["Café Row", "3 min"],
+          beach: ["Mackenzie Beach", "12 min drive"],
+          centre: ["Town Centre", "20 min"],
+        }),
+      },
     },
     {
       id: "marina-vista",
@@ -159,6 +212,36 @@ export const realEstatePack: IndustryPack = {
         "Walk to the promenade",
         "Premium rental demand",
       ],
+      lifestyle: {
+        district: "Marina District, Limassol",
+        tags: ["Waterfront", "Vibrant", "Investment"],
+        summary:
+          "A lively waterfront address where the promenade, dining and the marina are all on your doorstep.",
+        beds: 3,
+        sqm: 145,
+        at: { x: 45, y: 43 },
+        metrics: [
+          { icon: "Waves", label: "Marina", detail: "2 min walk" },
+          { icon: "UtensilsCrossed", label: "Dining", detail: "12 within 5 min" },
+          { icon: "ShoppingCart", label: "Groceries", detail: "3 within 5 min" },
+          { icon: "GraduationCap", label: "Schools", detail: "1 within 14 min" },
+          { icon: "TrendingUp", label: "Rental yield", detail: "Strong demand" },
+        ],
+        headline: [
+          { icon: "Waves", label: "Marina", detail: "2 min walk" },
+          { icon: "UtensilsCrossed", label: "Dining", detail: "1 min walk" },
+          { icon: "Car", label: "Commute", detail: "10 min to centre" },
+        ],
+        pois: pois({
+          school: ["Coastal School", "14 min"],
+          park: ["Seafront Park", "5 min walk"],
+          mall: ["Marina Mall", "3 min"],
+          health: ["Marina Clinic", "7 min"],
+          cafe: ["Promenade Cafés", "1 min walk"],
+          beach: ["Blue Flag Beach", "4 min walk"],
+          centre: ["City Centre", "10 min"],
+        }),
+      },
     },
     {
       id: "olive-grove",
@@ -183,6 +266,36 @@ export const realEstatePack: IndustryPack = {
         "Peaceful hillside setting",
         "Excellent value per m²",
       ],
+      lifestyle: {
+        district: "Olive Grove, Paphos Hills",
+        tags: ["Peaceful", "Spacious", "Value"],
+        summary:
+          "A tranquil hillside village of generous plots and olive groves, minutes from the coast yet a world away from the bustle.",
+        beds: 3,
+        sqm: 610,
+        at: { x: 45, y: 43 },
+        metrics: [
+          { icon: "Trees", label: "Green space", detail: "All around" },
+          { icon: "GraduationCap", label: "Schools", detail: "2 within 9 min" },
+          { icon: "ShoppingCart", label: "Groceries", detail: "Village centre" },
+          { icon: "HeartPulse", label: "Clinic", detail: "9 min drive" },
+          { icon: "Waves", label: "Beach", detail: "15 min drive" },
+        ],
+        headline: [
+          { icon: "GraduationCap", label: "School", detail: "9 min drive" },
+          { icon: "Trees", label: "Green space", detail: "On your plot" },
+          { icon: "Car", label: "Coast", detail: "15 min drive" },
+        ],
+        pois: pois({
+          school: ["Village School", "9 min"],
+          park: ["Olive Groves", "On your plot"],
+          mall: ["Village Market", "6 min"],
+          health: ["Hillside Clinic", "9 min"],
+          cafe: ["Taverna", "4 min"],
+          beach: ["Coral Bay", "15 min drive"],
+          centre: ["Paphos Centre", "18 min"],
+        }),
+      },
     },
     {
       id: "azure-residences",
@@ -207,6 +320,36 @@ export const realEstatePack: IndustryPack = {
         "Sea views from every room",
         "Flagship luxury address",
       ],
+      lifestyle: {
+        district: "Azure Quarter, Limassol",
+        tags: ["Luxury", "Seafront", "Prestige"],
+        summary:
+          "A flagship seafront address with concierge living, signature dining and uninterrupted views from every room.",
+        beds: 5,
+        sqm: 310,
+        at: { x: 45, y: 43 },
+        metrics: [
+          { icon: "Waves", label: "Seafront", detail: "Direct access" },
+          { icon: "UtensilsCrossed", label: "Fine dining", detail: "8 within 5 min" },
+          { icon: "GraduationCap", label: "Schools", detail: "2 within 8 min" },
+          { icon: "HeartPulse", label: "Hospital", detail: "6 min" },
+          { icon: "Sparkles", label: "Concierge", detail: "24/7" },
+        ],
+        headline: [
+          { icon: "Waves", label: "Seafront", detail: "Direct access" },
+          { icon: "UtensilsCrossed", label: "Dining", detail: "2 min walk" },
+          { icon: "Car", label: "Commute", detail: "8 min to centre" },
+        ],
+        pois: pois({
+          school: ["British School", "8 min"],
+          park: ["Molos Park", "6 min walk"],
+          mall: ["Luxury Avenue", "5 min"],
+          health: ["General Hospital", "6 min"],
+          cafe: ["Rooftop Lounge", "In building"],
+          beach: ["Private Beach", "1 min walk"],
+          centre: ["City Centre", "8 min"],
+        }),
+      },
     },
   ],
   rules: [

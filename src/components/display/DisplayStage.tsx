@@ -9,6 +9,7 @@ import { scoreInventory, isVisible } from "@/core/engine/scoring";
 import { narrate, formatMoney } from "@/core/engine/explain";
 import { itemGradient, cx } from "@/components/ui/primitives";
 import { Icon } from "@/lib/icon";
+import { LifestyleMap } from "./LifestyleMap";
 import type { Question, AnswerValue, InventoryItem } from "@/core/types";
 
 const spring = { type: "spring", stiffness: 260, damping: 30 } as const;
@@ -24,6 +25,33 @@ export function DisplayStage() {
   );
   const activeQuestion = pack.questions.find((q) => q.id === activeQuestionId);
   const focusedItem = pack.inventory.find((i) => i.id === focusedItemId);
+
+  // The Interactive Lifestyle Map is the hero for browsing/recommendation views
+  // whenever the active pack carries lifestyle-map data (e.g. real estate).
+  const mapView =
+    view === "welcome" || view === "recommendation" || view === "item";
+  const mapTarget =
+    view === "item" && focusedItem?.lifestyle ? focusedItem : scored[0]?.item;
+  if (mapView && mapTarget?.lifestyle) {
+    const entry = scored.find((s) => s.item.id === mapTarget.id);
+    const intentQ = pack.questions.find((q) => q.id === "intent");
+    const rawIntent = answers["intent"];
+    const intentSelected = Array.isArray(rawIntent)
+      ? rawIntent
+      : rawIntent != null
+        ? [String(rawIntent)]
+        : [];
+    return (
+      <LifestyleMap
+        item={mapTarget}
+        pack={pack}
+        reasons={entry?.reasons ?? []}
+        narrative={entry ? narrate(entry, pack) : mapTarget.lifestyle.summary}
+        intentOptions={intentQ?.options ?? []}
+        intentSelected={intentSelected}
+      />
+    );
+  }
 
   return (
     <div className="bg-aurora relative h-screen w-screen overflow-hidden">
