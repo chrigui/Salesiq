@@ -75,6 +75,7 @@ export function LifestyleMap({
   investmentMode?: boolean;
 }) {
   const [night, setNight] = useState(true);
+  const [threeD, setThreeD] = useState(false);
   const [activeLayer, setActiveLayer] = useState("lifestyle");
   const mapApi = useRef<MapApi | null>(null);
   const life = item.lifestyle;
@@ -99,6 +100,7 @@ export function LifestyleMap({
         arrival={arrival}
         familyMode={familyMode}
         investmentMode={investmentMode}
+        tilt={threeD ? 52 : 0}
         apiRef={mapApi}
       />
 
@@ -318,14 +320,16 @@ export function LifestyleMap({
         >
           <Diamond className="h-4 w-4" />
         </div>
-        <div
+        <button
+          onClick={() => setThreeD((v) => !v)}
           className={cx(
-            "grid h-9 w-9 place-items-center rounded-full border text-xs font-semibold backdrop-blur-xl",
-            glass,
+            "grid h-9 w-9 place-items-center rounded-full border text-xs font-semibold backdrop-blur-xl transition",
+            threeD ? "bg-brand text-white" : glass,
           )}
+          aria-label="Toggle 3D tilt"
         >
-          2D
-        </div>
+          {threeD ? "3D" : "2D"}
+        </button>
         <div
           className={cx(
             "flex flex-col overflow-hidden rounded-full border backdrop-blur-xl",

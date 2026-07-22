@@ -25,9 +25,6 @@ const POI_COLOR: Record<Poi["kind"], string> = {
   water: "text-cyan-300 bg-cyan-500/20 ring-cyan-400/30",
 };
 
-// Free, key-less OpenStreetMap-based tiles. CARTO's dark/light basemaps keep
-// the premium look and give us a real day/night toggle. Override via env for a
-// managed provider or raw tile.openstreetmap.org.
 const DARK_TILES =
   process.env.NEXT_PUBLIC_TILES_DARK ||
   "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
@@ -38,8 +35,8 @@ const TILE_ATTRIB =
   '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>';
 
 type LatLng = [number, number];
+type Pt = { x: number; y: number };
 
-/** Move `metres` east (dxE) and north (dyN) from a lat/lng. */
 function offset(lat: number, lng: number, dxE: number, dyN: number): LatLng {
   const dLat = dyN / 111320;
   const dLng = dxE / (111320 * Math.cos((lat * Math.PI) / 180));
@@ -51,17 +48,13 @@ export interface MapApi {
   zoomOut: () => void;
 }
 
-/**
- * The Interactive Lifestyle Map rendered on real OpenStreetMap tiles.
- * Floating panels (handled by the parent) stay fixed; everything here is
- * anchored to true coordinates and tracks the map as the camera flies.
- */
 export function RealMap({
   item,
   night,
   arrival,
   familyMode,
   investmentMode,
+  tilt = 0,
   apiRef,
 }: {
   item: InventoryItem;
@@ -69,6 +62,8 @@ export function RealMap({
   arrival: boolean;
   familyMode: boolean;
   investmentMode: boolean;
+  /** 3D pitch in degrees (0 = flat). */
+  tilt?: number;
   apiRef?: MutableRefObject<MapApi | null>;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -81,7 +76,6 @@ export function RealMap({
     ? [item.location.lat, item.location.lng]
     : [34.9, 33.6];
 
-  // Init the Leaflet map once.
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
     const map = L.map(containerRef.current, {
@@ -89,6 +83,7 @@ export function RealMap({
       attributionControl: true,
       scrollWheelZoom: false,
       doubleClickZoom: false,
+      dragging: false, // controlled "theatre" camera (and CSS tilt-safe)
       fadeAnimation: true,
       zoomSnap: 0.25,
     });
@@ -97,9 +92,7 @@ export function RealMap({
 
     if (arrival) {
       map.setView(center, 11, { animate: false });
-      window.setTimeout(() => {
-        map.flyTo(center, ZOOM, { duration: 2.4 });
-      }, 250);
+      window.setTimeout(() => map.flyTo(center, ZOOM, { duration: 2.4 }), 250);
     } else {
       map.setView(center, ZOOM, { animate: false });
     }
@@ -112,7 +105,8 @@ export function RealMap({
       rerender();
     }, 120);
 
-    if (apiRef) apiRef.current = { zoomIn: () => map.zoomIn(), zoomOut: () => map.zoomOut() };
+    if (apiRef)
+      apiRef.current = { zoomIn: () => map.zoomIn(), zoomOut: () => map.zoomOut() };
 
     return () => {
       map.remove();
@@ -121,7 +115,6 @@ export function RealMap({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Swap tiles on day/night.
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
@@ -134,7 +127,6 @@ export function RealMap({
     }).addTo(map);
   }, [night]);
 
-  // Fly to a new district when the recommended property changes.
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !firstFlyDone.current) return;
@@ -145,15 +137,13 @@ export function RealMap({
   const life = item.lifestyle;
   const map = mapRef.current;
 
-  // Project a lat/lng to a pixel position in the container (if the map is ready).
-  const project = (ll: LatLng) => {
+  const project = (ll: LatLng): Pt | null => {
     if (!map) return null;
     const p = map.latLngToContainerPoint(ll);
     return { x: p.x, y: p.y };
   };
 
   const centerPx = project(center);
-  // Pixel length of the lifestyle radius at the current zoom.
   const edgePx = project(offset(center[0], center[1], RADIUS_M, 0));
   const radiusPx =
     centerPx && edgePx ? Math.hypot(edgePx.x - centerPx.x, edgePx.y - centerPx.y) : 0;
@@ -169,58 +159,109 @@ export function RealMap({
     );
   };
 
+  const size = map?.getSize();
+  const W = size?.x ?? 0;
+  const H = size?.y ?? 0;
+
+  // "Standing" overlays are billboarded so they stay upright on the tilted ground.
+  const billboard = (anchor: "bottom" | "center"): React.CSSProperties => ({
+    transform: `${anchor === "center" ? "translate(-50%,-50%)" : "translate(-50%,-100%)"} rotateX(${-tilt}deg)`,
+    transformOrigin: "50% 100%",
+  });
+
+  // Walkable amenities get an animated route on the ground.
+  const walkPois = (life?.pois ?? []).filter((p) =>
+    p.detail.toLowerCase().includes("walk"),
+  );
+
   return (
-    // `isolate` contains Leaflet's internal z-indexes (its panes go up to ~700)
-    // so they can't paint over the floating UI panels rendered by the parent.
-    <div className="absolute inset-0 isolate">
-      {/* Leaflet canvas */}
-      <div ref={containerRef} className="absolute inset-0 z-0 h-full w-full" />
-
-      {/* Tint to seat the tiles into the dark UI and lift contrast for overlays */}
+    <div className="absolute inset-0 isolate" style={{ perspective: "1500px" }}>
+      {/* The tilting "ground" — tiles, tint, ground-plane overlays + standing markers */}
       <div
-        className={cx(
-          "pointer-events-none absolute inset-0 z-[400]",
-          night
-            ? "bg-gradient-to-b from-[#070b14]/55 via-[#070b14]/10 to-[#070b14]/70"
-            : "bg-gradient-to-b from-white/20 via-transparent to-black/20",
-        )}
-      />
+        className="absolute inset-0"
+        style={{
+          transform: tilt ? `rotateX(${tilt}deg)` : undefined,
+          transformOrigin: "50% 74%",
+          transformStyle: "preserve-3d",
+          transition: "transform 700ms cubic-bezier(0.22,1,0.36,1)",
+        }}
+      >
+        <div ref={containerRef} className="absolute inset-0 z-0 h-full w-full" />
 
-      {/* Map-anchored overlays — above the tiles, below the parent's UI panels */}
-      <div className="pointer-events-none absolute inset-0 z-[500] overflow-hidden">
-        {life && centerPx && radiusPx > 0 && (
-          <>
-            {/* Lifestyle radius */}
-            <div
-              className="absolute"
-              style={{ left: centerPx.x, top: centerPx.y, transform: "translate(-50%,-50%)" }}
-            >
-              {[0, 1].map((i) => (
-                <motion.div
-                  key={i}
-                  className="absolute rounded-full"
-                  style={{
-                    width: radiusPx * 2,
-                    height: radiusPx * 2,
-                    left: "50%",
-                    top: "50%",
-                    x: "-50%",
-                    y: "-50%",
-                    border: `1px solid rgb(var(--brand) / ${night ? 0.55 : 0.65})`,
-                    boxShadow: `0 0 60px rgb(var(--brand) / ${night ? 0.28 : 0.16}) inset`,
-                    background: `radial-gradient(circle, rgb(var(--brand) / 0.10), transparent 70%)`,
-                  }}
-                  initial={{ scale: 0.4, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 0.9 }}
-                  transition={{ duration: 1.2, ease, delay: 0.2 + i * 0.15 }}
-                />
-              ))}
+        <div
+          className={cx(
+            "pointer-events-none absolute inset-0 z-[400]",
+            night
+              ? "bg-gradient-to-b from-[#070b14]/55 via-[#070b14]/10 to-[#070b14]/70"
+              : "bg-gradient-to-b from-white/20 via-transparent to-black/20",
+          )}
+        />
 
-              {/* Family: calm walkable sonar rings + marker */}
-              {familyMode &&
-                [0, 1, 2].map((i) => (
+        <div
+          className="pointer-events-none absolute inset-0 z-[500] overflow-hidden"
+          style={{ transformStyle: "preserve-3d" }}
+        >
+          {life && centerPx && radiusPx > 0 && (
+            <>
+              {/* Walking routes on the ground (not billboarded) */}
+              {W > 0 && (
+                <svg
+                  className="absolute inset-0"
+                  width={W}
+                  height={H}
+                  style={{ overflow: "visible" }}
+                >
+                  {walkPois.map((poi) => {
+                    const p = project(poiLatLng(poi));
+                    if (!p || !centerPx) return null;
+                    const mx = (centerPx.x + p.x) / 2;
+                    const my = (centerPx.y + p.y) / 2;
+                    // perpendicular bow for a natural, non-straight path
+                    const nx = -(p.y - centerPx.y);
+                    const ny = p.x - centerPx.x;
+                    const nlen = Math.hypot(nx, ny) || 1;
+                    const bow = 26;
+                    const cxp = mx + (nx / nlen) * bow;
+                    const cyp = my + (ny / nlen) * bow;
+                    const d = `M ${centerPx.x} ${centerPx.y} Q ${cxp} ${cyp} ${p.x} ${p.y}`;
+                    return (
+                      <g key={poi.id}>
+                        <motion.path
+                          d={d}
+                          fill="none"
+                          stroke="rgb(var(--brand))"
+                          strokeOpacity={0.35}
+                          strokeWidth={3}
+                          strokeLinecap="round"
+                          initial={{ pathLength: 0 }}
+                          animate={{ pathLength: 1 }}
+                          transition={{ duration: 1, ease, delay: 0.5 }}
+                        />
+                        <motion.path
+                          d={d}
+                          fill="none"
+                          stroke="rgb(var(--brand))"
+                          strokeWidth={3}
+                          strokeLinecap="round"
+                          strokeDasharray="2 12"
+                          initial={{ strokeDashoffset: 0 }}
+                          animate={{ strokeDashoffset: -140 }}
+                          transition={{ duration: 3, ease: "linear", repeat: Infinity }}
+                        />
+                      </g>
+                    );
+                  })}
+                </svg>
+              )}
+
+              {/* Lifestyle radius (ground ellipse under tilt) */}
+              <div
+                className="absolute"
+                style={{ left: centerPx.x, top: centerPx.y, transform: "translate(-50%,-50%)" }}
+              >
+                {[0, 1].map((i) => (
                   <motion.div
-                    key={`w${i}`}
+                    key={i}
                     className="absolute rounded-full"
                     style={{
                       width: radiusPx * 2,
@@ -229,131 +270,161 @@ export function RealMap({
                       top: "50%",
                       x: "-50%",
                       y: "-50%",
-                      border: "1.5px solid rgb(var(--brand) / 0.55)",
+                      border: `1px solid rgb(var(--brand) / ${night ? 0.55 : 0.65})`,
+                      boxShadow: `0 0 60px rgb(var(--brand) / ${night ? 0.28 : 0.16}) inset`,
+                      background: `radial-gradient(circle, rgb(var(--brand) / 0.10), transparent 70%)`,
                     }}
-                    initial={{ scale: 0.15, opacity: 0 }}
-                    animate={{ scale: [0.15, 1.05], opacity: [0.55, 0] }}
-                    transition={{ duration: 4.2, ease: "easeOut", repeat: Infinity, delay: 0.6 + i * 1.4 }}
+                    initial={{ scale: 0.4, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 0.9 }}
+                    transition={{ duration: 1.2, ease, delay: 0.2 + i * 0.15 }}
                   />
                 ))}
+                {familyMode &&
+                  [0, 1, 2].map((i) => (
+                    <motion.div
+                      key={`w${i}`}
+                      className="absolute rounded-full"
+                      style={{
+                        width: radiusPx * 2,
+                        height: radiusPx * 2,
+                        left: "50%",
+                        top: "50%",
+                        x: "-50%",
+                        y: "-50%",
+                        border: "1.5px solid rgb(var(--brand) / 0.55)",
+                      }}
+                      initial={{ scale: 0.15, opacity: 0 }}
+                      animate={{ scale: [0.15, 1.05], opacity: [0.55, 0] }}
+                      transition={{ duration: 4.2, ease: "easeOut", repeat: Infinity, delay: 0.6 + i * 1.4 }}
+                    />
+                  ))}
+              </div>
+
+              {/* Investment heatmap (ground) */}
+              {investmentMode && (
+                <HeatmapLayer center={center} project={project} radiusPx={radiusPx} />
+              )}
+
+              {/* Family walkable marker (standing) */}
               {familyMode && (
-                <div
-                  className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-brand px-3 py-1 text-xs font-semibold text-white shadow-lg shadow-brand/40"
-                  style={{ top: -radiusPx - 14 }}
-                >
-                  Walkable in 15 min
+                <div className="absolute" style={{ left: centerPx.x, top: centerPx.y - radiusPx, transformStyle: "preserve-3d" }}>
+                  <div style={billboard("center")}>
+                    <div className="-translate-y-3 whitespace-nowrap rounded-full bg-brand px-3 py-1 text-xs font-semibold text-white shadow-lg shadow-brand/40">
+                      Walkable in 15 min
+                    </div>
+                  </div>
                 </div>
               )}
-            </div>
 
-            {/* Investment: growth heatmap + a ghosted future transit line */}
-            {investmentMode && (
-              <HeatmapAndInfra
-                center={center}
-                night={night}
-                project={project}
-                offsetFn={offset}
-                radiusPx={radiusPx}
-              />
-            )}
+              {/* Future transit (standing) */}
+              {investmentMode && (
+                <StandingInfra center={center} project={project} tilt={tilt} night={night} />
+              )}
 
-            {/* POIs */}
-            {life.pois.map((poi, i) => {
-              const p = project(poiLatLng(poi));
-              if (!p) return null;
-              const highlight = familyMode && (poi.kind === "school" || poi.kind === "park");
-              return (
-                <motion.div
-                  key={poi.id}
-                  className="absolute"
-                  style={{ left: p.x, top: p.y, transform: "translate(-50%,-100%)" }}
-                  initial={{ opacity: 0, y: 8, scale: 0.85 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ delay: 0.4 + i * 0.08, duration: 0.4, ease }}
-                >
+              {/* POI pins (standing) */}
+              {life.pois.map((poi, i) => {
+                const p = project(poiLatLng(poi));
+                if (!p) return null;
+                const highlight = familyMode && (poi.kind === "school" || poi.kind === "park");
+                return (
                   <div
-                    className={cx(
-                      "flex items-center gap-2 rounded-full border px-2.5 py-1.5 backdrop-blur-xl",
-                      night
-                        ? "border-white/15 bg-black/50 text-white"
-                        : "border-white/70 bg-white/85 text-zinc-800 shadow-lg shadow-black/10",
-                      highlight && "ring-2 ring-brand/70",
-                    )}
-                    style={highlight ? { boxShadow: "0 0 22px rgb(var(--brand) / 0.45)" } : undefined}
+                    key={poi.id}
+                    className="absolute"
+                    style={{ left: p.x, top: p.y, transformStyle: "preserve-3d" }}
                   >
-                    <span className={cx("grid h-6 w-6 place-items-center rounded-full ring-1", POI_COLOR[poi.kind])}>
-                      <Icon name={poi.icon} className="h-3.5 w-3.5" />
-                    </span>
-                    <span className="pr-1 text-xs font-medium leading-tight">
-                      {poi.label}
-                      <span className={night ? "block text-white/50" : "block text-zinc-500"}>
-                        {poi.detail}
-                      </span>
-                    </span>
+                    <div style={billboard("bottom")}>
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.85 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.4 + i * 0.08, duration: 0.4, ease }}
+                      >
+                        <div
+                          className={cx(
+                            "flex items-center gap-2 rounded-full border px-2.5 py-1.5 backdrop-blur-xl",
+                            night
+                              ? "border-white/15 bg-black/50 text-white"
+                              : "border-white/70 bg-white/85 text-zinc-800 shadow-lg shadow-black/10",
+                            highlight && "ring-2 ring-brand/70",
+                          )}
+                          style={highlight ? { boxShadow: "0 0 22px rgb(var(--brand) / 0.45)" } : undefined}
+                        >
+                          <span className={cx("grid h-6 w-6 place-items-center rounded-full ring-1", POI_COLOR[poi.kind])}>
+                            <Icon name={poi.icon} className="h-3.5 w-3.5" />
+                          </span>
+                          <span className="pr-1 text-xs font-medium leading-tight">
+                            {poi.label}
+                            <span className={night ? "block text-white/50" : "block text-zinc-500"}>
+                              {poi.detail}
+                            </span>
+                          </span>
+                        </div>
+                        <div className="mx-auto mt-1 h-1.5 w-1.5 rounded-full" style={{ background: "rgb(var(--brand))" }} />
+                      </motion.div>
+                    </div>
                   </div>
-                  <div className="mx-auto mt-1 h-1.5 w-1.5 rounded-full" style={{ background: "rgb(var(--brand))" }} />
-                </motion.div>
-              );
-            })}
+                );
+              })}
 
-            {/* The property */}
-            <motion.div
-              className="absolute w-60"
-              style={{ left: centerPx.x, top: centerPx.y, transform: "translate(-50%,-50%)" }}
-              initial={{ opacity: 0, y: 30, scale: 0.85 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ delay: 0.5, duration: 0.7, ease }}
-            >
+              {/* Property (standing) */}
               <div
-                className={cx(
-                  "overflow-hidden rounded-3xl border shadow-2xl shadow-black/50 backdrop-blur-xl",
-                  night ? "border-white/15 bg-black/55" : "border-white/70 bg-white/90",
-                )}
+                className="absolute"
+                style={{ left: centerPx.x, top: centerPx.y, transformStyle: "preserve-3d" }}
               >
-                <div className={cx("relative h-24 bg-gradient-to-br", itemGradient(item.image))}>
-                  <div className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full bg-black/30 text-white backdrop-blur">
-                    <Heart className="h-4 w-4" />
-                  </div>
-                </div>
-                <div className={cx("p-4", night ? "text-white" : "text-zinc-900")}>
-                  <div className="text-lg font-semibold leading-tight">{item.name}</div>
-                  <div className={cx("text-xs", night ? "text-white/60" : "text-zinc-500")}>
-                    {life.beds} Beds · {life.sqm} sqm
-                  </div>
-                  <div className="mt-1.5 text-lg font-semibold text-brand">
-                    {formatMoney(item.price, item.currency)}
-                  </div>
+                <div style={billboard("bottom")}>
+                  <motion.div
+                    className="w-60"
+                    initial={{ opacity: 0, scale: 0.85 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.5, duration: 0.7, ease }}
+                  >
+                    <div
+                      className={cx(
+                        "overflow-hidden rounded-3xl border shadow-2xl shadow-black/50 backdrop-blur-xl",
+                        night ? "border-white/15 bg-black/55" : "border-white/70 bg-white/90",
+                      )}
+                    >
+                      <div className={cx("relative h-24 bg-gradient-to-br", itemGradient(item.image))}>
+                        <div className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full bg-black/30 text-white backdrop-blur">
+                          <Heart className="h-4 w-4" />
+                        </div>
+                      </div>
+                      <div className={cx("p-4", night ? "text-white" : "text-zinc-900")}>
+                        <div className="text-lg font-semibold leading-tight">{item.name}</div>
+                        <div className={cx("text-xs", night ? "text-white/60" : "text-zinc-500")}>
+                          {life.beds} Beds · {life.sqm} sqm
+                        </div>
+                        <div className="mt-1.5 text-lg font-semibold text-brand">
+                          {formatMoney(item.price, item.currency)}
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
                 </div>
               </div>
-            </motion.div>
-          </>
-        )}
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
-function HeatmapAndInfra({
+function HeatmapLayer({
   center,
-  night,
   project,
-  offsetFn,
   radiusPx,
 }: {
   center: LatLng;
-  night: boolean;
-  project: (ll: LatLng) => { x: number; y: number } | null;
-  offsetFn: (lat: number, lng: number, dxE: number, dyN: number) => LatLng;
+  project: (ll: LatLng) => Pt | null;
   radiusPx: number;
 }) {
   const [lat, lng] = center;
   const spots: { ll: LatLng; r: number; hot: boolean }[] = [
     { ll: center, r: radiusPx * 1.15, hot: true },
-    { ll: offsetFn(lat, lng, 800, 700), r: radiusPx * 0.8, hot: true },
-    { ll: offsetFn(lat, lng, -900, -500), r: radiusPx * 0.7, hot: false },
-    { ll: offsetFn(lat, lng, 700, -800), r: radiusPx * 0.65, hot: false },
+    { ll: offset(lat, lng, 800, 700), r: radiusPx * 0.8, hot: true },
+    { ll: offset(lat, lng, -900, -500), r: radiusPx * 0.7, hot: false },
+    { ll: offset(lat, lng, 700, -800), r: radiusPx * 0.65, hot: false },
   ];
-  const infra = project(offsetFn(lat, lng, -650, -850));
   return (
     <>
       {spots.map((s, i) => {
@@ -380,27 +451,46 @@ function HeatmapAndInfra({
           />
         );
       })}
-      {infra && (
-        <motion.div
-          className="absolute"
-          style={{ left: infra.x, top: infra.y, transform: "translate(-50%,-50%)" }}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: [0, 0.85, 0.5, 0.85], y: 0 }}
-          transition={{ duration: 5, ease: "easeInOut", repeat: Infinity, delay: 1 }}
-        >
-          <div
-            className={cx(
-              "flex items-center gap-2 whitespace-nowrap rounded-full border border-dashed px-2.5 py-1.5 text-xs font-medium backdrop-blur-md",
-              night
-                ? "border-amber-300/50 bg-amber-400/10 text-amber-200"
-                : "border-amber-500/50 bg-amber-400/20 text-amber-700",
-            )}
-          >
-            <TrainFront className="h-3.5 w-3.5" />
-            Metro Line 2 · opening 2027
-          </div>
-        </motion.div>
-      )}
     </>
+  );
+}
+
+function StandingInfra({
+  center,
+  project,
+  tilt,
+  night,
+}: {
+  center: LatLng;
+  project: (ll: LatLng) => Pt | null;
+  tilt: number;
+  night: boolean;
+}) {
+  const p = project(offset(center[0], center[1], -650, -850));
+  if (!p) return null;
+  return (
+    <div className="absolute" style={{ left: p.x, top: p.y, transformStyle: "preserve-3d" }}>
+      <div
+        style={{
+          transform: `translate(-50%,-100%) rotateX(${-tilt}deg)`,
+          transformOrigin: "50% 100%",
+        }}
+      >
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: [0, 0.85, 0.5, 0.85] }}
+          transition={{ duration: 5, ease: "easeInOut", repeat: Infinity, delay: 1 }}
+          className={cx(
+            "flex items-center gap-2 whitespace-nowrap rounded-full border border-dashed px-2.5 py-1.5 text-xs font-medium backdrop-blur-md",
+            night
+              ? "border-amber-300/50 bg-amber-400/10 text-amber-200"
+              : "border-amber-500/50 bg-amber-400/20 text-amber-700",
+          )}
+        >
+          <TrainFront className="h-3.5 w-3.5" />
+          Metro Line 2 · opening 2027
+        </motion.div>
+      </div>
+    </div>
   );
 }

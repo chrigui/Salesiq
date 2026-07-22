@@ -171,7 +171,10 @@ NEXT_PUBLIC_TILES_DARK=https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}
 ```
 
 Property and amenity positions come from each inventory item's real coordinates,
-and the camera flies between districts when the recommendation changes.
+and the camera flies between districts when the recommendation changes. Animated
+**walking routes** are drawn from the home to the walkable amenities (schools,
+parks), and a **3D tilt** view (the 2D/3D control) pitches the map into a
+cinematic perspective while the pins and cards stay upright and readable.
 
 ---
 
