@@ -1,0 +1,162 @@
+import type { IndustryPack } from "@/core/types";
+import { atLeastRule, budgetRule, featureRule } from "./rules";
+
+export const privateJetsPack: IndustryPack = {
+  id: "private-jets",
+  label: "Private Jets",
+  vertical: "business aviation sales",
+  currency: "USD",
+  branding: {
+    name: "Meridian Aviation",
+    tagline: "Distance is no longer a constraint.",
+    brand: "56 189 248", // sky
+    brandSoft: "125 211 252",
+    logoGlyph: "✈",
+  },
+  sections: [
+    { id: "mission", label: "Mission" },
+    { id: "budget", label: "Investment" },
+    { id: "cabin", label: "Cabin" },
+  ],
+  questions: [
+    {
+      id: "route",
+      label: "Typical route",
+      prompt: "What's your most common mission?",
+      type: "single",
+      section: "mission",
+      options: [
+        { id: "regional", label: "Regional", icon: "MapPin" },
+        { id: "transcon", label: "Transcontinental", icon: "Navigation" },
+        { id: "intercont", label: "Intercontinental", icon: "Globe" },
+      ],
+    },
+    {
+      id: "passengers",
+      label: "Passengers",
+      prompt: "How many passengers typically fly?",
+      type: "counter",
+      section: "cabin",
+      min: 2,
+      max: 16,
+    },
+    {
+      id: "range",
+      label: "Range",
+      prompt: "Minimum range you need, non-stop?",
+      type: "slider",
+      section: "mission",
+      min: 1500,
+      max: 8000,
+      step: 250,
+      unit: "nm",
+    },
+    {
+      id: "budget",
+      label: "Investment",
+      prompt: "What acquisition budget are we planning around?",
+      type: "budget",
+      section: "budget",
+      min: 3000000,
+      max: 75000000,
+      step: 1000000,
+      unit: "USD",
+      weight: 3,
+    },
+    {
+      id: "bedroom",
+      label: "Private suite",
+      prompt: "Do you need a private bedroom suite?",
+      type: "toggle",
+      section: "cabin",
+    },
+    {
+      id: "standup",
+      label: "Stand-up cabin",
+      prompt: "Is a full stand-up cabin required?",
+      type: "toggle",
+      section: "cabin",
+    },
+  ],
+  inventory: [
+    {
+      id: "meridian-900",
+      name: "Meridian 900",
+      subtitle: "Ultra-long-range flagship",
+      price: 68000000,
+      currency: "USD",
+      image: "sky",
+      appreciation: 0,
+      attributes: {
+        passengers: 16,
+        range: 7700,
+        bedroom: true,
+        standup: true,
+        cabinHeight: 1.9,
+      },
+      highlights: ["7,700 nm non-stop", "Private suite + shower", "16 passengers"],
+    },
+    {
+      id: "meridian-600",
+      name: "Meridian 600",
+      subtitle: "Super-midsize workhorse",
+      price: 24000000,
+      currency: "USD",
+      image: "violet",
+      appreciation: 0,
+      attributes: {
+        passengers: 10,
+        range: 4200,
+        bedroom: false,
+        standup: true,
+        cabinHeight: 1.8,
+      },
+      highlights: ["Transcontinental range", "Stand-up cabin", "Best-in-class economics"],
+    },
+    {
+      id: "meridian-300",
+      name: "Meridian 300",
+      subtitle: "Light regional jet",
+      price: 8500000,
+      currency: "USD",
+      image: "emerald",
+      appreciation: 0,
+      attributes: {
+        passengers: 7,
+        range: 2000,
+        bedroom: false,
+        standup: false,
+        cabinHeight: 1.5,
+      },
+      highlights: ["Ideal for regional hops", "Low operating cost", "Short-field capable"],
+    },
+  ],
+  rules: [
+    budgetRule("budget", 3),
+    atLeastRule(
+      "passengers",
+      "passengers",
+      (need, have) => `it carries ${have} passengers, covering your ${need}`,
+      2.5,
+    ),
+    {
+      id: "range-min",
+      questionId: "range",
+      attribute: "range",
+      weight: 3,
+      evaluate: (answer, item) => {
+        const need = Number(answer);
+        if (Number.isNaN(need)) return null;
+        const have = Number(item.attributes.range ?? 0);
+        if (have >= need)
+          return {
+            match: 1,
+            reason: `it has ${have} nm of range, enough to fly your ${need} nm mission non-stop`,
+          };
+        return { match: Math.max(0, have / need) };
+      },
+    },
+    featureRule("bedroom", "bedroom", "it has the private bedroom suite you need", 2),
+    featureRule("standup", "standup", "it offers a full stand-up cabin", 1.5),
+  ],
+};

@@ -1,0 +1,180 @@
+import type { IndustryPack } from "@/core/types";
+import { atLeastRule, budgetRule, featureRule } from "./rules";
+
+export const automotivePack: IndustryPack = {
+  id: "automotive",
+  label: "Automotive",
+  vertical: "premium automotive retail",
+  currency: "USD",
+  branding: {
+    name: "Vantage Motors",
+    tagline: "The drive that fits your life.",
+    brand: "244 63 94", // rose
+    brandSoft: "251 113 133",
+    logoGlyph: "⬡",
+  },
+  sections: [
+    { id: "use", label: "Usage" },
+    { id: "budget", label: "Budget" },
+    { id: "priorities", label: "Priorities" },
+  ],
+  questions: [
+    {
+      id: "use",
+      label: "Primary use",
+      prompt: "How will you mostly use the car?",
+      type: "single",
+      section: "use",
+      options: [
+        { id: "city", label: "City commute", icon: "Building2" },
+        { id: "family", label: "Family trips", icon: "Users" },
+        { id: "adventure", label: "Adventure", icon: "Mountain" },
+        { id: "performance", label: "Performance", icon: "Gauge" },
+      ],
+    },
+    {
+      id: "seats",
+      label: "Seats",
+      prompt: "How many seats do you need?",
+      type: "counter",
+      section: "use",
+      min: 2,
+      max: 7,
+    },
+    {
+      id: "budget",
+      label: "Budget",
+      prompt: "What's your budget?",
+      type: "budget",
+      section: "budget",
+      min: 20000,
+      max: 200000,
+      step: 5000,
+      unit: "USD",
+      weight: 3,
+    },
+    {
+      id: "electric",
+      label: "Electric",
+      prompt: "Do you want a fully electric drivetrain?",
+      type: "toggle",
+      section: "priorities",
+    },
+    {
+      id: "awd",
+      label: "All-wheel drive",
+      prompt: "Is all-wheel drive important?",
+      type: "toggle",
+      section: "priorities",
+    },
+    {
+      id: "range",
+      label: "Range",
+      prompt: "Minimum range you'd be comfortable with?",
+      type: "slider",
+      section: "priorities",
+      min: 200,
+      max: 600,
+      step: 25,
+      unit: "mi",
+    },
+  ],
+  inventory: [
+    {
+      id: "eon-gt",
+      name: "Eon GT",
+      subtitle: "Electric grand tourer",
+      price: 96000,
+      currency: "USD",
+      image: "violet",
+      appreciation: 0,
+      attributes: {
+        seats: 4,
+        electric: true,
+        awd: true,
+        range: 405,
+        zeroToSixty: 3.4,
+      },
+      highlights: ["405 mi range", "0–60 in 3.4s", "Dual-motor AWD"],
+    },
+    {
+      id: "terra-x",
+      name: "Terra X",
+      subtitle: "All-terrain family SUV",
+      price: 68000,
+      currency: "USD",
+      image: "amber",
+      appreciation: 0,
+      attributes: {
+        seats: 7,
+        electric: false,
+        awd: true,
+        range: 480,
+        zeroToSixty: 6.1,
+      },
+      highlights: ["7 seats", "Rugged AWD", "480 mi touring range"],
+    },
+    {
+      id: "civ-e",
+      name: "Civ-e",
+      subtitle: "Compact city EV",
+      price: 34000,
+      currency: "USD",
+      image: "sky",
+      appreciation: 0,
+      attributes: {
+        seats: 5,
+        electric: true,
+        awd: false,
+        range: 260,
+        zeroToSixty: 7.2,
+      },
+      highlights: ["Effortless in the city", "260 mi range", "Best value EV"],
+    },
+    {
+      id: "apex-s",
+      name: "Apex S",
+      subtitle: "Track-bred sports coupe",
+      price: 168000,
+      currency: "USD",
+      image: "rose",
+      appreciation: 0,
+      attributes: {
+        seats: 2,
+        electric: false,
+        awd: true,
+        range: 320,
+        zeroToSixty: 2.9,
+      },
+      highlights: ["0–60 in 2.9s", "Carbon aero package", "Track telemetry"],
+    },
+  ],
+  rules: [
+    budgetRule("budget", 3),
+    atLeastRule(
+      "seats",
+      "seats",
+      (need, have) => `it seats ${have}, covering your need for ${need}`,
+      2.5,
+    ),
+    featureRule("electric", "electric", "it is fully electric as you wanted", 2.5),
+    featureRule("awd", "awd", "it has all-wheel drive", 2),
+    {
+      id: "range-min",
+      questionId: "range",
+      attribute: "range",
+      weight: 2,
+      evaluate: (answer, item) => {
+        const need = Number(answer);
+        if (Number.isNaN(need)) return null;
+        const have = Number(item.attributes.range ?? 0);
+        if (have >= need)
+          return {
+            match: 1,
+            reason: `it has ${have} mi of range, comfortably clearing your ${need} mi minimum`,
+          };
+        return { match: Math.max(0, have / need) };
+      },
+    },
+  ],
+};
