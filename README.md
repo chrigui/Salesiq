@@ -106,6 +106,31 @@ Then open `/companion` and `/display` in two windows.
 
 ---
 
+## Deploy to Vercel
+
+This is a stock Next.js 15 app with **no environment variables and no API keys**
+required, so it deploys with zero configuration.
+
+1. Go to [vercel.com/new](https://vercel.com/new) and **Import** the
+   `chrigui/salesiq` repository (authorize Vercel's GitHub app for the repo if
+   prompted — it is private).
+2. Vercel auto-detects **Next.js** (Build: `next build`, Install: `npm install`,
+   Output: default). Leave everything as-is.
+3. Under **Git branch**, pick the branch you want to deploy
+   (e.g. `claude/decision-intelligence-platform-0miwwv`), or merge it to `main`
+   first and deploy that.
+4. Click **Deploy**. You get a live `https://<project>.vercel.app` URL.
+
+Every later push to the connected branch redeploys automatically; pushes to
+non-production branches get their own preview URLs.
+
+> Note: the two-screen sync uses `BroadcastChannel`, which works between tabs of
+> the **same browser**. Open `/display` and `/companion` in two tabs/windows on
+> one machine to see them sync. (Syncing across different devices would use the
+> WebSocket seam described in the architecture — not wired in this demo.)
+
+---
+
 ## Architecture
 
 ```
