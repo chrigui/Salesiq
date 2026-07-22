@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { SessionProvider } from "@/components/providers/SessionProvider";
 import { SyncProvider } from "@/components/providers/SyncProvider";
+import { ReconnectingToast } from "@/components/sync/ReconnectingToast";
 
 export const metadata: Metadata = {
   title: "SalesIQ · Decision Intelligence Platform",
@@ -18,7 +19,10 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <SessionProvider>
-          <SyncProvider>{children}</SyncProvider>
+          <SyncProvider>
+            {children}
+            <ReconnectingToast />
+          </SyncProvider>
         </SessionProvider>
       </body>
     </html>
