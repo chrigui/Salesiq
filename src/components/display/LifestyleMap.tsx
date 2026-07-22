@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import dynamic from "next/dynamic";
 import {
-  Heart,
   Share2,
   Menu,
   Sun,
@@ -15,13 +15,17 @@ import {
   ArrowRight,
   Diamond,
   TrendingUp,
-  TrainFront,
 } from "lucide-react";
-import type { InventoryItem, IndustryPack, Poi } from "@/core/types";
+import type { InventoryItem, IndustryPack } from "@/core/types";
 import { formatMoney } from "@/core/engine/explain";
-import { itemGradient, cx } from "@/components/ui/primitives";
+import { cx } from "@/components/ui/primitives";
 import { Icon } from "@/lib/icon";
-import { StylizedMap } from "./StylizedMap";
+import type { MapApi } from "./RealMap";
+
+// Leaflet touches `window`, so the real map is client-only.
+const RealMap = dynamic(() => import("./RealMap").then((m) => m.RealMap), {
+  ssr: false,
+});
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
@@ -31,16 +35,6 @@ function shorten(text: string, sentences = 2): string {
   if (!parts) return text;
   return parts.slice(0, sentences).join("").trim();
 }
-
-const POI_COLOR: Record<Poi["kind"], string> = {
-  school: "text-indigo-300 bg-indigo-500/20 ring-indigo-400/30",
-  park: "text-emerald-300 bg-emerald-500/20 ring-emerald-400/30",
-  shopping: "text-amber-300 bg-amber-500/20 ring-amber-400/30",
-  health: "text-rose-300 bg-rose-500/20 ring-rose-400/30",
-  transport: "text-sky-300 bg-sky-500/20 ring-sky-400/30",
-  leisure: "text-orange-300 bg-orange-500/20 ring-orange-400/30",
-  water: "text-cyan-300 bg-cyan-500/20 ring-cyan-400/30",
-};
 
 const LAYERS = [
   { id: "lifestyle", label: "Lifestyle", icon: "Users" },
@@ -82,11 +76,9 @@ export function LifestyleMap({
 }) {
   const [night, setNight] = useState(true);
   const [activeLayer, setActiveLayer] = useState("lifestyle");
+  const mapApi = useRef<MapApi | null>(null);
   const life = item.lifestyle;
   if (!life) return null;
-
-  // On arrival the world settles first, then the scene populates.
-  const delayBase = arrival ? 1.7 : 0;
 
   const ink = night ? "text-white" : "text-zinc-900";
   const glass = night
@@ -100,63 +92,15 @@ export function LifestyleMap({
         night ? "bg-[#070b14]" : "bg-[#dfe6ec]",
       )}
     >
-      {/* ---- The world (map + pins + property): the camera glides on change ---- */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={item.id + String(night)}
-          className="absolute inset-0"
-          initial={
-            arrival
-              ? { scale: 0.86, opacity: 0, filter: "blur(14px)" }
-              : { scale: 1.12, opacity: 0.4, filter: "blur(0px)" }
-          }
-          animate={{ scale: 1, opacity: 1, filter: "blur(0px)" }}
-          exit={{ scale: 0.96, opacity: 0 }}
-          transition={{ duration: arrival ? 2.4 : 1.1, ease }}
-        >
-          <StylizedMap night={night} />
-          <div
-            className={cx(
-              "absolute inset-0",
-              night
-                ? "bg-gradient-to-b from-black/50 via-transparent to-black/60"
-                : "bg-gradient-to-b from-white/40 via-transparent to-black/10",
-            )}
-          />
-
-          {/* Investment mode: growth heatmap + a ghosted future transit line */}
-          {investmentMode && <HeatmapLayer delay={delayBase} />}
-          {investmentMode && <FutureInfra night={night} delay={delayBase} />}
-
-          {/* Lifestyle radius — expands outward from the property */}
-          <LifestyleRadius
-            at={life.at}
-            night={night}
-            family={familyMode}
-            delay={delayBase}
-          />
-
-          {/* POIs emerge softly, staggered */}
-          {life.pois.map((poi, i) => (
-            <PoiPin
-              key={poi.id}
-              poi={poi}
-              index={i}
-              night={night}
-              delay={delayBase}
-              highlight={familyMode && (poi.kind === "school" || poi.kind === "park")}
-            />
-          ))}
-
-          {/* The property rises elegantly at the centre of its radius */}
-          <PropertyReveal
-            item={item}
-            life={life}
-            night={night}
-            delay={delayBase}
-          />
-        </motion.div>
-      </AnimatePresence>
+      {/* ---- The world: real OpenStreetMap tiles; the camera flies on change ---- */}
+      <RealMap
+        item={item}
+        night={night}
+        arrival={arrival}
+        familyMode={familyMode}
+        investmentMode={investmentMode}
+        apiRef={mapApi}
+      />
 
       {/* ---------------- Floating UI (never scrolls, always above) ---------------- */}
 
@@ -388,12 +332,20 @@ export function LifestyleMap({
             glass,
           )}
         >
-          <span className="grid h-9 w-9 place-items-center border-b border-white/10">
+          <button
+            onClick={() => mapApi.current?.zoomIn()}
+            className="grid h-9 w-9 place-items-center border-b border-white/10 transition hover:bg-white/10"
+            aria-label="Zoom in"
+          >
             <Plus className="h-4 w-4" />
-          </span>
-          <span className="grid h-9 w-9 place-items-center">
+          </button>
+          <button
+            onClick={() => mapApi.current?.zoomOut()}
+            className="grid h-9 w-9 place-items-center transition hover:bg-white/10"
+            aria-label="Zoom out"
+          >
             <Minus className="h-4 w-4" />
-          </span>
+          </button>
         </div>
       </div>
 
@@ -486,77 +438,6 @@ export function LifestyleMap({
   );
 }
 
-/** Soft appreciation heatmap — growth areas glow and gently pulse. */
-const HOTSPOTS = [
-  { x: 46, y: 43, r: 20, hot: true },
-  { x: 66, y: 30, r: 13, hot: true },
-  { x: 30, y: 60, r: 12, hot: false },
-  { x: 73, y: 63, r: 11, hot: false },
-  { x: 24, y: 26, r: 9, hot: false },
-];
-
-function HeatmapLayer({ delay }: { delay: number }) {
-  return (
-    <div className="pointer-events-none absolute inset-0 z-[6]">
-      {HOTSPOTS.map((h, i) => (
-        <motion.div
-          key={i}
-          className="absolute rounded-full"
-          style={{
-            left: `${h.x}%`,
-            top: `${h.y}%`,
-            width: `${h.r}vw`,
-            height: `${h.r}vw`,
-            transform: "translate(-50%,-50%)",
-            background: h.hot
-              ? "radial-gradient(circle, rgba(52,211,153,0.42), rgba(245,158,11,0.14) 55%, transparent 72%)"
-              : "radial-gradient(circle, rgba(245,158,11,0.30), transparent 70%)",
-            filter: "blur(6px)",
-          }}
-          initial={{ opacity: 0, scale: 0.7 }}
-          animate={{ opacity: [0, 0.9, 0.6, 0.9], scale: [0.7, 1, 0.94, 1] }}
-          transition={{
-            duration: 6 + i,
-            ease: "easeInOut",
-            repeat: Infinity,
-            delay: delay + 0.4 + i * 0.5,
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
-/** "Future infrastructure fades into view" — a ghosted planned transit line. */
-function FutureInfra({ night, delay }: { night: boolean; delay: number }) {
-  return (
-    <motion.div
-      className="absolute z-[8]"
-      style={{ left: "29%", top: "70%", transform: "translate(-50%,-50%)" }}
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: [0, 0.85, 0.5, 0.85], y: 0 }}
-      transition={{
-        duration: 5,
-        ease: "easeInOut",
-        repeat: Infinity,
-        delay: delay + 1,
-      }}
-    >
-      <div
-        className={cx(
-          "flex items-center gap-2 rounded-full border border-dashed px-2.5 py-1.5 text-xs font-medium backdrop-blur-md",
-          night
-            ? "border-amber-300/50 bg-amber-400/10 text-amber-200"
-            : "border-amber-500/50 bg-amber-400/20 text-amber-700",
-        )}
-      >
-        <TrainFront className="h-3.5 w-3.5" />
-        Metro Line 2 · opening 2027
-      </div>
-    </motion.div>
-  );
-}
-
 /** The investment thesis for the current property, in numbers. */
 function InvestmentOutlook({
   item,
@@ -636,212 +517,3 @@ function Sparkline() {
   );
 }
 
-function LifestyleRadius({
-  at,
-  night,
-  family,
-  delay,
-}: {
-  at: { x: number; y: number };
-  night: boolean;
-  family: boolean;
-  delay: number;
-}) {
-  return (
-    <div
-      className="pointer-events-none absolute z-10"
-      style={{ left: `${at.x}%`, top: `${at.y}%`, transform: "translate(-50%,-50%)" }}
-    >
-      {/* The settled lifestyle radius */}
-      {[0, 1].map((i) => (
-        <motion.div
-          key={i}
-          className="absolute rounded-full"
-          style={{
-            width: "34vw",
-            height: "34vw",
-            left: "50%",
-            top: "50%",
-            x: "-50%",
-            y: "-50%",
-            border: `1px solid rgb(var(--brand) / ${night ? 0.5 : 0.6})`,
-            boxShadow: `0 0 60px rgb(var(--brand) / ${night ? 0.25 : 0.15}) inset`,
-          }}
-          initial={{ scale: 0.2, opacity: 0 }}
-          animate={{ scale: [0.2, 1, 1.06, 1], opacity: [0, 0.9, 0.7, 0.85] }}
-          transition={{ duration: 1.6, ease, delay: delay + 0.3 + i * 0.15 }}
-        />
-      ))}
-
-      {/* Family mode: gentle "walkable" rings pulse outward like calm sonar */}
-      {family &&
-        [0, 1, 2].map((i) => (
-          <motion.div
-            key={`w${i}`}
-            className="absolute rounded-full"
-            style={{
-              width: "34vw",
-              height: "34vw",
-              left: "50%",
-              top: "50%",
-              x: "-50%",
-              y: "-50%",
-              border: `1.5px solid rgb(var(--brand) / 0.55)`,
-            }}
-            initial={{ scale: 0.15, opacity: 0 }}
-            animate={{ scale: [0.15, 1.05], opacity: [0.55, 0] }}
-            transition={{
-              duration: 4.2,
-              ease: "easeOut",
-              repeat: Infinity,
-              delay: delay + 0.6 + i * 1.4,
-            }}
-          />
-        ))}
-
-      {family && (
-        <motion.div
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 rounded-full bg-brand px-3 py-1 text-xs font-semibold text-white shadow-lg shadow-brand/40"
-          style={{ marginTop: "-9.5vw" }}
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: delay + 1.2, ease }}
-        >
-          Walkable in 15 min
-        </motion.div>
-      )}
-
-      {/* Bright centre bloom */}
-      <div
-        className="absolute left-1/2 top-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full"
-        style={{
-          background: `radial-gradient(circle, rgb(var(--brand) / 0.5), transparent 70%)`,
-          filter: "blur(8px)",
-        }}
-      />
-    </div>
-  );
-}
-
-function PoiPin({
-  poi,
-  index,
-  night,
-  delay,
-  highlight,
-}: {
-  poi: Poi;
-  index: number;
-  night: boolean;
-  delay: number;
-  highlight: boolean;
-}) {
-  return (
-    <motion.div
-      className="absolute z-20"
-      style={{
-        left: `${poi.x}%`,
-        top: `${poi.y}%`,
-        transform: "translate(-50%,-100%)",
-      }}
-      initial={{ opacity: 0, y: 10, scale: 0.8 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ delay: delay + 0.6 + index * 0.09, duration: 0.5, ease }}
-    >
-      <motion.div
-        animate={{ y: [0, -3, 0] }}
-        transition={{ duration: 4 + index, repeat: Infinity, ease: "easeInOut" }}
-        className={cx(
-          "flex items-center gap-2 rounded-full border px-2.5 py-1.5 backdrop-blur-xl transition-shadow",
-          night
-            ? "border-white/15 bg-black/40 text-white"
-            : "border-white/70 bg-white/80 text-zinc-800 shadow-lg shadow-black/10",
-          highlight && "ring-2 ring-brand/70",
-        )}
-        style={
-          highlight
-            ? { boxShadow: "0 0 22px rgb(var(--brand) / 0.45)" }
-            : undefined
-        }
-      >
-        <span
-          className={cx(
-            "grid h-6 w-6 place-items-center rounded-full ring-1",
-            POI_COLOR[poi.kind],
-          )}
-        >
-          <Icon name={poi.icon} className="h-3.5 w-3.5" />
-        </span>
-        <span className="pr-1 text-xs font-medium leading-tight">
-          {poi.label}
-          <span className={night ? "block text-white/50" : "block text-zinc-500"}>
-            {poi.detail}
-          </span>
-        </span>
-      </motion.div>
-      {/* connector dot */}
-      <div
-        className="mx-auto mt-1 h-1.5 w-1.5 rounded-full"
-        style={{ background: "rgb(var(--brand))" }}
-      />
-    </motion.div>
-  );
-}
-
-function PropertyReveal({
-  item,
-  life,
-  night,
-  delay,
-}: {
-  item: InventoryItem;
-  life: NonNullable<InventoryItem["lifestyle"]>;
-  night: boolean;
-  delay: number;
-}) {
-  return (
-    <motion.div
-      className="absolute z-20 w-64"
-      style={{
-        left: `${life.at.x}%`,
-        top: `${life.at.y}%`,
-        transform: "translate(-50%,-50%)",
-      }}
-      initial={{ opacity: 0, y: 40, scale: 0.85 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ delay: delay + 0.7, duration: 0.8, ease }}
-    >
-      <div
-        className={cx(
-          "overflow-hidden rounded-3xl border shadow-2xl shadow-black/50 backdrop-blur-xl",
-          night ? "border-white/15 bg-black/50" : "border-white/70 bg-white/85",
-        )}
-      >
-        <div
-          className={cx(
-            "relative h-28 bg-gradient-to-br",
-            itemGradient(item.image),
-          )}
-        >
-          <div className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full bg-black/30 text-white backdrop-blur">
-            <Heart className="h-4 w-4" />
-          </div>
-        </div>
-        <div className={cx("p-4", night ? "text-white" : "text-zinc-900")}>
-          <div className="text-lg font-semibold leading-tight">{item.name}</div>
-          <div
-            className={cx(
-              "text-xs",
-              night ? "text-white/60" : "text-zinc-500",
-            )}
-          >
-            {life.beds} Beds · {life.sqm} sqm
-          </div>
-          <div className="mt-1.5 text-lg font-semibold text-brand">
-            {formatMoney(item.price, item.currency)}
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  );
-}

@@ -154,6 +154,27 @@ Same-device sync needs no configuration at all.
 
 ---
 
+## Map tiles
+
+The Interactive Lifestyle Map renders on real **OpenStreetMap** data via
+[Leaflet](https://leafletjs.com/). By default it uses CARTO's free, key-less
+dark/light basemaps (so the day/night toggle swaps real tile styles) with the
+required `© OpenStreetMap © CARTO` attribution shown on-map. No API key needed.
+
+Override the tile sources with env vars — e.g. to use raw OSM tiles or a managed
+provider:
+
+```bash
+# raw OpenStreetMap (light only)
+NEXT_PUBLIC_TILES_LIGHT=https://tile.openstreetmap.org/{z}/{x}/{y}.png
+NEXT_PUBLIC_TILES_DARK=https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png
+```
+
+Property and amenity positions come from each inventory item's real coordinates,
+and the camera flies between districts when the recommendation changes.
+
+---
+
 ## Architecture
 
 ```
