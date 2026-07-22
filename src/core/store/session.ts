@@ -4,6 +4,11 @@ import { create } from "zustand";
 import type { Answers, AnswerValue } from "@/core/types";
 import { DEFAULT_PACK_ID } from "@/core/industries";
 import { createSessionBus, newOrigin } from "@/core/sync/session-bus";
+import {
+  createNetworkTransport,
+  type NetworkTransport,
+  type SyncStatus,
+} from "@/core/sync/network";
 
 /** What the big customer display is currently showing. */
 export type DisplayView =
@@ -50,6 +55,9 @@ interface SessionActions {
 
 const bus = createSessionBus<SessionState>(newOrigin("surface"));
 
+// Optional cross-device transport (phone -> laptop), attached when a room is set.
+let net: NetworkTransport<SessionState> | null = null;
+
 function initialState(): SessionState {
   return {
     packId: DEFAULT_PACK_ID,
@@ -78,8 +86,13 @@ function snapshot(s: SessionState & SessionActions): SessionState {
 }
 
 export const useSession = create<SessionState & SessionActions>((set, get) => {
-  // Any local mutation publishes the new snapshot to the other surfaces.
-  const publish = () => bus.publish(snapshot(get()));
+  // Any local mutation publishes the new snapshot to the other surfaces —
+  // same-device (BroadcastChannel) and, when paired, cross-device (network).
+  const publish = () => {
+    const snap = snapshot(get());
+    bus.publish(snap);
+    net?.publish(snap);
+  };
   const bump = (patch: Partial<SessionState>) => {
     set((s) => ({ ...patch, revision: s.revision + 1 }));
     publish();
@@ -165,3 +178,37 @@ export function connectSessionSync(): () => void {
     useSession.getState()._applyRemote(state);
   });
 }
+
+/**
+ * Join a cross-device room. The Companion (controller) publishes state to the
+ * network; the Display (viewer) only receives, so it never clobbers the
+ * controller's retained state. Returns a disconnect function.
+ */
+export function connectNetwork(params: {
+  room: string;
+  role: "display" | "companion";
+  onStatus: (status: SyncStatus) => void;
+}): () => void {
+  disconnectNetwork();
+  const origin = newOrigin(params.role);
+  const transport = createNetworkTransport<SessionState>({
+    room: params.room,
+    origin,
+    role: params.role,
+    onRemote: (state) => useSession.getState()._applyRemote(state),
+    onStatus: params.onStatus,
+  });
+  net =
+    params.role === "companion"
+      ? transport
+      : // The display is a viewer: keep the live connection (presence + receive)
+        // but never push session state onto the network.
+        { publish: () => {}, disconnect: transport.disconnect };
+  return () => disconnectNetwork();
+}
+
+export function disconnectNetwork(): void {
+  net?.disconnect();
+  net = null;
+}
+

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { SessionProvider } from "@/components/providers/SessionProvider";
+import { SyncProvider } from "@/components/providers/SyncProvider";
 
 export const metadata: Metadata = {
   title: "SalesIQ · Decision Intelligence Platform",
@@ -16,7 +17,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <SessionProvider>{children}</SessionProvider>
+        <SessionProvider>
+          <SyncProvider>{children}</SyncProvider>
+        </SessionProvider>
       </body>
     </html>
   );

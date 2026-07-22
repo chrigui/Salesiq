@@ -25,6 +25,7 @@ import { Button, cx, Eyebrow } from "@/components/ui/primitives";
 import { Icon } from "@/lib/icon";
 import type { Question, BudgetValue } from "@/core/types";
 import { ProposalSheet } from "./ProposalSheet";
+import { CompanionSyncBar } from "@/components/sync/Pairing";
 
 export function CompanionApp() {
   const session = useSession();
@@ -74,6 +75,9 @@ export function CompanionApp() {
             Display <ExternalLink className="h-3 w-3" />
           </Link>
         </div>
+
+        {/* Cross-device pairing status / join */}
+        <CompanionSyncBar />
 
         {/* Industry switcher */}
         <div className="border-b border-white/5 px-5 py-3">

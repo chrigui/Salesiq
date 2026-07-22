@@ -124,10 +124,33 @@ required, so it deploys with zero configuration.
 Every later push to the connected branch redeploys automatically; pushes to
 non-production branches get their own preview URLs.
 
-> Note: the two-screen sync uses `BroadcastChannel`, which works between tabs of
-> the **same browser**. Open `/display` and `/companion` in two tabs/windows on
-> one machine to see them sync. (Syncing across different devices would use the
-> WebSocket seam described in the architecture — not wired in this demo.)
+---
+
+## Cross-device pairing (phone → laptop)
+
+The two surfaces stay in lockstep two ways:
+
+- **Same browser** (two tabs on one machine) → instant, offline, via
+  `BroadcastChannel`.
+- **Different devices** (salesperson's phone drives the customer's laptop/TV) →
+  over a realtime relay. Open **`/display`**: it shows a **QR code + short
+  code**. Scan it with a phone (or open `/companion` and type the code) and the
+  phone controls the display in real time. State is published `retain`-ed so a
+  screen that joins late hydrates to the current session immediately.
+
+The relay is **MQTT-over-WebSocket**, chosen because it needs no backend (Vercel
+can't host persistent WebSockets). By default it uses a **public broker** —
+great for demos, but anyone who guesses your room code could observe the
+(non-sensitive) session data. For production, point it at a private/managed
+broker (HiveMQ Cloud, EMQX Cloud, self-hosted Mosquitto, …):
+
+```bash
+# .env.local  (or Vercel project env vars)
+NEXT_PUBLIC_SYNC_BROKER=wss://your-broker.example.com:8084/mqtt
+NEXT_PUBLIC_SYNC_PREFIX=yourcompany         # optional topic namespace
+```
+
+Same-device sync needs no configuration at all.
 
 ---
 
@@ -140,7 +163,7 @@ src/
 │   ├── types.ts              # industry-agnostic domain model
 │   ├── industries/           # industry packs (config = questions + inventory + rules + brand)
 │   ├── engine/               # scoring.ts (decision logic) + explain.ts (AI narrative)
-│   ├── sync/                 # cross-surface session bus (BroadcastChannel → WebSocket)
+│   ├── sync/                 # session-bus.ts (BroadcastChannel) + network.ts (MQTT/WS pairing)
 │   └── store/                # Zustand session store, synced
 ├── components/
 │   ├── display/              # the customer presentation
