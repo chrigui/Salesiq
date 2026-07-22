@@ -12,6 +12,7 @@ import { Icon } from "@/lib/icon";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 const ZOOM = 15;
+const ZOOM_3D = 14; // pull back in 3D so the skyline + sky enter the frame
 const BEARING = -18;
 const RADIUS_M = 1000;
 const METERS_PER_UNIT = 40;
@@ -96,6 +97,8 @@ export function RealMap({
   const mapRef = useRef<MLMap | null>(null);
   const rafRef = useRef<number | null>(null);
   const firstDone = useRef(false);
+  const nightRef = useRef(night);
+  nightRef.current = night; // let the style-reload handler read the latest theme
   const [, setTick] = useState(0);
 
   const life = item.lifestyle;
@@ -127,6 +130,7 @@ export function RealMap({
       zoom: arrival ? 11.5 : ZOOM,
       pitch: tilt,
       bearing: BEARING,
+      maxPitch: 75,
       interactive: false, // controlled "theatre" camera
       attributionControl: { compact: true },
     });
@@ -139,7 +143,9 @@ export function RealMap({
     map.on("rotate", rerender);
 
     const onStyle = () => {
-      addSceneLayers(map, night);
+      const n = nightRef.current;
+      addSceneLayers(map, n);
+      applyAtmosphere(map, n);
       updateSceneData(map, radiusFeature(), routesFeatures());
     };
     map.on("style.load", onStyle);
@@ -180,14 +186,15 @@ export function RealMap({
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !firstDone.current) return;
-    map.easeTo({ pitch: tilt, duration: 700 });
+    map.easeTo({ pitch: tilt, zoom: tilt > 0 ? ZOOM_3D : ZOOM, duration: 800 });
   }, [tilt]);
 
   // ---- fly to a new district when the recommendation changes ----
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !firstDone.current) return;
-    map.flyTo({ center, zoom: ZOOM, pitch: tilt, bearing: BEARING, duration: 2200 });
+    const zoom = tilt > 0 ? ZOOM_3D : ZOOM;
+    map.flyTo({ center, zoom, pitch: tilt, bearing: BEARING, duration: 2200 });
     // refresh ground geometry for the new location
     updateSceneData(map, radiusFeature(), routesFeatures());
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -411,6 +418,46 @@ function firstVectorSource(map: MLMap): string | null {
     if ((s as { type?: string }).type === "vector") return id;
   }
   return null;
+}
+
+/** Subtle atmospheric sky + fog and directional light for the 3D buildings. */
+function applyAtmosphere(map: MLMap, night: boolean) {
+  // Sky + fog (MapLibre v4 `setSky` also carries the fog fields). Feature-detected.
+  safe(() => {
+    const m = map as unknown as { setSky?: (s: Record<string, unknown>) => void };
+    if (typeof m.setSky !== "function") return;
+    m.setSky(
+      night
+        ? {
+            "sky-color": "#0a1326",
+            "sky-horizon-blend": 0.7,
+            "horizon-color": "#1a2742",
+            "horizon-fog-blend": 0.6,
+            "fog-color": "#0b1220",
+            "fog-ground-blend": 0.75,
+            "atmosphere-blend": 0.55,
+          }
+        : {
+            "sky-color": "#bfe0f5",
+            "sky-horizon-blend": 0.6,
+            "horizon-color": "#e8f0f7",
+            "horizon-fog-blend": 0.6,
+            "fog-color": "#eaeff5",
+            "fog-ground-blend": 0.7,
+            "atmosphere-blend": 0.6,
+          },
+    );
+  });
+
+  // Directional light so the extruded buildings gain form and shadowed sides.
+  safe(() =>
+    map.setLight({
+      anchor: "viewport",
+      color: night ? "#aec4ff" : "#ffffff",
+      intensity: night ? 0.35 : 0.5,
+      position: [1.3, 210, 30], // [radial, azimuth°, polar°]
+    }),
+  );
 }
 
 /** Extruded 3D buildings + the lifestyle radius + walking-route lines. */

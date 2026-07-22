@@ -100,7 +100,7 @@ export function LifestyleMap({
         arrival={arrival}
         familyMode={familyMode}
         investmentMode={investmentMode}
-        tilt={threeD ? 52 : 0}
+        tilt={threeD ? 62 : 0}
         apiRef={mapApi}
       />
 
