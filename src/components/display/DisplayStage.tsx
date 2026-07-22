@@ -43,6 +43,9 @@ export function DisplayStage() {
         : [];
     const familyMode =
       answers["household"] === "family" || intentSelected.includes("living");
+    const investmentMode =
+      intentSelected.includes("investment") ||
+      intentSelected.includes("rental");
     return (
       <LifestyleMap
         item={mapTarget}
@@ -53,6 +56,7 @@ export function DisplayStage() {
         intentSelected={intentSelected}
         arrival={view === "welcome"}
         familyMode={familyMode}
+        investmentMode={investmentMode}
       />
     );
   }

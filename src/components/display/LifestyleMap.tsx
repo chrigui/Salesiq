@@ -14,6 +14,8 @@ import {
   AudioLines,
   ArrowRight,
   Diamond,
+  TrendingUp,
+  TrainFront,
 } from "lucide-react";
 import type { InventoryItem, IndustryPack, Poi } from "@/core/types";
 import { formatMoney } from "@/core/engine/explain";
@@ -63,6 +65,7 @@ export function LifestyleMap({
   intentSelected,
   arrival = false,
   familyMode = false,
+  investmentMode = false,
 }: {
   item: InventoryItem;
   pack: IndustryPack;
@@ -74,6 +77,8 @@ export function LifestyleMap({
   arrival?: boolean;
   /** Family signalled — animate the walkable lifestyle radius outward. */
   familyMode?: boolean;
+  /** Investment / rental signalled — reveal the growth heatmap & outlook. */
+  investmentMode?: boolean;
 }) {
   const [night, setNight] = useState(true);
   const [activeLayer, setActiveLayer] = useState("lifestyle");
@@ -118,6 +123,10 @@ export function LifestyleMap({
                 : "bg-gradient-to-b from-white/40 via-transparent to-black/10",
             )}
           />
+
+          {/* Investment mode: growth heatmap + a ghosted future transit line */}
+          {investmentMode && <HeatmapLayer delay={delayBase} />}
+          {investmentMode && <FutureInfra night={night} delay={delayBase} />}
 
           {/* Lifestyle radius — expands outward from the property */}
           <LifestyleRadius
@@ -317,6 +326,13 @@ export function LifestyleMap({
         </motion.div>
       </AnimatePresence>
 
+      {/* Right — investment outlook (only when investment/rental is signalled) */}
+      <AnimatePresence>
+        {investmentMode && (
+          <InvestmentOutlook item={item} glass={glass} night={night} />
+        )}
+      </AnimatePresence>
+
       {/* Right — layer rail */}
       <div className="absolute right-6 top-1/2 z-30 -translate-y-1/2">
         <div
@@ -467,6 +483,156 @@ export function LifestyleMap({
         </div>
       </motion.div>
     </div>
+  );
+}
+
+/** Soft appreciation heatmap — growth areas glow and gently pulse. */
+const HOTSPOTS = [
+  { x: 46, y: 43, r: 20, hot: true },
+  { x: 66, y: 30, r: 13, hot: true },
+  { x: 30, y: 60, r: 12, hot: false },
+  { x: 73, y: 63, r: 11, hot: false },
+  { x: 24, y: 26, r: 9, hot: false },
+];
+
+function HeatmapLayer({ delay }: { delay: number }) {
+  return (
+    <div className="pointer-events-none absolute inset-0 z-[6]">
+      {HOTSPOTS.map((h, i) => (
+        <motion.div
+          key={i}
+          className="absolute rounded-full"
+          style={{
+            left: `${h.x}%`,
+            top: `${h.y}%`,
+            width: `${h.r}vw`,
+            height: `${h.r}vw`,
+            transform: "translate(-50%,-50%)",
+            background: h.hot
+              ? "radial-gradient(circle, rgba(52,211,153,0.42), rgba(245,158,11,0.14) 55%, transparent 72%)"
+              : "radial-gradient(circle, rgba(245,158,11,0.30), transparent 70%)",
+            filter: "blur(6px)",
+          }}
+          initial={{ opacity: 0, scale: 0.7 }}
+          animate={{ opacity: [0, 0.9, 0.6, 0.9], scale: [0.7, 1, 0.94, 1] }}
+          transition={{
+            duration: 6 + i,
+            ease: "easeInOut",
+            repeat: Infinity,
+            delay: delay + 0.4 + i * 0.5,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+/** "Future infrastructure fades into view" — a ghosted planned transit line. */
+function FutureInfra({ night, delay }: { night: boolean; delay: number }) {
+  return (
+    <motion.div
+      className="absolute z-[8]"
+      style={{ left: "29%", top: "70%", transform: "translate(-50%,-50%)" }}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: [0, 0.85, 0.5, 0.85], y: 0 }}
+      transition={{
+        duration: 5,
+        ease: "easeInOut",
+        repeat: Infinity,
+        delay: delay + 1,
+      }}
+    >
+      <div
+        className={cx(
+          "flex items-center gap-2 rounded-full border border-dashed px-2.5 py-1.5 text-xs font-medium backdrop-blur-md",
+          night
+            ? "border-amber-300/50 bg-amber-400/10 text-amber-200"
+            : "border-amber-500/50 bg-amber-400/20 text-amber-700",
+        )}
+      >
+        <TrainFront className="h-3.5 w-3.5" />
+        Metro Line 2 · opening 2027
+      </div>
+    </motion.div>
+  );
+}
+
+/** The investment thesis for the current property, in numbers. */
+function InvestmentOutlook({
+  item,
+  glass,
+  night,
+}: {
+  item: InventoryItem;
+  glass: string;
+  night: boolean;
+}) {
+  const appr = item.appreciation ?? 0;
+  // Straight-line the 3-yr trend out to a 5-yr projection (illustrative).
+  const projected = Math.round((item.price * (1 + (appr / 100) * (5 / 3))) / 1000) * 1000;
+  const yieldPct = (3.8 + appr * 0.12).toFixed(1);
+  const rows: [string, string][] = [
+    ["Projected 5-yr value", formatMoney(projected, item.currency)],
+    ["Est. rental yield", `${yieldPct}%`],
+    ["Growth trend", "Accelerating"],
+  ];
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 24 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 24 }}
+      transition={{ duration: 0.5, ease }}
+      className={cx(
+        "absolute right-6 top-24 z-30 w-64 rounded-3xl border p-5 backdrop-blur-xl",
+        glass,
+      )}
+    >
+      <div className="flex items-center gap-1.5 text-sm font-semibold text-brand">
+        <TrendingUp className="h-4 w-4" /> Investment outlook
+      </div>
+      <div className="mt-3 flex items-end justify-between">
+        <div>
+          <div className="text-3xl font-semibold leading-none">+{appr}%</div>
+          <div
+            className={cx(
+              "mt-1 text-xs",
+              night ? "text-white/50" : "text-zinc-500",
+            )}
+          >
+            3-yr appreciation
+          </div>
+        </div>
+        <Sparkline />
+      </div>
+      <div className="mt-4 space-y-2">
+        {rows.map(([label, value]) => (
+          <div key={label} className="flex items-center justify-between text-sm">
+            <span className={night ? "text-white/60" : "text-zinc-500"}>
+              {label}
+            </span>
+            <span className="font-medium">{value}</span>
+          </div>
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
+function Sparkline() {
+  return (
+    <svg width="72" height="34" viewBox="0 0 72 34" fill="none" aria-hidden>
+      <motion.path
+        d="M2 30 L14 26 L26 27 L38 18 L50 14 L62 6 L70 3"
+        stroke="rgb(var(--brand))"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 1, ease }}
+      />
+      <circle cx="70" cy="3" r="2.5" fill="rgb(var(--brand))" />
+    </svg>
   );
 }
 
