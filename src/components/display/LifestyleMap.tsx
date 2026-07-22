@@ -61,6 +61,8 @@ export function LifestyleMap({
   narrative,
   intentOptions,
   intentSelected,
+  arrival = false,
+  familyMode = false,
 }: {
   item: InventoryItem;
   pack: IndustryPack;
@@ -68,11 +70,18 @@ export function LifestyleMap({
   narrative: string;
   intentOptions: { id: string; label: string; icon?: string }[];
   intentSelected: string[];
+  /** Welcome view — play the cinematic "arrival" descent into the district. */
+  arrival?: boolean;
+  /** Family signalled — animate the walkable lifestyle radius outward. */
+  familyMode?: boolean;
 }) {
   const [night, setNight] = useState(true);
   const [activeLayer, setActiveLayer] = useState("lifestyle");
   const life = item.lifestyle;
   if (!life) return null;
+
+  // On arrival the world settles first, then the scene populates.
+  const delayBase = arrival ? 1.7 : 0;
 
   const ink = night ? "text-white" : "text-zinc-900";
   const glass = night
@@ -91,10 +100,14 @@ export function LifestyleMap({
         <motion.div
           key={item.id + String(night)}
           className="absolute inset-0"
-          initial={{ scale: 1.12, opacity: 0.4 }}
-          animate={{ scale: 1, opacity: 1 }}
+          initial={
+            arrival
+              ? { scale: 0.86, opacity: 0, filter: "blur(14px)" }
+              : { scale: 1.12, opacity: 0.4, filter: "blur(0px)" }
+          }
+          animate={{ scale: 1, opacity: 1, filter: "blur(0px)" }}
           exit={{ scale: 0.96, opacity: 0 }}
-          transition={{ duration: 1.1, ease }}
+          transition={{ duration: arrival ? 2.4 : 1.1, ease }}
         >
           <StylizedMap night={night} />
           <div
@@ -107,15 +120,32 @@ export function LifestyleMap({
           />
 
           {/* Lifestyle radius — expands outward from the property */}
-          <LifestyleRadius at={life.at} night={night} />
+          <LifestyleRadius
+            at={life.at}
+            night={night}
+            family={familyMode}
+            delay={delayBase}
+          />
 
           {/* POIs emerge softly, staggered */}
           {life.pois.map((poi, i) => (
-            <PoiPin key={poi.id} poi={poi} index={i} night={night} />
+            <PoiPin
+              key={poi.id}
+              poi={poi}
+              index={i}
+              night={night}
+              delay={delayBase}
+              highlight={familyMode && (poi.kind === "school" || poi.kind === "park")}
+            />
           ))}
 
           {/* The property rises elegantly at the centre of its radius */}
-          <PropertyReveal item={item} life={life} night={night} />
+          <PropertyReveal
+            item={item}
+            life={life}
+            night={night}
+            delay={delayBase}
+          />
         </motion.div>
       </AnimatePresence>
 
@@ -443,15 +473,20 @@ export function LifestyleMap({
 function LifestyleRadius({
   at,
   night,
+  family,
+  delay,
 }: {
   at: { x: number; y: number };
   night: boolean;
+  family: boolean;
+  delay: number;
 }) {
   return (
     <div
       className="pointer-events-none absolute z-10"
       style={{ left: `${at.x}%`, top: `${at.y}%`, transform: "translate(-50%,-50%)" }}
     >
+      {/* The settled lifestyle radius */}
       {[0, 1].map((i) => (
         <motion.div
           key={i}
@@ -468,9 +503,48 @@ function LifestyleRadius({
           }}
           initial={{ scale: 0.2, opacity: 0 }}
           animate={{ scale: [0.2, 1, 1.06, 1], opacity: [0, 0.9, 0.7, 0.85] }}
-          transition={{ duration: 1.6, ease, delay: 0.3 + i * 0.15 }}
+          transition={{ duration: 1.6, ease, delay: delay + 0.3 + i * 0.15 }}
         />
       ))}
+
+      {/* Family mode: gentle "walkable" rings pulse outward like calm sonar */}
+      {family &&
+        [0, 1, 2].map((i) => (
+          <motion.div
+            key={`w${i}`}
+            className="absolute rounded-full"
+            style={{
+              width: "34vw",
+              height: "34vw",
+              left: "50%",
+              top: "50%",
+              x: "-50%",
+              y: "-50%",
+              border: `1.5px solid rgb(var(--brand) / 0.55)`,
+            }}
+            initial={{ scale: 0.15, opacity: 0 }}
+            animate={{ scale: [0.15, 1.05], opacity: [0.55, 0] }}
+            transition={{
+              duration: 4.2,
+              ease: "easeOut",
+              repeat: Infinity,
+              delay: delay + 0.6 + i * 1.4,
+            }}
+          />
+        ))}
+
+      {family && (
+        <motion.div
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 rounded-full bg-brand px-3 py-1 text-xs font-semibold text-white shadow-lg shadow-brand/40"
+          style={{ marginTop: "-9.5vw" }}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: delay + 1.2, ease }}
+        >
+          Walkable in 15 min
+        </motion.div>
+      )}
+
       {/* Bright centre bloom */}
       <div
         className="absolute left-1/2 top-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full"
@@ -487,10 +561,14 @@ function PoiPin({
   poi,
   index,
   night,
+  delay,
+  highlight,
 }: {
   poi: Poi;
   index: number;
   night: boolean;
+  delay: number;
+  highlight: boolean;
 }) {
   return (
     <motion.div
@@ -502,17 +580,23 @@ function PoiPin({
       }}
       initial={{ opacity: 0, y: 10, scale: 0.8 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ delay: 0.6 + index * 0.09, duration: 0.5, ease }}
+      transition={{ delay: delay + 0.6 + index * 0.09, duration: 0.5, ease }}
     >
       <motion.div
         animate={{ y: [0, -3, 0] }}
         transition={{ duration: 4 + index, repeat: Infinity, ease: "easeInOut" }}
         className={cx(
-          "flex items-center gap-2 rounded-full border px-2.5 py-1.5 backdrop-blur-xl",
+          "flex items-center gap-2 rounded-full border px-2.5 py-1.5 backdrop-blur-xl transition-shadow",
           night
             ? "border-white/15 bg-black/40 text-white"
             : "border-white/70 bg-white/80 text-zinc-800 shadow-lg shadow-black/10",
+          highlight && "ring-2 ring-brand/70",
         )}
+        style={
+          highlight
+            ? { boxShadow: "0 0 22px rgb(var(--brand) / 0.45)" }
+            : undefined
+        }
       >
         <span
           className={cx(
@@ -542,10 +626,12 @@ function PropertyReveal({
   item,
   life,
   night,
+  delay,
 }: {
   item: InventoryItem;
   life: NonNullable<InventoryItem["lifestyle"]>;
   night: boolean;
+  delay: number;
 }) {
   return (
     <motion.div
@@ -557,7 +643,7 @@ function PropertyReveal({
       }}
       initial={{ opacity: 0, y: 40, scale: 0.85 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ delay: 0.7, duration: 0.8, ease }}
+      transition={{ delay: delay + 0.7, duration: 0.8, ease }}
     >
       <div
         className={cx(

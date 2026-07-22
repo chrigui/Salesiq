@@ -41,6 +41,8 @@ export function DisplayStage() {
       : rawIntent != null
         ? [String(rawIntent)]
         : [];
+    const familyMode =
+      answers["household"] === "family" || intentSelected.includes("living");
     return (
       <LifestyleMap
         item={mapTarget}
@@ -49,6 +51,8 @@ export function DisplayStage() {
         narrative={entry ? narrate(entry, pack) : mapTarget.lifestyle.summary}
         intentOptions={intentQ?.options ?? []}
         intentSelected={intentSelected}
+        arrival={view === "welcome"}
+        familyMode={familyMode}
       />
     );
   }

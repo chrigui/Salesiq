@@ -106,7 +106,8 @@ export function StylizedMap({ night }: { night: boolean }) {
 
   return (
     <svg
-      className="absolute inset-0 h-full w-full"
+      // Slightly oversized so the arrival "descent" zoom never reveals an edge.
+      className="absolute -inset-[8%] h-[116%] w-[116%]"
       viewBox="0 0 160 100"
       preserveAspectRatio="xMidYMid slice"
       aria-hidden
