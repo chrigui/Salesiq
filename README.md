@@ -154,27 +154,30 @@ Same-device sync needs no configuration at all.
 
 ---
 
-## Map tiles
+## Map (MapLibre GL, real 3D)
 
 The Interactive Lifestyle Map renders on real **OpenStreetMap** data via
-[Leaflet](https://leafletjs.com/). By default it uses CARTO's free, key-less
-dark/light basemaps (so the day/night toggle swaps real tile styles) with the
-required `© OpenStreetMap © CARTO` attribution shown on-map. No API key needed.
+[MapLibre GL](https://maplibre.org/). By default it uses CARTO's free, key-less
+vector styles (dark-matter / positron), so the day/night toggle swaps real
+styles, with the required `© OpenStreetMap © CARTO` attribution shown on-map.
+No API key needed.
 
-Override the tile sources with env vars — e.g. to use raw OSM tiles or a managed
-provider:
+- **True 3D** — the 2D/3D control pitches the camera and the map extrudes
+  **3D buildings** from the vector tiles. The lifestyle radius and walking
+  routes are real map layers, so they sit in correct perspective on the ground;
+  pins and cards are projected with `map.project()` and stay upright.
+- **Walking routes** — animated "ant-path" lines from the home to the walkable
+  amenities (schools, parks).
+- **Cinematic camera** — flies in on arrival and between districts when the
+  recommendation changes.
+
+Override the styles with env vars — e.g. OpenFreeMap (also free, no key) or a
+managed provider (MapTiler, etc.):
 
 ```bash
-# raw OpenStreetMap (light only)
-NEXT_PUBLIC_TILES_LIGHT=https://tile.openstreetmap.org/{z}/{x}/{y}.png
-NEXT_PUBLIC_TILES_DARK=https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png
+NEXT_PUBLIC_MAP_STYLE_DARK=https://tiles.openfreemap.org/styles/liberty
+NEXT_PUBLIC_MAP_STYLE_LIGHT=https://tiles.openfreemap.org/styles/positron
 ```
-
-Property and amenity positions come from each inventory item's real coordinates,
-and the camera flies between districts when the recommendation changes. Animated
-**walking routes** are drawn from the home to the walkable amenities (schools,
-parks), and a **3D tilt** view (the 2D/3D control) pitches the map into a
-cinematic perspective while the pins and cards stay upright and readable.
 
 ---
 
