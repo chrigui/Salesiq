@@ -15,12 +15,15 @@ import {
   ArrowRight,
   Diamond,
   TrendingUp,
+  Maximize,
+  Minimize,
 } from "lucide-react";
 import type { InventoryItem, IndustryPack } from "@/core/types";
 import { formatMoney } from "@/core/engine/explain";
 import { cx } from "@/components/ui/primitives";
 import { Icon } from "@/lib/icon";
 import type { MapApi } from "./RealMap";
+import { useFullscreen } from "./DisplayKiosk";
 
 // Leaflet touches `window`, so the real map is client-only.
 const RealMap = dynamic(() => import("./RealMap").then((m) => m.RealMap), {
@@ -77,6 +80,7 @@ export function LifestyleMap({
   const [night, setNight] = useState(true);
   const [threeD, setThreeD] = useState(false);
   const [activeLayer, setActiveLayer] = useState("lifestyle");
+  const [fullscreen, toggleFullscreen] = useFullscreen();
   const mapApi = useRef<MapApi | null>(null);
   const life = item.lifestyle;
   if (!life) return null;
@@ -180,6 +184,16 @@ export function LifestyleMap({
           aria-label="Toggle day and night"
         >
           {night ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+        </button>
+        <button
+          onClick={toggleFullscreen}
+          className={cx(
+            "grid h-10 w-10 place-items-center rounded-2xl border backdrop-blur-xl transition",
+            glass,
+          )}
+          aria-label={fullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+        >
+          {fullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
         </button>
         <div
           className={cx(

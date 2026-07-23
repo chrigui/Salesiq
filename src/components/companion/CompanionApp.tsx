@@ -81,7 +81,18 @@ export function CompanionApp() {
 
         {/* Industry switcher */}
         <div className="border-b border-white/5 px-5 py-3">
-          <Eyebrow>Industry pack</Eyebrow>
+          <div className="flex items-center justify-between">
+            <Eyebrow>Industry pack</Eyebrow>
+            <button
+              onClick={() => {
+                session.loadDemo();
+                setActiveSection("intent");
+              }}
+              className="flex items-center gap-1 rounded-full bg-brand/15 px-2.5 py-1 text-[11px] font-medium text-brand ring-1 ring-brand/25 transition hover:bg-brand/25"
+            >
+              <Sparkles className="h-3 w-3" /> Load demo
+            </button>
+          </div>
           <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
             {PACKS.map((p) => (
               <button

@@ -136,6 +136,10 @@ export function RealMap({
     });
     mapRef.current = map;
 
+    // Swallow tile/style network errors so they never bubble up on the big
+    // screen — the scene overlays keep working even if imagery is patchy.
+    map.on("error", () => {});
+
     const rerender = () => setTick((t) => (t + 1) % 1_000_000);
     map.on("move", rerender);
     map.on("zoom", rerender);
@@ -149,7 +153,29 @@ export function RealMap({
       updateSceneData(map, radiusFeature(), routesFeatures());
     };
     map.on("style.load", onStyle);
+
+    // Safety net: if the vector style can't load (blocked/slow venue Wi-Fi),
+    // fall back to a branded blank canvas so the overlays still present.
+    const styleTimeout = window.setTimeout(() => {
+      if (!map.isStyleLoaded()) {
+        safe(() =>
+          map.setStyle({
+            version: 8,
+            sources: {},
+            layers: [
+              {
+                id: "bg",
+                type: "background",
+                paint: { "background-color": nightRef.current ? "#0b1220" : "#dfe6ec" },
+              },
+            ],
+          }),
+        );
+      }
+    }, 6000);
+
     map.once("load", () => {
+      window.clearTimeout(styleTimeout);
       map.resize();
       if (arrival) {
         map.flyTo({ center, zoom: ZOOM, pitch: tilt, bearing: BEARING, duration: 2600 });

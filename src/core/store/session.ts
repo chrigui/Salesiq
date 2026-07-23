@@ -48,6 +48,8 @@ interface SessionActions {
   toggleBookmark: (itemId: string) => void;
   updateCustomer: (patch: Partial<CustomerInfo>) => void;
   reset: () => void;
+  /** Load a compelling, pre-filled scenario for a clean live demo. */
+  loadDemo: () => void;
   /** Apply a full state received from another surface (no re-broadcast). */
   _applyRemote: (state: SessionState) => void;
   _hydrate: () => void;
@@ -155,6 +157,34 @@ export const useSession = create<SessionState & SessionActions>((set, get) => {
 
     reset: () => {
       set({ ...initialState() });
+      publish();
+    },
+
+    loadDemo: () => {
+      set((s) => ({
+        packId: "real-estate",
+        answers: {
+          household: "family",
+          familySize: 5,
+          budget: { min: 150000, max: 320000 },
+          bedrooms: 4,
+          schools: true,
+          garden: true,
+          quiet: true,
+          intent: ["living", "investment"],
+        },
+        activeQuestionId: "intent",
+        view: "recommendation",
+        focusedItemId: null,
+        bookmarks: [],
+        customer: {
+          name: "Sara Haddad",
+          phone: "+357 99 123 456",
+          email: "sara@example.com",
+          notes: "Relocating with two school-age children.",
+        },
+        revision: s.revision + 1,
+      }));
       publish();
     },
 
