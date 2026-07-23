@@ -7,7 +7,8 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { Heart, TrainFront } from "lucide-react";
 import type { InventoryItem, Poi } from "@/core/types";
 import { formatMoney } from "@/core/engine/explain";
-import { itemGradient, cx } from "@/components/ui/primitives";
+import { cx } from "@/components/ui/primitives";
+import { ItemImage } from "@/components/ui/ItemImage";
 import { Icon } from "@/lib/icon";
 
 const ease = [0.22, 1, 0.36, 1] as const;
@@ -355,11 +356,11 @@ export function RealMap({
                   night ? "border-white/15 bg-black/60" : "border-white/70 bg-white/90",
                 )}
               >
-                <div className={cx("relative h-24 bg-gradient-to-br", itemGradient(item.image))}>
-                  <div className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full bg-black/30 text-white backdrop-blur">
+                <ItemImage image={item.image} photo={item.photo} className="h-24">
+                  <div className="absolute right-3 top-3 z-10 grid h-8 w-8 place-items-center rounded-full bg-black/30 text-white backdrop-blur">
                     <Heart className="h-4 w-4" />
                   </div>
-                </div>
+                </ItemImage>
                 <div className={cx("p-4", night ? "text-white" : "text-zinc-900")}>
                   <div className="text-lg font-semibold leading-tight">{item.name}</div>
                   <div className={cx("text-xs", night ? "text-white/60" : "text-zinc-500")}>

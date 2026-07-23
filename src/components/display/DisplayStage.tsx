@@ -7,7 +7,8 @@ import { useSession } from "@/core/store/session";
 import { getPack } from "@/core/industries";
 import { scoreInventory, isVisible } from "@/core/engine/scoring";
 import { narrate, formatMoney } from "@/core/engine/explain";
-import { itemGradient, cx } from "@/components/ui/primitives";
+import { cx } from "@/components/ui/primitives";
+import { ItemImage } from "@/components/ui/ItemImage";
 import { Icon } from "@/lib/icon";
 import { LifestyleMap } from "./LifestyleMap";
 import type { Question, AnswerValue, InventoryItem } from "@/core/types";
@@ -443,18 +444,13 @@ function CompareStage({
               i === 0 && "ring-2 ring-brand",
             )}
           >
-            <div
-              className={cx(
-                "relative h-36 bg-gradient-to-br",
-                itemGradient(s.item.image),
-              )}
-            >
+            <ItemImage image={s.item.image} photo={s.item.photo} className="h-36">
               {i === 0 && (
-                <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-brand px-3 py-1 text-xs font-semibold text-white">
+                <div className="absolute right-3 top-3 z-10 flex items-center gap-1 rounded-full bg-brand px-3 py-1 text-xs font-semibold text-white">
                   <Star className="h-3 w-3" /> Best match
                 </div>
               )}
-            </div>
+            </ItemImage>
             <div className="p-5">
               <div className="flex items-baseline justify-between">
                 <h3 className="text-xl font-semibold">{s.item.name}</h3>
@@ -543,15 +539,17 @@ function ItemHero({
   large?: boolean;
 }) {
   return (
-    <div
+    <ItemImage
+      image={item.image}
+      photo={item.photo}
+      rounded="rounded-[2rem]"
       className={cx(
-        "relative overflow-hidden rounded-[2rem] bg-gradient-to-br shadow-2xl shadow-black/50 ring-1 ring-white/10",
-        itemGradient(item.image),
+        "shadow-2xl shadow-black/50 ring-1 ring-white/10",
         large ? "h-[26rem]" : "h-80",
       )}
     >
-      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-      <div className="absolute left-6 top-6 grid h-16 w-16 place-items-center rounded-2xl bg-black/30 backdrop-blur">
+      <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+      <div className="absolute left-6 top-6 z-10 grid h-16 w-16 place-items-center rounded-2xl bg-black/30 backdrop-blur">
         <div className="text-center">
           <div className="text-2xl font-bold leading-none text-white">
             {score}
@@ -562,11 +560,11 @@ function ItemHero({
         </div>
       </div>
       {item.appreciation ? (
-        <div className="absolute bottom-6 left-6 flex items-center gap-1.5 rounded-full bg-black/40 px-3 py-1.5 text-sm font-medium text-emerald-300 backdrop-blur">
+        <div className="absolute bottom-6 left-6 z-10 flex items-center gap-1.5 rounded-full bg-black/40 px-3 py-1.5 text-sm font-medium text-emerald-300 backdrop-blur">
           <TrendingUp className="h-4 w-4" /> +{item.appreciation}% / 3yr
         </div>
       ) : null}
-    </div>
+    </ItemImage>
   );
 }
 

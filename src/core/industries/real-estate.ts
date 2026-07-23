@@ -142,6 +142,8 @@ export const realEstatePack: IndustryPack = {
       price: 285000,
       currency: "USD",
       image: "emerald",
+      photo:
+        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=70",
       location: { label: "Larnaca", lat: 34.92, lng: 33.62 },
       appreciation: 18,
       attributes: {
@@ -196,6 +198,8 @@ export const realEstatePack: IndustryPack = {
       price: 520000,
       currency: "USD",
       image: "sky",
+      photo:
+        "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1200&q=70",
       location: { label: "Limassol", lat: 34.68, lng: 33.04 },
       appreciation: 12,
       attributes: {
@@ -250,6 +254,8 @@ export const realEstatePack: IndustryPack = {
       price: 240000,
       currency: "USD",
       image: "amber",
+      photo:
+        "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=1200&q=70",
       location: { label: "Paphos", lat: 34.77, lng: 32.42 },
       appreciation: 9,
       attributes: {
@@ -304,6 +310,8 @@ export const realEstatePack: IndustryPack = {
       price: 740000,
       currency: "USD",
       image: "violet",
+      photo:
+        "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=70",
       location: { label: "Limassol", lat: 34.7, lng: 33.02 },
       appreciation: 15,
       attributes: {

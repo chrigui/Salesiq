@@ -55,7 +55,8 @@ export interface InventoryItem {
   subtitle: string;
   price: number;
   currency: string;
-  image: string; // gradient token or url
+  image: string; // gradient token (fallback / accent)
+  photo?: string; // real photo URL; falls back to the gradient if it fails
   location?: { label: string; lat: number; lng: number };
   /** Free-form numeric/boolean attributes matched against answers. */
   attributes: Record<string, number | string | boolean>;
