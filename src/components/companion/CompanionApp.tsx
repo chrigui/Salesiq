@@ -15,6 +15,8 @@ import {
   Check,
   Minus,
   Plus,
+  Wand2,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
 import { useSession } from "@/core/store/session";
@@ -116,6 +118,9 @@ export function CompanionApp() {
 
         {/* Customer */}
         <CustomerBlock />
+
+        {/* Natural-language search — describe the customer, AI fills the flow */}
+        <AiSearchBox onApplied={() => setActiveSection("intent")} />
 
         {/* Section tabs */}
         <div className="flex gap-1 overflow-x-auto border-b border-white/5 px-4 py-2">
@@ -305,6 +310,87 @@ function CustomerBlock() {
             className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none placeholder:text-ink-faint focus:border-brand/50"
           />
         </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Natural-language intake. The salesperson describes the customer in one line;
+ * the AI search endpoint turns it into structured answers that drive the same
+ * decision engine, then jumps the display to the recommendation. Works with a
+ * live Claude key or the deterministic keyword fallback.
+ */
+function AiSearchBox({ onApplied }: { onApplied: () => void }) {
+  const session = useSession();
+  const [query, setQuery] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [feedback, setFeedback] = useState<string | null>(null);
+
+  const run = async () => {
+    const q = query.trim();
+    if (!q || loading) return;
+    setLoading(true);
+    setFeedback(null);
+    try {
+      const res = await fetch("/api/ai/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ packId: session.packId, query: q }),
+      });
+      const data = await res.json();
+      const answers = (data?.answers ?? {}) as Record<string, unknown>;
+      const keys = Object.keys(answers);
+      if (keys.length === 0) {
+        setFeedback("Couldn't read that — try mentioning budget, household, or must-haves.");
+        return;
+      }
+      for (const [id, value] of Object.entries(answers)) {
+        session.answer(id, value as never);
+      }
+      session.setView("recommendation");
+      onApplied();
+      setFeedback(
+        `Filled ${keys.length} field${keys.length > 1 ? "s" : ""}${
+          data?.source === "claude" ? " with Claude" : ""
+        }.`,
+      );
+    } catch {
+      setFeedback("Search failed — check the connection and try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="border-b border-white/5 px-5 py-3">
+      <Eyebrow>Describe the customer</Eyebrow>
+      <div className="mt-2 flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-3 py-2 focus-within:border-brand/50">
+        <Wand2 className="h-4 w-4 shrink-0 text-brand" />
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") run();
+          }}
+          placeholder="Family of 5, ~300k, needs schools and a garden…"
+          className="w-full bg-transparent text-sm outline-none placeholder:text-ink-faint"
+        />
+        <button
+          onClick={run}
+          disabled={loading || !query.trim()}
+          className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-brand text-white transition hover:brightness-110 disabled:opacity-40"
+          aria-label="Run AI search"
+        >
+          {loading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Sparkles className="h-4 w-4" />
+          )}
+        </button>
+      </div>
+      {feedback && (
+        <p className="mt-1.5 text-[11px] text-ink-faint">{feedback}</p>
       )}
     </div>
   );

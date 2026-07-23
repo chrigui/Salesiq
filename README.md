@@ -23,7 +23,7 @@ into the same core.
 | **Sales Companion** | `/companion` | The phone the salesperson holds. Asks questions, jumps sections, bookmarks, generates a proposal — every action updates the display instantly. |
 | **Company Dashboard** | `/dashboard` | Each tenant's admin: inventory, questions, branding, leads and analytics (conversion, funnel, most-selected, completion rates). |
 | **Platform Administration** | `/admin` | Our master console: tenants, subscriptions, MRR/ARR, churn, usage by vertical, system health. |
-| **AI Decision Engine** | `/api/ai/recommend` | Scores inventory against answers and returns **self-explaining** recommendations. Runs offline; upgrades to the Claude API without changing callers. |
+| **AI Decision Engine** | `/api/ai/recommend`, `/api/ai/search` | Scores inventory against answers and returns **self-explaining** recommendations. Also turns a plain-language customer description into structured answers. Runs offline; upgrades to live Claude by setting `ANTHROPIC_API_KEY`. |
 
 ### See the two-screen magic
 
@@ -72,8 +72,27 @@ It has also shown 18% appreciation over the last three years.
   to Claude for richer prose — the scoring/ranking stay identical, so the model
   can only ever rephrase *verified* facts.
 
-Enable the LLM path by setting `ANTHROPIC_API_KEY` and flipping `useLLM` in
-`src/app/api/ai/recommend/route.ts`.
+The LLM path is **live and key-gated**: set `ANTHROPIC_API_KEY` and the top
+recommendation's narrative is authored by Claude (`claude-opus-4-8`) from the
+engine's own verified reasons. With no key — or on any API error — it falls
+back to the deterministic narrator automatically. The UI is identical either
+way.
+
+### Natural-language search
+
+The Sales Companion has a **"Describe the customer"** box. Type a plain
+sentence — *"Family of 5, budget around 300k, needs schools and a garden, four
+bedrooms"* — and `/api/ai/search` turns it into structured answers that drive
+the exact same decision engine, then jumps the display to the recommendation.
+
+- With `ANTHROPIC_API_KEY` set, Claude extracts the answers against the active
+  pack's own questions (works for any vertical — automotive, jets, medical).
+- Without a key, a deterministic keyword extractor handles it (budget figures,
+  household, bedroom counts, must-haves, negations) so the feature always works
+  in a demo with zero configuration.
+
+Either way every extracted value is coerced and validated against the pack, so
+a bad extraction can never inject a value the engine doesn't understand.
 
 ---
 
