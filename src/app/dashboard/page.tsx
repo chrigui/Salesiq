@@ -12,6 +12,7 @@ import {
   YAxis,
 } from "recharts";
 import { ConsoleShell, KpiCard, Panel } from "@/components/console/ConsoleShell";
+import { useLeads } from "@/core/store/leads";
 import {
   companyKpis,
   funnel,
@@ -129,6 +130,82 @@ export default function DashboardPage() {
           </ResponsiveContainer>
         </Panel>
       </div>
+
+      <RecentLeads />
     </ConsoleShell>
+  );
+}
+
+function timeAgo(ts: number): string {
+  const s = Math.round((Date.now() - ts) / 1000);
+  if (s < 60) return "just now";
+  const m = Math.round(s / 60);
+  if (m < 60) return `${m}m ago`;
+  const h = Math.round(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.round(h / 24)}d ago`;
+}
+
+function RecentLeads() {
+  const leads = useLeads();
+  return (
+    <Panel title="Recent leads" className="mt-4">
+      {leads.length === 0 ? (
+        <p className="py-6 text-center text-sm text-ink-faint">
+          Leads captured from live sessions appear here in real time. Run a
+          session and tap <span className="text-ink-muted">Save lead to CRM</span>{" "}
+          in the companion.
+        </p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-left text-xs uppercase tracking-wide text-ink-faint">
+                <th className="pb-3 font-medium">Customer</th>
+                <th className="pb-3 font-medium">Interested in</th>
+                <th className="pb-3 font-medium">Vertical</th>
+                <th className="pb-3 text-right font-medium">Value</th>
+                <th className="pb-3 text-right font-medium">Match</th>
+                <th className="pb-3 text-right font-medium">Captured</th>
+              </tr>
+            </thead>
+            <tbody>
+              {leads.map((l, i) => (
+                <tr key={l.id} className="border-t border-white/5">
+                  <td className="py-3 font-medium">
+                    <span className="flex items-center gap-2">
+                      {l.name}
+                      {i === 0 && (
+                        <span className="rounded-full bg-emerald-400/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-300">
+                          NEW
+                        </span>
+                      )}
+                    </span>
+                    {l.email && (
+                      <span className="block text-xs text-ink-faint">{l.email}</span>
+                    )}
+                  </td>
+                  <td className="py-3 text-ink-muted">{l.itemName}</td>
+                  <td className="py-3 text-ink-muted">{l.packLabel}</td>
+                  <td className="py-3 text-right tabular-nums">
+                    {new Intl.NumberFormat("en-US", {
+                      style: "currency",
+                      currency: l.currency,
+                      maximumFractionDigits: 0,
+                    }).format(l.price)}
+                  </td>
+                  <td className="py-3 text-right font-semibold text-brand">
+                    {l.score}
+                  </td>
+                  <td className="py-3 text-right text-ink-faint">
+                    {timeAgo(l.createdAt)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </Panel>
   );
 }

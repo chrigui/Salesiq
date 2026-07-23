@@ -1,9 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, FileText, Check } from "lucide-react";
 import { useSession } from "@/core/store/session";
 import { narrate, formatMoney } from "@/core/engine/explain";
+import { saveLead } from "@/core/store/leads";
 import type { IndustryPack } from "@/core/types";
 import type { ScoredItem } from "@/core/engine/scoring";
 
@@ -26,6 +28,30 @@ export function ProposalSheet({
 }) {
   const { customer, answers } = useSession();
   const best = scored[0];
+  const [saved, setSaved] = useState(false);
+
+  // Reset the saved state whenever the sheet is reopened.
+  useEffect(() => {
+    if (open) setSaved(false);
+  }, [open]);
+
+  const handleSaveLead = () => {
+    if (!best) return;
+    saveLead({
+      name: customer.name || "Unnamed lead",
+      phone: customer.phone,
+      email: customer.email,
+      notes: customer.notes,
+      packId: pack.id,
+      packLabel: pack.label,
+      itemName: best.item.name,
+      price: best.item.price,
+      currency: best.item.currency,
+      score: best.score,
+    });
+    setSaved(true);
+  };
+
   const date = new Date().toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
@@ -137,14 +163,27 @@ export function ProposalSheet({
 
             <div className="mt-4 flex gap-2">
               <button
-                onClick={() => window.print()}
-                className="flex-1 rounded-2xl bg-brand py-3 text-sm font-semibold text-white transition hover:brightness-110"
+                onClick={handleSaveLead}
+                disabled={saved || !best}
+                className="flex-1 rounded-2xl bg-brand py-3 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-60"
               >
-                Export / Print
+                {saved ? (
+                  <span className="inline-flex items-center gap-1.5">
+                    <Check className="h-4 w-4" /> Saved to CRM
+                  </span>
+                ) : (
+                  "Save lead to CRM"
+                )}
+              </button>
+              <button
+                onClick={() => window.print()}
+                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-ink transition hover:bg-white/10"
+              >
+                Export
               </button>
               <button
                 onClick={onClose}
-                className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-ink transition hover:bg-white/10"
+                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-ink transition hover:bg-white/10"
               >
                 Close
               </button>
