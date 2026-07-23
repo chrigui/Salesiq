@@ -10,12 +10,17 @@ export function ConsoleShell({
   subtitle,
   glyph,
   nav,
+  active,
+  onSelect,
   children,
 }: {
   title: string;
   subtitle: string;
   glyph: string;
   nav: string[];
+  /** When provided, the nav is controlled and this item is highlighted. */
+  active?: string;
+  onSelect?: (item: string) => void;
   children: React.ReactNode;
 }) {
   return (
@@ -40,19 +45,23 @@ export function ConsoleShell({
         </div>
 
         <div className="mb-6 flex flex-wrap gap-1.5">
-          {nav.map((n, i) => (
-            <button
-              key={n}
-              className={cx(
-                "rounded-full px-4 py-1.5 text-sm font-medium transition",
-                i === 0
-                  ? "bg-white/10 text-ink"
-                  : "text-ink-faint hover:bg-white/5 hover:text-ink-muted",
-              )}
-            >
-              {n}
-            </button>
-          ))}
+          {nav.map((n, i) => {
+            const isActive = active != null ? n === active : i === 0;
+            return (
+              <button
+                key={n}
+                onClick={() => onSelect?.(n)}
+                className={cx(
+                  "rounded-full px-4 py-1.5 text-sm font-medium transition",
+                  isActive
+                    ? "bg-white/10 text-ink"
+                    : "text-ink-faint hover:bg-white/5 hover:text-ink-muted",
+                )}
+              >
+                {n}
+              </button>
+            );
+          })}
         </div>
 
         {children}

@@ -20,7 +20,15 @@ export const PACKS_BY_ID: Record<string, IndustryPack> = Object.fromEntries(
 
 export const DEFAULT_PACK_ID = realEstatePack.id;
 
-export function getPack(id: string | null | undefined): IndustryPack {
+/**
+ * The shipped pack config, ignoring any tenant customisation. Used by the
+ * engine, the API routes, and as the base the Visual Builder overlays drafts
+ * onto (see `@/core/store/packs`).
+ */
+export function getBasePack(id: string | null | undefined): IndustryPack {
   if (id && PACKS_BY_ID[id]) return PACKS_BY_ID[id];
   return PACKS_BY_ID[DEFAULT_PACK_ID];
 }
+
+/** Alias kept for existing call sites; identical to `getBasePack`. */
+export const getPack = getBasePack;

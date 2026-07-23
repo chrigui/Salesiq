@@ -21,6 +21,7 @@ import {
 import Link from "next/link";
 import { useSession } from "@/core/store/session";
 import { PACKS, getPack } from "@/core/industries";
+import { useLivePack } from "@/core/store/packs";
 import { scoreInventory, isVisible } from "@/core/engine/scoring";
 import { formatMoney } from "@/core/engine/explain";
 import { Button, cx, Eyebrow } from "@/components/ui/primitives";
@@ -31,7 +32,7 @@ import { CompanionSyncBar } from "@/components/sync/Pairing";
 
 export function CompanionApp() {
   const session = useSession();
-  const pack = getPack(session.packId);
+  const pack = useLivePack(session.packId);
   const [activeSection, setActiveSection] = useState(pack.sections[0]?.id);
   const [proposalOpen, setProposalOpen] = useState(false);
 

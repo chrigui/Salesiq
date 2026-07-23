@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   Area,
   AreaChart,
@@ -12,6 +13,8 @@ import {
   YAxis,
 } from "recharts";
 import { ConsoleShell, KpiCard, Panel } from "@/components/console/ConsoleShell";
+import { BuilderSection } from "@/components/console/builder/BuilderSection";
+import { DEFAULT_PACK_ID } from "@/core/industries";
 import { useLeads } from "@/core/store/leads";
 import {
   companyKpis,
@@ -20,6 +23,17 @@ import {
   popularQuestions,
   sessionTrend,
 } from "@/lib/analytics";
+
+const NAV = [
+  "Overview",
+  "Inventory",
+  "Questions",
+  "Leads",
+  "Analytics",
+  "Branding",
+  "Integrations",
+  "Users",
+] as const;
 
 const BRAND = "rgb(16 185 129)";
 const AXIS = "rgb(113 113 122)";
@@ -32,23 +46,50 @@ const tooltipStyle = {
 };
 
 export default function DashboardPage() {
-  const trend = sessionTrend();
+  const [tab, setTab] = useState<string>("Overview");
+  const [builderPack, setBuilderPack] = useState<string>(DEFAULT_PACK_ID);
+
   return (
     <ConsoleShell
       title="Green Hills Living"
       subtitle="Company Dashboard · Real Estate"
       glyph="◈"
-      nav={[
-        "Overview",
-        "Inventory",
-        "Questions",
-        "Leads",
-        "Analytics",
-        "Branding",
-        "Integrations",
-        "Users",
-      ]}
+      nav={[...NAV]}
+      active={tab}
+      onSelect={setTab}
     >
+      {tab === "Questions" ? (
+        <BuilderSection
+          kind="questions"
+          packId={builderPack}
+          onPackChange={setBuilderPack}
+        />
+      ) : tab === "Inventory" ? (
+        <BuilderSection
+          kind="inventory"
+          packId={builderPack}
+          onPackChange={setBuilderPack}
+        />
+      ) : tab === "Leads" ? (
+        <RecentLeads />
+      ) : tab === "Analytics" ? (
+        <Analytics />
+      ) : tab === "Overview" ? (
+        <>
+          <Analytics />
+          <RecentLeads />
+        </>
+      ) : (
+        <Placeholder tab={tab} />
+      )}
+    </ConsoleShell>
+  );
+}
+
+function Analytics() {
+  const trend = sessionTrend();
+  return (
+    <>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {companyKpis.map((k) => (
           <KpiCard key={k.label} {...k} />
@@ -77,7 +118,7 @@ export default function DashboardPage() {
 
         <Panel title="Most-selected products">
           <div className="space-y-3">
-            {popularProducts.map((p, i) => (
+            {popularProducts.map((p) => (
               <div key={p.name}>
                 <div className="mb-1 flex justify-between text-sm">
                   <span className="text-ink-muted">{p.name}</span>
@@ -100,7 +141,7 @@ export default function DashboardPage() {
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
         <Panel title="Sales funnel">
           <div className="space-y-2.5">
-            {funnel.map((f, i) => (
+            {funnel.map((f) => (
               <div key={f.stage} className="flex items-center gap-3">
                 <div className="w-44 shrink-0 text-sm text-ink-muted">
                   {f.stage}
@@ -130,9 +171,18 @@ export default function DashboardPage() {
           </ResponsiveContainer>
         </Panel>
       </div>
+    </>
+  );
+}
 
-      <RecentLeads />
-    </ConsoleShell>
+function Placeholder({ tab }: { tab: string }) {
+  return (
+    <Panel title={tab}>
+      <p className="py-8 text-center text-sm text-ink-faint">
+        {tab} is configured per tenant via the pack config. This surface is part
+        of the platform blueprint and not wired in the demo.
+      </p>
+    </Panel>
   );
 }
 

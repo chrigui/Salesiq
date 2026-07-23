@@ -4,21 +4,26 @@ import { useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Sparkles, MapPin, TrendingUp, Check, Star } from "lucide-react";
 import { useSession } from "@/core/store/session";
-import { getPack } from "@/core/industries";
+import { useLivePack } from "@/core/store/packs";
 import { scoreInventory, isVisible } from "@/core/engine/scoring";
 import { narrate, formatMoney } from "@/core/engine/explain";
 import { cx } from "@/components/ui/primitives";
 import { ItemImage } from "@/components/ui/ItemImage";
 import { Icon } from "@/lib/icon";
 import { LifestyleMap } from "./LifestyleMap";
-import type { Question, AnswerValue, InventoryItem } from "@/core/types";
+import type {
+  Question,
+  AnswerValue,
+  InventoryItem,
+  IndustryPack,
+} from "@/core/types";
 
 const spring = { type: "spring", stiffness: 260, damping: 30 } as const;
 
 export function DisplayStage() {
   const { packId, answers, activeQuestionId, view, focusedItemId, revision } =
     useSession();
-  const pack = getPack(packId);
+  const pack = useLivePack(packId);
 
   const scored = useMemo(
     () => scoreInventory(pack, answers),
@@ -147,7 +152,7 @@ function BrandHeader({
   );
 }
 
-function Welcome({ pack }: { pack: ReturnType<typeof getPack> }) {
+function Welcome({ pack }: { pack: IndustryPack }) {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.96 }}
@@ -182,7 +187,7 @@ function QuestionStage({
 }: {
   question: Question;
   answer: AnswerValue | undefined;
-  pack: ReturnType<typeof getPack>;
+  pack: IndustryPack;
 }) {
   return (
     <motion.div
@@ -358,7 +363,7 @@ function RecommendationStage({
 }: {
   scored: ReturnType<typeof scoreInventory>;
   packVertical: string;
-  pack: ReturnType<typeof getPack>;
+  pack: IndustryPack;
 }) {
   const best = scored[0];
   if (!best) return null;
@@ -418,7 +423,7 @@ function CompareStage({
   pack,
 }: {
   scored: ReturnType<typeof scoreInventory>;
-  pack: ReturnType<typeof getPack>;
+  pack: IndustryPack;
 }) {
   const top = scored.slice(0, 3);
   return (
@@ -572,7 +577,7 @@ function ProgressDots({
   pack,
   answers,
 }: {
-  pack: ReturnType<typeof getPack>;
+  pack: IndustryPack;
   answers: Record<string, AnswerValue>;
 }) {
   const visible = pack.questions.filter((q) => isVisible(q, answers));

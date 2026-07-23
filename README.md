@@ -21,7 +21,7 @@ into the same core.
 | --- | --- | --- |
 | **Customer Experience Display** | `/display` | The full-screen, animated presentation the customer sees. Keynote-grade motion, glassmorphism, live-driven. Never looks like a dashboard. |
 | **Sales Companion** | `/companion` | The phone the salesperson holds. Asks questions, jumps sections, bookmarks, generates a proposal — every action updates the display instantly. |
-| **Company Dashboard** | `/dashboard` | Each tenant's admin: inventory, questions, branding, leads and analytics (conversion, funnel, most-selected, completion rates). |
+| **Company Dashboard** | `/dashboard` | Each tenant's admin: a **visual question & inventory builder**, branding, leads and analytics (conversion, funnel, most-selected, completion rates). |
 | **Platform Administration** | `/admin` | Our master console: tenants, subscriptions, MRR/ARR, churn, usage by vertical, system health. |
 | **AI Decision Engine** | `/api/ai/recommend`, `/api/ai/search` | Scores inventory against answers and returns **self-explaining** recommendations. Also turns a plain-language customer description into structured answers. Runs offline; upgrades to live Claude by setting `ANTHROPIC_API_KEY`. |
 
@@ -49,6 +49,26 @@ Switch between them live from the Sales Companion. The whole UI re-skins
 (brand colours are CSS variables applied per tenant) and the questions,
 inventory and AI reasoning all change with it. Adding a new vertical (yachts,
 medical equipment, insurance…) is a new config file — no engine changes.
+
+### The Visual Builder
+
+Packs don't have to be edited in code. The Company Dashboard's **Questions** and
+**Inventory** tabs are a full visual builder:
+
+- **Questions** — add, edit, reorder and delete questions; change type (single,
+  multiple, yes/no, stepper, slider, budget range), edit options, sections,
+  weights and ranges.
+- **Inventory** — add, edit, reorder and delete items; set price, currency,
+  photo, accent gradient, highlights, appreciation, and the free-form
+  attributes the scoring rules match against (`bedrooms: 4`, `seaView: true`).
+
+Every edit is stored as a per-pack **draft** that overlays the shipped config
+(`src/core/store/packs.ts`) and streams **live to the companion and display** —
+add a question in the dashboard and it appears on the salesperson's phone
+instantly, no reload. "Revert" drops the draft and restores the shipped pack.
+Drafts persist in `localStorage` for the demo; in production this is a row in
+the tenant's pack table — the shape (a questions array + an inventory array
+over the base pack) is identical.
 
 ---
 
