@@ -8,6 +8,17 @@ import { PACKS } from "@/core/industries";
 import { hasDraft, resetPack, useDraftedPackIds } from "@/core/store/packs";
 import { QuestionBuilder } from "./QuestionBuilder";
 import { InventoryBuilder } from "./InventoryBuilder";
+import { RulesBuilder } from "./RulesBuilder";
+import { BrandingBuilder } from "./BrandingBuilder";
+
+export type BuilderKind = "questions" | "inventory" | "rules" | "branding";
+
+const TITLES: Record<BuilderKind, string> = {
+  questions: "Question builder",
+  inventory: "Inventory builder",
+  rules: "Scoring rules",
+  branding: "Branding",
+};
 
 /**
  * The Visual Builder shell. Picks which installed pack to edit, shows whether
@@ -19,7 +30,7 @@ export function BuilderSection({
   packId,
   onPackChange,
 }: {
-  kind: "questions" | "inventory";
+  kind: BuilderKind;
   packId: string;
   onPackChange: (id: string) => void;
 }) {
@@ -28,9 +39,7 @@ export function BuilderSection({
   const customised = drafted.includes(packId) || hasDraft(packId);
 
   return (
-    <Panel
-      title={kind === "questions" ? "Question builder" : "Inventory builder"}
-    >
+    <Panel title={TITLES[kind]}>
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-2">
           <span className="text-xs text-ink-faint">Editing pack</span>
@@ -82,8 +91,12 @@ export function BuilderSection({
 
       {kind === "questions" ? (
         <QuestionBuilder packId={packId} />
-      ) : (
+      ) : kind === "inventory" ? (
         <InventoryBuilder packId={packId} />
+      ) : kind === "rules" ? (
+        <RulesBuilder packId={packId} />
+      ) : (
+        <BrandingBuilder packId={packId} />
       )}
     </Panel>
   );

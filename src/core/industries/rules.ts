@@ -1,11 +1,112 @@
-import type { ScoringRule } from "@/core/types";
+import type { RuleKind, RuleSpec, ScoringRule } from "@/core/types";
 import { isBudget } from "@/core/engine/scoring";
 
 /**
  * Reusable scoring-rule builders shared across industry packs.
- * Companies configure these through the (future) visual rule builder; here
- * they are expressed in code to seed the demo packs.
+ * Companies configure these through the visual rule builder; the packs seed
+ * them as serialisable `RuleSpec`s (see below) which compile to these.
  */
+
+/* --------------------------------------------------------------------------
+ * Serialisable rule specs — the editable form of a scoring rule.
+ *
+ * A `ScoringRule` carries an `evaluate` closure, which can't be stored in a
+ * draft or edited in a form. A `RuleSpec` is the plain-data description the
+ * Visual Builder reads and writes; `compileRule` turns it back into a runnable
+ * `ScoringRule`. Reason strings are templates with `{have}`, `{need}` and
+ * `{value}` placeholders filled at evaluation time.
+ * ------------------------------------------------------------------------ */
+
+export type { RuleKind, RuleSpec };
+
+/** Human-friendly descriptions of each rule kind, for the builder UI. */
+export const RULE_KIND_INFO: Record<
+  RuleKind,
+  { label: string; blurb: string; needsAttribute: boolean; needsCeiling: boolean }
+> = {
+  budget: {
+    label: "Budget fit",
+    blurb: "Full score inside the budget range, graceful fall-off just outside.",
+    needsAttribute: false,
+    needsCeiling: false,
+  },
+  atLeast: {
+    label: "Meets a minimum",
+    blurb: "Rewards items whose attribute meets or exceeds the number asked for.",
+    needsAttribute: true,
+    needsCeiling: false,
+  },
+  proximity: {
+    label: "Closer is better",
+    blurb: "For a yes/no want — lower attribute values score higher up to a ceiling.",
+    needsAttribute: true,
+    needsCeiling: true,
+  },
+  feature: {
+    label: "Has a feature",
+    blurb: "Rewards items whose boolean attribute matches a 'want this' answer.",
+    needsAttribute: true,
+    needsCeiling: false,
+  },
+  investment: {
+    label: "Investment upside",
+    blurb: "Rewards appreciation when the customer signals investment intent.",
+    needsAttribute: false,
+    needsCeiling: false,
+  },
+};
+
+/** Fill `{have} {need} {value}` placeholders in a reason template. */
+function fill(template: string, vars: Record<string, number>): string {
+  return template.replace(/\{(\w+)\}/g, (_, k) =>
+    vars[k] != null ? String(vars[k]) : "",
+  );
+}
+
+/** Compile one serialisable spec into a runnable scoring rule. */
+export function compileRule(spec: RuleSpec): ScoringRule {
+  let rule: ScoringRule;
+  switch (spec.kind) {
+    case "budget":
+      rule = budgetRule(spec.questionId, spec.weight);
+      break;
+    case "investment":
+      rule = investmentRule(spec.questionId, spec.weight);
+      break;
+    case "feature":
+      rule = featureRule(
+        spec.questionId,
+        spec.attribute ?? spec.questionId,
+        spec.reason ?? "it has the feature you asked for",
+        spec.weight,
+      );
+      break;
+    case "proximity":
+      rule = proximityRule(spec.questionId, spec.attribute ?? spec.questionId, {
+        weight: spec.weight,
+        ceiling: spec.ceiling ?? 15,
+        reason: (v) => fill(spec.reason ?? "it is {value} away", { value: v }),
+      });
+      break;
+    case "atLeast":
+      rule = atLeastRule(
+        spec.questionId,
+        spec.attribute ?? spec.questionId,
+        (need, have) =>
+          fill(spec.reason ?? "it provides {have}, meeting your {need}", {
+            need,
+            have,
+          }),
+        spec.weight,
+      );
+      break;
+  }
+  return { ...rule, id: spec.id };
+}
+
+export function compileRules(specs: RuleSpec[]): ScoringRule[] {
+  return specs.map(compileRule);
+}
 
 /** Budget fit: full match inside range, graceful fall-off just outside. */
 export function budgetRule(questionId: string, weight = 3): ScoringRule {

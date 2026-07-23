@@ -1,5 +1,5 @@
 import type { IndustryPack } from "@/core/types";
-import { atLeastRule, budgetRule, featureRule } from "./rules";
+import { compileRules } from "./rules";
 
 export const automotivePack: IndustryPack = {
   id: "automotive",
@@ -149,32 +149,42 @@ export const automotivePack: IndustryPack = {
       highlights: ["0–60 in 2.9s", "Carbon aero package", "Track telemetry"],
     },
   ],
-  rules: [
-    budgetRule("budget", 3),
-    atLeastRule(
-      "seats",
-      "seats",
-      (need, have) => `it seats ${have}, covering your need for ${need}`,
-      2.5,
-    ),
-    featureRule("electric", "electric", "it is fully electric as you wanted", 2.5),
-    featureRule("awd", "awd", "it has all-wheel drive", 2),
+  ruleSpecs: [
+    { id: "budget-fit", kind: "budget", questionId: "budget", weight: 3 },
+    {
+      id: "seats-min",
+      kind: "atLeast",
+      questionId: "seats",
+      attribute: "seats",
+      weight: 2.5,
+      reason: "it seats {have}, covering your need for {need}",
+    },
+    {
+      id: "electric",
+      kind: "feature",
+      questionId: "electric",
+      attribute: "electric",
+      weight: 2.5,
+      reason: "it is fully electric as you wanted",
+    },
+    {
+      id: "awd",
+      kind: "feature",
+      questionId: "awd",
+      attribute: "awd",
+      weight: 2,
+      reason: "it has all-wheel drive",
+    },
     {
       id: "range-min",
+      kind: "atLeast",
       questionId: "range",
       attribute: "range",
       weight: 2,
-      evaluate: (answer, item) => {
-        const need = Number(answer);
-        if (Number.isNaN(need)) return null;
-        const have = Number(item.attributes.range ?? 0);
-        if (have >= need)
-          return {
-            match: 1,
-            reason: `it has ${have} mi of range, comfortably clearing your ${need} mi minimum`,
-          };
-        return { match: Math.max(0, have / need) };
-      },
+      reason: "it has {have} mi of range, comfortably clearing your {need} mi minimum",
     },
   ],
+  rules: [],
 };
+
+automotivePack.rules = compileRules(automotivePack.ruleSpecs!);

@@ -28,9 +28,10 @@ const NAV = [
   "Overview",
   "Inventory",
   "Questions",
+  "Scoring",
+  "Branding",
   "Leads",
   "Analytics",
-  "Branding",
   "Integrations",
   "Users",
 ] as const;
@@ -67,6 +68,18 @@ export default function DashboardPage() {
       ) : tab === "Inventory" ? (
         <BuilderSection
           kind="inventory"
+          packId={builderPack}
+          onPackChange={setBuilderPack}
+        />
+      ) : tab === "Scoring" ? (
+        <BuilderSection
+          kind="rules"
+          packId={builderPack}
+          onPackChange={setBuilderPack}
+        />
+      ) : tab === "Branding" ? (
+        <BuilderSection
+          kind="branding"
           packId={builderPack}
           onPackChange={setBuilderPack}
         />

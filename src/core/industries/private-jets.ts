@@ -1,5 +1,5 @@
 import type { IndustryPack } from "@/core/types";
-import { atLeastRule, budgetRule, featureRule } from "./rules";
+import { compileRules } from "./rules";
 
 export const privateJetsPack: IndustryPack = {
   id: "private-jets",
@@ -131,32 +131,42 @@ export const privateJetsPack: IndustryPack = {
       highlights: ["Ideal for regional hops", "Low operating cost", "Short-field capable"],
     },
   ],
-  rules: [
-    budgetRule("budget", 3),
-    atLeastRule(
-      "passengers",
-      "passengers",
-      (need, have) => `it carries ${have} passengers, covering your ${need}`,
-      2.5,
-    ),
+  ruleSpecs: [
+    { id: "budget-fit", kind: "budget", questionId: "budget", weight: 3 },
+    {
+      id: "passengers-min",
+      kind: "atLeast",
+      questionId: "passengers",
+      attribute: "passengers",
+      weight: 2.5,
+      reason: "it carries {have} passengers, covering your {need}",
+    },
     {
       id: "range-min",
+      kind: "atLeast",
       questionId: "range",
       attribute: "range",
       weight: 3,
-      evaluate: (answer, item) => {
-        const need = Number(answer);
-        if (Number.isNaN(need)) return null;
-        const have = Number(item.attributes.range ?? 0);
-        if (have >= need)
-          return {
-            match: 1,
-            reason: `it has ${have} nm of range, enough to fly your ${need} nm mission non-stop`,
-          };
-        return { match: Math.max(0, have / need) };
-      },
+      reason: "it has {have} nm of range, enough to fly your {need} nm mission non-stop",
     },
-    featureRule("bedroom", "bedroom", "it has the private bedroom suite you need", 2),
-    featureRule("standup", "standup", "it offers a full stand-up cabin", 1.5),
+    {
+      id: "bedroom",
+      kind: "feature",
+      questionId: "bedroom",
+      attribute: "bedroom",
+      weight: 2,
+      reason: "it has the private bedroom suite you need",
+    },
+    {
+      id: "standup",
+      kind: "feature",
+      questionId: "standup",
+      attribute: "standup",
+      weight: 1.5,
+      reason: "it offers a full stand-up cabin",
+    },
   ],
+  rules: [],
 };
+
+privateJetsPack.rules = compileRules(privateJetsPack.ruleSpecs!);

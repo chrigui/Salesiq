@@ -104,6 +104,32 @@ export interface Lifestyle {
   headline: LifestyleMetric[];
 }
 
+export type RuleKind =
+  | "budget"
+  | "atLeast"
+  | "proximity"
+  | "feature"
+  | "investment";
+
+/**
+ * Serialisable description of a scoring rule — the editable form the Visual
+ * Builder reads and writes. `compileRule` (in industries/rules) turns it into
+ * a runnable `ScoringRule`. Reason strings are templates with `{have}`,
+ * `{need}` and `{value}` placeholders filled at evaluation time.
+ */
+export interface RuleSpec {
+  id: string;
+  kind: RuleKind;
+  questionId: string;
+  weight: number;
+  /** Inventory attribute this rule inspects (atLeast / proximity / feature). */
+  attribute?: string;
+  /** Reason template surfaced when the rule matches. */
+  reason?: string;
+  /** proximity only: lower attribute values are better up to this ceiling. */
+  ceiling?: number;
+}
+
 /**
  * A scoring rule maps an answer to a contribution for an inventory item.
  * The engine evaluates every rule for every item and produces both a score
@@ -150,6 +176,11 @@ export interface IndustryPack {
   questions: Question[];
   inventory: InventoryItem[];
   rules: ScoringRule[];
+  /**
+   * Serialisable source for `rules`, when the pack is built from rule specs.
+   * The Visual Builder edits these; the engine runs the compiled `rules`.
+   */
+  ruleSpecs?: RuleSpec[];
   currency: string;
 }
 

@@ -1,19 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  ChevronDown,
-  Plus,
-  Trash2,
-  ArrowUp,
-  ArrowDown,
-  X,
-  ImageIcon,
-} from "lucide-react";
+import { ChevronDown, Plus, Trash2, ArrowUp, ArrowDown, X } from "lucide-react";
 import { cx, GRADIENTS } from "@/components/ui/primitives";
 import { getEffectivePack, saveInventory } from "@/core/store/packs";
 import type { InventoryItem } from "@/core/types";
-import { Field, NumberInput, Select, TextArea, TextInput } from "./fields";
+import { Field, NumberInput, TextInput } from "./fields";
+import { LifestyleEditor } from "./LifestyleEditor";
 
 const GRADIENT_TOKENS = Object.keys(GRADIENTS);
 
@@ -240,12 +233,10 @@ function ItemRow({
             onChange={(attributes) => onChange({ attributes })}
           />
 
-          {item.lifestyle && (
-            <p className="flex items-center gap-1.5 text-[11px] text-ink-faint">
-              <ImageIcon className="h-3.5 w-3.5" /> Lifestyle-map scene is kept
-              from the shipped config.
-            </p>
-          )}
+          <LifestyleEditor
+            lifestyle={item.lifestyle}
+            onChange={(lifestyle) => onChange({ lifestyle })}
+          />
         </div>
       )}
     </div>

@@ -1,11 +1,5 @@
 import type { IndustryPack, Poi } from "@/core/types";
-import {
-  atLeastRule,
-  budgetRule,
-  featureRule,
-  investmentRule,
-  proximityRule,
-} from "./rules";
+import { compileRules } from "./rules";
 
 /**
  * Shared placement for the lifestyle-map amenities. Every property reuses the
@@ -360,22 +354,52 @@ export const realEstatePack: IndustryPack = {
       },
     },
   ],
-  rules: [
-    budgetRule("budget", 3),
-    atLeastRule(
-      "bedrooms",
-      "bedrooms",
-      (need, have) => `it offers ${have} bedrooms, meeting your need for ${need}`,
-      2.5,
-    ),
-    proximityRule("schools", "schoolMinutes", {
-      ceiling: 15,
+  ruleSpecs: [
+    { id: "budget-fit", kind: "budget", questionId: "budget", weight: 3 },
+    {
+      id: "bedrooms-min",
+      kind: "atLeast",
+      questionId: "bedrooms",
+      attribute: "bedrooms",
       weight: 2.5,
-      reason: (v) => `it has international schools within ${v} minutes`,
-    }),
-    featureRule("seaView", "seaView", "it has the sea view you asked for", 2),
-    featureRule("garden", "garden", "it comes with a private garden", 2),
-    featureRule("quiet", "quiet", "it sits in a quiet neighbourhood", 1.5),
-    investmentRule("intent", 2.5),
+      reason: "it offers {have} bedrooms, meeting your need for {need}",
+    },
+    {
+      id: "schools-near",
+      kind: "proximity",
+      questionId: "schools",
+      attribute: "schoolMinutes",
+      weight: 2.5,
+      ceiling: 15,
+      reason: "it has international schools within {value} minutes",
+    },
+    {
+      id: "sea-view",
+      kind: "feature",
+      questionId: "seaView",
+      attribute: "seaView",
+      weight: 2,
+      reason: "it has the sea view you asked for",
+    },
+    {
+      id: "garden",
+      kind: "feature",
+      questionId: "garden",
+      attribute: "garden",
+      weight: 2,
+      reason: "it comes with a private garden",
+    },
+    {
+      id: "quiet",
+      kind: "feature",
+      questionId: "quiet",
+      attribute: "quiet",
+      weight: 1.5,
+      reason: "it sits in a quiet neighbourhood",
+    },
+    { id: "investment", kind: "investment", questionId: "intent", weight: 2.5 },
   ],
+  rules: [],
 };
+
+realEstatePack.rules = compileRules(realEstatePack.ruleSpecs!);

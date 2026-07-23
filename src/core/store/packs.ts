@@ -2,7 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { getBasePack, PACKS } from "@/core/industries";
-import type { InventoryItem, IndustryPack, Question } from "@/core/types";
+import { compileRules } from "@/core/industries/rules";
+import type {
+  Branding,
+  InventoryItem,
+  IndustryPack,
+  Question,
+  RuleSpec,
+} from "@/core/types";
 
 /**
  * Tenant pack customisation — the storage behind the Visual Builder.
@@ -20,6 +27,8 @@ import type { InventoryItem, IndustryPack, Question } from "@/core/types";
 export interface PackDraft {
   questions?: Question[];
   inventory?: InventoryItem[];
+  ruleSpecs?: RuleSpec[];
+  branding?: Branding;
   updatedAt: number;
 }
 
@@ -52,16 +61,27 @@ export function getDraft(packId: string): PackDraft | undefined {
 
 export function hasDraft(packId: string): boolean {
   const d = readAll()[packId];
-  return !!d && (d.questions != null || d.inventory != null);
+  return (
+    !!d &&
+    (d.questions != null ||
+      d.inventory != null ||
+      d.ruleSpecs != null ||
+      d.branding != null)
+  );
 }
 
 /** Overlay a draft onto its base pack. Missing sections fall back to the base. */
 export function mergePack(base: IndustryPack, draft?: PackDraft): IndustryPack {
   if (!draft) return base;
+  const ruleSpecs = draft.ruleSpecs ?? base.ruleSpecs;
   return {
     ...base,
     questions: draft.questions ?? base.questions,
     inventory: draft.inventory ?? base.inventory,
+    branding: draft.branding ?? base.branding,
+    ruleSpecs,
+    // Recompile rules whenever the draft overrides the specs.
+    rules: draft.ruleSpecs ? compileRules(draft.ruleSpecs) : base.rules,
   };
 }
 
@@ -84,6 +104,14 @@ export function saveQuestions(packId: string, questions: Question[]): void {
 
 export function saveInventory(packId: string, inventory: InventoryItem[]): void {
   patchDraft(packId, { inventory });
+}
+
+export function saveRuleSpecs(packId: string, ruleSpecs: RuleSpec[]): void {
+  patchDraft(packId, { ruleSpecs });
+}
+
+export function saveBranding(packId: string, branding: Branding): void {
+  patchDraft(packId, { branding });
 }
 
 /** Discard all customisations for a pack, reverting to the shipped config. */

@@ -21,7 +21,7 @@ into the same core.
 | --- | --- | --- |
 | **Customer Experience Display** | `/display` | The full-screen, animated presentation the customer sees. Keynote-grade motion, glassmorphism, live-driven. Never looks like a dashboard. |
 | **Sales Companion** | `/companion` | The phone the salesperson holds. Asks questions, jumps sections, bookmarks, generates a proposal — every action updates the display instantly. |
-| **Company Dashboard** | `/dashboard` | Each tenant's admin: a **visual question & inventory builder**, branding, leads and analytics (conversion, funnel, most-selected, completion rates). |
+| **Company Dashboard** | `/dashboard` | Each tenant's admin: a **visual builder** for questions, inventory, scoring rules and branding, plus leads and analytics (conversion, funnel, most-selected, completion rates). |
 | **Platform Administration** | `/admin` | Our master console: tenants, subscriptions, MRR/ARR, churn, usage by vertical, system health. |
 | **AI Decision Engine** | `/api/ai/recommend`, `/api/ai/search` | Scores inventory against answers and returns **self-explaining** recommendations. Also turns a plain-language customer description into structured answers. Runs offline; upgrades to live Claude by setting `ANTHROPIC_API_KEY`. |
 
@@ -52,8 +52,9 @@ medical equipment, insurance…) is a new config file — no engine changes.
 
 ### The Visual Builder
 
-Packs don't have to be edited in code. The Company Dashboard's **Questions** and
-**Inventory** tabs are a full visual builder:
+Packs don't have to be edited in code. The Company Dashboard's **Questions**, **Inventory**, **Scoring** and
+**Branding** tabs are a full visual builder — a pack can be shaped end-to-end
+without touching code:
 
 - **Questions** — add, edit, reorder and delete questions; change type (single,
   multiple, yes/no, stepper, slider, budget range), edit options, sections,
@@ -61,6 +62,16 @@ Packs don't have to be edited in code. The Company Dashboard's **Questions** and
 - **Inventory** — add, edit, reorder and delete items; set price, currency,
   photo, accent gradient, highlights, appreciation, and the free-form
   attributes the scoring rules match against (`bedrooms: 4`, `seaView: true`).
+  Each item also has a full **lifestyle-map scene** editor (district, tags,
+  summary, position, headline stats, amenities and points of interest) so new
+  items appear on the Interactive Lifestyle Map.
+- **Scoring** — edit the AI Decision Engine's rules visually. Rules are stored
+  as serialisable specs (`budget`, `atLeast`, `proximity`, `feature`,
+  `investment`) that compile to the engine's scoring functions; pick the rule
+  type, the answer that drives it, the item attribute it reads, the weight, and
+  the reason template (`{have}`, `{need}`, `{value}`) shown in the explanation.
+- **Branding** — company name, tagline, logo glyph and brand/accent colours,
+  with a live preview. Colours re-skin the companion and display instantly.
 
 Every edit is stored as a per-pack **draft** that overlays the shipped config
 (`src/core/store/packs.ts`) and streams **live to the companion and display** —
