@@ -1,172 +1,172 @@
 "use client";
 
-import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  Cell,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
-import { ConsoleShell, KpiCard, Panel } from "@/components/console/ConsoleShell";
+import { useState } from "react";
+import { DashboardShell, type NavGroup } from "@/components/console/DashboardShell";
+import { Panel, StatCard, sparkBars } from "@/components/console/light-ui";
+import { WaffleChart } from "@/components/console/WaffleChart";
 import { cx } from "@/components/ui/primitives";
-import {
-  mrrTrend,
-  platformKpis,
-  tenants,
-  usageByVertical,
-} from "@/lib/analytics";
+import { platformKpis, tenants, usageByVertical } from "@/lib/analytics";
 
-const AXIS = "rgb(113 113 122)";
-const PIE = [
-  "rgb(99 102 241)",
-  "rgb(16 185 129)",
-  "rgb(56 189 248)",
-  "rgb(244 63 94)",
-  "rgb(234 179 8)",
-  "rgb(168 85 247)",
+const NAV: NavGroup[] = [
+  {
+    heading: "Main Menu",
+    items: [
+      { id: "Overview", label: "Overview", icon: "LayoutDashboard" },
+      { id: "Tenants", label: "Tenants", icon: "Building2" },
+      { id: "Subscriptions", label: "Subscriptions", icon: "CreditCard" },
+      { id: "Billing", label: "Billing", icon: "Receipt" },
+    ],
+  },
+  {
+    heading: "Insights",
+    items: [
+      { id: "Usage", label: "Usage", icon: "PieChart" },
+      { id: "System health", label: "System health", icon: "Activity" },
+    ],
+  },
+  {
+    heading: "Management",
+    items: [
+      { id: "Audit logs", label: "Audit logs", icon: "ScrollText" },
+      { id: "White-label", label: "White-label", icon: "Palette" },
+      { id: "Settings", label: "Settings", icon: "Settings" },
+    ],
+  },
 ];
-const tooltipStyle = {
-  background: "rgba(24,24,27,0.95)",
-  border: "1px solid rgba(255,255,255,0.1)",
-  borderRadius: 12,
-  fontSize: 12,
-};
+
+const KPI_UNITS = ["", "", "tenants", ""];
 
 const healthColor: Record<string, string> = {
-  healthy: "text-emerald-400 bg-emerald-400/10",
-  watch: "text-amber-400 bg-amber-400/10",
-  "at-risk": "text-rose-400 bg-rose-400/10",
+  healthy: "text-emerald-600 bg-emerald-100",
+  watch: "text-amber-600 bg-amber-100",
+  "at-risk": "text-rose-600 bg-rose-100",
 };
 
 export default function AdminPage() {
-  const mrr = mrrTrend();
+  const [tab, setTab] = useState<string>("Overview");
+
   return (
-    <ConsoleShell
-      title="SalesIQ Platform"
-      subtitle="Master Administration"
+    <DashboardShell
+      workspaceKind="Platform"
+      workspaceName="SalesIQ Platform"
       glyph="◆"
-      nav={[
-        "Overview",
-        "Tenants",
-        "Subscriptions",
-        "Billing",
-        "Usage",
-        "System health",
-        "Audit logs",
-        "White-label",
-      ]}
+      greeting="Platform overview"
+      groups={NAV}
+      active={tab}
+      onSelect={setTab}
     >
+      {tab === "Tenants" ? (
+        <TenantsTable />
+      ) : tab === "Usage" ? (
+        <Usage />
+      ) : tab === "Overview" ? (
+        <Overview />
+      ) : (
+        <Placeholder tab={tab} />
+      )}
+    </DashboardShell>
+  );
+}
+
+function Overview() {
+  return (
+    <div className="space-y-4">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {platformKpis.map((k) => (
-          <KpiCard key={k.label} {...k} />
+        {platformKpis.map((k, i) => (
+          <StatCard key={k.label} {...k} unit={KPI_UNITS[i]} bars={sparkBars(i + 11)} />
         ))}
       </div>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-3">
-        <Panel title="MRR growth (12 months)" className="lg:col-span-2">
-          <ResponsiveContainer width="100%" height={260}>
-            <AreaChart data={mrr} margin={{ left: 4, right: 8, top: 8 }}>
-              <defs>
-                <linearGradient id="mrr" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="rgb(99 102 241)" stopOpacity={0.5} />
-                  <stop offset="100%" stopColor="rgb(99 102 241)" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid stroke="rgba(255,255,255,0.05)" vertical={false} />
-              <XAxis dataKey="month" tick={{ fill: AXIS, fontSize: 11 }} tickLine={false} axisLine={false} />
-              <YAxis
-                tick={{ fill: AXIS, fontSize: 11 }}
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={(v) => `$${Math.round(v / 1000)}k`}
-              />
-              <Tooltip
-                contentStyle={tooltipStyle}
-                formatter={(v: number) => [`$${v.toLocaleString()}`, "MRR"]}
-              />
-              <Area type="monotone" dataKey="mrr" stroke="rgb(99 102 241)" strokeWidth={2} fill="url(#mrr)" />
-            </AreaChart>
-          </ResponsiveContainer>
-        </Panel>
+      <WaffleChart title="Revenue trend" />
 
-        <Panel title="Usage by vertical">
-          <ResponsiveContainer width="100%" height={200}>
-            <PieChart>
-              <Pie
-                data={usageByVertical}
-                dataKey="value"
-                nameKey="name"
-                innerRadius={48}
-                outerRadius={80}
-                paddingAngle={2}
-                stroke="none"
-              >
-                {usageByVertical.map((_, i) => (
-                  <Cell key={i} fill={PIE[i % PIE.length]} />
-                ))}
-              </Pie>
-              <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [`${v}%`, ""]} />
-            </PieChart>
-          </ResponsiveContainer>
-          <div className="mt-2 grid grid-cols-2 gap-1.5">
-            {usageByVertical.map((u, i) => (
-              <div key={u.name} className="flex items-center gap-1.5 text-xs text-ink-muted">
-                <span className="h-2.5 w-2.5 rounded-full" style={{ background: PIE[i % PIE.length] }} />
-                {u.name}
-              </div>
-            ))}
-          </div>
-        </Panel>
-      </div>
-
-      <Panel title="Tenants" className="mt-4">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-xs uppercase tracking-wide text-ink-faint">
-                <th className="pb-3 font-medium">Organization</th>
-                <th className="pb-3 font-medium">Vertical</th>
-                <th className="pb-3 font-medium">Plan</th>
-                <th className="pb-3 text-right font-medium">Seats</th>
-                <th className="pb-3 text-right font-medium">Sessions</th>
-                <th className="pb-3 text-right font-medium">MRR</th>
-                <th className="pb-3 text-right font-medium">Health</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tenants.map((t) => (
-                <tr key={t.name} className="border-t border-white/5">
-                  <td className="py-3 font-medium">{t.name}</td>
-                  <td className="py-3 text-ink-muted">{t.vertical}</td>
-                  <td className="py-3 text-ink-muted">{t.plan}</td>
-                  <td className="py-3 text-right tabular-nums text-ink-muted">{t.seats}</td>
-                  <td className="py-3 text-right tabular-nums text-ink-muted">
-                    {t.sessions.toLocaleString()}
-                  </td>
-                  <td className="py-3 text-right tabular-nums">
-                    ${t.mrr.toLocaleString()}
-                  </td>
-                  <td className="py-3 text-right">
-                    <span
-                      className={cx(
-                        "rounded-full px-2.5 py-1 text-xs font-medium capitalize",
-                        healthColor[t.health],
-                      )}
-                    >
-                      {t.health}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <TenantsTable />
         </div>
-      </Panel>
-    </ConsoleShell>
+        <Usage />
+      </div>
+    </div>
+  );
+}
+
+function TenantsTable() {
+  return (
+    <Panel title="Tenants">
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="text-left text-xs uppercase tracking-wide text-zinc-400">
+              <th className="pb-3 font-medium">Organization</th>
+              <th className="pb-3 font-medium">Vertical</th>
+              <th className="pb-3 font-medium">Plan</th>
+              <th className="pb-3 text-right font-medium">Seats</th>
+              <th className="pb-3 text-right font-medium">Sessions</th>
+              <th className="pb-3 text-right font-medium">MRR</th>
+              <th className="pb-3 text-right font-medium">Health</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tenants.map((t) => (
+              <tr key={t.name} className="border-t border-zinc-100">
+                <td className="py-3 font-medium text-zinc-900">{t.name}</td>
+                <td className="py-3 text-zinc-600">{t.vertical}</td>
+                <td className="py-3 text-zinc-600">{t.plan}</td>
+                <td className="py-3 text-right tabular-nums text-zinc-600">{t.seats}</td>
+                <td className="py-3 text-right tabular-nums text-zinc-600">
+                  {t.sessions.toLocaleString()}
+                </td>
+                <td className="py-3 text-right tabular-nums text-zinc-900">
+                  ${t.mrr.toLocaleString()}
+                </td>
+                <td className="py-3 text-right">
+                  <span
+                    className={cx(
+                      "rounded-full px-2.5 py-1 text-xs font-medium capitalize",
+                      healthColor[t.health],
+                    )}
+                  >
+                    {t.health}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </Panel>
+  );
+}
+
+function Usage() {
+  const max = Math.max(...usageByVertical.map((u) => u.value));
+  return (
+    <Panel title="Usage by vertical">
+      <div className="space-y-3.5">
+        {usageByVertical.map((u) => (
+          <div key={u.name}>
+            <div className="mb-1 flex justify-between text-sm">
+              <span className="text-zinc-600">{u.name}</span>
+              <span className="text-zinc-400 tabular-nums">{u.value}%</span>
+            </div>
+            <div className="h-2 overflow-hidden rounded-full bg-zinc-100">
+              <div
+                className="h-full rounded-full bg-zinc-900"
+                style={{ width: `${(u.value / max) * 100}%` }}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    </Panel>
+  );
+}
+
+function Placeholder({ tab }: { tab: string }) {
+  return (
+    <Panel title={tab}>
+      <p className="py-8 text-center text-sm text-zinc-400">
+        {tab} is part of the platform blueprint and not wired in the demo.
+      </p>
+    </Panel>
   );
 }

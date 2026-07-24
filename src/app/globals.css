@@ -77,6 +77,58 @@ body {
   color: transparent;
 }
 
+/*
+ * Light "console" theme.
+ * The admin surfaces (Company Dashboard + Platform Admin) adopt a clean, bright
+ * UI. Scoping it to `.console` keeps the customer-facing display & companion on
+ * the dark, premium theme. Overriding the ink/surface CSS variables re-colours
+ * every `text-ink*` token; a handful of the dark theme's white-alpha utilities
+ * are remapped for a light surface so the existing builder forms render
+ * correctly without per-component edits.
+ */
+.console {
+  --ink: 24 24 27; /* zinc-900 */
+  --ink-muted: 82 82 91; /* zinc-600 */
+  --ink-faint: 161 161 170; /* zinc-400 */
+  --surface: 255 255 255;
+  --surface-raised: 250 250 250;
+  /* Monochrome accent to match the reference (black on white). */
+  --brand: 24 24 27;
+  --brand-soft: 63 63 70;
+  color: rgb(var(--ink));
+}
+.console .glass,
+.console .glass-strong {
+  background: #ffffff;
+  border: 1px solid rgb(0 0 0 / 0.08);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.console .bg-white\/5 {
+  background-color: rgb(0 0 0 / 0.035);
+}
+.console .bg-white\/10 {
+  background-color: rgb(0 0 0 / 0.06);
+}
+.console .bg-white\/\[0\.02\] {
+  background-color: rgb(0 0 0 / 0.02);
+}
+.console .bg-white\/\[0\.03\] {
+  background-color: rgb(0 0 0 / 0.025);
+}
+.console .hover\:bg-white\/5:hover {
+  background-color: rgb(0 0 0 / 0.05);
+}
+.console .hover\:bg-white\/10:hover {
+  background-color: rgb(0 0 0 / 0.08);
+}
+.console .border-white\/5 {
+  border-color: rgb(0 0 0 / 0.06);
+}
+.console .border-white\/10 {
+  border-color: rgb(0 0 0 / 0.1);
+}
+
 /* Scrollbars — quiet, premium */
 ::-webkit-scrollbar {
   width: 10px;

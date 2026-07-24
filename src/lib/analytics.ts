@@ -24,6 +24,51 @@ export function sessionTrend(days = 30) {
   });
 }
 
+// ---- Sales-trend waffle chart (new vs existing users) ----
+
+export type SalesPeriod = "Weekly" | "Monthly" | "Yearly";
+
+export interface SalesColumn {
+  newUsers: number;
+  existingUsers: number;
+}
+export interface SalesGroup {
+  label: string;
+  columns: SalesColumn[];
+}
+export interface SalesSeries {
+  groups: SalesGroup[];
+  /** Total revenue headline shown above the chart. */
+  total: number;
+  /** Max value a single column can reach — sets the y-axis ceiling. */
+  ceiling: number;
+}
+
+const MONTHS = [
+  "JAN", "FEB", "MAR", "APR", "MAY", "JUN",
+  "JUL", "AUG", "SEP", "OCT", "NOV", "DEC",
+];
+
+/** Deterministic new/existing-user series for the dot-matrix chart. */
+export function salesSeries(period: SalesPeriod = "Monthly"): SalesSeries {
+  const config: Record<SalesPeriod, { labels: string[]; perGroup: number; seed: number }> = {
+    Weekly: { labels: ["W1", "W2", "W3", "W4", "W5", "W6"], perGroup: 5, seed: 3 },
+    Monthly: { labels: MONTHS, perGroup: 4, seed: 7 },
+    Yearly: { labels: ["2020", "2021", "2022", "2023", "2024", "2025"], perGroup: 4, seed: 13 },
+  };
+  const { labels, perGroup, seed } = config[period];
+  const rnd = seeded(seed);
+  const groups: SalesGroup[] = labels.map((label) => ({
+    label,
+    columns: Array.from({ length: perGroup }, () => {
+      const existingUsers = Math.round((6 + rnd() * 16) * 1000);
+      const newUsers = Math.round((4 + rnd() * 34) * 1000);
+      return { newUsers, existingUsers };
+    }),
+  }));
+  return { groups, total: 20320, ceiling: 60000 };
+}
+
 export const popularProducts = [
   { name: "Green Hills", selected: 312 },
   { name: "Marina Vista", selected: 268 },
