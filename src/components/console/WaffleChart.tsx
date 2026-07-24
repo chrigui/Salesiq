@@ -72,9 +72,9 @@ export function WaffleChart({
           ))}
         </div>
 
-        {/* grid */}
-        <div className="min-w-0 flex-1">
-          <div className="flex items-end justify-between gap-2">
+        {/* grid — scrolls horizontally on small screens, spreads on desktop */}
+        <div className="min-w-0 flex-1 overflow-x-auto pb-1 lg:overflow-visible">
+          <div className="flex min-w-[560px] items-end justify-between gap-2">
             {series.groups.map((group) => (
               <div key={group.label} className="flex flex-col items-center gap-2">
                 <div className="flex gap-[3px]">
