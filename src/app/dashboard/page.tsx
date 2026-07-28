@@ -14,8 +14,10 @@ import { DashboardShell, type NavGroup } from "@/components/console/DashboardShe
 import { Panel, StatCard, sparkBars } from "@/components/console/light-ui";
 import { WaffleChart } from "@/components/console/WaffleChart";
 import { BuilderSection } from "@/components/console/builder/BuilderSection";
+import { OrganizationSettings } from "@/components/console/OrganizationSettings";
 import { DEFAULT_PACK_ID } from "@/core/industries";
 import { useLeads } from "@/core/store/leads";
+import { useOrganization } from "@/core/data/organization";
 import {
   companyKpis,
   funnel,
@@ -44,9 +46,9 @@ const NAV: NavGroup[] = [
   {
     heading: "Management",
     items: [
+      { id: "Settings", label: "Organization", icon: "Building2" },
       { id: "Integrations", label: "Integrations", icon: "Plug" },
       { id: "Team", label: "Team", icon: "Users" },
-      { id: "Settings", label: "Settings", icon: "Settings" },
     ],
   },
 ];
@@ -56,12 +58,13 @@ const KPI_UNITS = ["sessions", "", "", "leads"];
 export default function DashboardPage() {
   const [tab, setTab] = useState<string>("Overview");
   const [builderPack, setBuilderPack] = useState<string>(DEFAULT_PACK_ID);
+  const org = useOrganization();
 
   return (
     <DashboardShell
       workspaceKind="Agency"
-      workspaceName="Green Hills Living"
-      glyph="◈"
+      workspaceName={org.name}
+      glyph={org.logoGlyph}
       greeting="Welcome back, Sara"
       groups={NAV}
       active={tab}
@@ -79,6 +82,8 @@ export default function DashboardPage() {
         <RecentLeads />
       ) : tab === "Analytics" ? (
         <Analytics />
+      ) : tab === "Settings" ? (
+        <OrganizationSettings />
       ) : tab === "Overview" ? (
         <Overview />
       ) : (
