@@ -16,6 +16,7 @@ import { WaffleChart } from "@/components/console/WaffleChart";
 import { BuilderSection } from "@/components/console/builder/BuilderSection";
 import { OrganizationSettings } from "@/components/console/OrganizationSettings";
 import { BranchManagement } from "@/components/console/BranchManagement";
+import { UserManagement } from "@/components/console/UserManagement";
 import { DEFAULT_PACK_ID } from "@/core/industries";
 import { useLeads } from "@/core/store/leads";
 import { useOrganization } from "@/core/data/organization";
@@ -88,6 +89,8 @@ export default function DashboardPage() {
         <OrganizationSettings />
       ) : tab === "Branches" ? (
         <BranchManagement />
+      ) : tab === "Team" ? (
+        <UserManagement />
       ) : tab === "Overview" ? (
         <Overview />
       ) : (
