@@ -15,6 +15,7 @@ import { Panel, StatCard, sparkBars } from "@/components/console/light-ui";
 import { WaffleChart } from "@/components/console/WaffleChart";
 import { BuilderSection } from "@/components/console/builder/BuilderSection";
 import { OrganizationSettings } from "@/components/console/OrganizationSettings";
+import { BranchManagement } from "@/components/console/BranchManagement";
 import { DEFAULT_PACK_ID } from "@/core/industries";
 import { useLeads } from "@/core/store/leads";
 import { useOrganization } from "@/core/data/organization";
@@ -47,6 +48,7 @@ const NAV: NavGroup[] = [
     heading: "Management",
     items: [
       { id: "Settings", label: "Organization", icon: "Building2" },
+      { id: "Branches", label: "Branches", icon: "MapPin" },
       { id: "Integrations", label: "Integrations", icon: "Plug" },
       { id: "Team", label: "Team", icon: "Users" },
     ],
@@ -84,6 +86,8 @@ export default function DashboardPage() {
         <Analytics />
       ) : tab === "Settings" ? (
         <OrganizationSettings />
+      ) : tab === "Branches" ? (
+        <BranchManagement />
       ) : tab === "Overview" ? (
         <Overview />
       ) : (
