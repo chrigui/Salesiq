@@ -204,6 +204,28 @@ Same-device sync needs no configuration at all.
 
 ---
 
+## Idle Mode & QR Continue
+
+Two more Customer Display features, both live:
+
+- **Idle Mode** — when the display has sat on the welcome screen with no
+  activity for a while (any companion action or local tap resets the clock),
+  it fades into an attract loop: a slow cross-fading carousel of the pack's
+  own inventory photography, rotating "featured" highlights, and a pulsing AI
+  presence cycling through example questions. Tap anywhere to return. The
+  timeout defaults to 45s and is overridable per-display via `?idleMs=20000`
+  in the URL — handy for a demo floor.
+- **QR Continue Experience** — a "Continue on your phone" button (the map
+  hero's Share button, or a header button on non-map views) shows a QR the
+  *customer* scans to pick up their live recommendation, read-only, on their
+  own phone at `/continue`. It rides the exact same sync room as the display
+  (see pairing above), so it only ever shows real, currently-live session
+  data — never a placeholder. It works once the salesperson's Companion is
+  actually paired to the display, since that's what publishes the state the
+  customer's phone (and the display itself) both receive.
+
+---
+
 ## Map (MapLibre GL, real 3D)
 
 The Interactive Lifestyle Map renders on real **OpenStreetMap** data via

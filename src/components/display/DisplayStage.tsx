@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Sparkles, MapPin, TrendingUp, Check, Star } from "lucide-react";
+import { Sparkles, MapPin, TrendingUp, Check, Star, Smartphone } from "lucide-react";
 import { useSession } from "@/core/store/session";
 import { useLivePack } from "@/core/store/packs";
 import { scoreInventory, isVisible } from "@/core/engine/scoring";
@@ -11,6 +11,8 @@ import { cx } from "@/components/ui/primitives";
 import { ItemImage } from "@/components/ui/ItemImage";
 import { Icon } from "@/lib/icon";
 import { LifestyleMap } from "./LifestyleMap";
+import { DEFAULT_IDLE_TIMEOUT_MS, IdleScreen, useIdleGate } from "./IdleMode";
+import { ContinueQrModal } from "./ContinueQr";
 import type {
   Question,
   AnswerValue,
@@ -20,10 +22,18 @@ import type {
 
 const spring = { type: "spring", stiffness: 260, damping: 30 } as const;
 
+function readIdleTimeoutMs(): number {
+  if (typeof window === "undefined") return DEFAULT_IDLE_TIMEOUT_MS;
+  const q = new URLSearchParams(window.location.search).get("idleMs");
+  const n = q ? Number(q) : NaN;
+  return Number.isFinite(n) && n > 0 ? n : DEFAULT_IDLE_TIMEOUT_MS;
+}
+
 export function DisplayStage() {
   const { packId, answers, activeQuestionId, view, focusedItemId, revision } =
     useSession();
   const pack = useLivePack(packId);
+  const [qrOpen, setQrOpen] = useState(false);
 
   const scored = useMemo(
     () => scoreInventory(pack, answers),
@@ -32,12 +42,24 @@ export function DisplayStage() {
   const activeQuestion = pack.questions.find((q) => q.id === activeQuestionId);
   const focusedItem = pack.inventory.find((i) => i.id === focusedItemId);
 
+  // Idle Mode: only arm the attract loop while nobody has started a session —
+  // any answer or a view change away from "welcome" keeps it fully disabled.
+  const { isIdle, wake } = useIdleGate({
+    enabled: view === "welcome" && Object.keys(answers).length === 0,
+    timeoutMs: readIdleTimeoutMs(),
+    resetKey: revision,
+  });
+
   // The Interactive Lifestyle Map is the hero for browsing/recommendation views
   // whenever the active pack carries lifestyle-map data (e.g. real estate).
   const mapView =
     view === "welcome" || view === "recommendation" || view === "item";
   const mapTarget =
     view === "item" && focusedItem?.lifestyle ? focusedItem : scored[0]?.item;
+
+  const showMapStage = mapView && !!mapTarget?.lifestyle;
+
+  let stage: React.ReactNode;
   if (mapView && mapTarget?.lifestyle) {
     const entry = scored.find((s) => s.item.id === mapTarget.id);
     const intentQ = pack.questions.find((q) => q.id === "intent");
@@ -52,7 +74,7 @@ export function DisplayStage() {
     const investmentMode =
       intentSelected.includes("investment") ||
       intentSelected.includes("rental");
-    return (
+    stage = (
       <LifestyleMap
         item={mapTarget}
         pack={pack}
@@ -65,59 +87,74 @@ export function DisplayStage() {
         investmentMode={investmentMode}
       />
     );
+  } else {
+    stage = (
+      <div className="bg-aurora relative h-screen w-screen overflow-hidden">
+        <BrandHeader
+          name={pack.branding.name}
+          glyph={pack.branding.logoGlyph}
+          tagline={pack.branding.tagline}
+          onContinue={
+            Object.keys(answers).length > 0 ? () => setQrOpen(true) : undefined
+          }
+        />
+
+        <div className="absolute inset-0 grid place-items-center px-10 pb-14 pt-24">
+          <AnimatePresence mode="wait">
+            {view === "welcome" && (
+              <Welcome key="welcome" pack={pack} />
+            )}
+
+            {view === "question" && activeQuestion && (
+              <QuestionStage
+                key={`q-${activeQuestion.id}-${revision}`}
+                question={activeQuestion}
+                answer={answers[activeQuestion.id]}
+                pack={pack}
+              />
+            )}
+
+            {view === "recommendation" && (
+              <RecommendationStage
+                key="rec"
+                scored={scored}
+                packVertical={pack.vertical}
+                pack={pack}
+              />
+            )}
+
+            {view === "compare" && (
+              <CompareStage key="compare" scored={scored} pack={pack} />
+            )}
+
+            {view === "item" && focusedItem && (
+              <ItemStage
+                key={`item-${focusedItem.id}`}
+                item={focusedItem}
+                score={scored.find((s) => s.item.id === focusedItem.id)?.score ?? 0}
+                reasons={
+                  scored.find((s) => s.item.id === focusedItem.id)?.reasons ?? []
+                }
+              />
+            )}
+          </AnimatePresence>
+        </div>
+
+        <ProgressDots pack={pack} answers={answers} />
+      </div>
+    );
   }
 
   return (
-    <div className="bg-aurora relative h-screen w-screen overflow-hidden">
-      <BrandHeader
-        name={pack.branding.name}
-        glyph={pack.branding.logoGlyph}
-        tagline={pack.branding.tagline}
-      />
-
-      <div className="absolute inset-0 grid place-items-center px-10 pb-14 pt-24">
-        <AnimatePresence mode="wait">
-          {view === "welcome" && (
-            <Welcome key="welcome" pack={pack} />
-          )}
-
-          {view === "question" && activeQuestion && (
-            <QuestionStage
-              key={`q-${activeQuestion.id}-${revision}`}
-              question={activeQuestion}
-              answer={answers[activeQuestion.id]}
-              pack={pack}
-            />
-          )}
-
-          {view === "recommendation" && (
-            <RecommendationStage
-              key="rec"
-              scored={scored}
-              packVertical={pack.vertical}
-              pack={pack}
-            />
-          )}
-
-          {view === "compare" && (
-            <CompareStage key="compare" scored={scored} pack={pack} />
-          )}
-
-          {view === "item" && focusedItem && (
-            <ItemStage
-              key={`item-${focusedItem.id}`}
-              item={focusedItem}
-              score={scored.find((s) => s.item.id === focusedItem.id)?.score ?? 0}
-              reasons={
-                scored.find((s) => s.item.id === focusedItem.id)?.reasons ?? []
-              }
-            />
-          )}
-        </AnimatePresence>
-      </div>
-
-      <ProgressDots pack={pack} answers={answers} />
-    </div>
+    <>
+      {stage}
+      <AnimatePresence>
+        {isIdle && <IdleScreen pack={pack} onWake={wake} />}
+      </AnimatePresence>
+      {!showMapStage && (
+        <ContinueQrModal open={qrOpen} onClose={() => setQrOpen(false)} />
+      )}
+    </>
   );
 }
 
@@ -125,10 +162,13 @@ function BrandHeader({
   name,
   glyph,
   tagline,
+  onContinue,
 }: {
   name: string;
   glyph: string;
   tagline: string;
+  /** Show the "Continue on your phone" trigger once a session is underway. */
+  onContinue?: () => void;
 }) {
   return (
     <div className="absolute left-0 right-0 top-0 z-10 flex items-center justify-between px-10 py-7">
@@ -141,12 +181,22 @@ function BrandHeader({
           <div className="text-xs text-ink-faint">{tagline}</div>
         </div>
       </div>
-      <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs text-ink-muted">
-        <span className="relative flex h-2 w-2">
-          <span className="absolute inline-flex h-full w-full animate-pulse-ring rounded-full bg-brand" />
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-brand" />
-        </span>
-        Live session
+      <div className="flex items-center gap-2">
+        {onContinue && (
+          <button
+            onClick={onContinue}
+            className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-medium text-ink-muted transition hover:bg-white/10"
+          >
+            <Smartphone className="h-3.5 w-3.5" /> Continue on phone
+          </button>
+        )}
+        <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs text-ink-muted">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-pulse-ring rounded-full bg-brand" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-brand" />
+          </span>
+          Live session
+        </div>
       </div>
     </div>
   );

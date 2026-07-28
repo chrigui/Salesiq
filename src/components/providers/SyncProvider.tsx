@@ -12,7 +12,7 @@ import { usePathname } from "next/navigation";
 import { connectNetwork, disconnectNetwork } from "@/core/store/session";
 import { makeRoomCode, type SyncStatus } from "@/core/sync/network";
 
-type Role = "display" | "companion" | null;
+type Role = "display" | "companion" | "continue" | null;
 
 interface SyncValue {
   role: Role;
@@ -22,6 +22,8 @@ interface SyncValue {
   setRoom: (code: string) => void;
   /** Deep link that opens the Companion already paired to this room. */
   companionUrl: string | null;
+  /** Deep link that opens the customer's read-only "continue on your phone" view. */
+  continueUrl: string | null;
 }
 
 const SyncContext = createContext<SyncValue>({
@@ -30,6 +32,7 @@ const SyncContext = createContext<SyncValue>({
   status: "idle",
   setRoom: () => {},
   companionUrl: null,
+  continueUrl: null,
 });
 
 export const useSync = () => useContext(SyncContext);
@@ -51,6 +54,11 @@ function writeRoomToUrl(code: string) {
  * - Display: mints a room code on first load (and puts it in the URL) so it can
  *   be shown as a QR / short code.
  * - Companion: joins the room from the URL (?room=CODE) or a typed code.
+ * - Continue (customer's own phone, Module 2 "QR Continue Experience"): joins
+ *   an existing display's room from the URL only — it never mints one, since
+ *   scanning the QR is the only way in. It connects to the network as a
+ *   receive-only viewer (the same transport role as the display), so it rides
+ *   the same retained-state channel the salesperson's companion publishes to.
  */
 export function SyncProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -58,7 +66,9 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
     ? "display"
     : pathname?.startsWith("/companion")
       ? "companion"
-      : null;
+      : pathname?.startsWith("/continue")
+        ? "continue"
+        : null;
 
   const [room, setRoomState] = useState<string | null>(null);
   const [status, setStatus] = useState<SyncStatus>("idle");
@@ -74,14 +84,16 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
       writeRoomToUrl(code);
       setRoomState(code);
     }
-    // Companion with no code stays unpaired until the user enters one.
+    // Companion/Continue with no code stay unconnected until one is provided.
   }, [role]);
 
   // Connect to the network whenever we have a role + room.
   useEffect(() => {
     if (!role || !room) return;
+    // "continue" is a viewer, exactly like the display — never publishes.
+    const transportRole = role === "continue" ? "display" : role;
     setStatus("connecting");
-    const disconnect = connectNetwork({ room, role, onStatus: setStatus });
+    const disconnect = connectNetwork({ room, role: transportRole, onStatus: setStatus });
     return () => {
       disconnect();
       disconnectNetwork();
@@ -100,9 +112,14 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
     return `${window.location.origin}/companion?room=${room}`;
   }, [room]);
 
+  const continueUrl = useMemo(() => {
+    if (!room || typeof window === "undefined") return null;
+    return `${window.location.origin}/continue?room=${room}`;
+  }, [room]);
+
   const value = useMemo(
-    () => ({ role, room, status, setRoom, companionUrl }),
-    [role, room, status, setRoom, companionUrl],
+    () => ({ role, room, status, setRoom, companionUrl, continueUrl }),
+    [role, room, status, setRoom, companionUrl, continueUrl],
   );
 
   return <SyncContext.Provider value={value}>{children}</SyncContext.Provider>;

@@ -24,6 +24,7 @@ import { cx } from "@/components/ui/primitives";
 import { Icon } from "@/lib/icon";
 import type { MapApi } from "./RealMap";
 import { useFullscreen } from "./DisplayKiosk";
+import { ContinueQrModal } from "./ContinueQr";
 
 // Leaflet touches `window`, so the real map is client-only.
 const RealMap = dynamic(() => import("./RealMap").then((m) => m.RealMap), {
@@ -81,6 +82,7 @@ export function LifestyleMap({
   const [threeD, setThreeD] = useState(false);
   const [activeLayer, setActiveLayer] = useState("lifestyle");
   const [fullscreen, toggleFullscreen] = useFullscreen();
+  const [qrOpen, setQrOpen] = useState(false);
   const mapApi = useRef<MapApi | null>(null);
   const life = item.lifestyle;
   if (!life) return null;
@@ -195,14 +197,15 @@ export function LifestyleMap({
         >
           {fullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
         </button>
-        <div
+        <button
+          onClick={() => setQrOpen(true)}
           className={cx(
-            "flex items-center gap-1.5 rounded-2xl border px-3.5 py-2.5 text-sm font-medium backdrop-blur-xl",
+            "flex items-center gap-1.5 rounded-2xl border px-3.5 py-2.5 text-sm font-medium backdrop-blur-xl transition hover:brightness-110",
             glass,
           )}
         >
           <Share2 className="h-4 w-4" /> Share
-        </div>
+        </button>
         <div
           className={cx(
             "grid h-10 w-10 place-items-center rounded-2xl border backdrop-blur-xl",
@@ -452,6 +455,8 @@ export function LifestyleMap({
           <AudioLines className="h-4 w-4" />
         </div>
       </motion.div>
+
+      <ContinueQrModal open={qrOpen} onClose={() => setQrOpen(false)} />
     </div>
   );
 }
