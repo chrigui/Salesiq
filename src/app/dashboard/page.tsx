@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Bar,
   BarChart,
@@ -18,15 +18,32 @@ import { OrganizationSettings } from "@/components/console/OrganizationSettings"
 import { BranchManagement } from "@/components/console/BranchManagement";
 import { UserManagement } from "@/components/console/UserManagement";
 import { PermissionsEditor } from "@/components/console/PermissionsEditor";
+import { LoginScreen } from "@/components/console/LoginScreen";
 import { DEFAULT_PACK_ID } from "@/core/industries";
 import { useLeads } from "@/core/store/leads";
 import { useOrganization } from "@/core/data/organization";
+import { logout, useSession } from "@/core/data/auth";
+import { can } from "@/core/data/permissions";
 import {
   companyKpis,
   funnel,
   popularProducts,
   popularQuestions,
 } from "@/lib/analytics";
+
+// Nav items gated by a capability; items with no entry are always visible to
+// any signed-in user (e.g. Overview, Organization profile, Integrations).
+const NAV_CAPABILITY: Record<string, string> = {
+  Inventory: "inventory.view",
+  Questions: "questions.edit",
+  Scoring: "scoring.edit",
+  Branding: "branding.edit",
+  Leads: "leads.view",
+  Analytics: "analytics.view",
+  Branches: "branches.manage",
+  Team: "users.manage",
+  Permissions: "users.manage",
+};
 
 const NAV: NavGroup[] = [
   {
@@ -64,18 +81,47 @@ export default function DashboardPage() {
   const [tab, setTab] = useState<string>("Overview");
   const [builderPack, setBuilderPack] = useState<string>(DEFAULT_PACK_ID);
   const org = useOrganization();
+  const session = useSession();
+
+  // Hide nav items the signed-in role isn't granted — the Permission Engine
+  // enforced live, not just documented.
+  const nav = useMemo(() => {
+    if (!session) return NAV;
+    return NAV.map((group) => ({
+      ...group,
+      items: group.items.filter((item) => {
+        const capId = NAV_CAPABILITY[item.id];
+        return !capId || can(session.role, capId);
+      }),
+    }));
+  }, [session]);
+
+  if (!session) {
+    return (
+      <LoginScreen
+        workspaceName={org.name}
+        glyph={org.logoGlyph}
+        onSuccess={() => {
+          /* useSession() reacts to the session-updated event automatically */
+        }}
+      />
+    );
+  }
 
   return (
     <DashboardShell
       workspaceKind="Agency"
       workspaceName={org.name}
       glyph={org.logoGlyph}
-      greeting="Welcome back, Sara"
-      groups={NAV}
+      greeting={`Welcome back, ${session.name.split(" ")[0]}`}
+      groups={nav}
       active={tab}
       onSelect={setTab}
+      session={{ name: session.name, role: session.role, onSignOut: logout }}
     >
-      {tab === "Questions" ? (
+      {NAV_CAPABILITY[tab] && !can(session.role, NAV_CAPABILITY[tab]) ? (
+        <RestrictedPanel tab={tab} />
+      ) : tab === "Questions" ? (
         <BuilderSection kind="questions" packId={builderPack} onPackChange={setBuilderPack} />
       ) : tab === "Inventory" ? (
         <BuilderSection kind="inventory" packId={builderPack} onPackChange={setBuilderPack} />
@@ -207,6 +253,17 @@ function Completion() {
           <Bar dataKey="rate" fill="#18181b" radius={[6, 6, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
+    </Panel>
+  );
+}
+
+function RestrictedPanel({ tab }: { tab: string }) {
+  return (
+    <Panel title={tab}>
+      <p className="py-8 text-center text-sm text-zinc-400">
+        Your role doesn&rsquo;t have access to {tab.toLowerCase()}. Ask an admin to
+        grant it from Permissions.
+      </p>
     </Panel>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ChevronDown, ChevronRight, Menu, Search, X } from "lucide-react";
+import { ChevronDown, ChevronRight, LogOut, Menu, Search, X } from "lucide-react";
 import { Icon } from "@/lib/icon";
 import { cx } from "@/components/ui/primitives";
 
@@ -28,6 +28,7 @@ export function DashboardShell({
   groups,
   active,
   onSelect,
+  session,
   children,
 }: {
   workspaceKind: string;
@@ -37,6 +38,8 @@ export function DashboardShell({
   groups: NavGroup[];
   active: string;
   onSelect: (id: string) => void;
+  /** Optional signed-in user chip + sign-out, rendered in the top bar. */
+  session?: { name: string; role: string; onSignOut: () => void };
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
@@ -160,6 +163,22 @@ export function DashboardShell({
             >
               All products
             </Link>
+            {session && (
+              <div className="flex items-center gap-2 border-l border-zinc-200 pl-2 sm:pl-3">
+                <div className="hidden text-right leading-tight sm:block">
+                  <div className="text-xs font-medium text-zinc-900">{session.name}</div>
+                  <div className="text-[11px] text-zinc-400">{session.role}</div>
+                </div>
+                <button
+                  onClick={session.onSignOut}
+                  aria-label="Sign out"
+                  title="Sign out"
+                  className="grid h-9 w-9 shrink-0 place-items-center rounded-lg text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-800"
+                >
+                  <LogOut className="h-4 w-4" />
+                </button>
+              </div>
+            )}
           </div>
         </header>
 
