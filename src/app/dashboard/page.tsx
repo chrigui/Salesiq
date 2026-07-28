@@ -18,6 +18,7 @@ import { OrganizationSettings } from "@/components/console/OrganizationSettings"
 import { BranchManagement } from "@/components/console/BranchManagement";
 import { UserManagement } from "@/components/console/UserManagement";
 import { PermissionsEditor } from "@/components/console/PermissionsEditor";
+import { SubscriptionManagement } from "@/components/console/SubscriptionManagement";
 import { LoginScreen } from "@/components/console/LoginScreen";
 import { DEFAULT_PACK_ID } from "@/core/industries";
 import { useLeads } from "@/core/store/leads";
@@ -43,6 +44,7 @@ const NAV_CAPABILITY: Record<string, string> = {
   Branches: "branches.manage",
   Team: "users.manage",
   Permissions: "users.manage",
+  Subscription: "billing.manage",
 };
 
 const NAV: NavGroup[] = [
@@ -70,6 +72,7 @@ const NAV: NavGroup[] = [
       { id: "Branches", label: "Branches", icon: "MapPin" },
       { id: "Team", label: "Team", icon: "Users" },
       { id: "Permissions", label: "Permissions", icon: "Lock" },
+      { id: "Subscription", label: "Subscription", icon: "CreditCard" },
       { id: "Integrations", label: "Integrations", icon: "Plug" },
     ],
   },
@@ -141,6 +144,8 @@ export default function DashboardPage() {
         <UserManagement />
       ) : tab === "Permissions" ? (
         <PermissionsEditor />
+      ) : tab === "Subscription" ? (
+        <SubscriptionManagement />
       ) : tab === "Overview" ? (
         <Overview />
       ) : (
