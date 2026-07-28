@@ -17,6 +17,7 @@ import { BuilderSection } from "@/components/console/builder/BuilderSection";
 import { OrganizationSettings } from "@/components/console/OrganizationSettings";
 import { BranchManagement } from "@/components/console/BranchManagement";
 import { UserManagement } from "@/components/console/UserManagement";
+import { PermissionsEditor } from "@/components/console/PermissionsEditor";
 import { DEFAULT_PACK_ID } from "@/core/industries";
 import { useLeads } from "@/core/store/leads";
 import { useOrganization } from "@/core/data/organization";
@@ -50,8 +51,9 @@ const NAV: NavGroup[] = [
     items: [
       { id: "Settings", label: "Organization", icon: "Building2" },
       { id: "Branches", label: "Branches", icon: "MapPin" },
-      { id: "Integrations", label: "Integrations", icon: "Plug" },
       { id: "Team", label: "Team", icon: "Users" },
+      { id: "Permissions", label: "Permissions", icon: "Lock" },
+      { id: "Integrations", label: "Integrations", icon: "Plug" },
     ],
   },
 ];
@@ -91,6 +93,8 @@ export default function DashboardPage() {
         <BranchManagement />
       ) : tab === "Team" ? (
         <UserManagement />
+      ) : tab === "Permissions" ? (
+        <PermissionsEditor />
       ) : tab === "Overview" ? (
         <Overview />
       ) : (
