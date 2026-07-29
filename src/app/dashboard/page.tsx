@@ -25,6 +25,9 @@ import { KnowledgeBase } from "@/components/console/KnowledgeBase";
 import { AiSettings } from "@/components/console/AiSettings";
 import { Integrations } from "@/components/console/Integrations";
 import { NotificationCenter } from "@/components/console/NotificationCenter";
+import { AiAnalytics } from "@/components/console/AiAnalytics";
+import { CustomerJourney } from "@/components/console/CustomerJourney";
+import { ProductHeatmap } from "@/components/console/ProductHeatmap";
 import { useUnreadCount } from "@/core/data/notifications";
 import { LoginScreen } from "@/components/console/LoginScreen";
 import { DEFAULT_PACK_ID } from "@/core/industries";
@@ -224,6 +227,9 @@ function Analytics() {
         <Funnel />
         <Completion />
       </div>
+      <AiAnalytics />
+      <ProductHeatmap />
+      <CustomerJourney />
     </div>
   );
 }

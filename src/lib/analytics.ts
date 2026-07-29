@@ -99,6 +99,55 @@ export const companyKpis = [
   { label: "Active leads", value: "329", delta: "-3.1%", up: false },
 ];
 
+// ---- Customer Journey & Heatmaps (Module 8 · Analytics) ----
+
+/** A typical path a customer takes through a session, with drop-off at each step. */
+export interface JourneyStep {
+  step: string;
+  reached: number;
+}
+export interface JourneyPath {
+  label: string;
+  steps: JourneyStep[];
+}
+
+export const journeyPaths: JourneyPath[] = [
+  {
+    label: "Guided flow (most common)",
+    steps: [
+      { step: "Welcome", reached: 1840 },
+      { step: "Household", reached: 1712 },
+      { step: "Budget", reached: 1520 },
+      { step: "Recommendation", reached: 1327 },
+      { step: "Item detail", reached: 940 },
+      { step: "Proposal", reached: 486 },
+    ],
+  },
+  {
+    label: "AI search shortcut",
+    steps: [
+      { step: "Welcome", reached: 612 },
+      { step: "AI search", reached: 598 },
+      { step: "Recommendation", reached: 571 },
+      { step: "Item detail", reached: 402 },
+      { step: "Proposal", reached: 201 },
+    ],
+  },
+];
+
+/** Product × week selection intensity for the heatmap. */
+export function productHeatmap(weeks = 6) {
+  const rnd = seeded(41);
+  const weekLabels = Array.from({ length: weeks }, (_, i) => `W${i + 1}`);
+  return {
+    weeks: weekLabels,
+    rows: popularProducts.map((p) => ({
+      name: p.name,
+      values: weekLabels.map(() => Math.round(20 + rnd() * 80)),
+    })),
+  };
+}
+
 // ---- Platform-level (master admin) ----
 
 export function mrrTrend(months = 12) {
