@@ -2,12 +2,37 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { X, FileText, Check } from "lucide-react";
+import { X, FileText, Check, Mail, MessageCircle, Printer } from "lucide-react";
 import { useSession } from "@/core/store/session";
 import { narrate, formatMoney } from "@/core/engine/explain";
 import { saveLead } from "@/core/store/leads";
 import type { IndustryPack } from "@/core/types";
 import type { ScoredItem } from "@/core/engine/scoring";
+
+/** A plain-text summary of the proposal, shared by the Email and WhatsApp links. */
+function proposalMessage(
+  pack: IndustryPack,
+  customerName: string,
+  best: ScoredItem | undefined,
+): string {
+  if (!best) return `Your ${pack.branding.name} proposal.`;
+  const lines = [
+    `Hi ${customerName || "there"},`,
+    ``,
+    `Here's the ${pack.branding.name} proposal we put together for you:`,
+    ``,
+    `${best.item.name} — ${formatMoney(best.item.price, best.item.currency)}`,
+    narrate(best, pack),
+    ``,
+    ...best.item.highlights.map((h) => `• ${h}`),
+  ];
+  return lines.join("\n");
+}
+
+/** Digits-only phone for a wa.me deep link (WhatsApp ignores +/spaces anyway). */
+function toWhatsAppDigits(phone: string): string {
+  return phone.replace(/[^\d]/g, "");
+}
 
 /**
  * Generates a client-ready proposal from the live session — the "Generate
@@ -69,6 +94,17 @@ export function ProposalSheet({
     month: "long",
     day: "numeric",
   });
+
+  const message = proposalMessage(pack, customer.name, best);
+  const mailtoUrl = customer.email
+    ? `mailto:${encodeURIComponent(customer.email)}?subject=${encodeURIComponent(
+        `Your ${pack.branding.name} proposal`,
+      )}&body=${encodeURIComponent(message)}`
+    : null;
+  const whatsappDigits = customer.phone ? toWhatsAppDigits(customer.phone) : "";
+  const whatsappUrl = whatsappDigits
+    ? `https://wa.me/${whatsappDigits}?text=${encodeURIComponent(message)}`
+    : null;
 
   return (
     <AnimatePresence>
@@ -173,31 +209,52 @@ export function ProposalSheet({
               </div>
             </div>
 
-            <div className="mt-4 flex gap-2">
-              <button
-                onClick={handleSaveLead}
-                disabled={saved || !best}
-                className="flex-1 rounded-2xl bg-brand py-3 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-60"
-              >
-                {saved ? (
-                  <span className="inline-flex items-center gap-1.5">
-                    <Check className="h-4 w-4" /> Saved to CRM
-                  </span>
-                ) : (
-                  "Save lead to CRM"
-                )}
-              </button>
+            <button
+              onClick={handleSaveLead}
+              disabled={saved || !best}
+              className="mt-4 w-full rounded-2xl bg-brand py-3 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-60"
+            >
+              {saved ? (
+                <span className="inline-flex items-center gap-1.5">
+                  <Check className="h-4 w-4" /> Saved to CRM
+                </span>
+              ) : (
+                "Save lead to CRM"
+              )}
+            </button>
+
+            <div className="mt-2 grid grid-cols-4 gap-1.5">
+              <DeliveryButton
+                icon={Mail}
+                label="Email"
+                href={mailtoUrl}
+                onSend={() =>
+                  logEvent({ kind: "proposal", detail: `Emailed proposal to ${customer.email}` })
+                }
+                disabledHint="Add an email above first"
+              />
+              <DeliveryButton
+                icon={MessageCircle}
+                label="WhatsApp"
+                href={whatsappUrl}
+                onSend={() =>
+                  logEvent({ kind: "proposal", detail: `Sent proposal via WhatsApp` })
+                }
+                disabledHint="Add a phone number above first"
+              />
               <button
                 onClick={() => window.print()}
-                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-ink transition hover:bg-white/10"
+                className="flex flex-col items-center gap-1 rounded-2xl px-2 py-2.5 text-ink-muted transition hover:bg-white/5 hover:text-ink"
               >
-                Export
+                <Printer className="h-5 w-5" />
+                <span className="text-[10px] font-medium">PDF / Print</span>
               </button>
               <button
                 onClick={onClose}
-                className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-ink transition hover:bg-white/10"
+                className="flex flex-col items-center gap-1 rounded-2xl px-2 py-2.5 text-ink-muted transition hover:bg-white/5 hover:text-ink"
               >
-                Close
+                <X className="h-5 w-5" />
+                <span className="text-[10px] font-medium">Close</span>
               </button>
             </div>
             <p className="mt-3 text-center text-[11px] text-ink-faint">
@@ -208,5 +265,50 @@ export function ProposalSheet({
         </motion.div>
       )}
     </AnimatePresence>
+  );
+}
+
+/**
+ * A real (not simulated) send: `mailto:`/`wa.me` links hand off to the
+ * customer's own mail client or WhatsApp with the proposal pre-filled — no
+ * backend required. Greyed out with an explanatory title when the contact
+ * field it needs hasn't been captured yet.
+ */
+function DeliveryButton({
+  icon: Icon,
+  label,
+  href,
+  onSend,
+  disabledHint,
+}: {
+  icon: typeof Mail;
+  label: string;
+  href: string | null;
+  onSend: () => void;
+  disabledHint: string;
+}) {
+  if (!href) {
+    return (
+      <button
+        disabled
+        title={disabledHint}
+        className="flex cursor-not-allowed flex-col items-center gap-1 rounded-2xl px-2 py-2.5 text-ink-faint/50"
+      >
+        <Icon className="h-5 w-5" />
+        <span className="text-[10px] font-medium">{label}</span>
+      </button>
+    );
+  }
+  return (
+    <a
+      href={href}
+      target={href.startsWith("https://") ? "_blank" : undefined}
+      rel={href.startsWith("https://") ? "noreferrer" : undefined}
+      onClick={onSend}
+      className="flex flex-col items-center gap-1 rounded-2xl px-2 py-2.5 text-ink-muted transition hover:bg-white/5 hover:text-ink"
+    >
+      <Icon className="h-5 w-5" />
+      <span className="text-[10px] font-medium">{label}</span>
+    </a>
   );
 }
