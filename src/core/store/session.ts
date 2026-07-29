@@ -25,6 +25,42 @@ export interface CustomerInfo {
   notes: string;
 }
 
+/**
+ * Session Timeline (Module 3 — Sales Companion): "stores every interaction."
+ * Events are kept structured (question id, raw value, view name, item id)
+ * rather than pre-formatted strings, so the UI can render them against
+ * whatever industry pack is active — the store itself stays pack-agnostic,
+ * matching every other piece of shared session state.
+ */
+export type TimelineEventKind =
+  | "pack"
+  | "answer"
+  | "clear-answer"
+  | "view"
+  | "focus"
+  | "bookmark-add"
+  | "bookmark-remove"
+  | "customer"
+  | "proposal"
+  | "lead"
+  | "demo"
+  | "reset";
+
+export interface TimelineEvent {
+  id: string;
+  ts: number;
+  kind: TimelineEventKind;
+  questionId?: string;
+  value?: AnswerValue;
+  view?: DisplayView;
+  itemId?: string | null;
+  field?: keyof CustomerInfo;
+  packId?: string;
+  detail?: string;
+}
+
+const MAX_TIMELINE = 200;
+
 /** The full, serialisable session state shared across surfaces. */
 export interface SessionState {
   packId: string;
@@ -34,6 +70,7 @@ export interface SessionState {
   focusedItemId: string | null;
   bookmarks: string[];
   customer: CustomerInfo;
+  timeline: TimelineEvent[];
   /** Bumps on every meaningful change to drive display animations. */
   revision: number;
 }
@@ -47,12 +84,29 @@ interface SessionActions {
   focusItem: (itemId: string | null) => void;
   toggleBookmark: (itemId: string) => void;
   updateCustomer: (patch: Partial<CustomerInfo>) => void;
+  /** Record a interaction not covered by another action (proposal, lead saved…). */
+  logEvent: (event: Omit<TimelineEvent, "id" | "ts">) => void;
   reset: () => void;
   /** Load a compelling, pre-filled scenario for a clean live demo. */
   loadDemo: () => void;
   /** Apply a full state received from another surface (no re-broadcast). */
   _applyRemote: (state: SessionState) => void;
   _hydrate: () => void;
+}
+
+function makeEvent(event: Omit<TimelineEvent, "id" | "ts">): TimelineEvent {
+  return {
+    ...event,
+    id: `ev-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    ts: Date.now(),
+  };
+}
+
+function pushEvent(
+  timeline: TimelineEvent[],
+  event: Omit<TimelineEvent, "id" | "ts">,
+): TimelineEvent[] {
+  return [...timeline, makeEvent(event)].slice(-MAX_TIMELINE);
 }
 
 const bus = createSessionBus<SessionState>(newOrigin("surface"));
@@ -69,6 +123,7 @@ function initialState(): SessionState {
     focusedItemId: null,
     bookmarks: [],
     customer: { name: "", phone: "", email: "", notes: "" },
+    timeline: [],
     revision: 0,
   };
 }
@@ -83,6 +138,7 @@ function snapshot(s: SessionState & SessionActions): SessionState {
     focusedItemId: s.focusedItemId,
     bookmarks: s.bookmarks,
     customer: s.customer,
+    timeline: s.timeline,
     revision: s.revision,
   };
 }
@@ -111,6 +167,7 @@ export const useSession = create<SessionState & SessionActions>((set, get) => {
         view: "welcome",
         focusedItemId: null,
         bookmarks: [],
+        timeline: pushEvent(get().timeline, { kind: "pack", packId }),
       }),
 
     answer: (questionId, value) => {
@@ -118,6 +175,7 @@ export const useSession = create<SessionState & SessionActions>((set, get) => {
         answers: { ...s.answers, [questionId]: value },
         activeQuestionId: questionId,
         view: "question",
+        timeline: pushEvent(s.timeline, { kind: "answer", questionId, value }),
         revision: s.revision + 1,
       }));
       publish();
@@ -127,7 +185,11 @@ export const useSession = create<SessionState & SessionActions>((set, get) => {
       set((s) => {
         const next = { ...s.answers };
         delete next[questionId];
-        return { answers: next, revision: s.revision + 1 };
+        return {
+          answers: next,
+          timeline: pushEvent(s.timeline, { kind: "clear-answer", questionId }),
+          revision: s.revision + 1,
+        };
       });
       publish();
     },
@@ -135,28 +197,52 @@ export const useSession = create<SessionState & SessionActions>((set, get) => {
     setActiveQuestion: (questionId) =>
       bump({ activeQuestionId: questionId, view: "question" }),
 
-    setView: (view) => bump({ view }),
+    setView: (view) =>
+      bump({ view, timeline: pushEvent(get().timeline, { kind: "view", view }) }),
 
     focusItem: (itemId) =>
-      bump({ focusedItemId: itemId, view: itemId ? "item" : "recommendation" }),
+      bump({
+        focusedItemId: itemId,
+        view: itemId ? "item" : "recommendation",
+        timeline: pushEvent(get().timeline, { kind: "focus", itemId }),
+      }),
 
     toggleBookmark: (itemId) => {
+      set((s) => {
+        const adding = !s.bookmarks.includes(itemId);
+        return {
+          bookmarks: adding
+            ? [...s.bookmarks, itemId]
+            : s.bookmarks.filter((b) => b !== itemId),
+          timeline: pushEvent(s.timeline, {
+            kind: adding ? "bookmark-add" : "bookmark-remove",
+            itemId,
+          }),
+          revision: s.revision + 1,
+        };
+      });
+      publish();
+    },
+
+    updateCustomer: (patch) => {
+      // Not logged to the timeline — fires on every keystroke, would flood it.
+      set((s) => ({ customer: { ...s.customer, ...patch } }));
+      publish();
+    },
+
+    logEvent: (event) => {
       set((s) => ({
-        bookmarks: s.bookmarks.includes(itemId)
-          ? s.bookmarks.filter((b) => b !== itemId)
-          : [...s.bookmarks, itemId],
+        timeline: pushEvent(s.timeline, event),
         revision: s.revision + 1,
       }));
       publish();
     },
 
-    updateCustomer: (patch) => {
-      set((s) => ({ customer: { ...s.customer, ...patch } }));
-      publish();
-    },
-
     reset: () => {
-      set({ ...initialState() });
+      set({
+        ...initialState(),
+        timeline: [makeEvent({ kind: "reset", detail: "Session reset" })],
+      });
       publish();
     },
 
@@ -183,16 +269,20 @@ export const useSession = create<SessionState & SessionActions>((set, get) => {
           email: "sara@example.com",
           notes: "Relocating with two school-age children.",
         },
+        timeline: pushEvent(s.timeline, {
+          kind: "demo",
+          detail: "Loaded demo scenario",
+        }),
         revision: s.revision + 1,
       }));
       publish();
     },
 
-    _applyRemote: (state) => set({ ...state }),
+    _applyRemote: (state) => set({ ...state, timeline: state.timeline ?? [] }),
 
     _hydrate: () => {
       const env = bus.hydrate();
-      if (env) set({ ...env.state });
+      if (env) set({ ...env.state, timeline: env.state.timeline ?? [] });
     },
   };
 });

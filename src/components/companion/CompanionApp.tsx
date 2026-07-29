@@ -17,6 +17,7 @@ import {
   Plus,
   Wand2,
   Loader2,
+  History,
 } from "lucide-react";
 import Link from "next/link";
 import { useSession } from "@/core/store/session";
@@ -28,6 +29,7 @@ import { Button, cx, Eyebrow } from "@/components/ui/primitives";
 import { Icon } from "@/lib/icon";
 import type { Question, BudgetValue } from "@/core/types";
 import { ProposalSheet } from "./ProposalSheet";
+import { SessionTimeline } from "./SessionTimeline";
 import { CompanionSyncBar } from "@/components/sync/Pairing";
 
 export function CompanionApp() {
@@ -35,6 +37,7 @@ export function CompanionApp() {
   const pack = useLivePack(session.packId);
   const [activeSection, setActiveSection] = useState(pack.sections[0]?.id);
   const [proposalOpen, setProposalOpen] = useState(false);
+  const [timelineOpen, setTimelineOpen] = useState(false);
 
   const visibleQuestions = useMemo(
     () =>
@@ -70,13 +73,27 @@ export function CompanionApp() {
               </div>
             </div>
           </div>
-          <Link
-            href="/display"
-            target="_blank"
-            className="flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] text-ink-muted transition hover:bg-white/10"
-          >
-            Display <ExternalLink className="h-3 w-3" />
-          </Link>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setTimelineOpen(true)}
+              aria-label="Session timeline"
+              className="relative grid h-8 w-8 place-items-center rounded-full border border-white/10 bg-white/5 text-ink-muted transition hover:bg-white/10"
+            >
+              <History className="h-3.5 w-3.5" />
+              {session.timeline.length > 0 && (
+                <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-brand px-1 text-[9px] font-semibold text-white">
+                  {session.timeline.length}
+                </span>
+              )}
+            </button>
+            <Link
+              href="/display"
+              target="_blank"
+              className="flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] text-ink-muted transition hover:bg-white/10"
+            >
+              Display <ExternalLink className="h-3 w-3" />
+            </Link>
+          </div>
         </div>
 
         {/* Cross-device pairing status / join */}
@@ -239,6 +256,13 @@ export function CompanionApp() {
         onClose={() => setProposalOpen(false)}
         pack={pack}
         scored={scored}
+      />
+
+      <SessionTimeline
+        open={timelineOpen}
+        onClose={() => setTimelineOpen(false)}
+        events={session.timeline}
+        pack={pack}
       />
     </div>
   );

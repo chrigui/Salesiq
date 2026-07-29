@@ -26,13 +26,24 @@ export function ProposalSheet({
   pack: IndustryPack;
   scored: ScoredItem[];
 }) {
-  const { customer, answers } = useSession();
+  const { customer, answers, logEvent } = useSession();
   const best = scored[0];
   const [saved, setSaved] = useState(false);
 
-  // Reset the saved state whenever the sheet is reopened.
+  // Reset the saved state whenever the sheet is reopened, and record it on
+  // the session timeline — this is the "Generate proposal" interaction.
   useEffect(() => {
-    if (open) setSaved(false);
+    if (open) {
+      setSaved(false);
+      if (best) {
+        logEvent({
+          kind: "proposal",
+          detail: `Generated proposal for ${best.item.name}`,
+        });
+      }
+    }
+    // logEvent is stable (Zustand store action); only re-run on open/best change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const handleSaveLead = () => {
@@ -49,6 +60,7 @@ export function ProposalSheet({
       currency: best.item.currency,
       score: best.score,
     });
+    logEvent({ kind: "lead", detail: `Saved lead — ${customer.name || "Unnamed"}` });
     setSaved(true);
   };
 
