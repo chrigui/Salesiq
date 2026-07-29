@@ -2,19 +2,27 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { X, FileText, Check, Mail, MessageCircle, Printer } from "lucide-react";
+import { X, FileText, Check, Mail, MessageCircle, Printer, Sparkles, Loader2 } from "lucide-react";
 import { useSession } from "@/core/store/session";
 import { narrate, formatMoney } from "@/core/engine/explain";
 import { saveLead } from "@/core/store/leads";
+import { getKnowledgeBase, knowledgePayload } from "@/core/data/knowledgeBase";
 import type { IndustryPack } from "@/core/types";
 import type { ScoredItem } from "@/core/engine/scoring";
 
-/** A plain-text summary of the proposal, shared by the Email and WhatsApp links. */
+/**
+ * A plain-text summary of the proposal, shared by the Email and WhatsApp
+ * links. When an AI-authored proposal has been generated it's already a
+ * complete letter (greeting through call-to-action), so it's used verbatim
+ * instead of being wrapped a second time.
+ */
 function proposalMessage(
   pack: IndustryPack,
   customerName: string,
   best: ScoredItem | undefined,
+  aiProposal?: string | null,
 ): string {
+  if (aiProposal) return aiProposal;
   if (!best) return `Your ${pack.branding.name} proposal.`;
   const lines = [
     `Hi ${customerName || "there"},`,
@@ -54,12 +62,17 @@ export function ProposalSheet({
   const { customer, answers, logEvent } = useSession();
   const best = scored[0];
   const [saved, setSaved] = useState(false);
+  const [aiProposal, setAiProposal] = useState<string | null>(null);
+  const [aiEngine, setAiEngine] = useState<string | null>(null);
+  const [generating, setGenerating] = useState(false);
 
   // Reset the saved state whenever the sheet is reopened, and record it on
   // the session timeline — this is the "Generate proposal" interaction.
   useEffect(() => {
     if (open) {
       setSaved(false);
+      setAiProposal(null);
+      setAiEngine(null);
       if (best) {
         logEvent({
           kind: "proposal",
@@ -70,6 +83,38 @@ export function ProposalSheet({
     // logEvent is stable (Zustand store action); only re-run on open/best change.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
+
+  // Proposal Writer (Module 6): upgrades the deterministic one-liner into a
+  // full, multi-paragraph letter grounded in the same verified facts plus the
+  // tenant's Knowledge Base. Claude-authored when a key is set, deterministic
+  // otherwise — either way the UI shown here is identical.
+  const generateAiProposal = async () => {
+    if (!best || generating) return;
+    setGenerating(true);
+    try {
+      const res = await fetch("/api/ai/proposal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          packId: pack.id,
+          answers,
+          customerName: customer.name,
+          knowledge: knowledgePayload(getKnowledgeBase()),
+        }),
+      });
+      const data = await res.json();
+      if (data?.proposal) {
+        setAiProposal(data.proposal);
+        setAiEngine(data.engine ?? null);
+        logEvent({ kind: "proposal", detail: `Wrote AI proposal for ${best.item.name}` });
+      }
+    } catch {
+      // Network/route failure — the deterministic one-liner already on screen
+      // still stands, so there's nothing more to do here.
+    } finally {
+      setGenerating(false);
+    }
+  };
 
   const handleSaveLead = () => {
     if (!best) return;
@@ -95,7 +140,7 @@ export function ProposalSheet({
     day: "numeric",
   });
 
-  const message = proposalMessage(pack, customer.name, best);
+  const message = proposalMessage(pack, customer.name, best, aiProposal);
   const mailtoUrl = customer.email
     ? `mailto:${encodeURIComponent(customer.email)}?subject=${encodeURIComponent(
         `Your ${pack.branding.name} proposal`,
@@ -175,9 +220,40 @@ export function ProposalSheet({
                       {formatMoney(best.item.price, best.item.currency)}
                     </span>
                   </div>
-                  <p className="mt-2 text-sm leading-relaxed text-ink-muted">
-                    {narrate(best, pack)}
-                  </p>
+                  {aiProposal ? (
+                    <div className="mt-2 space-y-2 text-sm leading-relaxed text-ink-muted">
+                      {aiProposal.split(/\n\n+/).map((para, i) => (
+                        <p key={i}>{para}</p>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mt-2 text-sm leading-relaxed text-ink-muted">
+                      {narrate(best, pack)}
+                    </p>
+                  )}
+                  <button
+                    onClick={generateAiProposal}
+                    disabled={generating}
+                    className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-brand transition hover:brightness-110 disabled:opacity-50"
+                  >
+                    {generating ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Sparkles className="h-3.5 w-3.5" />
+                    )}
+                    {generating
+                      ? "Writing…"
+                      : aiProposal
+                        ? "Rewrite with AI"
+                        : "Write full proposal with AI"}
+                  </button>
+                  {aiEngine && (
+                    <p className="mt-1 text-[10px] text-ink-faint">
+                      {aiEngine === "claude+writer"
+                        ? "Authored by Claude from verified facts."
+                        : "Deterministic writer — set ANTHROPIC_API_KEY for Claude-authored prose."}
+                    </p>
+                  )}
                   <div className="mt-3 space-y-1.5">
                     {best.item.highlights.map((h) => (
                       <div
