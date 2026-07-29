@@ -92,6 +92,20 @@ export function updateLead(id: string, patch: Partial<Lead>): void {
   saveAll(getLeads().map((l) => (l.id === id ? { ...l, ...patch } : l)));
 }
 
+/**
+ * GDPR "right to be forgotten" (Module 10). Strips a lead's personal
+ * fields (name, phone, email, notes) while keeping the analytics-relevant
+ * shape (score, price, status, pack) intact, so aggregate reporting still
+ * reflects that a session happened without retaining who it was.
+ */
+export function redactLeadPII(id: string): void {
+  saveAll(
+    getLeads().map((l) =>
+      l.id === id ? { ...l, name: "Redacted", phone: "", email: "", notes: "" } : l,
+    ),
+  );
+}
+
 /** Live-updating list of captured leads (reacts across tabs and in-tab). */
 export function useLeads(): Lead[] {
   const [leads, setLeads] = useState<Lead[]>([]);

@@ -12,6 +12,8 @@ import {
   savePermissionMatrix,
   usePermissionMatrix,
 } from "@/core/data/permissions";
+import { logTenantAudit } from "@/core/data/tenantAuditLog";
+import { useSession } from "@/core/data/auth";
 
 /**
  * Role & Permission Engine (Module 1). A granular capability matrix — every
@@ -21,6 +23,7 @@ import {
  */
 export function PermissionsEditor() {
   const matrix = usePermissionMatrix();
+  const session = useSession();
   const [savedFlash, setSavedFlash] = useState(false);
 
   const flash = () => {
@@ -31,9 +34,17 @@ export function PermissionsEditor() {
   const toggle = (role: UserRole, capId: string) => {
     if (role === "Owner") return;
     const next = getPermissionMatrix();
-    next[role] = { ...next[role], [capId]: !next[role][capId] };
+    const granting = !next[role][capId];
+    next[role] = { ...next[role], [capId]: granting };
     savePermissionMatrix(next);
     flash();
+    const cap = CAPABILITIES.find((c) => c.id === capId);
+    logTenantAudit({
+      actor: session?.name ?? "Unknown",
+      action: granting ? "Granted permission" : "Revoked permission",
+      target: role,
+      detail: cap?.label ?? capId,
+    });
   };
 
   const groups = Array.from(new Set(CAPABILITIES.map((c) => c.group)));

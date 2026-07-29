@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AlertCircle, KeyRound, Lock, ShieldCheck, User2 } from "lucide-react";
+import { AlertCircle, KeyRound, Lock, ShieldAlert, ShieldCheck, User2 } from "lucide-react";
 import { cx } from "@/components/ui/primitives";
 import { getUsers } from "@/core/data/users";
 import {
@@ -10,6 +10,7 @@ import {
   verifyCredential,
   verifyMfaCode,
 } from "@/core/data/auth";
+import { SSO_PROVIDERS, useSsoSettings } from "@/core/data/ssoSettings";
 import { Field, TextInput } from "@/components/console/builder/fields";
 
 const ERROR_COPY: Record<string, string> = {
@@ -40,6 +41,7 @@ export function LoginScreen({
   const [pendingUserId, setPendingUserId] = useState<string | null>(null);
   const [code, setCode] = useState("");
   const [mfaError, setMfaError] = useState<string | null>(null);
+  const sso = useSsoSettings();
 
   const quickAccounts = getUsers().filter((u) => u.status === "active").slice(0, 3);
 
@@ -129,6 +131,13 @@ export function LoginScreen({
             </form>
           ) : (
             <form onSubmit={submitCredentials} className="space-y-4">
+              {sso.enforced && sso.provider !== "none" && (
+                <div className="flex items-center gap-2 rounded-xl bg-amber-50 px-3 py-2 text-xs text-amber-700">
+                  <ShieldAlert className="h-3.5 w-3.5 shrink-0" />
+                  SSO ({SSO_PROVIDERS.find((p) => p.id === sso.provider)?.label}) is required for
+                  this workspace — pilot demo sign-in is still available below.
+                </div>
+              )}
               <Field label="Email">
                 <div className="relative">
                   <User2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />

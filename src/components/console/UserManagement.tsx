@@ -26,6 +26,8 @@ import {
   type UserRole,
 } from "@/core/data/users";
 import { Field, Select, TextInput } from "@/components/console/builder/fields";
+import { logTenantAudit } from "@/core/data/tenantAuditLog";
+import { useSession } from "@/core/data/auth";
 
 const STATUS_STYLE: Record<AppUser["status"], string> = {
   active: "bg-emerald-100 text-emerald-700",
@@ -54,8 +56,11 @@ function timeAgo(ts: number | null): string {
 export function UserManagement() {
   const users = useUsers();
   const branches = useBranches();
+  const session = useSession();
   const [inviteOpen, setInviteOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+
+  const actor = session?.name ?? "Unknown";
 
   const flash = (msg: string) => {
     setToast(msg);
@@ -69,12 +74,19 @@ export function UserManagement() {
     if (!confirm(`Remove ${u.name}? They will lose access immediately.`)) return;
     saveUsers(users.filter((x) => x.id !== u.id));
     flash(`${u.name} removed.`);
+    logTenantAudit({ actor, action: "Removed user", target: u.name, detail: u.email });
   };
 
   const toggleSuspend = (u: AppUser) => {
     const status = u.status === "suspended" ? "active" : "suspended";
     update(u.id, { status });
     flash(status === "suspended" ? `${u.name} suspended.` : `${u.name} reactivated.`);
+    logTenantAudit({
+      actor,
+      action: status === "suspended" ? "Suspended user" : "Reactivated user",
+      target: u.name,
+      detail: u.email,
+    });
   };
 
   const toggleMfa = (u: AppUser) => {
@@ -207,6 +219,7 @@ export function UserManagement() {
             inviteUser(input);
             setInviteOpen(false);
             flash(`Invite sent to ${input.email}.`);
+            logTenantAudit({ actor, action: "Invited user", target: input.name, detail: `${input.email} · ${input.role}` });
           }}
         />
       )}

@@ -20,6 +20,8 @@ import {
   useSubscription,
   type PlanId,
 } from "@/core/data/subscription";
+import { logTenantAudit } from "@/core/data/tenantAuditLog";
+import { useSession } from "@/core/data/auth";
 
 const STATUS_STYLE: Record<string, string> = {
   active: "bg-emerald-100 text-emerald-700",
@@ -41,6 +43,8 @@ function formatDate(ts: number | null): string {
  */
 export function SubscriptionManagement() {
   const sub = useSubscription();
+  const session = useSession();
+  const actor = session?.name ?? "Unknown";
   const [confirmPlan, setConfirmPlan] = useState<PlanId | null>(null);
   const currentPlan = PLANS.find((p) => p.id === sub.plan)!;
   const currentIndex = PLANS.findIndex((p) => p.id === sub.plan);
@@ -70,7 +74,10 @@ export function SubscriptionManagement() {
           </div>
           {sub.status === "canceled" ? (
             <button
-              onClick={() => reactivateSubscription()}
+              onClick={() => {
+                reactivateSubscription();
+                logTenantAudit({ actor, action: "Reactivated subscription", target: currentPlan.name, detail: "Subscription reactivated" });
+              }}
               className="inline-flex items-center gap-1.5 rounded-xl bg-zinc-900 px-3 py-2 text-sm font-semibold text-white transition hover:brightness-110"
             >
               <RotateCcw className="h-4 w-4" /> Reactivate
@@ -80,6 +87,7 @@ export function SubscriptionManagement() {
               onClick={() => {
                 if (confirm("Cancel your subscription? You'll keep access until the end of the current period.")) {
                   cancelSubscription();
+                  logTenantAudit({ actor, action: "Canceled subscription", target: currentPlan.name, detail: "Access continues until period end" });
                 }
               }}
               className="inline-flex items-center gap-1.5 rounded-xl border border-zinc-200 px-3 py-2 text-sm text-zinc-600 transition hover:bg-zinc-50 hover:text-rose-600"
@@ -213,8 +221,15 @@ export function SubscriptionManagement() {
           isUpgrade={PLANS.findIndex((p) => p.id === confirmPlan) > currentIndex}
           onCancel={() => setConfirmPlan(null)}
           onConfirm={() => {
+            const newPlan = PLANS.find((p) => p.id === confirmPlan);
             changePlan(confirmPlan);
             setConfirmPlan(null);
+            logTenantAudit({
+              actor,
+              action: "Changed plan",
+              target: newPlan?.name ?? confirmPlan,
+              detail: `${currentPlan.name} → ${newPlan?.name ?? confirmPlan}`,
+            });
           }}
         />
       )}

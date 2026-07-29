@@ -28,6 +28,7 @@ import { NotificationCenter } from "@/components/console/NotificationCenter";
 import { AiAnalytics } from "@/components/console/AiAnalytics";
 import { CustomerJourney } from "@/components/console/CustomerJourney";
 import { ProductHeatmap } from "@/components/console/ProductHeatmap";
+import { SecurityCompliance } from "@/components/console/SecurityCompliance";
 import { useUnreadCount } from "@/core/data/notifications";
 import { LoginScreen } from "@/components/console/LoginScreen";
 import { DEFAULT_PACK_ID } from "@/core/industries";
@@ -58,6 +59,7 @@ const NAV_CAPABILITY: Record<string, string> = {
   Subscription: "billing.manage",
   Knowledge: "ai.manage",
   AiSettings: "ai.manage",
+  Security: "security.manage",
 };
 
 const NAV: NavGroup[] = [
@@ -90,6 +92,7 @@ const NAV: NavGroup[] = [
       { id: "Team", label: "Team", icon: "Users" },
       { id: "Permissions", label: "Permissions", icon: "Lock" },
       { id: "Subscription", label: "Subscription", icon: "CreditCard" },
+      { id: "Security", label: "Security & Compliance", icon: "ShieldCheck" },
       { id: "Integrations", label: "Integrations", icon: "Plug" },
     ],
   },
@@ -182,6 +185,8 @@ export default function DashboardPage() {
         <PermissionsEditor />
       ) : tab === "Subscription" ? (
         <SubscriptionManagement />
+      ) : tab === "Security" ? (
+        <SecurityCompliance />
       ) : tab === "Integrations" ? (
         <Integrations />
       ) : tab === "Overview" ? (

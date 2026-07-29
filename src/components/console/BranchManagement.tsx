@@ -23,6 +23,8 @@ import {
   type Branch,
 } from "@/core/data/branches";
 import { Field, NumberInput, Select, TextInput } from "@/components/console/builder/fields";
+import { logTenantAudit } from "@/core/data/tenantAuditLog";
+import { useSession } from "@/core/data/auth";
 
 /**
  * Branch Management (Module 1). Each company can create unlimited branches;
@@ -33,14 +35,18 @@ import { Field, NumberInput, Select, TextInput } from "@/components/console/buil
  */
 export function BranchManagement() {
   const branches = useBranches();
+  const session = useSession();
   const [openId, setOpenId] = useState<string | null>(null);
+  const actor = session?.name ?? "Unknown";
 
   const commit = (next: Branch[]) => saveBranches(next);
   const update = (id: string, patch: Partial<Branch>) =>
     commit(branches.map((b) => (b.id === id ? { ...b, ...patch } : b)));
   const remove = (id: string) => {
     if (!confirm("Remove this branch? This cannot be undone.")) return;
+    const branch = branches.find((b) => b.id === id);
     commit(branches.filter((b) => b.id !== id));
+    if (branch) logTenantAudit({ actor, action: "Removed branch", target: branch.name, detail: branch.address });
   };
   const move = (index: number, dir: -1 | 1) => {
     const to = index + dir;
@@ -53,6 +59,7 @@ export function BranchManagement() {
     const b = newBranch();
     commit([...getBranches(), b]);
     setOpenId(b.id);
+    logTenantAudit({ actor, action: "Added branch", target: b.name, detail: "New branch created" });
   };
 
   const activeCount = branches.filter((b) => b.status === "active").length;

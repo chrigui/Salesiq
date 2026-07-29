@@ -36,6 +36,7 @@ export const CAPABILITIES: Capability[] = [
   { id: "branches.manage", label: "Manage branches", group: "Organization" },
   { id: "users.manage", label: "Manage users", group: "Organization" },
   { id: "billing.manage", label: "Manage billing", group: "Organization" },
+  { id: "security.manage", label: "Manage security & compliance", group: "Organization" },
 ];
 
 export type PermissionMatrix = Record<UserRole, Record<string, boolean>>;
@@ -45,7 +46,9 @@ function defaultMatrix(): PermissionMatrix {
     Object.fromEntries(CAPABILITIES.map((c) => [c.id, ids.includes(c.id)]));
 
   const all = CAPABILITIES.map((c) => c.id);
-  const managerSet = all.filter((id) => !["billing.manage", "users.manage", "branches.manage"].includes(id));
+  const managerSet = all.filter(
+    (id) => !["billing.manage", "users.manage", "branches.manage", "security.manage"].includes(id),
+  );
   const salesSet = [
     "inventory.view",
     "questions.edit",
