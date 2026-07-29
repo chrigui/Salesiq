@@ -49,7 +49,7 @@ export function Integrations() {
           Fires a real HTTP POST from the browser whenever a lead is saved
           from the companion — point it at Zapier, Make, or your own
           endpoint. Only works with receivers that accept cross-origin
-          requests, since there's no backend relay in this pilot.
+          requests, since there&rsquo;s no backend relay in this pilot.
         </p>
         <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
           <Field label="Endpoint URL">

@@ -19,7 +19,7 @@ import { toneDirective, type AiSettingsShape } from "@/core/data/aiSettingsShare
 const CONNECTORS = ["it also", "plus it", "and it"];
 
 /** Deterministic, offline narrative — reads like a human sales advisor. */
-export function narrate(scored: ScoredItem, pack: IndustryPack): string {
+export function narrate(scored: ScoredItem, _pack: IndustryPack): string {
   const { item, reasons, score } = scored;
   const price = formatMoney(item.price, item.currency);
 

@@ -59,7 +59,7 @@ function SsoPanel({ actor }: { actor: string }) {
     <Panel title="Single sign-on">
       <p className="mb-4 text-sm text-zinc-500">
         Configure SSO for this workspace. Settings are saved and every
-        change is audited — this pilot isn't wired to a real identity
+        change is audited — this pilot isn&rsquo;t wired to a real identity
         provider yet, so sign-in itself still uses the demo password below.
       </p>
       <div className="grid gap-3 sm:grid-cols-2">
@@ -117,7 +117,7 @@ function DataPrivacyPanel({ actor }: { actor: string }) {
     <Panel title="Data & privacy (GDPR)">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-zinc-500">
-          Export every record this workspace holds, or redact a lead's
+          Export every record this workspace holds, or redact a lead&rsquo;s
           personal details on request.
         </p>
         <button
@@ -171,8 +171,8 @@ function BackupPanel({ actor }: { actor: string }) {
     <Panel title="Backup & restore">
       <p className="mb-4 text-sm text-zinc-500">
         Downloads every record this browser holds for this workspace as one
-        JSON file, and can restore from one — scoped to this browser's local
-        data, since there's no server-side store behind this pilot.
+        JSON file, and can restore from one — scoped to this browser&rsquo;s local
+        data, since there&rsquo;s no server-side store behind this pilot.
       </p>
       <div className="flex flex-wrap gap-2">
         <button
@@ -208,7 +208,7 @@ function ReliabilityPanel() {
   return (
     <Panel title="Reliability">
       <p className="mb-4 text-sm text-zinc-500">
-        Illustrative pilot targets — there's no multi-region infrastructure
+        Illustrative pilot targets — there&rsquo;s no multi-region infrastructure
         behind this demo to actually fail over.
       </p>
       <div className="grid gap-4 sm:grid-cols-4">

@@ -11,7 +11,6 @@ import {
   Sparkles as SparklesIcon,
 } from "lucide-react";
 import { Panel } from "@/components/console/light-ui";
-import { cx } from "@/components/ui/primitives";
 import { useAllPacks } from "@/core/store/packs";
 import { getEffectivePack, saveBranding } from "@/core/store/packs";
 
@@ -110,8 +109,8 @@ export function Marketplace({ onOpenPack }: { onOpenPack: (packId: string) => vo
 
       <Panel title="Roadmap">
         <p className="mb-4 text-sm text-zinc-500">
-          Planned, not built — shown here so it's clear what's real above
-          this line and what isn't.
+          Planned, not built — shown here so it&rsquo;s clear what&rsquo;s real above
+          this line and what isn&rsquo;t.
         </p>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {ROADMAP.map((r) => (

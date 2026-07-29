@@ -1,6 +1,5 @@
 "use client";
 
-import { Panel } from "@/components/console/light-ui";
 import { cx } from "@/components/ui/primitives";
 import { useSystemHealth, type SystemMetric } from "@/core/data/systemHealth";
 

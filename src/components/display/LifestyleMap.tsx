@@ -57,7 +57,6 @@ const LAYERS = [
 export function LifestyleMap({
   item,
   pack,
-  reasons,
   narrative,
   intentOptions,
   intentSelected,
@@ -67,7 +66,6 @@ export function LifestyleMap({
 }: {
   item: InventoryItem;
   pack: IndustryPack;
-  reasons: string[];
   narrative: string;
   intentOptions: { id: string; label: string; icon?: string }[];
   intentSelected: string[];

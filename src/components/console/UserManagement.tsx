@@ -18,7 +18,6 @@ import { cx } from "@/components/ui/primitives";
 import { useBranches } from "@/core/data/branches";
 import {
   ROLES,
-  getUsers,
   inviteUser,
   saveUsers,
   useUsers,

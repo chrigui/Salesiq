@@ -58,7 +58,7 @@ function slugify(input: string, fallback: string): string {
 }
 
 function uniqueSlug(input: string, fallback: string, used: Set<string>): string {
-  let base = slugify(input, fallback);
+  const base = slugify(input, fallback);
   let id = base;
   let n = 2;
   while (used.has(id)) id = `${base}-${n++}`;

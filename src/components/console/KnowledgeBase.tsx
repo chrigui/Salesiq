@@ -50,7 +50,7 @@ export function KnowledgeBase() {
         <p className="mb-4 text-sm text-zinc-500">
           Facts the AI can draw on — financing terms, policies, warranty
           details — for proposals, follow-up emails and objection responses.
-          It's told to use these facts only, never invent beyond them.
+          It&rsquo;s told to use these facts only, never invent beyond them.
         </p>
 
         <div className="space-y-2">

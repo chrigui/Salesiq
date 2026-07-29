@@ -3,7 +3,6 @@
 import { useMemo, useState } from "react";
 import {
   Sparkles,
-  LayoutGrid,
   GitCompareArrows,
   RotateCcw,
   FileText,
@@ -25,7 +24,7 @@ import { useSession } from "@/core/store/session";
 import { useLivePack, useAllPacks, getEffectivePack } from "@/core/store/packs";
 import { scoreInventory, isVisible } from "@/core/engine/scoring";
 import { formatMoney } from "@/core/engine/explain";
-import { Button, cx, Eyebrow } from "@/components/ui/primitives";
+import { cx, Eyebrow } from "@/components/ui/primitives";
 import { Icon } from "@/lib/icon";
 import type { Question, BudgetValue } from "@/core/types";
 import { ProposalSheet } from "./ProposalSheet";

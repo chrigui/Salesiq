@@ -78,7 +78,6 @@ export function DisplayStage() {
       <LifestyleMap
         item={mapTarget}
         pack={pack}
-        reasons={entry?.reasons ?? []}
         narrative={entry ? narrate(entry, pack) : mapTarget.lifestyle.summary}
         intentOptions={intentQ?.options ?? []}
         intentSelected={intentSelected}
@@ -124,7 +123,7 @@ export function DisplayStage() {
             )}
 
             {view === "compare" && (
-              <CompareStage key="compare" scored={scored} pack={pack} />
+              <CompareStage key="compare" scored={scored} />
             )}
 
             {view === "item" && focusedItem && (
@@ -470,10 +469,8 @@ function RecommendationStage({
 
 function CompareStage({
   scored,
-  pack,
 }: {
   scored: ReturnType<typeof scoreInventory>;
-  pack: IndustryPack;
 }) {
   const top = scored.slice(0, 3);
   return (

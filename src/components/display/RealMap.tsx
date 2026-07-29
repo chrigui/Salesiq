@@ -206,7 +206,6 @@ export function RealMap({
     if (!map || !firstDone.current) return;
     map.setStyle(night ? STYLE_DARK : STYLE_LIGHT);
     // style.load handler re-adds scene layers
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [night]);
 
   // ---- 3D tilt toggle ----

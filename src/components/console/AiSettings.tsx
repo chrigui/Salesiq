@@ -53,7 +53,7 @@ export function AiSettings() {
           objection responses and top-pick narration whenever{" "}
           <code className="rounded bg-zinc-100 px-1 py-0.5 text-xs">ANTHROPIC_API_KEY</code>{" "}
           is set. Every deterministic fallback works the same regardless — it
-          never calls a model, so there's nothing here to tune.
+          never calls a model, so there&rsquo;s nothing here to tune.
         </p>
 
         <div className="grid gap-4 sm:grid-cols-2">

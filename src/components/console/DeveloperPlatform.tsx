@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Code2, Copy, Check, Smartphone, Terminal } from "lucide-react";
 import { Panel } from "@/components/console/light-ui";
-import { cx } from "@/components/ui/primitives";
 
 function CodeBlock({ code }: { code: string }) {
   const [copied, setCopied] = useState(false);
