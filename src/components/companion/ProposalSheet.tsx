@@ -9,6 +9,7 @@ import { saveLead } from "@/core/store/leads";
 import { getKnowledgeBase, knowledgePayload } from "@/core/data/knowledgeBase";
 import { getAiSettings } from "@/core/data/aiSettings";
 import { fireWebhook } from "@/core/data/integrations";
+import { notify } from "@/core/data/notifications";
 import type { IndustryPack } from "@/core/types";
 import type { ScoredItem } from "@/core/engine/scoring";
 
@@ -134,6 +135,11 @@ export function ProposalSheet({
       score: best.score,
     });
     fireWebhook("lead.created", lead);
+    notify({
+      kind: "lead",
+      title: `New lead: ${lead.name}`,
+      detail: `${lead.itemName} · ${formatMoney(lead.price, lead.currency)}`,
+    });
     logEvent({ kind: "lead", detail: `Saved lead — ${customer.name || "Unnamed"}` });
     setSaved(true);
   };

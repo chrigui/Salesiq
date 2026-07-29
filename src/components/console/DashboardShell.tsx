@@ -10,6 +10,8 @@ export interface NavItem {
   id: string;
   label: string;
   icon: string;
+  /** Optional unread/pending count shown as a pill beside the label. */
+  badge?: number;
 }
 export interface NavGroup {
   heading?: string;
@@ -120,7 +122,12 @@ export function DashboardShell({
                           isActive ? "text-zinc-900" : "text-zinc-400",
                         )}
                       />
-                      {item.label}
+                      <span className="flex-1">{item.label}</span>
+                      {!!item.badge && (
+                        <span className="grid h-5 min-w-5 shrink-0 place-items-center rounded-full bg-zinc-900 px-1 text-[10px] font-semibold text-white">
+                          {item.badge > 99 ? "99+" : item.badge}
+                        </span>
+                      )}
                     </button>
                   );
                 })}

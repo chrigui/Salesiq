@@ -23,6 +23,7 @@ import {
 import { Field, Select, TextArea, TextInput } from "@/components/console/builder/fields";
 import { getKnowledgeBase, knowledgePayload } from "@/core/data/knowledgeBase";
 import { getAiSettings } from "@/core/data/aiSettings";
+import { notify } from "@/core/data/notifications";
 import { EMAIL_PURPOSES, type EmailPurpose } from "@/core/engine/email";
 
 const STATUS_STYLE: Record<LeadStatus, string> = {
@@ -207,7 +208,21 @@ function LeadRow({
             <Field label="Status">
               <Select
                 value={lead.status}
-                onChange={(e) => patch({ status: e.target.value as LeadStatus })}
+                onChange={(e) => {
+                  const status = e.target.value as LeadStatus;
+                  patch({ status });
+                  if (status === "won") {
+                    notify({
+                      kind: "deal",
+                      title: `Deal won: ${lead.name}`,
+                      detail: `${lead.itemName} · ${new Intl.NumberFormat("en-US", {
+                        style: "currency",
+                        currency: lead.currency,
+                        maximumFractionDigits: 0,
+                      }).format(lead.price)}`,
+                    });
+                  }
+                }}
               >
                 {LEAD_STATUSES.map((s) => (
                   <option key={s} value={s}>

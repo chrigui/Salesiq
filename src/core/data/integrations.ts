@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { notify } from "./notifications";
 
 /**
  * Integrations (Module 4 · Company Dashboard).
@@ -89,5 +90,10 @@ export async function fireWebhook(event: string, payload: unknown): Promise<void
     saveIntegrationSettings({ lastFiredAt: Date.now(), lastEvent: event, lastStatus: "ok" });
   } catch {
     saveIntegrationSettings({ lastFiredAt: Date.now(), lastEvent: event, lastStatus: "error" });
+    notify({
+      kind: "system",
+      title: "Webhook delivery failed",
+      detail: `"${event}" couldn't reach ${settings.webhookUrl}.`,
+    });
   }
 }

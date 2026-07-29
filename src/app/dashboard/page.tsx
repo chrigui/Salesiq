@@ -24,6 +24,8 @@ import { IndustryBuilder } from "@/components/console/IndustryBuilder";
 import { KnowledgeBase } from "@/components/console/KnowledgeBase";
 import { AiSettings } from "@/components/console/AiSettings";
 import { Integrations } from "@/components/console/Integrations";
+import { NotificationCenter } from "@/components/console/NotificationCenter";
+import { useUnreadCount } from "@/core/data/notifications";
 import { LoginScreen } from "@/components/console/LoginScreen";
 import { DEFAULT_PACK_ID } from "@/core/industries";
 import { useLeads } from "@/core/store/leads";
@@ -74,6 +76,7 @@ const NAV: NavGroup[] = [
     items: [
       { id: "Leads", label: "Leads", icon: "UserPlus" },
       { id: "Analytics", label: "Analytics", icon: "BarChart3" },
+      { id: "Notifications", label: "Notifications", icon: "Bell" },
     ],
   },
   {
@@ -96,19 +99,25 @@ export default function DashboardPage() {
   const [builderPack, setBuilderPack] = useState<string>(DEFAULT_PACK_ID);
   const org = useOrganization();
   const session = useSession();
+  const unreadCount = useUnreadCount();
 
   // Hide nav items the signed-in role isn't granted — the Permission Engine
-  // enforced live, not just documented.
+  // enforced live, not just documented — and stamp the live unread count
+  // onto the Notifications item.
   const nav = useMemo(() => {
     if (!session) return NAV;
     return NAV.map((group) => ({
       ...group,
-      items: group.items.filter((item) => {
-        const capId = NAV_CAPABILITY[item.id];
-        return !capId || can(session.role, capId);
-      }),
+      items: group.items
+        .filter((item) => {
+          const capId = NAV_CAPABILITY[item.id];
+          return !capId || can(session.role, capId);
+        })
+        .map((item) =>
+          item.id === "Notifications" ? { ...item, badge: unreadCount } : item,
+        ),
     }));
-  }, [session]);
+  }, [session, unreadCount]);
 
   if (!session) {
     return (
@@ -158,6 +167,8 @@ export default function DashboardPage() {
         <LeadManagement />
       ) : tab === "Analytics" ? (
         <Analytics />
+      ) : tab === "Notifications" ? (
+        <NotificationCenter onOpenLeads={() => setTab("Leads")} />
       ) : tab === "Settings" ? (
         <OrganizationSettings />
       ) : tab === "Branches" ? (
