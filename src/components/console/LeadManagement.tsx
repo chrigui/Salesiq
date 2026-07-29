@@ -7,6 +7,8 @@ import {
   Sparkles,
   CalendarClock,
   Trophy,
+  Mail,
+  Loader2,
 } from "lucide-react";
 import { Panel } from "@/components/console/light-ui";
 import { cx } from "@/components/ui/primitives";
@@ -19,6 +21,8 @@ import {
   type LeadStatus,
 } from "@/core/store/leads";
 import { Field, Select, TextArea, TextInput } from "@/components/console/builder/fields";
+import { getKnowledgeBase, knowledgePayload } from "@/core/data/knowledgeBase";
+import { EMAIL_PURPOSES, type EmailPurpose } from "@/core/engine/email";
 
 const STATUS_STYLE: Record<LeadStatus, string> = {
   new: "bg-sky-100 text-sky-700",
@@ -249,8 +253,131 @@ function LeadRow({
               <TextArea rows={2} value={lead.notes} onChange={(e) => patch({ notes: e.target.value })} />
             </Field>
           </div>
+
+          <EmailGenerator lead={lead} />
         </div>
       )}
     </div>
+  );
+}
+
+/**
+ * Email Generator (Module 6). Drafts a follow-up email for this lead —
+ * outreach cadence after the fact, distinct from the Proposal Writer's
+ * point-of-sale letter generated live in the companion. Deterministic
+ * templates by default; Claude-authored when ANTHROPIC_API_KEY is set (see
+ * /api/ai/email), always falling back to the template on any error.
+ */
+function EmailGenerator({ lead }: { lead: Lead }) {
+  const [purpose, setPurpose] = useState<EmailPurpose>("first-followup");
+  const [draft, setDraft] = useState<{ subject: string; body: string } | null>(null);
+  const [engine, setEngine] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const generate = async () => {
+    if (loading) return;
+    setLoading(true);
+    try {
+      const res = await fetch("/api/ai/email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          packId: lead.packId,
+          purpose,
+          customerName: lead.name,
+          itemName: lead.itemName,
+          price: lead.price,
+          currency: lead.currency,
+          notes: lead.notes,
+          knowledge: knowledgePayload(getKnowledgeBase()),
+        }),
+      });
+      const data = await res.json();
+      if (data?.subject && data?.body) {
+        setDraft({ subject: data.subject, body: data.body });
+        setEngine(data.engine ?? null);
+      }
+    } catch {
+      // Network/route failure — leave any previously drafted email as-is.
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const mailtoUrl =
+    lead.email && draft
+      ? `mailto:${encodeURIComponent(lead.email)}?subject=${encodeURIComponent(
+          draft.subject,
+        )}&body=${encodeURIComponent(draft.body)}`
+      : null;
+
+  return (
+    <div className="rounded-2xl border border-zinc-200 bg-zinc-50/60 p-4">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <div className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+          Follow-up email
+        </div>
+        <Select
+          value={purpose}
+          onChange={(e) => setPurpose(e.target.value as EmailPurpose)}
+          className="w-auto"
+        >
+          {EMAIL_PURPOSES.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.label}
+            </option>
+          ))}
+        </Select>
+      </div>
+
+      <button
+        onClick={generate}
+        disabled={loading}
+        className="inline-flex items-center gap-1.5 rounded-xl bg-zinc-900 px-3 py-1.5 text-xs font-semibold text-white transition hover:brightness-110 disabled:opacity-50"
+      >
+        {loading ? (
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        ) : (
+          <Sparkles className="h-3.5 w-3.5" />
+        )}
+        {loading ? "Drafting…" : draft ? "Redraft with AI" : "Draft with AI"}
+      </button>
+
+      {draft && (
+        <div className="mt-3 space-y-2 rounded-xl border border-zinc-200 bg-white p-3">
+          <div className="text-xs font-medium text-zinc-900">{draft.subject}</div>
+          <p className="whitespace-pre-line text-xs text-zinc-500">{draft.body}</p>
+          {engine && (
+            <p className="text-[10px] text-zinc-400">
+              {engine === "claude+email"
+                ? "Authored by Claude from verified facts."
+                : "Deterministic template — set ANTHROPIC_API_KEY for Claude-authored prose."}
+            </p>
+          )}
+          <DeliveryLink href={mailtoUrl} disabledHint="Add an email address above first" />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DeliveryLink({ href, disabledHint }: { href: string | null; disabledHint: string }) {
+  if (!href) {
+    return (
+      <span
+        title={disabledHint}
+        className="inline-flex cursor-not-allowed items-center gap-1.5 text-xs font-medium text-zinc-300"
+      >
+        <Mail className="h-3.5 w-3.5" /> Send email
+      </span>
+    );
+  }
+  return (
+    <a
+      href={href}
+      className="inline-flex items-center gap-1.5 text-xs font-medium text-brand hover:brightness-110"
+    >
+      <Mail className="h-3.5 w-3.5" /> Send email
+    </a>
   );
 }
