@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getPack } from "@/core/industries";
 import { scoreInventory, type ScoredItem } from "@/core/engine/scoring";
 import { narrate, buildNarrationPrompt } from "@/core/engine/explain";
+import { resolveAiSettings, type AiSettingsShape } from "@/core/data/aiSettings";
 import type { Answers, IndustryPack } from "@/core/types";
 
 /**
@@ -17,7 +18,7 @@ import type { Answers, IndustryPack } from "@/core/types";
  * back to the deterministic narrator. The UI is identical either way.
  */
 export async function POST(request: Request) {
-  let body: { packId?: string; answers?: Answers };
+  let body: { packId?: string; answers?: Answers; settings?: Partial<AiSettingsShape> };
   try {
     body = await request.json();
   } catch {
@@ -26,6 +27,7 @@ export async function POST(request: Request) {
 
   const pack = getPack(body.packId);
   const answers = body.answers ?? {};
+  const settings = resolveAiSettings(body.settings);
   const scored = scoreInventory(pack, answers);
 
   // Only the headline recommendation gets LLM prose (latency + cost); the rest
@@ -34,7 +36,7 @@ export async function POST(request: Request) {
   let engine = "deterministic-scoring";
   if (process.env.ANTHROPIC_API_KEY && scored[0]) {
     try {
-      claudeNarrative = await narrateWithClaude(scored[0], pack);
+      claudeNarrative = await narrateWithClaude(scored[0], pack, settings);
       engine = "claude+scoring";
     } catch (err) {
       console.error("Claude narration failed, using deterministic narrator:", err);
@@ -64,6 +66,7 @@ export async function POST(request: Request) {
 async function narrateWithClaude(
   scored: ScoredItem,
   pack: IndustryPack,
+  settings: AiSettingsShape,
 ): Promise<string> {
   const { default: Anthropic } = await import("@anthropic-ai/sdk");
   const client = new Anthropic();
@@ -71,7 +74,8 @@ async function narrateWithClaude(
   const message = await client.messages.create({
     model: "claude-opus-4-8",
     max_tokens: 400,
-    messages: [{ role: "user", content: buildNarrationPrompt(scored, pack) }],
+    temperature: settings.creativity,
+    messages: [{ role: "user", content: buildNarrationPrompt(scored, pack, settings) }],
   });
 
   const text = message.content

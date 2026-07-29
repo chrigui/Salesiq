@@ -8,6 +8,7 @@ import {
   type EmailLeadFacts,
 } from "@/core/engine/email";
 import type { KnowledgeFact } from "@/core/engine/proposal";
+import { resolveAiSettings, type AiSettingsShape } from "@/core/data/aiSettings";
 import type { IndustryPack } from "@/core/types";
 
 /**
@@ -31,6 +32,7 @@ export async function POST(request: Request) {
     currency?: string;
     notes?: string;
     knowledge?: KnowledgeFact[];
+    settings?: Partial<AiSettingsShape>;
   };
   try {
     body = await request.json();
@@ -49,11 +51,14 @@ export async function POST(request: Request) {
     currency: body.currency ?? pack.currency,
     notes: (body.notes ?? "").trim(),
   };
-  const knowledge = Array.isArray(body.knowledge) ? body.knowledge.slice(0, 6) : [];
+  const settings = resolveAiSettings(body.settings);
+  const knowledge = Array.isArray(body.knowledge)
+    ? body.knowledge.slice(0, settings.maxKnowledgeFacts)
+    : [];
 
   if (process.env.ANTHROPIC_API_KEY) {
     try {
-      const draft = await draftWithClaude(purpose, pack, lead, knowledge);
+      const draft = await draftWithClaude(purpose, pack, lead, knowledge, settings);
       return NextResponse.json({ ...draft, engine: "claude+email" });
     } catch (err) {
       console.error("Claude email draft failed, using deterministic templates:", err);
@@ -69,6 +74,7 @@ async function draftWithClaude(
   pack: IndustryPack,
   lead: EmailLeadFacts,
   knowledge: KnowledgeFact[],
+  settings: AiSettingsShape,
 ): Promise<{ subject: string; body: string }> {
   const { default: Anthropic } = await import("@anthropic-ai/sdk");
   const client = new Anthropic();
@@ -76,7 +82,10 @@ async function draftWithClaude(
   const message = await client.messages.create({
     model: "claude-opus-4-8",
     max_tokens: 500,
-    messages: [{ role: "user", content: buildEmailPrompt(purpose, pack, lead, knowledge) }],
+    temperature: settings.creativity,
+    messages: [
+      { role: "user", content: buildEmailPrompt(purpose, pack, lead, knowledge, settings) },
+    ],
   });
 
   const text = message.content

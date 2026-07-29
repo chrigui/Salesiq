@@ -3,6 +3,7 @@ import { getPack } from "@/core/industries";
 import { scoreInventory } from "@/core/engine/scoring";
 import { respondToObjection, buildObjectionPrompt } from "@/core/engine/objection";
 import type { KnowledgeFact } from "@/core/engine/proposal";
+import { resolveAiSettings, type AiSettingsShape } from "@/core/data/aiSettings";
 import type { Answers, IndustryPack } from "@/core/types";
 import type { ScoredItem } from "@/core/engine/scoring";
 
@@ -24,6 +25,7 @@ export async function POST(request: Request) {
     answers?: Answers;
     objection?: string;
     knowledge?: KnowledgeFact[];
+    settings?: Partial<AiSettingsShape>;
   };
   try {
     body = await request.json();
@@ -34,7 +36,10 @@ export async function POST(request: Request) {
   const pack = getPack(body.packId);
   const answers = body.answers ?? {};
   const objection = (body.objection ?? "").trim();
-  const knowledge = Array.isArray(body.knowledge) ? body.knowledge.slice(0, 6) : [];
+  const settings = resolveAiSettings(body.settings);
+  const knowledge = Array.isArray(body.knowledge)
+    ? body.knowledge.slice(0, settings.maxKnowledgeFacts)
+    : [];
 
   if (!objection) {
     return NextResponse.json({ error: "Empty objection" }, { status: 400 });
@@ -45,7 +50,7 @@ export async function POST(request: Request) {
 
   if (process.env.ANTHROPIC_API_KEY) {
     try {
-      const response = await respondWithClaude(objection, best, pack, knowledge);
+      const response = await respondWithClaude(objection, best, pack, knowledge, settings);
       return NextResponse.json({ response, engine: "claude+objection" });
     } catch (err) {
       console.error("Claude objection response failed, using deterministic responder:", err);
@@ -61,6 +66,7 @@ async function respondWithClaude(
   scored: ScoredItem | undefined,
   pack: IndustryPack,
   knowledge: KnowledgeFact[],
+  settings: AiSettingsShape,
 ): Promise<string> {
   const { default: Anthropic } = await import("@anthropic-ai/sdk");
   const client = new Anthropic();
@@ -68,7 +74,10 @@ async function respondWithClaude(
   const message = await client.messages.create({
     model: "claude-opus-4-8",
     max_tokens: 400,
-    messages: [{ role: "user", content: buildObjectionPrompt(objection, scored, pack, knowledge) }],
+    temperature: settings.creativity,
+    messages: [
+      { role: "user", content: buildObjectionPrompt(objection, scored, pack, knowledge, settings) },
+    ],
   });
 
   const text = message.content

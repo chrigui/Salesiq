@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getPack } from "@/core/industries";
 import { scoreInventory, type ScoredItem } from "@/core/engine/scoring";
 import { writeProposal, buildProposalPrompt, type KnowledgeFact } from "@/core/engine/proposal";
+import { resolveAiSettings, type AiSettingsShape } from "@/core/data/aiSettings";
 import type { Answers, IndustryPack } from "@/core/types";
 
 /**
@@ -22,6 +23,7 @@ export async function POST(request: Request) {
     answers?: Answers;
     customerName?: string;
     knowledge?: KnowledgeFact[];
+    settings?: Partial<AiSettingsShape>;
   };
   try {
     body = await request.json();
@@ -32,7 +34,10 @@ export async function POST(request: Request) {
   const pack = getPack(body.packId);
   const answers = body.answers ?? {};
   const customerName = (body.customerName ?? "").trim();
-  const knowledge = Array.isArray(body.knowledge) ? body.knowledge.slice(0, 6) : [];
+  const settings = resolveAiSettings(body.settings);
+  const knowledge = Array.isArray(body.knowledge)
+    ? body.knowledge.slice(0, settings.maxKnowledgeFacts)
+    : [];
 
   const scored = scoreInventory(pack, answers);
   const best = scored[0];
@@ -42,7 +47,7 @@ export async function POST(request: Request) {
 
   if (process.env.ANTHROPIC_API_KEY) {
     try {
-      const proposal = await writeWithClaude(best, pack, customerName, knowledge);
+      const proposal = await writeWithClaude(best, pack, customerName, knowledge, settings);
       return NextResponse.json({
         proposal,
         engine: "claude+writer",
@@ -68,6 +73,7 @@ async function writeWithClaude(
   pack: IndustryPack,
   customerName: string,
   knowledge: KnowledgeFact[],
+  settings: AiSettingsShape,
 ): Promise<string> {
   const { default: Anthropic } = await import("@anthropic-ai/sdk");
   const client = new Anthropic();
@@ -75,7 +81,10 @@ async function writeWithClaude(
   const message = await client.messages.create({
     model: "claude-opus-4-8",
     max_tokens: 700,
-    messages: [{ role: "user", content: buildProposalPrompt(scored, pack, customerName, knowledge) }],
+    temperature: settings.creativity,
+    messages: [
+      { role: "user", content: buildProposalPrompt(scored, pack, customerName, knowledge, settings) },
+    ],
   });
 
   const text = message.content

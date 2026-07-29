@@ -1,5 +1,6 @@
 import type { IndustryPack } from "@/core/types";
 import type { ScoredItem } from "./scoring";
+import { toneDirective, type AiSettingsShape } from "@/core/data/aiSettings";
 
 /**
  * The AI Decision Engine's explanation layer.
@@ -63,6 +64,7 @@ function stripIt(reason: string): string {
 export function buildNarrationPrompt(
   scored: ScoredItem,
   pack: IndustryPack,
+  settings?: AiSettingsShape,
 ): string {
   const facts = scored.breakdown
     .filter((b) => b.reason)
@@ -70,14 +72,17 @@ export function buildNarrationPrompt(
     .join("\n");
   return [
     `You are the sales advisor for ${pack.branding.name}, a ${pack.vertical} business.`,
-    `Explain in 2-3 warm, confident sentences why "${scored.item.name}" is recommended.`,
+    `Explain in 2-3 confident sentences why "${scored.item.name}" is recommended.`,
+    settings ? toneDirective(settings) : null,
     `Only use these verified facts — never invent numbers:`,
     facts,
     `Overall match score: ${scored.score}/100. Price: ${formatMoney(
       scored.item.price,
       scored.item.currency,
     )}.`,
-  ].join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 export function formatMoney(n: number, currency: string): string {

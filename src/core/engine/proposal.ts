@@ -1,6 +1,7 @@
 import type { IndustryPack } from "@/core/types";
 import type { ScoredItem } from "./scoring";
 import { formatMoney } from "./explain";
+import { toneDirective, knowledgeOnlyDirective, type AiSettingsShape } from "@/core/data/aiSettings";
 
 export interface KnowledgeFact {
   title: string;
@@ -71,6 +72,7 @@ export function buildProposalPrompt(
   pack: IndustryPack,
   customerName: string,
   knowledge: KnowledgeFact[] = [],
+  settings?: AiSettingsShape,
 ): string {
   const facts = scored.breakdown
     .filter((b) => b.reason)
@@ -82,15 +84,19 @@ export function buildProposalPrompt(
 
   return [
     `You are a sales advisor at ${pack.branding.name}, a ${pack.vertical} business.`,
-    `Write a warm, professional sales proposal (3-4 short paragraphs, plain text, no markdown, no subject line) for ${
+    `Write a sales proposal (3-4 short paragraphs, plain text, no markdown, no subject line) for ${
       customerName || "the customer"
     } recommending "${scored.item.name}" at ${formatMoney(scored.item.price, scored.item.currency)}.`,
+    settings ? toneDirective(settings) : null,
     `Start with "Hi ${customerName || "there"},". Only use these verified facts — never invent numbers or promises:`,
     facts || "(no specific match reasons recorded)",
     ``,
     `You may also draw on these company facts if relevant, quoting them accurately and only if they apply:`,
     kbBlock,
+    settings ? knowledgeOnlyDirective(settings) : null,
     ``,
     `End with a friendly call to action.`,
-  ].join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 }

@@ -6,6 +6,7 @@ import { X, ShieldQuestion, Sparkles, Loader2 } from "lucide-react";
 import { useSession } from "@/core/store/session";
 import { COMMON_OBJECTIONS } from "@/core/engine/objection";
 import { getKnowledgeBase, knowledgePayload } from "@/core/data/knowledgeBase";
+import { getAiSettings } from "@/core/data/aiSettings";
 import type { IndustryPack } from "@/core/types";
 import type { ScoredItem } from "@/core/engine/scoring";
 
@@ -60,6 +61,7 @@ export function ObjectionHandler({
           answers,
           objection: q,
           knowledge: knowledgePayload(getKnowledgeBase()),
+          settings: getAiSettings(),
         }),
       });
       const data = await res.json();

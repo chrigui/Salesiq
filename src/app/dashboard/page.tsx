@@ -22,6 +22,7 @@ import { SubscriptionManagement } from "@/components/console/SubscriptionManagem
 import { LeadManagement } from "@/components/console/LeadManagement";
 import { IndustryBuilder } from "@/components/console/IndustryBuilder";
 import { KnowledgeBase } from "@/components/console/KnowledgeBase";
+import { AiSettings } from "@/components/console/AiSettings";
 import { LoginScreen } from "@/components/console/LoginScreen";
 import { DEFAULT_PACK_ID } from "@/core/industries";
 import { useLeads } from "@/core/store/leads";
@@ -50,6 +51,7 @@ const NAV_CAPABILITY: Record<string, string> = {
   Permissions: "users.manage",
   Subscription: "billing.manage",
   Knowledge: "ai.manage",
+  AiSettings: "ai.manage",
 };
 
 const NAV: NavGroup[] = [
@@ -63,6 +65,7 @@ const NAV: NavGroup[] = [
       { id: "Scoring", label: "Scoring", icon: "Scale" },
       { id: "Branding", label: "Branding", icon: "Palette" },
       { id: "Knowledge", label: "Knowledge Base", icon: "BookOpen" },
+      { id: "AiSettings", label: "AI Settings", icon: "SlidersHorizontal" },
     ],
   },
   {
@@ -148,6 +151,8 @@ export default function DashboardPage() {
         <BuilderSection kind="branding" packId={builderPack} onPackChange={setBuilderPack} />
       ) : tab === "Knowledge" ? (
         <KnowledgeBase />
+      ) : tab === "AiSettings" ? (
+        <AiSettings />
       ) : tab === "Leads" ? (
         <LeadManagement />
       ) : tab === "Analytics" ? (

@@ -2,6 +2,7 @@ import type { IndustryPack } from "@/core/types";
 import type { ScoredItem } from "./scoring";
 import { formatMoney } from "./explain";
 import type { KnowledgeFact } from "./proposal";
+import { toneDirective, knowledgeOnlyDirective, type AiSettingsShape } from "@/core/data/aiSettings";
 
 export const COMMON_OBJECTIONS = [
   "It's too expensive",
@@ -97,6 +98,7 @@ export function buildObjectionPrompt(
   scored: ScoredItem | undefined,
   pack: IndustryPack,
   knowledge: KnowledgeFact[] = [],
+  settings?: AiSettingsShape,
 ): string {
   const facts = scored
     ? scored.breakdown
@@ -115,10 +117,14 @@ export function buildObjectionPrompt(
     `You are a sales advisor at ${pack.branding.name}, a ${pack.vertical} business, currently recommending ${itemLine}.`,
     `The customer just said: "${objection}"`,
     `Write a short, confident, empathetic response (2-3 sentences, plain text, no markdown) that addresses this objection.`,
+    settings ? toneDirective(settings) : null,
     `Only use these verified facts — never invent numbers or promises:`,
     facts,
     `You may also draw on these company facts if relevant, quoting them accurately and only if they apply:`,
     kbBlock,
+    settings ? knowledgeOnlyDirective(settings) : null,
     `End with a question that moves the conversation forward.`,
-  ].join("\n");
+  ]
+    .filter(Boolean)
+    .join("\n");
 }

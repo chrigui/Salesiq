@@ -22,6 +22,7 @@ import {
 } from "@/core/store/leads";
 import { Field, Select, TextArea, TextInput } from "@/components/console/builder/fields";
 import { getKnowledgeBase, knowledgePayload } from "@/core/data/knowledgeBase";
+import { getAiSettings } from "@/core/data/aiSettings";
 import { EMAIL_PURPOSES, type EmailPurpose } from "@/core/engine/email";
 
 const STATUS_STYLE: Record<LeadStatus, string> = {
@@ -290,6 +291,7 @@ function EmailGenerator({ lead }: { lead: Lead }) {
           currency: lead.currency,
           notes: lead.notes,
           knowledge: knowledgePayload(getKnowledgeBase()),
+          settings: getAiSettings(),
         }),
       });
       const data = await res.json();

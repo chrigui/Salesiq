@@ -7,6 +7,7 @@ import { useSession } from "@/core/store/session";
 import { narrate, formatMoney } from "@/core/engine/explain";
 import { saveLead } from "@/core/store/leads";
 import { getKnowledgeBase, knowledgePayload } from "@/core/data/knowledgeBase";
+import { getAiSettings } from "@/core/data/aiSettings";
 import type { IndustryPack } from "@/core/types";
 import type { ScoredItem } from "@/core/engine/scoring";
 
@@ -100,6 +101,7 @@ export function ProposalSheet({
           answers,
           customerName: customer.name,
           knowledge: knowledgePayload(getKnowledgeBase()),
+          settings: getAiSettings(),
         }),
       });
       const data = await res.json();

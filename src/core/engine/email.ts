@@ -1,6 +1,7 @@
 import type { IndustryPack } from "@/core/types";
 import { formatMoney } from "./explain";
 import type { KnowledgeFact } from "./proposal";
+import { toneDirective, knowledgeOnlyDirective, type AiSettingsShape } from "@/core/data/aiSettings";
 
 export const EMAIL_PURPOSES = [
   { id: "first-followup", label: "First follow-up" },
@@ -79,6 +80,7 @@ export function buildEmailPrompt(
   pack: IndustryPack,
   lead: EmailLeadFacts,
   knowledge: KnowledgeFact[] = [],
+  settings?: AiSettingsShape,
 ): string {
   const kbBlock = knowledge.length
     ? knowledge.map((k) => `- ${k.title}: ${k.content}`).join("\n")
@@ -87,15 +89,17 @@ export function buildEmailPrompt(
 
   return [
     `You are a sales advisor at ${pack.branding.name}, a ${pack.vertical} business.`,
-    `Write a short, warm follow-up email (subject line + 2-3 short paragraph body, plain text, no markdown) to ${
+    `Write a short follow-up email (subject line + 2-3 short paragraph body, plain text, no markdown) to ${
       lead.customerName || "the customer"
     }.`,
     `Purpose: ${purposeLabel}.`,
+    settings ? toneDirective(settings) : null,
     `Facts you may reference — never invent numbers or promises beyond these:`,
     `- Item discussed: ${lead.itemName} at ${formatMoney(lead.price, lead.currency)}`,
     lead.notes ? `- Notes from the salesperson: ${lead.notes}` : "",
     `Company facts you may draw on if relevant, quoting them accurately and only if they apply:`,
     kbBlock,
+    settings ? knowledgeOnlyDirective(settings) : null,
     ``,
     `Respond with only a single JSON object: {"subject": "...", "body": "..."}`,
   ]
