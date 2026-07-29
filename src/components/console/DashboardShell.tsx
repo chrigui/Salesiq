@@ -109,7 +109,7 @@ export function DashboardShell({
                       key={item.id}
                       onClick={() => select(item.id)}
                       className={cx(
-                        "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition",
+                        "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition",
                         isActive
                           ? "bg-zinc-100 font-medium text-zinc-900"
                           : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-800",
@@ -122,7 +122,7 @@ export function DashboardShell({
                           isActive ? "text-zinc-900" : "text-zinc-400",
                         )}
                       />
-                      <span className="flex-1">{item.label}</span>
+                      <span className="flex-1 text-left">{item.label}</span>
                       {!!item.badge && (
                         <span className="grid h-5 min-w-5 shrink-0 place-items-center rounded-full bg-zinc-900 px-1 text-[10px] font-semibold text-white">
                           {item.badge > 99 ? "99+" : item.badge}
