@@ -31,6 +31,8 @@ import { ProductHeatmap } from "@/components/console/ProductHeatmap";
 import { SecurityCompliance } from "@/components/console/SecurityCompliance";
 import { CustomerSuccess } from "@/components/console/CustomerSuccess";
 import { HelpCenter } from "@/components/console/HelpCenter";
+import { Marketplace } from "@/components/console/Marketplace";
+import { DeveloperPlatform } from "@/components/console/DeveloperPlatform";
 import { useUnreadCount } from "@/core/data/notifications";
 import { LoginScreen } from "@/components/console/LoginScreen";
 import { DEFAULT_PACK_ID } from "@/core/industries";
@@ -97,6 +99,8 @@ const NAV: NavGroup[] = [
       { id: "Subscription", label: "Subscription", icon: "CreditCard" },
       { id: "Security", label: "Security & Compliance", icon: "ShieldCheck" },
       { id: "Integrations", label: "Integrations", icon: "Plug" },
+      { id: "Marketplace", label: "Marketplace", icon: "Store" },
+      { id: "Developers", label: "Developer Platform", icon: "Code2" },
       { id: "Help", label: "Help Center", icon: "LifeBuoy" },
     ],
   },
@@ -193,6 +197,15 @@ export default function DashboardPage() {
         <SecurityCompliance />
       ) : tab === "Integrations" ? (
         <Integrations />
+      ) : tab === "Marketplace" ? (
+        <Marketplace
+          onOpenPack={(id) => {
+            setBuilderPack(id);
+            setTab("Questions");
+          }}
+        />
+      ) : tab === "Developers" ? (
+        <DeveloperPlatform />
       ) : tab === "Success" ? (
         <CustomerSuccess />
       ) : tab === "Help" ? (
