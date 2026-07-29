@@ -29,6 +29,8 @@ import { AiAnalytics } from "@/components/console/AiAnalytics";
 import { CustomerJourney } from "@/components/console/CustomerJourney";
 import { ProductHeatmap } from "@/components/console/ProductHeatmap";
 import { SecurityCompliance } from "@/components/console/SecurityCompliance";
+import { CustomerSuccess } from "@/components/console/CustomerSuccess";
+import { HelpCenter } from "@/components/console/HelpCenter";
 import { useUnreadCount } from "@/core/data/notifications";
 import { LoginScreen } from "@/components/console/LoginScreen";
 import { DEFAULT_PACK_ID } from "@/core/industries";
@@ -67,6 +69,7 @@ const NAV: NavGroup[] = [
     heading: "Main Menu",
     items: [
       { id: "Overview", label: "Overview", icon: "LayoutDashboard" },
+      { id: "Success", label: "Getting Started", icon: "Compass" },
       { id: "Industries", label: "Industries", icon: "Boxes" },
       { id: "Inventory", label: "Inventory", icon: "Package" },
       { id: "Questions", label: "Questions", icon: "ListChecks" },
@@ -94,6 +97,7 @@ const NAV: NavGroup[] = [
       { id: "Subscription", label: "Subscription", icon: "CreditCard" },
       { id: "Security", label: "Security & Compliance", icon: "ShieldCheck" },
       { id: "Integrations", label: "Integrations", icon: "Plug" },
+      { id: "Help", label: "Help Center", icon: "LifeBuoy" },
     ],
   },
 ];
@@ -189,6 +193,10 @@ export default function DashboardPage() {
         <SecurityCompliance />
       ) : tab === "Integrations" ? (
         <Integrations />
+      ) : tab === "Success" ? (
+        <CustomerSuccess />
+      ) : tab === "Help" ? (
+        <HelpCenter />
       ) : tab === "Overview" ? (
         <Overview />
       ) : (
