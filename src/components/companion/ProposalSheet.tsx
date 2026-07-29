@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { X, FileText, Check, Mail, MessageCircle, Printer, Sparkles, Loader2 } from "lucide-react";
+import { X, FileText, Check, Mail, MessageCircle, Printer, Sparkles, Loader2, Presentation } from "lucide-react";
 import { useSession } from "@/core/store/session";
 import { narrate, formatMoney } from "@/core/engine/explain";
 import { saveLead } from "@/core/store/leads";
@@ -62,18 +62,20 @@ export function ProposalSheet({
   pack: IndustryPack;
   scored: ScoredItem[];
 }) {
-  const { customer, answers, logEvent } = useSession();
+  const { customer, answers, logEvent, presentProposal } = useSession();
   const best = scored[0];
   const [saved, setSaved] = useState(false);
   const [aiProposal, setAiProposal] = useState<string | null>(null);
   const [aiEngine, setAiEngine] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [presented, setPresented] = useState(false);
 
   // Reset the saved state whenever the sheet is reopened, and record it on
   // the session timeline — this is the "Generate proposal" interaction.
   useEffect(() => {
     if (open) {
       setSaved(false);
+      setPresented(false);
       setAiProposal(null);
       setAiEngine(null);
       if (best) {
@@ -118,6 +120,13 @@ export function ProposalSheet({
     } finally {
       setGenerating(false);
     }
+  };
+
+  const handlePresent = () => {
+    if (!best) return;
+    presentProposal(aiProposal ?? narrate(best, pack), aiProposal ? aiEngine : null);
+    setPresented(true);
+    window.setTimeout(() => setPresented(false), 2500);
   };
 
   const handleSaveLead = () => {
@@ -296,9 +305,25 @@ export function ProposalSheet({
             </div>
 
             <button
+              onClick={handlePresent}
+              disabled={!best}
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border border-brand/30 bg-brand/10 py-3 text-sm font-semibold text-brand transition hover:bg-brand/15 disabled:opacity-50"
+            >
+              {presented ? (
+                <span className="inline-flex items-center gap-1.5">
+                  <Check className="h-4 w-4" /> Presented on screen
+                </span>
+              ) : (
+                <>
+                  <Presentation className="h-4 w-4" /> Present on customer screen
+                </>
+              )}
+            </button>
+
+            <button
               onClick={handleSaveLead}
               disabled={saved || !best}
-              className="mt-4 w-full rounded-2xl bg-brand py-3 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-60"
+              className="mt-2 w-full rounded-2xl bg-brand py-3 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-60"
             >
               {saved ? (
                 <span className="inline-flex items-center gap-1.5">

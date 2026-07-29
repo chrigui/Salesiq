@@ -30,8 +30,17 @@ function readIdleTimeoutMs(): number {
 }
 
 export function DisplayStage() {
-  const { packId, answers, activeQuestionId, view, focusedItemId, revision } =
-    useSession();
+  const {
+    packId,
+    answers,
+    activeQuestionId,
+    view,
+    focusedItemId,
+    revision,
+    customer,
+    proposalText,
+    proposalEngine,
+  } = useSession();
   const pack = useLivePack(packId);
   const [qrOpen, setQrOpen] = useState(false);
 
@@ -124,6 +133,17 @@ export function DisplayStage() {
 
             {view === "compare" && (
               <CompareStage key="compare" scored={scored} />
+            )}
+
+            {view === "proposal" && (
+              <ProposalStage
+                key="proposal"
+                scored={scored}
+                pack={pack}
+                customerName={customer.name}
+                proposalText={proposalText}
+                proposalEngine={proposalEngine}
+              />
             )}
 
             {view === "item" && focusedItem && (
@@ -527,6 +547,125 @@ function CompareStage({
             </div>
           </motion.div>
         ))}
+      </div>
+    </motion.div>
+  );
+}
+
+function ProposalStage({
+  scored,
+  pack,
+  customerName,
+  proposalText,
+  proposalEngine,
+}: {
+  scored: ReturnType<typeof scoreInventory>;
+  pack: IndustryPack;
+  customerName: string;
+  proposalText: string | null;
+  proposalEngine: string | null;
+}) {
+  const best = scored[0];
+  if (!best) return null;
+  // Capped at three paragraphs to fit one screen — the full letter (this
+  // same text) still goes out in full via Email/WhatsApp/Print from the
+  // companion's Proposal sheet, so nothing presented here is truncated for
+  // the customer's own copy.
+  const paragraphs = (proposalText ?? narrate(best, pack))
+    .split(/\n\n+/)
+    .filter(Boolean)
+    .slice(0, 3);
+  const alternates = scored.slice(1, 3);
+  const date = new Date().toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={spring}
+      className="w-full max-w-6xl"
+    >
+      <div className="glass-strong overflow-hidden rounded-[2rem]">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 px-10 py-6">
+          <div className="flex items-center gap-3">
+            <div className="grid h-11 w-11 place-items-center rounded-2xl bg-brand/20 text-lg text-brand ring-1 ring-brand/30">
+              {pack.branding.logoGlyph}
+            </div>
+            <div>
+              <div className="text-base font-semibold">{pack.branding.name}</div>
+              <div className="text-xs text-ink-faint">{date}</div>
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-[11px] uppercase tracking-[0.18em] text-ink-faint">
+              Prepared for
+            </div>
+            <div className="text-lg font-semibold">{customerName || "you"}</div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-0 lg:grid-cols-[1fr_1.2fr]">
+          <div className="p-10 pb-6 lg:pb-10">
+            <ItemHero item={best.item} score={best.score} large />
+          </div>
+          <div className="p-10 pt-0 lg:pl-0 lg:pt-10">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-brand/15 px-4 py-1.5 text-xs font-medium text-brand ring-1 ring-brand/30">
+              <Sparkles className="h-3.5 w-3.5" />
+              {proposalEngine === "claude+writer"
+                ? "Authored by Claude"
+                : "Your proposal"}
+            </div>
+            <h2 className="text-3xl font-semibold tracking-tight">
+              {best.item.name}
+            </h2>
+            <p className="mt-1 text-lg text-ink-muted">
+              {formatMoney(best.item.price, best.item.currency)}
+            </p>
+
+            <div className="mt-5 space-y-3 text-base leading-relaxed text-ink-muted">
+              {paragraphs.map((p, i) => (
+                <p key={i}>{p}</p>
+              ))}
+            </div>
+
+            <div className="mt-6 flex flex-wrap gap-2">
+              {best.item.highlights.slice(0, 4).map((h) => (
+                <span
+                  key={h}
+                  className="glass inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs text-ink-muted"
+                >
+                  <Check className="h-3 w-3 text-brand" /> {h}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {alternates.length > 0 && (
+          <div className="border-t border-white/10 px-10 py-6">
+            <div className="mb-3 text-[11px] uppercase tracking-[0.18em] text-ink-faint">
+              Also considered
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {alternates.map((s) => (
+                <div
+                  key={s.item.id}
+                  className="flex items-center justify-between rounded-2xl bg-white/[0.03] px-4 py-3"
+                >
+                  <span className="text-sm text-ink-muted">{s.item.name}</span>
+                  <span className="text-sm text-ink-faint">
+                    {formatMoney(s.item.price, s.item.currency)} · {s.score}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </motion.div>
   );

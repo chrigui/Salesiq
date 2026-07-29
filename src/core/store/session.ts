@@ -16,7 +16,8 @@ export type DisplayView =
   | "question"
   | "recommendation"
   | "compare"
-  | "item";
+  | "item"
+  | "proposal";
 
 export interface CustomerInfo {
   name: string;
@@ -72,6 +73,14 @@ export interface SessionState {
   bookmarks: string[];
   customer: CustomerInfo;
   timeline: TimelineEvent[];
+  /**
+   * The proposal narrative currently presented on the customer display
+   * (Claude-authored or the deterministic writer's text) — set only when the
+   * salesperson explicitly presents it, so the big screen never shows a
+   * proposal that wasn't reviewed first.
+   */
+  proposalText: string | null;
+  proposalEngine: string | null;
   /** Bumps on every meaningful change to drive display animations. */
   revision: number;
 }
@@ -85,6 +94,8 @@ interface SessionActions {
   focusItem: (itemId: string | null) => void;
   toggleBookmark: (itemId: string) => void;
   updateCustomer: (patch: Partial<CustomerInfo>) => void;
+  /** Push a reviewed proposal onto the customer display and switch it into view. */
+  presentProposal: (text: string, engine: string | null) => void;
   /** Record a interaction not covered by another action (proposal, lead saved…). */
   logEvent: (event: Omit<TimelineEvent, "id" | "ts">) => void;
   reset: () => void;
@@ -125,6 +136,8 @@ function initialState(): SessionState {
     bookmarks: [],
     customer: { name: "", phone: "", email: "", notes: "" },
     timeline: [],
+    proposalText: null,
+    proposalEngine: null,
     revision: 0,
   };
 }
@@ -140,6 +153,8 @@ function snapshot(s: SessionState & SessionActions): SessionState {
     bookmarks: s.bookmarks,
     customer: s.customer,
     timeline: s.timeline,
+    proposalText: s.proposalText,
+    proposalEngine: s.proposalEngine,
     revision: s.revision,
   };
 }
@@ -231,6 +246,17 @@ export const useSession = create<SessionState & SessionActions>((set, get) => {
       publish();
     },
 
+    presentProposal: (text, engine) =>
+      bump({
+        proposalText: text,
+        proposalEngine: engine,
+        view: "proposal",
+        timeline: pushEvent(get().timeline, {
+          kind: "proposal",
+          detail: "Presented the proposal on the customer screen",
+        }),
+      }),
+
     logEvent: (event) => {
       set((s) => ({
         timeline: pushEvent(s.timeline, event),
@@ -279,11 +305,24 @@ export const useSession = create<SessionState & SessionActions>((set, get) => {
       publish();
     },
 
-    _applyRemote: (state) => set({ ...state, timeline: state.timeline ?? [] }),
+    _applyRemote: (state) =>
+      set({
+        ...state,
+        timeline: state.timeline ?? [],
+        proposalText: state.proposalText ?? null,
+        proposalEngine: state.proposalEngine ?? null,
+      }),
 
     _hydrate: () => {
       const env = bus.hydrate();
-      if (env) set({ ...env.state, timeline: env.state.timeline ?? [] });
+      if (env) {
+        set({
+          ...env.state,
+          timeline: env.state.timeline ?? [],
+          proposalText: env.state.proposalText ?? null,
+          proposalEngine: env.state.proposalEngine ?? null,
+        });
+      }
     },
   };
 });
