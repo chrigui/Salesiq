@@ -8,6 +8,7 @@ import { narrate, formatMoney } from "@/core/engine/explain";
 import { saveLead } from "@/core/store/leads";
 import { getKnowledgeBase, knowledgePayload } from "@/core/data/knowledgeBase";
 import { getAiSettings } from "@/core/data/aiSettings";
+import { fireWebhook } from "@/core/data/integrations";
 import type { IndustryPack } from "@/core/types";
 import type { ScoredItem } from "@/core/engine/scoring";
 
@@ -120,7 +121,7 @@ export function ProposalSheet({
 
   const handleSaveLead = () => {
     if (!best) return;
-    saveLead({
+    const lead = saveLead({
       name: customer.name || "Unnamed lead",
       phone: customer.phone,
       email: customer.email,
@@ -132,6 +133,7 @@ export function ProposalSheet({
       currency: best.item.currency,
       score: best.score,
     });
+    fireWebhook("lead.created", lead);
     logEvent({ kind: "lead", detail: `Saved lead — ${customer.name || "Unnamed"}` });
     setSaved(true);
   };

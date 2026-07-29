@@ -23,6 +23,7 @@ import { LeadManagement } from "@/components/console/LeadManagement";
 import { IndustryBuilder } from "@/components/console/IndustryBuilder";
 import { KnowledgeBase } from "@/components/console/KnowledgeBase";
 import { AiSettings } from "@/components/console/AiSettings";
+import { Integrations } from "@/components/console/Integrations";
 import { LoginScreen } from "@/components/console/LoginScreen";
 import { DEFAULT_PACK_ID } from "@/core/industries";
 import { useLeads } from "@/core/store/leads";
@@ -167,6 +168,8 @@ export default function DashboardPage() {
         <PermissionsEditor />
       ) : tab === "Subscription" ? (
         <SubscriptionManagement />
+      ) : tab === "Integrations" ? (
+        <Integrations />
       ) : tab === "Overview" ? (
         <Overview />
       ) : (
