@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import QRCode from "qrcode";
-import { Smartphone, X, Check, Wifi, WifiOff } from "lucide-react";
+import { Smartphone, X, Check, Wifi, WifiOff, ChevronDown } from "lucide-react";
 import { useSync } from "@/components/providers/SyncProvider";
 import { cx } from "@/components/ui/primitives";
+import { SYNC_PREFIX } from "@/core/sync/network";
 
 /* ----------------------------- Display side ----------------------------- */
 
@@ -120,9 +121,11 @@ export function PairingOverlay() {
                     ? "Waiting for your phone…"
                     : status === "connected"
                       ? "Ready — waiting for your phone…"
-                      : status === "error"
-                        ? "Connection issue — retrying…"
-                        : "Starting…"}
+                      : status === "offline"
+                        ? "Offline — will reconnect automatically"
+                        : status === "error"
+                          ? "Connection issue — retrying…"
+                          : "Starting…"}
               </div>
             </motion.div>
           </motion.div>
@@ -138,6 +141,7 @@ export function PairingOverlay() {
 export function CompanionSyncBar() {
   const { role, room, status, setRoom } = useSync();
   const [code, setCode] = useState("");
+  const [details, setDetails] = useState(false);
   if (role !== "companion") return null;
 
   const paired = status === "paired";
@@ -166,19 +170,35 @@ export function CompanionSyncBar() {
   }
 
   return (
-    <div
-      className={cx(
-        "flex items-center gap-2 border-b border-white/5 px-5 py-2 text-xs font-medium",
-        paired ? "text-emerald-300" : "text-ink-muted",
-      )}
-    >
-      <StatusDot status={status} />
-      {paired ? (
-        <>
-          <Check className="h-3.5 w-3.5" /> Connected to display · {room}
-        </>
-      ) : (
-        <>Connecting to {room}…</>
+    <div className="border-b border-white/5">
+      <button
+        onClick={() => setDetails((d) => !d)}
+        className={cx(
+          "flex w-full items-center gap-2 px-5 py-2 text-left text-xs font-medium transition",
+          paired ? "text-emerald-300" : "text-ink-muted",
+        )}
+      >
+        <StatusDot status={status} />
+        {paired ? (
+          <>
+            <Check className="h-3.5 w-3.5" /> Connected to display · {room}
+          </>
+        ) : status === "offline" ? (
+          <>
+            <WifiOff className="h-3.5 w-3.5" /> Offline · changes will sync when reconnected
+          </>
+        ) : (
+          <>Connecting to {room}…</>
+        )}
+        <ChevronDown className={cx("ml-auto h-3.5 w-3.5 transition", details && "rotate-180")} />
+      </button>
+      {details && (
+        <div className="space-y-1 px-5 pb-3 text-[11px] text-ink-faint">
+          <div>Role: companion (publisher)</div>
+          <div>State topic: {SYNC_PREFIX}/{room}/state</div>
+          <div>Presence topic: {SYNC_PREFIX}/{room}/presence/+</div>
+          <div>Payloads encrypted per room (AES-GCM)</div>
+        </div>
       )}
     </div>
   );
@@ -188,7 +208,7 @@ function StatusDot({ status }: { status: string }) {
   const color =
     status === "paired"
       ? "bg-emerald-400"
-      : status === "error"
+      : status === "error" || status === "offline"
         ? "bg-rose-400"
         : "bg-amber-400";
   return (
