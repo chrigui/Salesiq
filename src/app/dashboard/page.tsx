@@ -19,6 +19,7 @@ import { BranchManagement } from "@/components/console/BranchManagement";
 import { UserManagement } from "@/components/console/UserManagement";
 import { PermissionsEditor } from "@/components/console/PermissionsEditor";
 import { SubscriptionManagement } from "@/components/console/SubscriptionManagement";
+import { LeadManagement } from "@/components/console/LeadManagement";
 import { LoginScreen } from "@/components/console/LoginScreen";
 import { DEFAULT_PACK_ID } from "@/core/industries";
 import { useLeads } from "@/core/store/leads";
@@ -133,7 +134,7 @@ export default function DashboardPage() {
       ) : tab === "Branding" ? (
         <BuilderSection kind="branding" packId={builderPack} onPackChange={setBuilderPack} />
       ) : tab === "Leads" ? (
-        <RecentLeads />
+        <LeadManagement />
       ) : tab === "Analytics" ? (
         <Analytics />
       ) : tab === "Settings" ? (
