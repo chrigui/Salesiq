@@ -3,7 +3,7 @@ import { getPack } from "@/core/industries";
 import { scoreInventory } from "@/core/engine/scoring";
 import { respondToObjection, buildObjectionPrompt } from "@/core/engine/objection";
 import type { KnowledgeFact } from "@/core/engine/proposal";
-import { resolveAiSettings, type AiSettingsShape } from "@/core/data/aiSettings";
+import { resolveAiSettings, type AiSettingsShape } from "@/core/data/aiSettingsShared";
 import type { Answers, IndustryPack } from "@/core/types";
 import type { ScoredItem } from "@/core/engine/scoring";
 

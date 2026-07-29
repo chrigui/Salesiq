@@ -1,6 +1,6 @@
 import type { IndustryPack } from "@/core/types";
 import type { ScoredItem } from "./scoring";
-import { toneDirective, type AiSettingsShape } from "@/core/data/aiSettings";
+import { toneDirective, type AiSettingsShape } from "@/core/data/aiSettingsShared";
 
 /**
  * The AI Decision Engine's explanation layer.

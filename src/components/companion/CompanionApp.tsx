@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useSession } from "@/core/store/session";
-import { useLivePack, useAllPacks } from "@/core/store/packs";
+import { useLivePack, useAllPacks, getEffectivePack } from "@/core/store/packs";
 import { scoreInventory, isVisible } from "@/core/engine/scoring";
 import { formatMoney } from "@/core/engine/explain";
 import { Button, cx, Eyebrow } from "@/components/ui/primitives";
@@ -129,7 +129,9 @@ export function CompanionApp() {
                 key={p.id}
                 onClick={() => {
                   session.setPack(p.id);
-                  setActiveSection(p.sections[0]?.id);
+                  // Use the merged (draft-aware) sections, not the shell's —
+                  // a custom pack's first section can change post-generation.
+                  setActiveSection(getEffectivePack(p.id).sections[0]?.id);
                 }}
                 className={cx(
                   "whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-medium transition",

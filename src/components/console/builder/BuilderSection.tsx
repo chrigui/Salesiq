@@ -1,14 +1,16 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { ExternalLink, RotateCcw, Wand2 } from "lucide-react";
+import { ExternalLink, RotateCcw, Wand2, Sparkles } from "lucide-react";
 import { Panel } from "@/components/console/ConsoleShell";
 import { Select } from "./fields";
-import { hasDraft, resetPack, useAllPacks, useDraftedPackIds } from "@/core/store/packs";
+import { hasDraft, resetPack, useAllPacks, useDraftedPackIds, useLivePack } from "@/core/store/packs";
 import { QuestionBuilder } from "./QuestionBuilder";
 import { InventoryBuilder } from "./InventoryBuilder";
 import { RulesBuilder } from "./RulesBuilder";
 import { BrandingBuilder } from "./BrandingBuilder";
+import { SmartWizard } from "./SmartWizard";
 
 export type BuilderKind = "questions" | "inventory" | "rules" | "branding";
 
@@ -28,15 +30,26 @@ export function BuilderSection({
   kind,
   packId,
   onPackChange,
+  onNavigate,
 }: {
   kind: BuilderKind;
   packId: string;
   onPackChange: (id: string) => void;
+  /** Optional: lets "Take me to Questions" in the Smart Wizard switch tabs. */
+  onNavigate?: (tab: "Questions") => void;
 }) {
   // Re-render when drafts change so the "Customised" badge stays accurate.
   const drafted = useDraftedPackIds();
   const customised = drafted.includes(packId) || hasDraft(packId);
   const allPacks = useAllPacks();
+  const livePack = useLivePack(packId);
+  const [wizardOpen, setWizardOpen] = useState(false);
+  // Bumped after the Smart Wizard writes a fresh draft, to force the active
+  // builder to remount and re-read it — the builders keep their own local
+  // editable copy for responsive typing, which otherwise only re-syncs when
+  // packId itself changes, not when something else overwrites the same draft.
+  const [wizardVersion, setWizardVersion] = useState(0);
+  const builderKey = `${packId}:${wizardVersion}`;
 
   return (
     <Panel title={TITLES[kind]}>
@@ -63,6 +76,12 @@ export function BuilderSection({
         )}
 
         <div className="ml-auto flex items-center gap-2">
+          <button
+            onClick={() => setWizardOpen(true)}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-zinc-900 px-3 py-2 text-xs font-semibold text-white transition hover:brightness-110"
+          >
+            <Sparkles className="h-3.5 w-3.5" /> Smart Wizard
+          </button>
           {customised && (
             <button
               onClick={() => {
@@ -90,13 +109,26 @@ export function BuilderSection({
       </div>
 
       {kind === "questions" ? (
-        <QuestionBuilder packId={packId} />
+        <QuestionBuilder key={builderKey} packId={packId} />
       ) : kind === "inventory" ? (
-        <InventoryBuilder packId={packId} />
+        <InventoryBuilder key={builderKey} packId={packId} />
       ) : kind === "rules" ? (
-        <RulesBuilder packId={packId} />
+        <RulesBuilder key={builderKey} packId={packId} />
       ) : (
-        <BrandingBuilder packId={packId} />
+        <BrandingBuilder key={builderKey} packId={packId} />
+      )}
+
+      {wizardOpen && (
+        <SmartWizard
+          packId={packId}
+          pack={livePack}
+          onClose={() => setWizardOpen(false)}
+          onGenerated={() => {
+            setWizardOpen(false);
+            setWizardVersion((v) => v + 1);
+            onNavigate?.("Questions");
+          }}
+        />
       )}
     </Panel>
   );

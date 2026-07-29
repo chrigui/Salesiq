@@ -45,6 +45,7 @@ function resolveBasePack(packId: string): IndustryPack {
  * questions array + an inventory array over the base pack) stays identical.
  */
 export interface PackDraft {
+  sections?: { id: string; label: string }[];
   questions?: Question[];
   inventory?: InventoryItem[];
   ruleSpecs?: RuleSpec[];
@@ -83,7 +84,8 @@ export function hasDraft(packId: string): boolean {
   const d = readAll()[packId];
   return (
     !!d &&
-    (d.questions != null ||
+    (d.sections != null ||
+      d.questions != null ||
       d.inventory != null ||
       d.ruleSpecs != null ||
       d.branding != null)
@@ -96,6 +98,7 @@ export function mergePack(base: IndustryPack, draft?: PackDraft): IndustryPack {
   const ruleSpecs = draft.ruleSpecs ?? base.ruleSpecs;
   return {
     ...base,
+    sections: draft.sections ?? base.sections,
     questions: draft.questions ?? base.questions,
     inventory: draft.inventory ?? base.inventory,
     branding: draft.branding ?? base.branding,
@@ -116,6 +119,10 @@ function patchDraft(packId: string, patch: Partial<PackDraft>): void {
   const base = resolveBasePack(packId);
   all[base.id] = { ...all[base.id], ...patch, updatedAt: Date.now() };
   writeAll(all);
+}
+
+export function saveSections(packId: string, sections: { id: string; label: string }[]): void {
+  patchDraft(packId, { sections });
 }
 
 export function saveQuestions(packId: string, questions: Question[]): void {

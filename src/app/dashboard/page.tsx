@@ -152,13 +152,13 @@ export default function DashboardPage() {
           }}
         />
       ) : tab === "Questions" ? (
-        <BuilderSection kind="questions" packId={builderPack} onPackChange={setBuilderPack} />
+        <BuilderSection kind="questions" packId={builderPack} onPackChange={setBuilderPack} onNavigate={setTab} />
       ) : tab === "Inventory" ? (
-        <BuilderSection kind="inventory" packId={builderPack} onPackChange={setBuilderPack} />
+        <BuilderSection kind="inventory" packId={builderPack} onPackChange={setBuilderPack} onNavigate={setTab} />
       ) : tab === "Scoring" ? (
-        <BuilderSection kind="rules" packId={builderPack} onPackChange={setBuilderPack} />
+        <BuilderSection kind="rules" packId={builderPack} onPackChange={setBuilderPack} onNavigate={setTab} />
       ) : tab === "Branding" ? (
-        <BuilderSection kind="branding" packId={builderPack} onPackChange={setBuilderPack} />
+        <BuilderSection kind="branding" packId={builderPack} onPackChange={setBuilderPack} onNavigate={setTab} />
       ) : tab === "Knowledge" ? (
         <KnowledgeBase />
       ) : tab === "AiSettings" ? (

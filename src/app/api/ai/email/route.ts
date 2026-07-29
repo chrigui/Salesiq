@@ -8,7 +8,7 @@ import {
   type EmailLeadFacts,
 } from "@/core/engine/email";
 import type { KnowledgeFact } from "@/core/engine/proposal";
-import { resolveAiSettings, type AiSettingsShape } from "@/core/data/aiSettings";
+import { resolveAiSettings, type AiSettingsShape } from "@/core/data/aiSettingsShared";
 import type { IndustryPack } from "@/core/types";
 
 /**

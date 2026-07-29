@@ -1,7 +1,7 @@
 import type { IndustryPack } from "@/core/types";
 import type { ScoredItem } from "./scoring";
 import { formatMoney } from "./explain";
-import { toneDirective, knowledgeOnlyDirective, type AiSettingsShape } from "@/core/data/aiSettings";
+import { toneDirective, knowledgeOnlyDirective, type AiSettingsShape } from "@/core/data/aiSettingsShared";
 
 export interface KnowledgeFact {
   title: string;

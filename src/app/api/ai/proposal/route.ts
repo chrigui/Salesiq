@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getPack } from "@/core/industries";
 import { scoreInventory, type ScoredItem } from "@/core/engine/scoring";
 import { writeProposal, buildProposalPrompt, type KnowledgeFact } from "@/core/engine/proposal";
-import { resolveAiSettings, type AiSettingsShape } from "@/core/data/aiSettings";
+import { resolveAiSettings, type AiSettingsShape } from "@/core/data/aiSettingsShared";
 import type { Answers, IndustryPack } from "@/core/types";
 
 /**
