@@ -44,7 +44,8 @@ export type TimelineEventKind =
   | "proposal"
   | "lead"
   | "demo"
-  | "reset";
+  | "reset"
+  | "objection";
 
 export interface TimelineEvent {
   id: string;

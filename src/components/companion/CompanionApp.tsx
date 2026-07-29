@@ -18,6 +18,7 @@ import {
   Wand2,
   Loader2,
   History,
+  ShieldQuestion,
 } from "lucide-react";
 import Link from "next/link";
 import { useSession } from "@/core/store/session";
@@ -29,6 +30,7 @@ import { Icon } from "@/lib/icon";
 import type { Question, BudgetValue } from "@/core/types";
 import { ProposalSheet } from "./ProposalSheet";
 import { SessionTimeline } from "./SessionTimeline";
+import { ObjectionHandler } from "./ObjectionHandler";
 import { CompanionSyncBar } from "@/components/sync/Pairing";
 
 export function CompanionApp() {
@@ -38,6 +40,7 @@ export function CompanionApp() {
   const [activeSection, setActiveSection] = useState(pack.sections[0]?.id);
   const [proposalOpen, setProposalOpen] = useState(false);
   const [timelineOpen, setTimelineOpen] = useState(false);
+  const [objectionOpen, setObjectionOpen] = useState(false);
 
   const visibleQuestions = useMemo(
     () =>
@@ -74,6 +77,13 @@ export function CompanionApp() {
             </div>
           </div>
           <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setObjectionOpen(true)}
+              aria-label="Objection handler"
+              className="grid h-8 w-8 place-items-center rounded-full border border-white/10 bg-white/5 text-ink-muted transition hover:bg-white/10"
+            >
+              <ShieldQuestion className="h-3.5 w-3.5" />
+            </button>
             <button
               onClick={() => setTimelineOpen(true)}
               aria-label="Session timeline"
@@ -254,6 +264,13 @@ export function CompanionApp() {
       <ProposalSheet
         open={proposalOpen}
         onClose={() => setProposalOpen(false)}
+        pack={pack}
+        scored={scored}
+      />
+
+      <ObjectionHandler
+        open={objectionOpen}
+        onClose={() => setObjectionOpen(false)}
         pack={pack}
         scored={scored}
       />

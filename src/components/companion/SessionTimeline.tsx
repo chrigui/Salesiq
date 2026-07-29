@@ -14,6 +14,7 @@ import {
   FileText,
   UserPlus,
   RotateCcw,
+  ShieldQuestion,
 } from "lucide-react";
 import type { IndustryPack } from "@/core/types";
 import type { TimelineEvent } from "@/core/store/session";
@@ -31,6 +32,7 @@ const ICONS: Record<TimelineEvent["kind"], typeof History> = {
   lead: UserPlus,
   demo: Sparkles,
   reset: RotateCcw,
+  objection: ShieldQuestion,
 };
 
 const VIEW_LABEL: Record<string, string> = {
@@ -81,6 +83,8 @@ function describe(event: TimelineEvent, pack: IndustryPack): string {
       return event.detail ?? "Loaded demo scenario";
     case "reset":
       return event.detail ?? "Session reset";
+    case "objection":
+      return event.detail ?? "Handled an objection";
     default:
       return event.detail ?? "Interaction";
   }
