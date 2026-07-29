@@ -20,6 +20,7 @@ import { UserManagement } from "@/components/console/UserManagement";
 import { PermissionsEditor } from "@/components/console/PermissionsEditor";
 import { SubscriptionManagement } from "@/components/console/SubscriptionManagement";
 import { LeadManagement } from "@/components/console/LeadManagement";
+import { IndustryBuilder } from "@/components/console/IndustryBuilder";
 import { LoginScreen } from "@/components/console/LoginScreen";
 import { DEFAULT_PACK_ID } from "@/core/industries";
 import { useLeads } from "@/core/store/leads";
@@ -36,6 +37,7 @@ import {
 // Nav items gated by a capability; items with no entry are always visible to
 // any signed-in user (e.g. Overview, Organization profile, Integrations).
 const NAV_CAPABILITY: Record<string, string> = {
+  Industries: "packs.create",
   Inventory: "inventory.view",
   Questions: "questions.edit",
   Scoring: "scoring.edit",
@@ -53,6 +55,7 @@ const NAV: NavGroup[] = [
     heading: "Main Menu",
     items: [
       { id: "Overview", label: "Overview", icon: "LayoutDashboard" },
+      { id: "Industries", label: "Industries", icon: "Boxes" },
       { id: "Inventory", label: "Inventory", icon: "Package" },
       { id: "Questions", label: "Questions", icon: "ListChecks" },
       { id: "Scoring", label: "Scoring", icon: "Scale" },
@@ -125,6 +128,13 @@ export default function DashboardPage() {
     >
       {NAV_CAPABILITY[tab] && !can(session.role, NAV_CAPABILITY[tab]) ? (
         <RestrictedPanel tab={tab} />
+      ) : tab === "Industries" ? (
+        <IndustryBuilder
+          onOpenBuilder={(id) => {
+            setBuilderPack(id);
+            setTab("Questions");
+          }}
+        />
       ) : tab === "Questions" ? (
         <BuilderSection kind="questions" packId={builderPack} onPackChange={setBuilderPack} />
       ) : tab === "Inventory" ? (

@@ -3,6 +3,12 @@
 import { useEffect, useState } from "react";
 import { getBasePack, PACKS } from "@/core/industries";
 import { compileRules } from "@/core/industries/rules";
+import {
+  customPackToShell,
+  getCustomPack,
+  getCustomPacks,
+  useCustomPacks,
+} from "@/core/data/customPacks";
 import type {
   Branding,
   InventoryItem,
@@ -10,6 +16,20 @@ import type {
   Question,
   RuleSpec,
 } from "@/core/types";
+
+/**
+ * Resolve a pack id to its base config — a shipped pack, a custom pack's
+ * (empty) shell, or the default shipped pack as a last resort. This is the
+ * one place that knows about both pack sources; everything below layers a
+ * draft on top of whichever base this returns.
+ */
+function resolveBasePack(packId: string): IndustryPack {
+  const shipped = PACKS.find((p) => p.id === packId);
+  if (shipped) return shipped;
+  const custom = getCustomPack(packId);
+  if (custom) return customPackToShell(custom);
+  return getBasePack(packId);
+}
 
 /**
  * Tenant pack customisation — the storage behind the Visual Builder.
@@ -87,13 +107,13 @@ export function mergePack(base: IndustryPack, draft?: PackDraft): IndustryPack {
 
 /** The current effective pack (base + draft) — what the builder edits against. */
 export function getEffectivePack(packId: string): IndustryPack {
-  const base = getBasePack(packId);
+  const base = resolveBasePack(packId);
   return mergePack(base, getDraft(base.id));
 }
 
 function patchDraft(packId: string, patch: Partial<PackDraft>): void {
   const all = readAll();
-  const base = getBasePack(packId);
+  const base = resolveBasePack(packId);
   all[base.id] = { ...all[base.id], ...patch, updatedAt: Date.now() };
   writeAll(all);
 }
@@ -114,10 +134,10 @@ export function saveBranding(packId: string, branding: Branding): void {
   patchDraft(packId, { branding });
 }
 
-/** Discard all customisations for a pack, reverting to the shipped config. */
+/** Discard all customisations for a pack, reverting to the shipped/shell config. */
 export function resetPack(packId: string): void {
   const all = readAll();
-  const base = getBasePack(packId);
+  const base = resolveBasePack(packId);
   delete all[base.id];
   writeAll(all);
 }
@@ -128,7 +148,7 @@ export function resetPack(packId: string): void {
  * companion and display.
  */
 export function useLivePack(packId: string): IndustryPack {
-  const [pack, setPack] = useState<IndustryPack>(() => getBasePack(packId));
+  const [pack, setPack] = useState<IndustryPack>(() => resolveBasePack(packId));
   useEffect(() => {
     const load = () => setPack(getEffectivePack(packId));
     load();
@@ -146,8 +166,10 @@ export function useLivePack(packId: string): IndustryPack {
 export function useDraftedPackIds(): string[] {
   const [ids, setIds] = useState<string[]>([]);
   useEffect(() => {
-    const load = () =>
-      setIds(PACKS.map((p) => p.id).filter((id) => hasDraft(id)));
+    const load = () => {
+      const allIds = [...PACKS.map((p) => p.id), ...getCustomPacks().map((p) => p.id)];
+      setIds(allIds.filter((id) => hasDraft(id)));
+    };
     load();
     window.addEventListener("storage", load);
     window.addEventListener(EVT, load);
@@ -157,6 +179,16 @@ export function useDraftedPackIds(): string[] {
     };
   }, []);
   return ids;
+}
+
+/**
+ * Every pack the tenant can currently select — shipped + custom (as empty
+ * shells the builder fills in). Drives the pack switchers in the Companion
+ * and the Visual Builder.
+ */
+export function useAllPacks(): IndustryPack[] {
+  const custom = useCustomPacks();
+  return [...PACKS, ...custom.map(customPackToShell)];
 }
 
 /** Slug helper shared by the builder for generating ids from labels. */

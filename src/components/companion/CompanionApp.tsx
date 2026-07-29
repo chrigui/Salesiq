@@ -21,8 +21,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useSession } from "@/core/store/session";
-import { PACKS, getPack } from "@/core/industries";
-import { useLivePack } from "@/core/store/packs";
+import { useLivePack, useAllPacks } from "@/core/store/packs";
 import { scoreInventory, isVisible } from "@/core/engine/scoring";
 import { formatMoney } from "@/core/engine/explain";
 import { Button, cx, Eyebrow } from "@/components/ui/primitives";
@@ -35,6 +34,7 @@ import { CompanionSyncBar } from "@/components/sync/Pairing";
 export function CompanionApp() {
   const session = useSession();
   const pack = useLivePack(session.packId);
+  const allPacks = useAllPacks();
   const [activeSection, setActiveSection] = useState(pack.sections[0]?.id);
   const [proposalOpen, setProposalOpen] = useState(false);
   const [timelineOpen, setTimelineOpen] = useState(false);
@@ -114,7 +114,7 @@ export function CompanionApp() {
             </button>
           </div>
           <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
-            {PACKS.map((p) => (
+            {allPacks.map((p) => (
               <button
                 key={p.id}
                 onClick={() => {
@@ -211,7 +211,7 @@ export function CompanionApp() {
             label="Reset"
             onClick={() => {
               session.reset();
-              setActiveSection(getPack(session.packId).sections[0]?.id);
+              setActiveSection(pack.sections[0]?.id);
             }}
           />
         </div>

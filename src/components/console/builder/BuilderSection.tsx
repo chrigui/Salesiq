@@ -4,8 +4,7 @@ import Link from "next/link";
 import { ExternalLink, RotateCcw, Wand2 } from "lucide-react";
 import { Panel } from "@/components/console/ConsoleShell";
 import { Select } from "./fields";
-import { PACKS } from "@/core/industries";
-import { hasDraft, resetPack, useDraftedPackIds } from "@/core/store/packs";
+import { hasDraft, resetPack, useAllPacks, useDraftedPackIds } from "@/core/store/packs";
 import { QuestionBuilder } from "./QuestionBuilder";
 import { InventoryBuilder } from "./InventoryBuilder";
 import { RulesBuilder } from "./RulesBuilder";
@@ -37,6 +36,7 @@ export function BuilderSection({
   // Re-render when drafts change so the "Customised" badge stays accurate.
   const drafted = useDraftedPackIds();
   const customised = drafted.includes(packId) || hasDraft(packId);
+  const allPacks = useAllPacks();
 
   return (
     <Panel title={TITLES[kind]}>
@@ -48,7 +48,7 @@ export function BuilderSection({
             onChange={(e) => onPackChange(e.target.value)}
             className="w-auto"
           >
-            {PACKS.map((p) => (
+            {allPacks.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.label}
               </option>
