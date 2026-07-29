@@ -5,7 +5,14 @@ import { DashboardShell, type NavGroup } from "@/components/console/DashboardShe
 import { Panel, StatCard, sparkBars } from "@/components/console/light-ui";
 import { WaffleChart } from "@/components/console/WaffleChart";
 import { cx } from "@/components/ui/primitives";
-import { platformKpis, tenants, usageByVertical } from "@/lib/analytics";
+import { platformKpis, usageByVertical } from "@/lib/analytics";
+import { usePlatformTenants } from "@/core/data/platformTenants";
+import { Subscriptions } from "@/components/console/platform/Subscriptions";
+import { BillingCenter } from "@/components/console/platform/BillingCenter";
+import { SystemMonitoring } from "@/components/console/platform/SystemMonitoring";
+import { UsageAnalytics } from "@/components/console/platform/UsageAnalytics";
+import { AuditLog } from "@/components/console/platform/AuditLog";
+import { FeatureFlags } from "@/components/console/platform/FeatureFlags";
 
 const NAV: NavGroup[] = [
   {
@@ -28,6 +35,7 @@ const NAV: NavGroup[] = [
     heading: "Management",
     items: [
       { id: "Audit logs", label: "Audit logs", icon: "ScrollText" },
+      { id: "Feature flags", label: "Feature flags", icon: "FlaskConical" },
       { id: "White-label", label: "White-label", icon: "Palette" },
       { id: "Settings", label: "Settings", icon: "Settings" },
     ],
@@ -57,8 +65,18 @@ export default function AdminPage() {
     >
       {tab === "Tenants" ? (
         <TenantsTable />
+      ) : tab === "Subscriptions" ? (
+        <Subscriptions />
+      ) : tab === "Billing" ? (
+        <BillingCenter />
       ) : tab === "Usage" ? (
-        <Usage />
+        <UsageAnalytics />
+      ) : tab === "System health" ? (
+        <SystemMonitoring />
+      ) : tab === "Audit logs" ? (
+        <AuditLog />
+      ) : tab === "Feature flags" ? (
+        <FeatureFlags />
       ) : tab === "Overview" ? (
         <Overview />
       ) : (
@@ -83,13 +101,14 @@ function Overview() {
         <div className="lg:col-span-2">
           <TenantsTable />
         </div>
-        <Usage />
+        <UsageByVertical />
       </div>
     </div>
   );
 }
 
 function TenantsTable() {
+  const tenants = usePlatformTenants();
   return (
     <Panel title="Tenants">
       <div className="overflow-x-auto">
@@ -107,7 +126,7 @@ function TenantsTable() {
           </thead>
           <tbody>
             {tenants.map((t) => (
-              <tr key={t.name} className="border-t border-zinc-100">
+              <tr key={t.id} className="border-t border-zinc-100">
                 <td className="py-3 font-medium text-zinc-900">{t.name}</td>
                 <td className="py-3 text-zinc-600">{t.vertical}</td>
                 <td className="py-3 text-zinc-600">{t.plan}</td>
@@ -137,7 +156,7 @@ function TenantsTable() {
   );
 }
 
-function Usage() {
+function UsageByVertical() {
   const max = Math.max(...usageByVertical.map((u) => u.value));
   return (
     <Panel title="Usage by vertical">

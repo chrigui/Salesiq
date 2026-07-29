@@ -129,6 +129,31 @@ export const tenants = [
   { name: "Assured Cover", vertical: "Insurance", plan: "Growth", seats: 40, sessions: 1512, mrr: 2400, health: "healthy" },
 ];
 
+// ---- Usage Analytics (Module 5 · Platform Admin) ----
+
+export interface UsageStat {
+  label: string;
+  value: string;
+  delta: string;
+  up: boolean;
+}
+
+/** Platform-wide resource usage — API calls, storage, bandwidth, AI tokens. */
+export const platformUsage: UsageStat[] = [
+  { label: "API calls this month", value: "4.82M", delta: "+18.2%", up: true },
+  { label: "Storage used", value: "312 GB", delta: "+22 GB", up: true },
+  { label: "Bandwidth this month", value: "1.4 TB", delta: "+9.6%", up: true },
+  { label: "AI tokens consumed", value: "38.6M", delta: "+31.4%", up: true },
+];
+
+export function apiCallsTrend(days = 14) {
+  const rnd = seeded(29);
+  return Array.from({ length: days }, (_, i) => ({
+    day: `D${i + 1}`,
+    calls: Math.round(120000 + i * 3800 + rnd() * 40000),
+  }));
+}
+
 export const usageByVertical = [
   { name: "Real Estate", value: 38 },
   { name: "Automotive", value: 22 },
