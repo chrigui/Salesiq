@@ -62,3 +62,21 @@ test("Sales Twin reads real progress, budget posture and decision drivers off th
   await expect(page.getByText("High")).toBeVisible();
   await expect(page.getByText("Budget", { exact: true }).first()).toBeVisible();
 });
+
+test("Buying Committee lets a salesperson track and remove real stakeholders", async ({ page }) => {
+  await page.goto("/companion");
+  await page.getByText("Load demo", { exact: true }).click();
+  await page.getByText("Sara Haddad", { exact: true }).click();
+
+  // Demo seeds one real stakeholder — not fabricated on the fly, part of the
+  // same intentional "Load demo" scenario as the customer contact.
+  await expect(page.getByText("Karim Haddad")).toBeVisible();
+
+  await page.getByPlaceholder("Name", { exact: true }).fill("Nadia Khoury");
+  await page.getByPlaceholder("Role (e.g. Economic buyer)").fill("Champion");
+  await page.getByLabel("Add stakeholder").click();
+  await expect(page.getByText("Nadia Khoury")).toBeVisible();
+
+  await page.getByLabel("Remove Karim Haddad").click();
+  await expect(page.getByText("Karim Haddad")).toHaveCount(0);
+});

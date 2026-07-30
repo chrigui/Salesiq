@@ -27,6 +27,23 @@ export interface CustomerInfo {
 }
 
 /**
+ * Buying Committee Intelligence (roadmap P2). `customer` above models
+ * exactly one contact; most real purchases involve more than one
+ * stakeholder, so this is a small, separate list rather than a rework of
+ * the primary-contact model everything else (leads, proposals) already
+ * depends on.
+ */
+export type StakeholderInfluence = "high" | "medium" | "low";
+
+export interface Stakeholder {
+  id: string;
+  name: string;
+  role: string;
+  influence: StakeholderInfluence;
+  notes: string;
+}
+
+/**
  * Session Timeline (Module 3 — Sales Companion): "stores every interaction."
  * Events are kept structured (question id, raw value, view name, item id)
  * rather than pre-formatted strings, so the UI can render them against
@@ -46,7 +63,8 @@ export type TimelineEventKind =
   | "lead"
   | "demo"
   | "reset"
-  | "objection";
+  | "objection"
+  | "stakeholder";
 
 export interface TimelineEvent {
   id: string;
@@ -72,6 +90,7 @@ export interface SessionState {
   focusedItemId: string | null;
   bookmarks: string[];
   customer: CustomerInfo;
+  stakeholders: Stakeholder[];
   timeline: TimelineEvent[];
   /**
    * The proposal narrative currently presented on the customer display
@@ -94,6 +113,9 @@ interface SessionActions {
   focusItem: (itemId: string | null) => void;
   toggleBookmark: (itemId: string) => void;
   updateCustomer: (patch: Partial<CustomerInfo>) => void;
+  addStakeholder: (stakeholder: Omit<Stakeholder, "id">) => void;
+  updateStakeholder: (id: string, patch: Partial<Stakeholder>) => void;
+  removeStakeholder: (id: string) => void;
   /** Push a reviewed proposal onto the customer display and switch it into view. */
   presentProposal: (text: string, engine: string | null) => void;
   /** Record a interaction not covered by another action (proposal, lead saved…). */
@@ -135,6 +157,7 @@ function initialState(): SessionState {
     focusedItemId: null,
     bookmarks: [],
     customer: { name: "", phone: "", email: "", notes: "" },
+    stakeholders: [],
     timeline: [],
     proposalText: null,
     proposalEngine: null,
@@ -152,6 +175,7 @@ function snapshot(s: SessionState & SessionActions): SessionState {
     focusedItemId: s.focusedItemId,
     bookmarks: s.bookmarks,
     customer: s.customer,
+    stakeholders: s.stakeholders,
     timeline: s.timeline,
     proposalText: s.proposalText,
     proposalEngine: s.proposalEngine,
@@ -246,6 +270,37 @@ export const useSession = create<SessionState & SessionActions>((set, get) => {
       publish();
     },
 
+    addStakeholder: (stakeholder) =>
+      bump({
+        stakeholders: [
+          ...get().stakeholders,
+          { ...stakeholder, id: `sh-${Date.now()}-${Math.random().toString(36).slice(2, 7)}` },
+        ],
+        timeline: pushEvent(get().timeline, {
+          kind: "stakeholder",
+          detail: `Added ${stakeholder.name || "a stakeholder"} (${stakeholder.role || "role unset"})`,
+        }),
+      }),
+
+    updateStakeholder: (id, patch) => {
+      // Not logged to the timeline — fires on every keystroke, would flood it.
+      set((s) => ({
+        stakeholders: s.stakeholders.map((sh) => (sh.id === id ? { ...sh, ...patch } : sh)),
+      }));
+      publish();
+    },
+
+    removeStakeholder: (id) => {
+      const removed = get().stakeholders.find((sh) => sh.id === id);
+      bump({
+        stakeholders: get().stakeholders.filter((sh) => sh.id !== id),
+        timeline: pushEvent(get().timeline, {
+          kind: "stakeholder",
+          detail: `Removed ${removed?.name || "a stakeholder"} from the buying committee`,
+        }),
+      });
+    },
+
     presentProposal: (text, engine) =>
       bump({
         proposalText: text,
@@ -296,6 +351,15 @@ export const useSession = create<SessionState & SessionActions>((set, get) => {
           email: "sara@example.com",
           notes: "Relocating with two school-age children.",
         },
+        stakeholders: [
+          {
+            id: "sh-demo-1",
+            name: "Karim Haddad",
+            role: "Co-decision maker",
+            influence: "high",
+            notes: "Sara's spouse — hasn't seen the shortlist yet.",
+          },
+        ],
         timeline: pushEvent(s.timeline, {
           kind: "demo",
           detail: "Loaded demo scenario",
@@ -309,6 +373,7 @@ export const useSession = create<SessionState & SessionActions>((set, get) => {
       set({
         ...state,
         timeline: state.timeline ?? [],
+        stakeholders: state.stakeholders ?? [],
         proposalText: state.proposalText ?? null,
         proposalEngine: state.proposalEngine ?? null,
       }),
@@ -319,6 +384,7 @@ export const useSession = create<SessionState & SessionActions>((set, get) => {
         set({
           ...env.state,
           timeline: env.state.timeline ?? [],
+          stakeholders: env.state.stakeholders ?? [],
           proposalText: env.state.proposalText ?? null,
           proposalEngine: env.state.proposalEngine ?? null,
         });

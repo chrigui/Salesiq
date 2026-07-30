@@ -21,9 +21,10 @@ import {
   Sliders,
   Compass,
   Fingerprint,
+  Users,
 } from "lucide-react";
 import Link from "next/link";
-import { useSession } from "@/core/store/session";
+import { useSession, type Stakeholder } from "@/core/store/session";
 import { useLivePack, useAllPacks, getEffectivePack } from "@/core/store/packs";
 import { scoreInventory, isVisible } from "@/core/engine/scoring";
 import { formatMoney } from "@/core/engine/explain";
@@ -414,8 +415,102 @@ function CustomerBlock() {
             rows={2}
             className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none placeholder:text-ink-faint focus:border-brand/50"
           />
+          <BuyingCommittee />
         </div>
       )}
+    </div>
+  );
+}
+
+const INFLUENCE_STYLE: Record<string, string> = {
+  high: "bg-rose-500/15 text-rose-300 ring-rose-500/30",
+  medium: "bg-amber-500/15 text-amber-300 ring-amber-500/30",
+  low: "bg-white/10 text-ink-faint ring-white/10",
+};
+
+/**
+ * Buying Committee Intelligence (roadmap P2). Most real purchases involve
+ * more than the one contact `customer` models — this extends the same
+ * companion customer-info panel with a small stakeholder list instead of
+ * reworking the primary-contact model everything else (leads, proposals)
+ * already depends on.
+ */
+function BuyingCommittee() {
+  const { stakeholders, addStakeholder, updateStakeholder, removeStakeholder } = useSession();
+  const [name, setName] = useState("");
+  const [role, setRole] = useState("");
+
+  const submit = () => {
+    if (!name.trim()) return;
+    addStakeholder({ name: name.trim(), role: role.trim() || "Stakeholder", influence: "medium", notes: "" });
+    setName("");
+    setRole("");
+  };
+
+  return (
+    <div className="mt-1 border-t border-white/5 pt-3">
+      <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-ink-faint">
+        <Users className="h-3.5 w-3.5" /> Buying committee
+      </div>
+
+      {stakeholders.length > 0 && (
+        <div className="mb-2.5 space-y-2">
+          {stakeholders.map((sh) => (
+            <div
+              key={sh.id}
+              className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2"
+            >
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-sm text-ink">{sh.name}</div>
+                <div className="truncate text-xs text-ink-faint">{sh.role}</div>
+              </div>
+              <select
+                value={sh.influence}
+                onChange={(e) => updateStakeholder(sh.id, { influence: e.target.value as Stakeholder["influence"] })}
+                className={cx(
+                  "shrink-0 rounded-full border-0 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide ring-1",
+                  INFLUENCE_STYLE[sh.influence],
+                )}
+              >
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+              <button
+                onClick={() => removeStakeholder(sh.id)}
+                aria-label={`Remove ${sh.name}`}
+                className="shrink-0 rounded-full p-1 text-ink-faint hover:bg-white/10 hover:text-ink"
+              >
+                <Minus className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="flex gap-1.5">
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Name"
+          className="min-w-0 flex-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none placeholder:text-ink-faint focus:border-brand/50"
+        />
+        <input
+          value={role}
+          onChange={(e) => setRole(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && submit()}
+          placeholder="Role (e.g. Economic buyer)"
+          className="min-w-0 flex-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none placeholder:text-ink-faint focus:border-brand/50"
+        />
+        <button
+          onClick={submit}
+          disabled={!name.trim()}
+          aria-label="Add stakeholder"
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-brand text-white transition hover:brightness-110 disabled:opacity-40"
+        >
+          <Plus className="h-4 w-4" />
+        </button>
+      </div>
     </div>
   );
 }
