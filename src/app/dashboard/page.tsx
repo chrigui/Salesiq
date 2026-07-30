@@ -11,7 +11,7 @@ import {
   YAxis,
 } from "recharts";
 import { DashboardShell, type NavGroup } from "@/components/console/DashboardShell";
-import { Panel, StatCard, sparkBars } from "@/components/console/light-ui";
+import { Panel, StatCard } from "@/components/console/light-ui";
 import { WaffleChart } from "@/components/console/WaffleChart";
 import { BuilderSection } from "@/components/console/builder/BuilderSection";
 import { OrganizationSettings } from "@/components/console/OrganizationSettings";
@@ -26,6 +26,7 @@ import { AiSettings } from "@/components/console/AiSettings";
 import { Integrations } from "@/components/console/Integrations";
 import { NotificationCenter } from "@/components/console/NotificationCenter";
 import { AiAnalytics } from "@/components/console/AiAnalytics";
+import { BusinessImpact } from "@/components/console/BusinessImpact";
 import { CustomerJourney } from "@/components/console/CustomerJourney";
 import { ProductHeatmap } from "@/components/console/ProductHeatmap";
 import { SecurityCompliance } from "@/components/console/SecurityCompliance";
@@ -40,8 +41,8 @@ import { useLeads } from "@/core/store/leads";
 import { useOrganization } from "@/core/data/organization";
 import { logout, useSession } from "@/core/data/auth";
 import { can } from "@/core/data/permissions";
+import { formatMoney } from "@/core/engine/explain";
 import {
-  companyKpis,
   funnel,
   popularProducts,
   popularQuestions,
@@ -57,6 +58,7 @@ const NAV_CAPABILITY: Record<string, string> = {
   Branding: "branding.edit",
   Leads: "leads.view",
   Analytics: "analytics.view",
+  "Business Impact": "analytics.view",
   Branches: "branches.manage",
   Team: "users.manage",
   Permissions: "users.manage",
@@ -85,6 +87,7 @@ const NAV: NavGroup[] = [
     heading: "Insights",
     items: [
       { id: "Leads", label: "Leads", icon: "UserPlus" },
+      { id: "Business Impact", label: "Business Impact", icon: "TrendingUp" },
       { id: "Analytics", label: "Analytics", icon: "BarChart3" },
       { id: "Notifications", label: "Notifications", icon: "Bell" },
     ],
@@ -106,7 +109,49 @@ const NAV: NavGroup[] = [
   },
 ];
 
-const KPI_UNITS = ["sessions", "", "", "leads"];
+/**
+ * Real KPIs computed from captured leads — replaces the previous static
+ * mock strip (sessions/conversion numbers that never moved regardless of
+ * what happened in the app). "Sessions this month" and "avg. session
+ * length" are dropped rather than faked: neither is derivable without a
+ * persisted session history, which this pilot's browser-only storage
+ * doesn't have.
+ */
+function useRealCompanyKpis() {
+  const leads = useLeads();
+  const decided = leads.filter((l) => l.status === "won" || l.status === "lost");
+  const won = leads.filter((l) => l.status === "won");
+  const open = leads.filter((l) => l.status !== "won" && l.status !== "lost");
+  const conversionRate = decided.length ? Math.round((won.length / decided.length) * 100) : null;
+  const pipelineValue = open.reduce((sum, l) => sum + l.price, 0);
+  const avgDealSize = leads.length
+    ? Math.round(leads.reduce((sum, l) => sum + l.price, 0) / leads.length)
+    : 0;
+  const currency = leads[0]?.currency ?? "USD";
+
+  return [
+    {
+      label: "Active leads",
+      value: String(open.length),
+      caption: `${leads.length} total captured`,
+    },
+    {
+      label: "Conversion rate",
+      value: conversionRate != null ? `${conversionRate}%` : "—",
+      caption: decided.length ? `${won.length} of ${decided.length} decided` : "no decided leads yet",
+    },
+    {
+      label: "Pipeline value",
+      value: open.length ? formatMoney(pipelineValue, currency) : "—",
+      caption: `${open.length} open lead${open.length === 1 ? "" : "s"}`,
+    },
+    {
+      label: "Avg. deal size",
+      value: leads.length ? formatMoney(avgDealSize, currency) : "—",
+      caption: `across ${leads.length} lead${leads.length === 1 ? "" : "s"}`,
+    },
+  ];
+}
 
 export default function DashboardPage() {
   const [tab, setTab] = useState<string>("Overview");
@@ -179,6 +224,8 @@ export default function DashboardPage() {
         <AiSettings />
       ) : tab === "Leads" ? (
         <LeadManagement />
+      ) : tab === "Business Impact" ? (
+        <BusinessImpact />
       ) : tab === "Analytics" ? (
         <Analytics />
       ) : tab === "Notifications" ? (
@@ -220,11 +267,12 @@ export default function DashboardPage() {
 }
 
 function Overview() {
+  const kpis = useRealCompanyKpis();
   return (
     <div className="space-y-4">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {companyKpis.map((k, i) => (
-          <StatCard key={k.label} {...k} unit={KPI_UNITS[i]} bars={sparkBars(i + 3)} />
+        {kpis.map((k) => (
+          <StatCard key={k.label} {...k} />
         ))}
       </div>
 
@@ -241,11 +289,12 @@ function Overview() {
 }
 
 function Analytics() {
+  const kpis = useRealCompanyKpis();
   return (
     <div className="space-y-4">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {companyKpis.map((k, i) => (
-          <StatCard key={k.label} {...k} unit={KPI_UNITS[i]} bars={sparkBars(i + 3)} />
+        {kpis.map((k) => (
+          <StatCard key={k.label} {...k} />
         ))}
       </div>
       <WaffleChart title="Sessions & conversions" />

@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { DashboardShell, type NavGroup } from "@/components/console/DashboardShell";
-import { Panel, StatCard, sparkBars } from "@/components/console/light-ui";
+import { Panel, StatCard } from "@/components/console/light-ui";
 import { WaffleChart } from "@/components/console/WaffleChart";
 import { cx } from "@/components/ui/primitives";
-import { platformKpis, usageByVertical } from "@/lib/analytics";
+import { usageByVertical } from "@/lib/analytics";
 import { usePlatformTenants } from "@/core/data/platformTenants";
 import { Subscriptions } from "@/components/console/platform/Subscriptions";
 import { BillingCenter } from "@/components/console/platform/BillingCenter";
@@ -41,8 +41,6 @@ const NAV: NavGroup[] = [
     ],
   },
 ];
-
-const KPI_UNITS = ["", "", "tenants", ""];
 
 const healthColor: Record<string, string> = {
   healthy: "text-emerald-600 bg-emerald-100",
@@ -86,12 +84,38 @@ export default function AdminPage() {
   );
 }
 
+/**
+ * Real platform KPIs computed from the live tenant store — replaces the
+ * previous static mock strip, which showed MRR/ARR/churn figures
+ * disconnected from the real tenant table rendered right below it (the
+ * table already reads from usePlatformTenants(); the headline numbers
+ * didn't). "Net churn" is dropped rather than faked — there's no historical
+ * tenant-count snapshot to compute it from — in favor of "at-risk tenants",
+ * which is real today.
+ */
+function usePlatformKpis() {
+  const tenants = usePlatformTenants();
+  const mrr = tenants.reduce((sum, t) => sum + t.mrr, 0);
+  const atRisk = tenants.filter((t) => t.health === "at-risk").length;
+  return [
+    { label: "MRR", value: `$${(mrr / 1000).toFixed(1)}k`, caption: `across ${tenants.length} tenants` },
+    { label: "ARR", value: `$${(mrr * 12 / 1000).toFixed(0)}k`, caption: "12 × current MRR" },
+    { label: "Active tenants", value: String(tenants.length), unit: "tenants" },
+    {
+      label: "At-risk tenants",
+      value: String(atRisk),
+      caption: atRisk > 0 ? "needs attention" : "none flagged",
+    },
+  ];
+}
+
 function Overview() {
+  const kpis = usePlatformKpis();
   return (
     <div className="space-y-4">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {platformKpis.map((k, i) => (
-          <StatCard key={k.label} {...k} unit={KPI_UNITS[i]} bars={sparkBars(i + 11)} />
+        {kpis.map((k) => (
+          <StatCard key={k.label} {...k} />
         ))}
       </div>
 

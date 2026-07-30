@@ -81,12 +81,16 @@ export interface StatCardProps {
   label: string;
   value: string;
   unit?: string;
-  delta: string;
-  up: boolean;
+  /** Omit both when there's no real prior-period figure to compare against —
+   * a fabricated trend arrow is worse than no trend at all. */
+  delta?: string;
+  up?: boolean;
+  /** A short factual caption shown in place of the trend row, e.g. "12 open leads". */
+  caption?: string;
   bars?: number[];
 }
 
-export function StatCard({ label, value, unit, delta, up, bars }: StatCardProps) {
+export function StatCard({ label, value, unit, delta, up, caption, bars }: StatCardProps) {
   return (
     <Card className="p-5">
       <div className="flex items-start justify-between">
@@ -101,29 +105,35 @@ export function StatCard({ label, value, unit, delta, up, bars }: StatCardProps)
         </span>
         {unit && <span className="text-sm text-zinc-400">{unit}</span>}
       </div>
-      <div className="mt-4 flex items-center gap-1.5 border-t border-zinc-100 pt-3">
-        <span
-          className={cx(
-            "grid h-4 w-4 place-items-center rounded-full",
-            up ? "bg-emerald-100 text-emerald-600" : "bg-rose-100 text-rose-600",
-          )}
-        >
-          {up ? (
-            <ArrowUpRight className="h-3 w-3" />
-          ) : (
-            <ArrowDownRight className="h-3 w-3" />
-          )}
-        </span>
-        <span
-          className={cx(
-            "text-xs font-medium",
-            up ? "text-emerald-600" : "text-rose-600",
-          )}
-        >
-          {delta}
-        </span>
-        <span className="text-xs text-zinc-400">vs last year</span>
-      </div>
+      {delta != null && up != null ? (
+        <div className="mt-4 flex items-center gap-1.5 border-t border-zinc-100 pt-3">
+          <span
+            className={cx(
+              "grid h-4 w-4 place-items-center rounded-full",
+              up ? "bg-emerald-100 text-emerald-600" : "bg-rose-100 text-rose-600",
+            )}
+          >
+            {up ? (
+              <ArrowUpRight className="h-3 w-3" />
+            ) : (
+              <ArrowDownRight className="h-3 w-3" />
+            )}
+          </span>
+          <span
+            className={cx(
+              "text-xs font-medium",
+              up ? "text-emerald-600" : "text-rose-600",
+            )}
+          >
+            {delta}
+          </span>
+          <span className="text-xs text-zinc-400">vs last year</span>
+        </div>
+      ) : caption ? (
+        <div className="mt-4 border-t border-zinc-100 pt-3 text-xs text-zinc-400">
+          {caption}
+        </div>
+      ) : null}
     </Card>
   );
 }

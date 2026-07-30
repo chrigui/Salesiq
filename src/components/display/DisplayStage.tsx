@@ -7,6 +7,7 @@ import { useSession } from "@/core/store/session";
 import { useLivePack } from "@/core/store/packs";
 import { scoreInventory, isVisible } from "@/core/engine/scoring";
 import { narrate, formatMoney } from "@/core/engine/explain";
+import { whyNotReasons } from "@/core/engine/whyNot";
 import { cx } from "@/components/ui/primitives";
 import { ItemImage } from "@/components/ui/ItemImage";
 import { Icon } from "@/lib/icon";
@@ -132,7 +133,7 @@ export function DisplayStage() {
             )}
 
             {view === "compare" && (
-              <CompareStage key="compare" scored={scored} />
+              <CompareStage key="compare" scored={scored} pack={pack} answers={answers} />
             )}
 
             {view === "proposal" && (
@@ -489,10 +490,15 @@ function RecommendationStage({
 
 function CompareStage({
   scored,
+  pack,
+  answers,
 }: {
   scored: ReturnType<typeof scoreInventory>;
+  pack: IndustryPack;
+  answers: Record<string, AnswerValue>;
 }) {
   const top = scored.slice(0, 3);
+  const winner = top[0];
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -544,6 +550,20 @@ function CompareStage({
                   </div>
                 ))}
               </div>
+              {i > 0 && winner && (
+                <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                  <div className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-ink-faint">
+                    Why it&rsquo;s behind {winner.item.name}
+                  </div>
+                  <ul className="space-y-1">
+                    {whyNotReasons(pack, answers, s, winner).map((r) => (
+                      <li key={r} className="text-xs text-ink-faint">
+                        {r}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           </motion.div>
         ))}
