@@ -19,6 +19,7 @@ import {
   History,
   ShieldQuestion,
   Sliders,
+  Compass,
 } from "lucide-react";
 import Link from "next/link";
 import { useSession } from "@/core/store/session";
@@ -32,6 +33,8 @@ import { ProposalSheet } from "./ProposalSheet";
 import { SessionTimeline } from "./SessionTimeline";
 import { ObjectionHandler } from "./ObjectionHandler";
 import { DecisionSimulator } from "./DecisionSimulator";
+import { SalesCopilot } from "./SalesCopilot";
+import { detectSignals } from "@/core/engine/copilot";
 import { CompanionSyncBar } from "@/components/sync/Pairing";
 
 export function CompanionApp() {
@@ -43,6 +46,7 @@ export function CompanionApp() {
   const [timelineOpen, setTimelineOpen] = useState(false);
   const [objectionOpen, setObjectionOpen] = useState(false);
   const [simulatorOpen, setSimulatorOpen] = useState(false);
+  const [copilotOpen, setCopilotOpen] = useState(false);
 
   const visibleQuestions = useMemo(
     () =>
@@ -55,6 +59,10 @@ export function CompanionApp() {
   const scored = useMemo(
     () => scoreInventory(pack, session.answers),
     [pack, session.answers],
+  );
+  const copilotSignals = useMemo(
+    () => detectSignals(pack, session.answers, session.timeline, session.bookmarks, scored),
+    [pack, session.answers, session.timeline, session.bookmarks, scored],
   );
   const answeredCount = pack.questions.filter(
     (q) => session.answers[q.id] !== undefined,
@@ -79,6 +87,18 @@ export function CompanionApp() {
             </div>
           </div>
           <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setCopilotOpen(true)}
+              aria-label="Sales copilot"
+              className="relative grid h-8 w-8 place-items-center rounded-full border border-white/10 bg-white/5 text-ink-muted transition hover:bg-white/10"
+            >
+              <Compass className="h-3.5 w-3.5" />
+              {copilotSignals.length > 0 && (
+                <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-brand px-1 text-[9px] font-semibold text-white">
+                  {copilotSignals.length}
+                </span>
+              )}
+            </button>
             <button
               onClick={() => setSimulatorOpen(true)}
               aria-label="Decision simulator"
@@ -298,6 +318,14 @@ export function CompanionApp() {
         onClose={() => setSimulatorOpen(false)}
         pack={pack}
         answers={session.answers}
+      />
+
+      <SalesCopilot
+        open={copilotOpen}
+        onClose={() => setCopilotOpen(false)}
+        pack={pack}
+        scored={scored}
+        onOpenObjectionHandler={() => setObjectionOpen(true)}
       />
     </div>
   );
