@@ -282,3 +282,9 @@ Android/iOS companion apps with offline sync, per-tenant custom domains, SSO /
 OAuth / RBAC, billing (Stripe) and CRM integrations (Salesforce, HubSpot,
 WhatsApp), and predictive analytics. Each attaches to the same config-driven
 core rather than replacing it.
+
+## Marketing website
+
+`website/` is a separate, independent Next.js app — the public marketing site,
+not the product. Different design language, different audience, its own
+`package.json` and deploy target. See `website/README.md`.
