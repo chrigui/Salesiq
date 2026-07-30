@@ -16,7 +16,7 @@ import { useUsers } from "@/core/data/users";
 import {
   LEAD_STATUSES,
   updateLead,
-  useLeads,
+  useLeadsState,
   type Lead,
   type LeadStatus,
 } from "@/core/store/leads";
@@ -55,7 +55,7 @@ function formatDate(ts: number): string {
  * Follow-up/Status half of the spec's bullet list.
  */
 export function LeadManagement() {
-  const leads = useLeads();
+  const { leads, isLoading } = useLeadsState();
   const users = useUsers();
   const [openId, setOpenId] = useState<string | null>(null);
 
@@ -84,7 +84,11 @@ export function LeadManagement() {
       </div>
 
       <Panel title="Leads">
-        {leads.length === 0 ? (
+        {isLoading ? (
+          <div className="flex items-center justify-center gap-2 py-6 text-sm text-zinc-400">
+            <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+          </div>
+        ) : leads.length === 0 ? (
           <p className="py-6 text-center text-sm text-zinc-400">
             Leads captured from live sessions appear here in real time. Run a
             session and tap{" "}
@@ -154,7 +158,9 @@ function LeadRow({
   assignable: { id: string; name: string }[];
   userName: (id: string | null) => string;
 }) {
-  const patch = (p: Partial<Lead>) => updateLead(lead.id, p);
+  const patch = (p: Partial<Lead>) => {
+    void updateLead(lead.id, p);
+  };
   const overdue =
     lead.followUpAt != null &&
     lead.followUpAt < Date.now() &&

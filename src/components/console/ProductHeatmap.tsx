@@ -1,9 +1,9 @@
 "use client";
 
-import { Flame } from "lucide-react";
+import { Flame, Loader2 } from "lucide-react";
 import { Panel } from "@/components/console/light-ui";
 import { cx } from "@/components/ui/primitives";
-import { useLeads } from "@/core/store/leads";
+import { useLeadsState } from "@/core/store/leads";
 
 const WEEKS = 6;
 const MS_PER_WEEK = 7 * 24 * 60 * 60 * 1000;
@@ -25,7 +25,18 @@ function intensityClass(value: number, max: number): string {
  * sparse; that's the real shape of the data, not a bug.
  */
 export function ProductHeatmap() {
-  const leads = useLeads();
+  const { leads, isLoading } = useLeadsState();
+
+  if (isLoading) {
+    return (
+      <Panel title="Product interest heatmap">
+        <div className="rounded-2xl border border-dashed border-zinc-200 py-10 text-center text-sm text-zinc-400">
+          <Loader2 className="mx-auto mb-2 h-6 w-6 animate-spin text-zinc-300" />
+          Loading…
+        </div>
+      </Panel>
+    );
+  }
 
   if (leads.length === 0) {
     return (

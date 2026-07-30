@@ -1,5 +1,8 @@
 import { test, expect } from "@playwright/test";
 import { login } from "./helpers";
+import { resetTestData } from "./reset";
+
+test.beforeEach(resetTestData);
 
 test("Decision Simulator recomputes the top pick locally without touching the real session", async ({ page }) => {
   await page.goto("/companion");

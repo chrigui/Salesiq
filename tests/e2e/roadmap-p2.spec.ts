@@ -1,5 +1,8 @@
 import { test, expect } from "@playwright/test";
 import { login } from "./helpers";
+import { resetTestData } from "./reset";
+
+test.beforeEach(resetTestData);
 
 test("Sales Copilot shows a clean session with no signals by default", async ({ page }) => {
   await page.goto("/companion");

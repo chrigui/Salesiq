@@ -65,6 +65,8 @@ export function ProposalSheet({
   const { customer, answers, logEvent, presentProposal } = useSession();
   const best = scored[0];
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [aiProposal, setAiProposal] = useState<string | null>(null);
   const [aiEngine, setAiEngine] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
@@ -129,28 +131,40 @@ export function ProposalSheet({
     window.setTimeout(() => setPresented(false), 2500);
   };
 
-  const handleSaveLead = () => {
-    if (!best) return;
-    const lead = saveLead({
-      name: customer.name || "Unnamed lead",
-      phone: customer.phone,
-      email: customer.email,
-      notes: customer.notes,
-      packId: pack.id,
-      packLabel: pack.label,
-      itemName: best.item.name,
-      price: best.item.price,
-      currency: best.item.currency,
-      score: best.score,
-    });
-    fireWebhook("lead.created", lead);
-    notify({
-      kind: "lead",
-      title: `New lead: ${lead.name}`,
-      detail: `${lead.itemName} · ${formatMoney(lead.price, lead.currency)}`,
-    });
-    logEvent({ kind: "lead", detail: `Saved lead — ${customer.name || "Unnamed"}` });
-    setSaved(true);
+  const handleSaveLead = async () => {
+    if (!best || saving) return;
+    setSaving(true);
+    setSaveError(null);
+    try {
+      const lead = await saveLead({
+        name: customer.name || "Unnamed lead",
+        phone: customer.phone,
+        email: customer.email,
+        notes: customer.notes,
+        packId: pack.id,
+        packLabel: pack.label,
+        itemName: best.item.name,
+        price: best.item.price,
+        currency: best.item.currency,
+        score: best.score,
+      });
+      if (!lead) {
+        setSaveError("Couldn't save the lead — try again.");
+        return;
+      }
+      fireWebhook("lead.created", lead);
+      notify({
+        kind: "lead",
+        title: `New lead: ${lead.name}`,
+        detail: `${lead.itemName} · ${formatMoney(lead.price, lead.currency)}`,
+      });
+      logEvent({ kind: "lead", detail: `Saved lead — ${customer.name || "Unnamed"}` });
+      setSaved(true);
+    } catch {
+      setSaveError("Couldn't reach the server — check your connection.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const date = new Date().toLocaleDateString("en-US", {
@@ -321,18 +335,25 @@ export function ProposalSheet({
             </button>
 
             <button
-              onClick={handleSaveLead}
-              disabled={saved || !best}
+              onClick={() => void handleSaveLead()}
+              disabled={saved || saving || !best}
               className="mt-2 w-full rounded-2xl bg-brand py-3 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-60"
             >
               {saved ? (
                 <span className="inline-flex items-center gap-1.5">
                   <Check className="h-4 w-4" /> Saved to CRM
                 </span>
+              ) : saving ? (
+                <span className="inline-flex items-center gap-1.5">
+                  <Loader2 className="h-4 w-4 animate-spin" /> Saving…
+                </span>
               ) : (
                 "Save lead to CRM"
               )}
             </button>
+            {saveError && (
+              <p className="mt-1.5 text-center text-xs text-rose-400">{saveError}</p>
+            )}
 
             <div className="mt-2 grid grid-cols-4 gap-1.5">
               <DeliveryButton

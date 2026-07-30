@@ -1,16 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import useSWR, { mutate as globalMutate } from "swr";
 
 /**
- * Captured leads. Persisted to localStorage so a session run on the companion
- * shows up live in the Company Dashboard (same browser) — closing the loop for
- * a demo with zero backend. In production this becomes a write to the tenant's
- * CRM / a KV store; the shape stays the same.
+ * Captured leads — Module 3 "Lead Management". Real DB-backed store now
+ * (src/app/api/leads/*.ts) — this is the client seam. `Lead` and
+ * `useLeads()` keep their exact shapes from the localStorage era, so the
+ * 9 components that only ever read leads needed zero changes; the 3 that
+ * mutate (ProposalSheet's "Save lead to CRM", LeadManagement's status/
+ * assign/follow-up controls, SecurityCompliance's GDPR redact) each needed
+ * only their own async handling.
  *
- * Module 3 "Lead Management": Create happens on the companion (a live session
- * becomes a lead); Edit/Assign/Follow-up/Status are managed from the
- * dashboard, where a manager triages the pipeline — see LeadManagement.tsx.
+ * Create happens on the companion (a live session becomes a lead, even
+ * unauthenticated — see the SECURITY comment on POST /api/leads);
+ * Edit/Assign/Follow-up/Status are managed from the dashboard.
  */
 export type LeadStatus = "new" | "contacted" | "qualified" | "won" | "lost";
 
@@ -42,54 +45,44 @@ export interface Lead {
   followUpAt: number | null;
 }
 
-const KEY = "salesiq-leads";
-const EVT = "salesiq-leads-updated";
+const LEADS_KEY = "/api/leads";
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-export function getLeads(): Lead[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = JSON.parse(localStorage.getItem(KEY) || "[]") as Partial<Lead>[];
-    // Merge over defaults so leads captured before this feature still work.
-    return raw.map((l) => ({
-      status: "new",
-      assignedTo: null,
-      followUpAt: null,
-      ...l,
-    })) as Lead[];
-  } catch {
-    return [];
-  }
+/** Live-updating list of captured leads, shared/deduped across every consumer via SWR's cache. */
+export function useLeads(): Lead[] {
+  const { data } = useSWR<{ leads: Lead[] }>(LEADS_KEY, fetcher);
+  return data?.leads ?? [];
 }
 
-function saveAll(leads: Lead[]): void {
-  try {
-    localStorage.setItem(KEY, JSON.stringify(leads));
-    window.dispatchEvent(new CustomEvent(EVT));
-  } catch {
-    /* storage unavailable */
-  }
+/** Same as useLeads(), but exposes loading state — use where an empty
+ * array during the initial fetch would otherwise flash a false "no leads
+ * yet" empty state. */
+export function useLeadsState(): { leads: Lead[]; isLoading: boolean } {
+  const { data, isLoading } = useSWR<{ leads: Lead[] }>(LEADS_KEY, fetcher);
+  return { leads: data?.leads ?? [], isLoading: isLoading && data === undefined };
 }
 
-export function saveLead(
+export async function saveLead(
   input: Omit<Lead, "id" | "createdAt" | "status" | "assignedTo" | "followUpAt">,
-): Lead {
-  const lead: Lead = {
-    ...input,
-    id:
-      typeof crypto !== "undefined" && crypto.randomUUID
-        ? crypto.randomUUID()
-        : String(Date.now()),
-    createdAt: Date.now(),
-    status: "new",
-    assignedTo: null,
-    followUpAt: null,
-  };
-  saveAll([lead, ...getLeads()].slice(0, 50));
-  return lead;
+): Promise<Lead | null> {
+  const res = await fetch(LEADS_KEY, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  if (!res.ok) return null;
+  const { lead } = await res.json();
+  globalMutate(LEADS_KEY);
+  return lead as Lead;
 }
 
-export function updateLead(id: string, patch: Partial<Lead>): void {
-  saveAll(getLeads().map((l) => (l.id === id ? { ...l, ...patch } : l)));
+export async function updateLead(id: string, patch: Partial<Lead>): Promise<void> {
+  await fetch(`${LEADS_KEY}/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(patch),
+  });
+  globalMutate(LEADS_KEY);
 }
 
 /**
@@ -98,26 +91,7 @@ export function updateLead(id: string, patch: Partial<Lead>): void {
  * shape (score, price, status, pack) intact, so aggregate reporting still
  * reflects that a session happened without retaining who it was.
  */
-export function redactLeadPII(id: string): void {
-  saveAll(
-    getLeads().map((l) =>
-      l.id === id ? { ...l, name: "Redacted", phone: "", email: "", notes: "" } : l,
-    ),
-  );
-}
-
-/** Live-updating list of captured leads (reacts across tabs and in-tab). */
-export function useLeads(): Lead[] {
-  const [leads, setLeads] = useState<Lead[]>([]);
-  useEffect(() => {
-    const load = () => setLeads(getLeads());
-    load();
-    window.addEventListener("storage", load);
-    window.addEventListener(EVT, load);
-    return () => {
-      window.removeEventListener("storage", load);
-      window.removeEventListener(EVT, load);
-    };
-  }, []);
-  return leads;
+export async function redactLeadPII(id: string): Promise<void> {
+  await fetch(`${LEADS_KEY}/${id}/redact`, { method: "POST" });
+  globalMutate(LEADS_KEY);
 }

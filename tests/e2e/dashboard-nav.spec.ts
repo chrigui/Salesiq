@@ -1,5 +1,8 @@
 import { test, expect } from "@playwright/test";
 import { login } from "./helpers";
+import { resetTestData } from "./reset";
+
+test.beforeEach(resetTestData);
 
 const screens: { navLabel: string; heading: string | RegExp }[] = [
   { navLabel: "Overview", heading: "Overview" },

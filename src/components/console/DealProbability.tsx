@@ -1,9 +1,9 @@
 "use client";
 
-import { Radar, Flame, ThermometerSun, Snowflake, AlertTriangle } from "lucide-react";
+import { Radar, Flame, ThermometerSun, Snowflake, AlertTriangle, Loader2 } from "lucide-react";
 import { Panel } from "@/components/console/light-ui";
 import { cx } from "@/components/ui/primitives";
-import { useLeads, type Lead } from "@/core/store/leads";
+import { useLeadsState, type Lead } from "@/core/store/leads";
 import { formatMoney } from "@/core/engine/explain";
 
 /**
@@ -46,8 +46,19 @@ function riskFlags(lead: Lead): string[] {
 }
 
 export function DealProbability() {
-  const leads = useLeads();
+  const { leads, isLoading } = useLeadsState();
   const open = leads.filter((l) => l.status !== "won" && l.status !== "lost");
+
+  if (isLoading) {
+    return (
+      <Panel title="Deal probability radar">
+        <div className="rounded-2xl border border-dashed border-zinc-200 py-10 text-center text-sm text-zinc-400">
+          <Loader2 className="mx-auto mb-2 h-6 w-6 animate-spin text-zinc-300" />
+          Loading…
+        </div>
+      </Panel>
+    );
+  }
 
   if (open.length === 0) {
     return (

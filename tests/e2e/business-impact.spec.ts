@@ -1,5 +1,8 @@
 import { test, expect } from "@playwright/test";
 import { login } from "./helpers";
+import { resetTestData } from "./reset";
+
+test.beforeEach(resetTestData);
 
 test("Business Impact Dashboard shows an honest empty state with no leads", async ({ page }) => {
   await login(page);

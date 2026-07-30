@@ -1,9 +1,9 @@
 "use client";
 
-import { DollarSign, Trophy, Sparkles, Target, Award } from "lucide-react";
+import { DollarSign, Trophy, Sparkles, Target, Award, Loader2 } from "lucide-react";
 import { Panel } from "@/components/console/light-ui";
 import { cx } from "@/components/ui/primitives";
-import { useLeads } from "@/core/store/leads";
+import { useLeadsState } from "@/core/store/leads";
 import { useUsers } from "@/core/data/users";
 import { formatMoney } from "@/core/engine/explain";
 
@@ -18,8 +18,19 @@ import { formatMoney } from "@/core/engine/explain";
  * Audit for the full reasoning.
  */
 export function BusinessImpact() {
-  const leads = useLeads();
+  const { leads, isLoading } = useLeadsState();
   const users = useUsers();
+
+  if (isLoading) {
+    return (
+      <Panel title="Business impact">
+        <div className="rounded-2xl border border-dashed border-zinc-200 py-10 text-center text-sm text-zinc-400">
+          <Loader2 className="mx-auto mb-2 h-6 w-6 animate-spin text-zinc-300" />
+          Loading…
+        </div>
+      </Panel>
+    );
+  }
 
   if (leads.length === 0) {
     return (

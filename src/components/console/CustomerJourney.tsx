@@ -1,9 +1,9 @@
 "use client";
 
-import { Route } from "lucide-react";
+import { Route, Loader2 } from "lucide-react";
 import { Panel } from "@/components/console/light-ui";
 import { cx } from "@/components/ui/primitives";
-import { useLeads, LEAD_STATUSES, type LeadStatus } from "@/core/store/leads";
+import { useLeadsState, LEAD_STATUSES, type LeadStatus } from "@/core/store/leads";
 
 const STAGE_LABEL: Record<Exclude<LeadStatus, "lost">, string> = {
   new: "New",
@@ -21,7 +21,18 @@ const STAGE_LABEL: Record<Exclude<LeadStatus, "lost">, string> = {
  * each stage right now, computed live from core/store/leads.ts.
  */
 export function CustomerJourney() {
-  const leads = useLeads();
+  const { leads, isLoading } = useLeadsState();
+
+  if (isLoading) {
+    return (
+      <Panel title="Customer journey">
+        <div className="rounded-2xl border border-dashed border-zinc-200 py-10 text-center text-sm text-zinc-400">
+          <Loader2 className="mx-auto mb-2 h-6 w-6 animate-spin text-zinc-300" />
+          Loading…
+        </div>
+      </Panel>
+    );
+  }
 
   if (leads.length === 0) {
     return (

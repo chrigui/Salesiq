@@ -143,7 +143,7 @@ function DataPrivacyPanel({ actor }: { actor: string }) {
               <button
                 onClick={() => {
                   if (confirm(`Redact ${l.name}'s personal details? This can't be undone.`)) {
-                    redactLeadPII(l.id);
+                    void redactLeadPII(l.id);
                   }
                 }}
                 className="inline-flex items-center gap-1.5 rounded-xl border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-600 transition hover:bg-rose-50 hover:text-rose-600"

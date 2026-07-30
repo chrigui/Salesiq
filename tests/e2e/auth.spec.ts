@@ -1,5 +1,8 @@
 import { test, expect } from "@playwright/test";
 import { login, DEMO_EMAIL, DEMO_PASSWORD } from "./helpers";
+import { resetTestData } from "./reset";
+
+test.beforeEach(resetTestData);
 
 test("signs in with the real credential + MFA flow", async ({ page }) => {
   await login(page);
