@@ -51,3 +51,14 @@ test("Sales Copilot detects repeated real objections from the timeline", async (
   await page.getByRole("button", { name: "Open objection handler" }).click();
   await expect(page.getByText("Objection handler", { exact: true })).toBeVisible();
 });
+
+test("Sales Twin reads real progress, budget posture and decision drivers off the demo session", async ({ page }) => {
+  await page.goto("/companion");
+  await page.getByText("Load demo", { exact: true }).click();
+  await page.getByRole("button", { name: "Sales twin" }).click();
+
+  await expect(page.getByText("Questionnaire progress")).toBeVisible();
+  await expect(page.getByText("Flexible")).toBeVisible();
+  await expect(page.getByText("High")).toBeVisible();
+  await expect(page.getByText("Budget", { exact: true }).first()).toBeVisible();
+});

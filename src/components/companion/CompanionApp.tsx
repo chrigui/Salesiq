@@ -20,6 +20,7 @@ import {
   ShieldQuestion,
   Sliders,
   Compass,
+  Fingerprint,
 } from "lucide-react";
 import Link from "next/link";
 import { useSession } from "@/core/store/session";
@@ -35,6 +36,7 @@ import { ObjectionHandler } from "./ObjectionHandler";
 import { DecisionSimulator } from "./DecisionSimulator";
 import { SalesCopilot } from "./SalesCopilot";
 import { detectSignals } from "@/core/engine/copilot";
+import { SalesTwin } from "./SalesTwin";
 import { CompanionSyncBar } from "@/components/sync/Pairing";
 
 export function CompanionApp() {
@@ -47,6 +49,7 @@ export function CompanionApp() {
   const [objectionOpen, setObjectionOpen] = useState(false);
   const [simulatorOpen, setSimulatorOpen] = useState(false);
   const [copilotOpen, setCopilotOpen] = useState(false);
+  const [twinOpen, setTwinOpen] = useState(false);
 
   const visibleQuestions = useMemo(
     () =>
@@ -87,6 +90,13 @@ export function CompanionApp() {
             </div>
           </div>
           <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setTwinOpen(true)}
+              aria-label="Sales twin"
+              className="grid h-8 w-8 place-items-center rounded-full border border-white/10 bg-white/5 text-ink-muted transition hover:bg-white/10"
+            >
+              <Fingerprint className="h-3.5 w-3.5" />
+            </button>
             <button
               onClick={() => setCopilotOpen(true)}
               aria-label="Sales copilot"
@@ -326,6 +336,13 @@ export function CompanionApp() {
         pack={pack}
         scored={scored}
         onOpenObjectionHandler={() => setObjectionOpen(true)}
+      />
+
+      <SalesTwin
+        open={twinOpen}
+        onClose={() => setTwinOpen(false)}
+        pack={pack}
+        scored={scored}
       />
     </div>
   );
