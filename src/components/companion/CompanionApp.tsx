@@ -22,6 +22,7 @@ import {
   Compass,
   Fingerprint,
   Users,
+  Presentation,
 } from "lucide-react";
 import Link from "next/link";
 import { useSession, type Stakeholder, type TimelineEvent } from "@/core/store/session";
@@ -38,6 +39,7 @@ import { DecisionSimulator } from "./DecisionSimulator";
 import { SalesCopilot } from "./SalesCopilot";
 import { detectSignals } from "@/core/engine/copilot";
 import { SalesTwin } from "./SalesTwin";
+import { DemoScript, type DemoStep } from "./DemoScript";
 import { CompanionSyncBar } from "@/components/sync/Pairing";
 
 export function CompanionApp() {
@@ -51,6 +53,80 @@ export function CompanionApp() {
   const [simulatorOpen, setSimulatorOpen] = useState(false);
   const [copilotOpen, setCopilotOpen] = useState(false);
   const [twinOpen, setTwinOpen] = useState(false);
+  const [demoScriptOpen, setDemoScriptOpen] = useState(false);
+
+  const closeAllPanels = () => {
+    setProposalOpen(false);
+    setTimelineOpen(false);
+    setObjectionOpen(false);
+    setSimulatorOpen(false);
+    setCopilotOpen(false);
+    setTwinOpen(false);
+  };
+
+  const demoSteps: DemoStep[] = useMemo(
+    () => [
+      {
+        title: "Load the scenario",
+        script: `"Let's say a family of five is looking to buy — here's how a session with them would go."`,
+        run: () => {
+          closeAllPanels();
+          session.loadDemo();
+          setActiveSection("intent");
+        },
+      },
+      {
+        title: "The recommendation",
+        script: `"Based on what they told us, this is the top match — and exactly why it's the top match."`,
+        run: () => {
+          closeAllPanels();
+          session.setView("recommendation");
+        },
+      },
+      {
+        title: "Compare the shortlist",
+        script: `"If they're weighing a few options, Compare puts every one side by side."`,
+        run: () => {
+          closeAllPanels();
+          session.setView("compare");
+        },
+      },
+      {
+        title: "What if the budget moves?",
+        script: `"Let's see what happens the moment their budget flexes upward — no waiting, no re-asking."`,
+        run: () => {
+          closeAllPanels();
+          setSimulatorOpen(true);
+        },
+      },
+      {
+        title: "Handle a real objection",
+        script: `"Say they push back on price right now — watch how the response stays grounded in real facts."`,
+        run: () => {
+          closeAllPanels();
+          setObjectionOpen(true);
+        },
+      },
+      {
+        title: "Read the room",
+        script: `"The Sales Twin and Copilot read the session itself — pace, budget posture, hesitation — all from real signals."`,
+        run: () => {
+          closeAllPanels();
+          setTwinOpen(true);
+        },
+      },
+      {
+        title: "Present the proposal",
+        script: `"And when they're ready, the proposal goes straight onto the big screen in front of them."`,
+        run: () => {
+          closeAllPanels();
+          setProposalOpen(true);
+        },
+      },
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
 
   const visibleQuestions = useMemo(
     () =>
@@ -153,15 +229,23 @@ export function CompanionApp() {
         <div className="border-b border-white/5 px-5 py-3">
           <div className="flex items-center justify-between">
             <Eyebrow>Industry pack</Eyebrow>
-            <button
-              onClick={() => {
-                session.loadDemo();
-                setActiveSection("intent");
-              }}
-              className="flex items-center gap-1 rounded-full bg-brand/15 px-2.5 py-1 text-[11px] font-medium text-brand ring-1 ring-brand/25 transition hover:bg-brand/25"
-            >
-              <Sparkles className="h-3 w-3" /> Load demo
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => setDemoScriptOpen(true)}
+                className="flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-medium text-ink-muted transition hover:bg-white/10"
+              >
+                <Presentation className="h-3 w-3" /> Guided demo
+              </button>
+              <button
+                onClick={() => {
+                  session.loadDemo();
+                  setActiveSection("intent");
+                }}
+                className="flex items-center gap-1 rounded-full bg-brand/15 px-2.5 py-1 text-[11px] font-medium text-brand ring-1 ring-brand/25 transition hover:bg-brand/25"
+              >
+                <Sparkles className="h-3 w-3" /> Load demo
+              </button>
+            </div>
           </div>
           <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
             {allPacks.map((p) => (
@@ -359,6 +443,12 @@ export function CompanionApp() {
         onClose={() => setTwinOpen(false)}
         pack={pack}
         scored={scored}
+      />
+
+      <DemoScript
+        open={demoScriptOpen}
+        onClose={() => setDemoScriptOpen(false)}
+        steps={demoSteps}
       />
     </div>
   );

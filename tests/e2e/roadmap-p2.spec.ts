@@ -99,3 +99,26 @@ test("AI Meeting Replay recaps the real session and jumps the shared display to 
   await companion.getByLabel("Jump to this moment").first().click();
   await expect(display.getByText("Green Hills", { exact: true }).first()).toBeVisible({ timeout: 5000 });
 });
+
+test("Guided Demo Mode drives the real session through each scripted beat", async ({ page }) => {
+  await page.goto("/companion");
+  await page.getByRole("button", { name: "Guided demo" }).click();
+
+  await expect(page.getByText("Load the scenario")).toBeVisible();
+  await expect(page.getByText("1/7")).toBeVisible();
+  // Step 1 actually calls session.loadDemo() — real state, not a screenshot.
+  await expect(page.getByText("Green Hills", { exact: true }).first()).toBeVisible();
+
+  await page.getByRole("button", { name: "Next", exact: true }).click();
+  await expect(page.getByText("The recommendation")).toBeVisible();
+
+  // Step 4 opens the real Decision Simulator, not a mock of it.
+  for (let i = 0; i < 2; i++) {
+    await page.getByRole("button", { name: "Next", exact: true }).click();
+  }
+  await expect(page.getByText("What if the budget moves?")).toBeVisible();
+  await expect(page.getByText("Decision simulator", { exact: true })).toBeVisible();
+
+  await page.getByRole("button", { name: "Exit guided demo" }).click();
+  await expect(page.getByText("Guided demo · ")).toHaveCount(0);
+});
