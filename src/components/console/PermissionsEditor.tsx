@@ -7,7 +7,6 @@ import { cx } from "@/components/ui/primitives";
 import { ROLES, type UserRole } from "@/core/data/users";
 import {
   CAPABILITIES,
-  getPermissionMatrix,
   resetPermissionMatrix,
   savePermissionMatrix,
   usePermissionMatrix,
@@ -33,10 +32,9 @@ export function PermissionsEditor() {
 
   const toggle = (role: UserRole, capId: string) => {
     if (role === "Owner") return;
-    const next = getPermissionMatrix();
-    const granting = !next[role][capId];
-    next[role] = { ...next[role], [capId]: granting };
-    savePermissionMatrix(next);
+    const granting = !matrix[role][capId];
+    const next = { ...matrix, [role]: { ...matrix[role], [capId]: granting } };
+    void savePermissionMatrix(next);
     flash();
     const cap = CAPABILITIES.find((c) => c.id === capId);
     logTenantAudit({
@@ -65,7 +63,7 @@ export function PermissionsEditor() {
             </span>
             <button
               onClick={() => {
-                if (confirm("Reset all roles to their default permissions?")) resetPermissionMatrix();
+                if (confirm("Reset all roles to their default permissions?")) void resetPermissionMatrix();
               }}
               className="inline-flex items-center gap-1.5 rounded-xl border border-zinc-200 px-3 py-1.5 text-xs text-zinc-600 transition hover:bg-zinc-50"
             >

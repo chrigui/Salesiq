@@ -1,0 +1,414 @@
+// SalesIQ — persistent backend, Phase 1.
+//
+// Core models (Tenant, Branch, User, Session, RolePermission, Lead) are
+// wired to real API routes this phase. Every other model below mirrors an
+// existing localStorage-backed store in src/core/data/*.ts or
+// src/core/store/*.ts and is a schema-only placeholder — present so the
+// schema is holistic, not yet read/written by any route. See the migration
+// plan for the phased rollout.
+//
+// Tenant-scoping convention applied throughout: every tenant-owned model
+// carries `tenantId` + an index on it, and natural keys are composite
+// (`@@unique([tenantId, x])`), never a bare global unique — the one thing
+// the localStorage-only app never had to model, since it was effectively
+// single-tenant per browser.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+  runtime  = "nodejs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------
+// Core — wired this phase
+// ---------------------------------------------------------------------
+
+enum UserRole {
+  Owner
+  Admin
+  Manager
+  Salesperson
+  Viewer
+}
+
+enum UserStatus {
+  active
+  invited
+  suspended
+}
+
+enum LeadStatus {
+  new
+  contacted
+  qualified
+  won
+  lost
+}
+
+model Tenant {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  name            String
+  legalName       String   @default("")
+  logoGlyph       String   @default("◈")
+  logoUrl         String   @default("")
+  tagline         String   @default("")
+  defaultLanguage String   @default("en")
+  defaultCurrency String   @default("USD")
+  timezone        String   @default("UTC")
+  address         String   @default("")
+  workingHours    Json
+  businessUnits   String[]
+
+  // Platform-operator view (src/core/data/platformTenants.ts) — folded
+  // into Tenant rather than a parallel table, so the admin console's
+  // headline numbers and this row can never drift apart once wired.
+  plan     String @default("Starter")
+  seats    Int    @default(1)
+  mrr      Decimal @default(0) @db.Decimal(12, 2)
+  health   String @default("healthy")
+  vertical String @default("real-estate")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  branches        Branch[]
+  users           User[]
+  sessions        Session[]
+  rolePermissions RolePermission[]
+  leads           Lead[]
+
+  /// TODO(pass-2): src/core/data/knowledgeBase.ts
+  knowledgeEntries KnowledgeEntry[]
+  /// TODO(pass-2): src/core/data/tenantAuditLog.ts
+  tenantAuditEntries TenantAuditEntry[]
+  /// TODO(pass-2): src/core/data/notifications.ts
+  notifications Notification[]
+  /// TODO(pass-2): src/core/data/featureFlags.ts
+  featureFlags FeatureFlag[]
+  /// TODO(pass-2): src/core/data/ssoSettings.ts
+  ssoSettings SsoSettings?
+  /// TODO(pass-2): src/core/data/aiSettingsShared.ts
+  aiSettings AiSettings?
+  /// TODO(pass-2): src/core/data/integrations.ts
+  integrationSettings IntegrationSettings?
+  /// TODO(pass-2): src/core/data/billingSettings.ts
+  billingSettings BillingSettings?
+  /// TODO(pass-2): src/core/data/subscription.ts
+  subscription Subscription?
+  /// TODO(pass-2): src/core/data/customPacks.ts
+  customPacks CustomPack[]
+  /// TODO(pass-2): src/core/store/packs.ts
+  packDrafts PackDraft[]
+
+  @@index([slug])
+}
+
+model Branch {
+  id           String   @id @default(cuid())
+  tenantId     String
+  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name         String
+  code         String
+  address      String   @default("")
+  lat          Float?
+  lng          Float?
+  phone        String   @default("")
+  status       String   @default("active")
+  workingHours Json
+  teamSize     Int      @default(0)
+  displays     Int      @default(0)
+  companions   Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  users User[]
+  leads Lead[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+}
+
+model User {
+  id           String     @id @default(cuid())
+  tenantId     String
+  tenant       Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name         String
+  email        String
+  passwordHash String
+  role         UserRole
+  branchId     String?
+  branch       Branch?    @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  status       UserStatus @default(invited)
+  // Toggle only — no TOTP secret yet, see the PILOT-MODE AUTH comment in
+  // core/data/auth.ts for exactly what this does and doesn't secure.
+  mfaEnabled   Boolean    @default(false)
+  lastLoginAt  DateTime?
+  device       String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  sessions      Session[]
+  assignedLeads Lead[] @relation("LeadAssignee")
+  createdLeads  Lead[] @relation("LeadCreator")
+
+  @@unique([tenantId, email])
+  @@index([tenantId, status])
+}
+
+model Session {
+  id        String    @id @default(cuid())
+  tenantId  String
+  tenant    Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  issuedAt  DateTime  @default(now())
+  expiresAt DateTime
+  revokedAt DateTime?
+  userAgent String?
+  ip        String?
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model RolePermission {
+  id           String   @id @default(cuid())
+  tenantId     String
+  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  role         UserRole
+  capabilityId String
+  granted      Boolean
+
+  @@unique([tenantId, role, capabilityId])
+  @@index([tenantId, role])
+}
+
+model Lead {
+  id       String  @id @default(cuid())
+  tenantId String
+  tenant   Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branchId String?
+  branch   Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  name  String
+  phone String @default("")
+  email String @default("")
+  notes String @default("")
+
+  packId    String
+  packLabel String
+  itemName  String
+  price     Decimal @db.Decimal(14, 2)
+  currency  String  @db.Char(3)
+  score     Int
+
+  status       LeadStatus @default(new)
+  assignedToId String?
+  assignedTo   User?      @relation("LeadAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  createdById  String?
+  createdBy    User?      @relation("LeadCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  followUpAt DateTime?
+  // GDPR redact (src/core/store/leads.ts redactLeadPII) still writes the
+  // literal string "Redacted" to `name` for compatibility with
+  // SecurityCompliance.tsx's current string-match filter; this timestamp
+  // makes a real predicate possible later without breaking that filter.
+  redactedAt DateTime?
+
+  // Set when a lead is created from the unauthenticated /companion flow
+  // with no session cookie — see the migration plan's §"companion tenant
+  // problem" for why this exists and what it's a deliberate tradeoff for.
+  source String @default("dashboard")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId, createdAt(sort: Desc)])
+  @@index([tenantId, status])
+  @@index([tenantId, assignedToId])
+  @@index([tenantId, followUpAt])
+}
+
+// ---------------------------------------------------------------------
+// Placeholders — schema only, not wired to routes this phase
+// ---------------------------------------------------------------------
+
+/// TODO(pass-2): src/core/data/knowledgeBase.ts
+model KnowledgeEntry {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  title     String
+  category  String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId, category])
+}
+
+/// TODO(pass-2): src/core/data/tenantAuditLog.ts
+model TenantAuditEntry {
+  id       String   @id @default(cuid())
+  tenantId String
+  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  ts       DateTime @default(now())
+  actor    String
+  action   String
+  target   String
+  detail   String
+
+  @@index([tenantId, ts(sort: Desc)])
+}
+
+/// TODO(pass-2): src/core/data/notifications.ts
+model Notification {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  kind      String
+  title     String
+  detail    String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([tenantId, read, createdAt])
+}
+
+/// TODO(pass-2): src/core/data/featureFlags.ts
+model FeatureFlag {
+  id          String  @id @default(cuid())
+  tenantId    String
+  tenant      Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  key         String
+  label       String
+  description String
+  beta        Boolean @default(false)
+  enabled     Boolean @default(true)
+
+  @@unique([tenantId, key])
+}
+
+/// TODO(pass-2): src/core/data/ssoSettings.ts
+model SsoSettings {
+  tenantId    String  @id
+  tenant      Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  provider    String  @default("none")
+  metadataUrl String  @default("")
+  clientId    String  @default("")
+  enforced    Boolean @default(false)
+}
+
+/// TODO(pass-2): src/core/data/aiSettingsShared.ts
+model AiSettings {
+  tenantId          String @id
+  tenant            Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tone              String @default("professional")
+  creativity        Float  @default(0.5)
+  knowledgeOnly     Boolean @default(false)
+  maxKnowledgeFacts Int    @default(5)
+}
+
+/// TODO(pass-2): src/core/data/integrations.ts
+model IntegrationSettings {
+  tenantId       String    @id
+  tenant         Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  webhookUrl     String    @default("")
+  webhookEnabled Boolean   @default(false)
+  lastFiredAt    DateTime?
+  lastEvent      String?
+  lastStatus     String?
+}
+
+/// TODO(pass-2): src/core/data/billingSettings.ts
+model BillingSettings {
+  tenantId    String  @id
+  tenant      Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  taxRatePct  Decimal @default(0) @db.Decimal(5, 2)
+}
+
+/// TODO(pass-2): src/core/data/subscription.ts
+model Subscription {
+  tenantId     String    @id
+  tenant       Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  plan         String    @default("Starter")
+  status       String    @default("active")
+  seats        Int       @default(1)
+  renewsAt     DateTime?
+  trialEndsAt  DateTime?
+  canceledAt   DateTime?
+
+  billingEntries BillingEntry[]
+}
+
+/// TODO(pass-2): src/core/data/subscription.ts (BillingEntry)
+model BillingEntry {
+  id             String       @id @default(cuid())
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [tenantId], onDelete: Cascade)
+  date           DateTime     @default(now())
+  description    String
+  amount         Decimal      @db.Decimal(12, 2)
+  currency       String       @db.Char(3)
+  status         String
+
+  @@index([subscriptionId])
+}
+
+/// TODO(pass-2): src/core/data/customPacks.ts
+model CustomPack {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  slug      String
+  label     String
+  vertical  String
+  currency  String   @db.Char(3)
+  branding  Json
+  sections  Json
+  createdAt DateTime @default(now())
+
+  @@unique([tenantId, slug])
+}
+
+/// TODO(pass-2): src/core/store/packs.ts — draft overrides for shipped packs
+model PackDraft {
+  id         String   @id @default(cuid())
+  tenantId   String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  packId     String
+  sections   Json?
+  questions  Json?
+  inventory  Json?
+  ruleSpecs  Json?
+  branding   Json?
+  updatedAt  DateTime @updatedAt
+
+  @@unique([tenantId, packId])
+}
+
+/// TODO(pass-2): src/core/data/coupons.ts — platform-level, no tenantId
+model Coupon {
+  id           String    @id @default(cuid())
+  code         String    @unique
+  discountPct  Int
+  expiresAt    DateTime?
+  active       Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+}
+
+/// TODO(pass-2): src/core/data/auditLog.ts — platform-level, no tenantId
+model PlatformAuditEntry {
+  id     String   @id @default(cuid())
+  ts     DateTime @default(now())
+  actor  String
+  action String
+  target String
+  detail String
+
+  @@index([ts(sort: Desc)])
+}

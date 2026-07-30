@@ -1,19 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import useSWR from "swr";
 import type { UserRole } from "./users";
 import { ROLES } from "./users";
 
 /**
  * Role & Permission Engine — Module 1 · Platform Foundation.
  *
- * Every capability in the product is declared once here, grouped by the
- * resource it governs. A permission matrix (role x capability -> boolean) is
- * the tenant's actual access-control policy; Owner is always fully granted
- * and cannot be edited (there must always be one role with full access).
- * `can()` is the seam every surface will eventually call before rendering an
- * action or handling a request — today only the dashboard consults it, but
- * the shape is what a server-side check would use unchanged.
+ * Real DB-backed store now (src/app/api/permissions/route.ts), enforced
+ * server-side too (src/lib/auth/server.ts's serverCan/requireCapability) —
+ * this used to be a client-only affordance. `can()` is still called
+ * synchronously during render (the dashboard's nav-filtering useMemo), so
+ * it can't become async: it reads a module-level cache seeded with the
+ * same defaults the server seeds, refreshed as a side effect whenever
+ * usePermissionMatrix() gets a fresh fetch. First paint uses the same
+ * defaults the DB is seeded with, so there's no visible flicker.
  */
 export interface Capability {
   id: string;
@@ -31,6 +32,7 @@ export const CAPABILITIES: Capability[] = [
   { id: "ai.manage", label: "Manage AI settings", group: "AI" },
   { id: "packs.create", label: "Create industry packs", group: "AI" },
   { id: "leads.view", label: "View leads", group: "Leads & CRM" },
+  { id: "leads.edit", label: "Edit leads", group: "Leads & CRM" },
   { id: "leads.export", label: "Export reports", group: "Leads & CRM" },
   { id: "analytics.view", label: "View analytics", group: "Leads & CRM" },
   { id: "branches.manage", label: "Manage branches", group: "Organization" },
@@ -41,7 +43,7 @@ export const CAPABILITIES: Capability[] = [
 
 export type PermissionMatrix = Record<UserRole, Record<string, boolean>>;
 
-function defaultMatrix(): PermissionMatrix {
+export function defaultMatrix(): PermissionMatrix {
   const grant = (ids: string[]): Record<string, boolean> =>
     Object.fromEntries(CAPABILITIES.map((c) => [c.id, ids.includes(c.id)]));
 
@@ -49,12 +51,7 @@ function defaultMatrix(): PermissionMatrix {
   const managerSet = all.filter(
     (id) => !["billing.manage", "users.manage", "branches.manage", "security.manage"].includes(id),
   );
-  const salesSet = [
-    "inventory.view",
-    "questions.edit",
-    "leads.view",
-    "analytics.view",
-  ];
+  const salesSet = ["inventory.view", "questions.edit", "leads.view", "leads.edit", "analytics.view"];
   const viewerSet = ["inventory.view", "leads.view", "analytics.view"];
 
   return {
@@ -66,64 +63,57 @@ function defaultMatrix(): PermissionMatrix {
   };
 }
 
-const KEY = "salesiq-permissions";
-const EVT = "salesiq-permissions-updated";
+const PERMISSIONS_KEY = "/api/permissions";
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-export function getPermissionMatrix(): PermissionMatrix {
-  const fallback = defaultMatrix();
-  if (typeof window === "undefined") return fallback;
-  try {
-    const raw = localStorage.getItem(KEY);
-    if (!raw) return fallback;
-    const parsed = JSON.parse(raw) as PermissionMatrix;
-    // Merge over defaults so newly-added capabilities are always present.
-    const merged = {} as PermissionMatrix;
-    for (const role of ROLES) {
-      merged[role] = { ...fallback[role], ...parsed[role] };
-    }
-    // Owner is always fully granted — it is the non-lockout guarantee.
-    merged.Owner = fallback.Owner;
-    return merged;
-  } catch {
-    return fallback;
-  }
-}
+// The synchronous read path — can() must stay sync (see file doc comment),
+// so this cache is the seam between the async DB fetch and that sync call.
+let cachedMatrix: PermissionMatrix = defaultMatrix();
 
-export function savePermissionMatrix(matrix: PermissionMatrix): void {
-  try {
-    localStorage.setItem(KEY, JSON.stringify({ ...matrix, Owner: defaultMatrix().Owner }));
-    window.dispatchEvent(new CustomEvent(EVT));
-  } catch {
-    /* storage unavailable */
-  }
-}
-
-export function resetPermissionMatrix(): void {
-  try {
-    localStorage.removeItem(KEY);
-    window.dispatchEvent(new CustomEvent(EVT));
-  } catch {
-    /* storage unavailable */
-  }
-}
-
-/** Whether a role holds a capability — the check every surface calls. */
+/** Whether a role holds a capability — the check every surface calls, sync. */
 export function can(role: UserRole, capabilityId: string): boolean {
-  return getPermissionMatrix()[role]?.[capabilityId] ?? false;
+  if (role === "Owner") return true; // no-lockout guarantee, mirrors the server check
+  return cachedMatrix[role]?.[capabilityId] ?? false;
 }
 
-/** Live permission matrix — reacts to edits across tabs and in-tab. */
+/** Live permission matrix — reacts to edits across tabs and in-tab via SWR, and refreshes the sync cache can() reads. */
 export function usePermissionMatrix(): PermissionMatrix {
-  const [matrix, setMatrix] = useState<PermissionMatrix>(defaultMatrix());
-  useEffect(() => {
-    const load = () => setMatrix(getPermissionMatrix());
-    load();
-    window.addEventListener("storage", load);
-    window.addEventListener(EVT, load);
-    return () => {
-      window.removeEventListener("storage", load);
-      window.removeEventListener(EVT, load);
-    };
-  }, []);
-  return matrix;
+  const { data } = useSWR<{ matrix: Record<string, Record<string, boolean>> }>(PERMISSIONS_KEY, fetcher, {
+    onSuccess: (result) => {
+      const fallback = defaultMatrix();
+      const merged = {} as PermissionMatrix;
+      for (const role of ROLES) {
+        merged[role] = { ...fallback[role], ...result.matrix[role] };
+      }
+      merged.Owner = fallback.Owner;
+      cachedMatrix = merged;
+    },
+  });
+
+  if (!data) return cachedMatrix;
+  const fallback = defaultMatrix();
+  const merged = {} as PermissionMatrix;
+  for (const role of ROLES) {
+    merged[role] = { ...fallback[role], ...data.matrix[role] };
+  }
+  merged.Owner = fallback.Owner;
+  return merged;
+}
+
+export async function savePermissionMatrix(matrix: PermissionMatrix): Promise<void> {
+  await fetch(PERMISSIONS_KEY, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(matrix),
+  });
+  cachedMatrix = matrix;
+}
+
+export async function resetPermissionMatrix(): Promise<void> {
+  await savePermissionMatrix(defaultMatrix());
+}
+
+/** Non-hook accessor for the current best-known matrix (used by editors that need a synchronous read-modify-write). */
+export function getPermissionMatrix(): PermissionMatrix {
+  return cachedMatrix;
 }

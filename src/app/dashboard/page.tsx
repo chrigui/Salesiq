@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Loader2 } from "lucide-react";
 import {
   Bar,
   BarChart,
@@ -41,7 +42,7 @@ import { LoginScreen } from "@/components/console/LoginScreen";
 import { DEFAULT_PACK_ID } from "@/core/industries";
 import { useLeads } from "@/core/store/leads";
 import { useOrganization } from "@/core/data/organization";
-import { logout, useSession } from "@/core/data/auth";
+import { logout, useSessionStatus } from "@/core/data/auth";
 import { can } from "@/core/data/permissions";
 import { formatMoney } from "@/core/engine/explain";
 import {
@@ -162,7 +163,7 @@ export default function DashboardPage() {
   const [tab, setTab] = useState<string>("Overview");
   const [builderPack, setBuilderPack] = useState<string>(DEFAULT_PACK_ID);
   const org = useOrganization();
-  const session = useSession();
+  const { session, status } = useSessionStatus();
   const unreadCount = useUnreadCount();
 
   // Hide nav items the signed-in role isn't granted — the Permission Engine
@@ -183,13 +184,24 @@ export default function DashboardPage() {
     }));
   }, [session, unreadCount]);
 
+  if (status === "loading") {
+    // Neutral splash instead of a one-frame LoginScreen flash while the
+    // session probe (a real network round-trip now, not a localStorage
+    // read) resolves.
+    return (
+      <div className="console flex min-h-screen items-center justify-center bg-zinc-100">
+        <Loader2 className="h-6 w-6 animate-spin text-zinc-400" />
+      </div>
+    );
+  }
+
   if (!session) {
     return (
       <LoginScreen
         workspaceName={org.name}
         glyph={org.logoGlyph}
         onSuccess={() => {
-          /* useSession() reacts to the session-updated event automatically */
+          /* useSessionStatus() shares SWR's cache — verifyCredential/verifyMfaCode already updated it. */
         }}
       />
     );

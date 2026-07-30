@@ -19,7 +19,8 @@ import { useBranches } from "@/core/data/branches";
 import {
   ROLES,
   inviteUser,
-  saveUsers,
+  updateUser,
+  deleteUser,
   useUsers,
   type AppUser,
   type UserRole,
@@ -66,12 +67,13 @@ export function UserManagement() {
     window.setTimeout(() => setToast((t) => (t === msg ? null : t)), 2200);
   };
 
-  const update = (id: string, patch: Partial<AppUser>) =>
-    saveUsers(users.map((u) => (u.id === id ? { ...u, ...patch } : u)));
+  const update = (id: string, patch: Partial<AppUser>) => {
+    void updateUser(id, patch);
+  };
 
   const remove = (u: AppUser) => {
     if (!confirm(`Remove ${u.name}? They will lose access immediately.`)) return;
-    saveUsers(users.filter((x) => x.id !== u.id));
+    void deleteUser(u.id);
     flash(`${u.name} removed.`);
     logTenantAudit({ actor, action: "Removed user", target: u.name, detail: u.email });
   };
@@ -215,7 +217,7 @@ export function UserManagement() {
           branches={branches}
           onClose={() => setInviteOpen(false)}
           onInvite={(input) => {
-            inviteUser(input);
+            void inviteUser(input);
             setInviteOpen(false);
             flash(`Invite sent to ${input.email}.`);
             logTenantAudit({ actor, action: "Invited user", target: input.name, detail: `${input.email} · ${input.role}` });

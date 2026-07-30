@@ -1,17 +1,5 @@
-import { test, expect, type Page } from "@playwright/test";
-
-async function login(page: Page) {
-  await page.goto("/dashboard");
-  await page.locator('input[type="email"]').fill("sara@greenhills.example");
-  await page.locator('input[type="password"]').fill("demo1234");
-  await page.locator('button[type="submit"]').click();
-  const mfaField = page.locator('input[placeholder="000000"]');
-  if (await mfaField.isVisible({ timeout: 5000 }).catch(() => false)) {
-    await mfaField.fill("000000");
-    await page.getByRole("button", { name: /verify & sign in/i }).click();
-  }
-  await page.getByText(/welcome back/i).waitFor({ timeout: 10_000 });
-}
+import { test, expect } from "@playwright/test";
+import { login } from "./helpers";
 
 test("Decision Simulator recomputes the top pick locally without touching the real session", async ({ page }) => {
   await page.goto("/companion");

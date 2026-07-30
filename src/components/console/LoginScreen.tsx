@@ -1,30 +1,42 @@
 "use client";
 
 import { useState } from "react";
-import { AlertCircle, KeyRound, Lock, ShieldAlert, ShieldCheck, User2 } from "lucide-react";
+import useSWR from "swr";
+import { AlertCircle, KeyRound, Lock, Loader2, ShieldAlert, ShieldCheck, User2 } from "lucide-react";
 import { cx } from "@/components/ui/primitives";
-import { getUsers } from "@/core/data/users";
 import {
   DEMO_MFA_CODE,
   DEMO_PASSWORD,
   verifyCredential,
   verifyMfaCode,
+  type LoginError,
 } from "@/core/data/auth";
 import { SSO_PROVIDERS, useSsoSettings } from "@/core/data/ssoSettings";
 import { Field, TextInput } from "@/components/console/builder/fields";
 
-const ERROR_COPY: Record<string, string> = {
+const ERROR_COPY: Record<LoginError, string> = {
   "not-found": "No account found with that email.",
   "wrong-password": "That password isn't right.",
   suspended: "This account is suspended. Contact an admin.",
   invited: "This invite hasn't been accepted yet.",
+  network: "Couldn't reach the server. Check your connection.",
 };
 
+interface DemoAccount {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
+
+const demoAccountsFetcher = (url: string) => fetch(url).then((res) => (res.ok ? res.json() : null));
+
 /**
- * Authentication (Module 1). A real login/MFA/session flow against the
- * existing User records — see the warning in core/data/auth.ts for exactly
- * what is and isn't real here. The demo credential is shown on-screen so
- * anyone testing the pilot can sign in without guessing.
+ * Authentication (Module 1). A real login/MFA/session flow, backed by
+ * bcrypt-hashed passwords and a server-verified session cookie — see
+ * core/data/auth.ts for exactly what changed and src/lib/auth/*.ts for the
+ * server side. MFA itself stays pilot-mode; the demo code is shown
+ * on-screen so anyone testing the pilot can sign in without guessing.
  */
 export function LoginScreen({
   workspaceName,
@@ -38,37 +50,53 @@ export function LoginScreen({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [pendingUserId, setPendingUserId] = useState<string | null>(null);
+  const [pendingMfa, setPendingMfa] = useState(false);
   const [code, setCode] = useState("");
   const [mfaError, setMfaError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
   const sso = useSsoSettings();
 
-  const quickAccounts = getUsers().filter((u) => u.status === "active").slice(0, 3);
+  const { data: demoAccounts } = useSWR<{ users: DemoAccount[] }>(
+    "/api/auth/demo-accounts",
+    demoAccountsFetcher,
+  );
+  const quickAccounts = demoAccounts?.users ?? [];
 
-  const submitCredentials = (e: React.FormEvent) => {
+  const submitCredentials = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (busy) return;
     setError(null);
-    const result = verifyCredential(email, password);
-    if (!result.ok) {
-      setError(ERROR_COPY[result.error] ?? "Something went wrong.");
-      return;
+    setBusy(true);
+    try {
+      const result = await verifyCredential(email, password);
+      if (!result.ok) {
+        setError(ERROR_COPY[result.error] ?? "Something went wrong.");
+        return;
+      }
+      if (result.needsMfa) {
+        setPendingMfa(true);
+        return;
+      }
+      onSuccess();
+    } finally {
+      setBusy(false);
     }
-    if (result.needsMfa) {
-      setPendingUserId(result.pendingUserId);
-      return;
-    }
-    onSuccess();
   };
 
-  const submitMfa = (e: React.FormEvent) => {
+  const submitMfa = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!pendingUserId) return;
-    const result = verifyMfaCode(pendingUserId, code);
-    if (!result.ok) {
-      setMfaError("That code isn't right.");
-      return;
+    if (busy) return;
+    setBusy(true);
+    try {
+      const result = await verifyMfaCode(code);
+      if (!result.ok) {
+        setMfaError("That code isn't right.");
+        return;
+      }
+      onSuccess();
+    } finally {
+      setBusy(false);
     }
-    onSuccess();
   };
 
   return (
@@ -83,7 +111,7 @@ export function LoginScreen({
         </div>
 
         <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
-          {pendingUserId ? (
+          {pendingMfa ? (
             <form onSubmit={submitMfa} className="space-y-4">
               <div className="mb-1 flex items-center gap-2 text-zinc-900">
                 <ShieldCheck className="h-4 w-4" />
@@ -109,15 +137,16 @@ export function LoginScreen({
               {mfaError && <ErrorNote text={mfaError} />}
               <button
                 type="submit"
-                disabled={code.length !== 6}
-                className="w-full rounded-xl bg-zinc-900 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
+                disabled={code.length !== 6 || busy}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-zinc-900 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
               >
+                {busy && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                 Verify &amp; sign in
               </button>
               <button
                 type="button"
                 onClick={() => {
-                  setPendingUserId(null);
+                  setPendingMfa(false);
                   setCode("");
                   setMfaError(null);
                 }}
@@ -172,19 +201,20 @@ export function LoginScreen({
               {error && <ErrorNote text={error} />}
               <button
                 type="submit"
-                disabled={!email || !password}
-                className="w-full rounded-xl bg-zinc-900 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
+                disabled={!email || !password || busy}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-zinc-900 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
               >
+                {busy && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                 Sign in
               </button>
             </form>
           )}
         </div>
 
-        {!pendingUserId && (
+        {!pendingMfa && quickAccounts.length > 0 && (
           <div className="mt-4 rounded-2xl border border-dashed border-zinc-300 bg-white/60 p-4 text-xs text-zinc-500">
             <div className="mb-2 flex items-center gap-1.5 font-medium text-zinc-600">
-              <KeyRound className="h-3.5 w-3.5" /> Pilot demo — no real passwords yet
+              <KeyRound className="h-3.5 w-3.5" /> Pilot demo accounts
             </div>
             <p className="mb-2">
               Use password <span className="rounded bg-zinc-100 px-1.5 py-0.5 font-mono text-zinc-700">{DEMO_PASSWORD}</span> with any account below:
