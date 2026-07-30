@@ -8,6 +8,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      # `npm ci` runs the postinstall hook (`prisma generate`), which
+      # resolves DATABASE_URL at config-parse time even though it never
+      # opens a connection — needs to be set for the whole job, not just
+      # the `npm run build` step, or postinstall fails before build even
+      # starts. Only needs to be syntactically valid, not reachable.
+      DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci?schema=public"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -18,11 +25,6 @@ jobs:
       - run: npm run typecheck
       - run: npm run lint
       - run: npm run build
-        env:
-          # prisma generate (part of `build`) only needs a syntactically
-          # valid connection string, not a reachable database — no service
-          # container needed for this job.
-          DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci?schema=public"
 
   e2e:
     runs-on: ubuntu-latest
@@ -41,6 +43,14 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+    env:
+      # Same reasoning as the build job's DATABASE_URL — postinstall runs
+      # during `npm ci`, before any step-level env would apply. The
+      # Postgres service is already up by then, so this points straight
+      # at the real test database rather than a throwaway string.
+      DATABASE_URL: "postgresql://salesiq:salesiq@localhost:5432/salesiq_test?schema=public"
+      TEST_DATABASE_URL: "postgresql://salesiq:salesiq@localhost:5432/salesiq_test?schema=public"
+      AUTH_SECRET: ${{ secrets.AUTH_SECRET || 'ci-only-secret-not-for-production-0000' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -52,8 +62,6 @@ jobs:
       - run: npm run test:e2e
         env:
           CI: true
-          TEST_DATABASE_URL: "postgresql://salesiq:salesiq@localhost:5432/salesiq_test?schema=public"
-          AUTH_SECRET: ${{ secrets.AUTH_SECRET || 'ci-only-secret-not-for-production-0000' }}
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
