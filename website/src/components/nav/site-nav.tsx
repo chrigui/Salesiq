@@ -73,6 +73,16 @@ export function SiteNav() {
         <div className="flex items-center gap-2">
           <CommandPalette />
           <ThemeToggle />
+          {/* Plain <a>, not next/link — this crosses into the product
+              app's own zone (see next.config.mjs rewrites), so it must be
+              a full navigation, not a client-side route Next tries to
+              resolve within this app. */}
+          <a
+            href="/dashboard"
+            className="hidden px-2 text-[14px] font-medium text-ink-muted transition-colors hover:text-ink sm:inline-flex"
+          >
+            Sign in
+          </a>
           <Button asChild size="sm" className="hidden sm:inline-flex">
             <Link href="/demo">Book a demo</Link>
           </Button>
@@ -142,6 +152,9 @@ function MobileNav({
             >
               {pricingItem.label}
             </Link>
+            <a href="/dashboard" className="text-[15px] font-medium text-ink">
+              Sign in
+            </a>
           </nav>
 
           <Button asChild size="lg" className="mt-auto">

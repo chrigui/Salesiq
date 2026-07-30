@@ -287,4 +287,9 @@ core rather than replacing it.
 
 `website/` is a separate, independent Next.js app — the public marketing site,
 not the product. Different design language, different audience, its own
-`package.json` and deploy target. See `website/README.md`.
+`package.json`. It's meant to own the public root domain: deployed as a
+second Vercel project, it proxies `/display`, `/companion`, `/dashboard`,
+`/admin`, `/continue`, and `/api/*` through to this app via a `PRODUCT_APP_URL`
+env var (Vercel's [Multi-Zones](https://vercel.com/docs/multi-zones) pattern —
+see `assetPrefix` in this file's own `next.config.mjs`). No route or component
+here changes for that to work. Full deploy steps in `website/README.md`.

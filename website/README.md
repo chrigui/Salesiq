@@ -42,15 +42,62 @@ service (ESP) configured yet — forwarding to one (e.g. HubSpot, Resend) is a `
 `src/app/api/demo-request/route.ts`, the same disclosure pattern the product app uses for its own
 not-yet-wired integrations.
 
-## Deploying to Vercel
+## Deploying to Vercel — this site owns the root domain
 
-This repo hosts two independent Next.js apps. Deploy the website as its **own Vercel project**:
+This repo hosts two independent Next.js apps, and this site is meant to **own the public root
+domain** (`/`) — the product app's homepage moves aside in favor of it, while `/display`,
+`/companion`, `/dashboard`, `/admin`, `/continue`, and `/api/*` keep working exactly as before,
+transparently proxied through to the product app. This is
+[Vercel's documented Multi-Zones pattern](https://vercel.com/docs/multi-zones): two separate
+Vercel projects, stitched into one apparent site via `next.config.mjs` rewrites — not a code
+merge, so neither app's design system or routing touches the other's.
 
-1. Import this repository into Vercel as a new project (separate from the product app's project).
-2. In **Settings → General → Root Directory**, set it to `website`.
-3. Vercel auto-detects Next.js from there — no other configuration is required for this phase
-   (no database, no environment variables).
-4. Point the project's production domain at the marketing site's intended hostname.
+**You'll end up with two Vercel projects from the same repo:**
+
+| | This app (`website/`) | The product app (repo root) |
+|---|---|---|
+| Root Directory | `website` | *(default — repo root)* |
+| Owns | `/`, `/platform`, `/decision-intelligence`, `/pricing`, `/demo` | `/display`, `/companion`, `/dashboard`, `/admin`, `/continue`, `/api/*` |
+| Custom domain | Your main domain (e.g. `salesiq.ai`) | Its own Vercel-assigned domain — no custom domain needed |
+| New env var | `PRODUCT_APP_URL` | `PRODUCT_APP_URL` |
+
+### Steps
+
+1. **If the product app isn't already a Vercel project**, import this repo as one (Root Directory
+   left at its default — the repo root). Note the domain Vercel assigns it
+   (`your-project.vercel.app`, or whatever you configure).
+2. **Import this repo a second time** as a new project for the marketing site. Set
+   **Settings → General → Root Directory** to `website`.
+3. In **both** projects, add an environment variable **`PRODUCT_APP_URL`** set to the product
+   app's real URL from step 1 (e.g. `https://your-project.vercel.app`, no trailing slash).
+   - In the marketing project, it's used by `next.config.mjs`'s `rewrites()` to proxy
+     `/display`, `/companion`, `/dashboard`, `/admin`, `/continue`, and `/api/*` through to it.
+   - In the product project (root `next.config.mjs`), it's used as `assetPrefix` — so that when a
+     page is reached *through* the marketing domain's proxy, its JS/CSS chunks still resolve back
+     to the product app's own deployment instead of 404ing against the marketing domain.
+   - Neither app breaks if this var is unset — the rewrite and the assetPrefix both no-op, which
+     is exactly what local development needs (see below).
+4. **Move your main custom domain** (Domains tab) from the product project to the marketing
+   project. The product project can keep its Vercel-assigned domain, or get a new one — it doesn't
+   need the main domain once the marketing site is proxying to it.
+5. Redeploy both projects after adding the env var (`PRODUCT_APP_URL` is read at build time for
+   `assetPrefix`, and `rewrites()` is also evaluated per-build).
+
+### What this does *not* touch
+
+Zero changes to the product app's route files, components, or design system — the only change on
+that side is one `assetPrefix` line in its `next.config.mjs`. If you'd rather not do the multi-zone
+proxy setup at all, this site still works standalone on its own domain/subdomain (skip steps 3–4);
+you'd just lose the "one seamless domain" effect and the marketing nav's "Sign in" link
+(`src/components/nav/site-nav.tsx`) would need to point at the product app's actual domain instead
+of the relative `/dashboard`.
+
+### Local development with both apps
+
+`PRODUCT_APP_URL` isn't set locally, so running `npm run dev` here serves only this app's own 5
+pages — visiting `/dashboard` (e.g. via the "Sign in" link) will 404, since there's no local proxy.
+Run the product app separately (`npm run dev` from the repo root, a different port) if you need to
+test both together; there's no automated local multi-zone story for this phase.
 
 ## Design system
 
