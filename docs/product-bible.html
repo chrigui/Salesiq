@@ -1,0 +1,359 @@
+<style>
+  :root {
+    --paper: #f0f3f0; --surface: #ffffff; --surface-2: #f7f9f7;
+    --ink: #15201b; --ink-muted: #55605a; --ink-faint: #8a938c;
+    --line: rgba(21,32,27,0.12); --line-soft: rgba(21,32,27,0.07);
+    --accent: #0e8f5b; --accent-ink: #0a6f47; --accent-wash: rgba(14,143,91,0.10);
+    --brass: #9c7622; --star: #d8a72a; --star-off: rgba(21,32,27,0.16);
+    --shadow: 0 1px 2px rgba(21,32,27,0.04), 0 12px 32px -18px rgba(21,32,27,0.22);
+    --serif: "Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,ui-serif,serif;
+    --sans: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono: "SF Mono",ui-monospace,"JetBrains Mono","Cascadia Code",Menlo,Consolas,monospace;
+    --wide: 72rem; --read: 42rem;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #0a0e0c; --surface: #121714; --surface-2: #0f1512;
+      --ink: #e9eee9; --ink-muted: #9aa59d; --ink-faint: #69746c;
+      --line: rgba(255,255,255,0.12); --line-soft: rgba(255,255,255,0.07);
+      --accent: #35cf8b; --accent-ink: #55e0a2; --accent-wash: rgba(53,207,139,0.12);
+      --brass: #d8b257; --star: #e6c25a; --star-off: rgba(255,255,255,0.18);
+      --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 18px 40px -22px rgba(0,0,0,0.7);
+    }
+  }
+  :root[data-theme="light"]{--paper:#f0f3f0;--surface:#fff;--surface-2:#f7f9f7;--ink:#15201b;--ink-muted:#55605a;--ink-faint:#8a938c;--line:rgba(21,32,27,0.12);--line-soft:rgba(21,32,27,0.07);--accent:#0e8f5b;--accent-ink:#0a6f47;--accent-wash:rgba(14,143,91,0.10);--brass:#9c7622;--star:#d8a72a;--star-off:rgba(21,32,27,0.16);--shadow:0 1px 2px rgba(21,32,27,0.04),0 12px 32px -18px rgba(21,32,27,0.22);}
+  :root[data-theme="dark"]{--paper:#0a0e0c;--surface:#121714;--surface-2:#0f1512;--ink:#e9eee9;--ink-muted:#9aa59d;--ink-faint:#69746c;--line:rgba(255,255,255,0.12);--line-soft:rgba(255,255,255,0.07);--accent:#35cf8b;--accent-ink:#55e0a2;--accent-wash:rgba(53,207,139,0.12);--brass:#d8b257;--star:#e6c25a;--star-off:rgba(255,255,255,0.18);--shadow:0 1px 2px rgba(0,0,0,0.4),0 18px 40px -22px rgba(0,0,0,0.7);}
+
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink); font-family:var(--sans); line-height:1.6; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
+  .wrap { max-width:var(--wide); margin:0 auto; padding:0 1.5rem; }
+  h1,h2,h3 { font-family:var(--serif); font-weight:600; text-wrap:balance; letter-spacing:-0.01em; }
+  a { color:inherit; text-decoration:none; }
+  a:focus-visible { outline:2px solid var(--accent); outline-offset:3px; border-radius:6px; }
+
+  .eyebrow { font-family:var(--mono); font-size:0.72rem; letter-spacing:0.22em; text-transform:uppercase; color:var(--accent-ink); margin:0 0 0.9rem; }
+  .eyebrow.muted { color:var(--ink-faint); }
+
+  /* Cover */
+  .cover { position:relative; overflow:hidden; background:var(--surface); border-bottom:1px solid var(--line); }
+  .cover::before { content:""; position:absolute; inset:0; background-image:radial-gradient(var(--line) 1.1px,transparent 1.1px); background-size:20px 20px; -webkit-mask-image:radial-gradient(120% 90% at 85% -10%,#000,transparent 60%); mask-image:radial-gradient(120% 90% at 85% -10%,#000,transparent 60%); }
+  .cover::after { content:""; position:absolute; inset:0; background:radial-gradient(70% 60% at 90% -20%,var(--accent-wash),transparent 60%); }
+  .cover-inner { position:relative; padding:5rem 0 3.5rem; }
+  .brandline { display:flex; align-items:center; gap:0.6rem; margin-bottom:2.4rem; }
+  .mark { width:2rem; height:2rem; border-radius:8px; display:grid; place-items:center; background:var(--ink); color:var(--paper); font-size:1rem; }
+  .brandline .n { font-family:var(--mono); font-size:0.8rem; letter-spacing:0.08em; color:var(--ink-muted); }
+  h1.title { font-size:clamp(2.4rem,6vw,4.2rem); line-height:1.03; margin:0 0 0.6rem; max-width:18ch; }
+  .subtitle { font-family:var(--serif); font-size:clamp(1.1rem,2.4vw,1.5rem); color:var(--ink-muted); margin:0 0 1.8rem; font-style:italic; }
+  .lede { color:var(--ink-muted); max-width:52ch; margin:0 0 2.2rem; font-size:1.05rem; }
+  .meta { display:flex; flex-wrap:wrap; gap:0 2.4rem; border-top:1px solid var(--line-soft); padding-top:1.4rem; font-family:var(--mono); font-size:0.78rem; }
+  .meta dt { color:var(--ink-faint); letter-spacing:0.08em; text-transform:uppercase; font-size:0.66rem; margin-bottom:0.2rem; }
+  .meta dd { margin:0; }
+
+  /* Legend */
+  .legend { display:flex; flex-wrap:wrap; gap:1.4rem; margin-top:1.6rem; font-size:0.82rem; color:var(--ink-muted); align-items:center; }
+  .legend .dot { display:inline-block; width:0.6rem; height:0.6rem; border-radius:50%; background:var(--accent); margin-right:0.4rem; vertical-align:middle; }
+  .legend .st { color:var(--star); letter-spacing:0.05em; }
+
+  /* Module index */
+  .index { padding:3rem 0; border-bottom:1px solid var(--line-soft); }
+  .index h2 { font-size:1.1rem; margin:0 0 1.3rem; font-family:var(--sans); font-weight:650; letter-spacing:0; }
+  .modgrid { display:grid; grid-template-columns:repeat(3,1fr); gap:0.7rem; }
+  .modgrid a { display:flex; gap:0.7rem; align-items:baseline; padding:0.85rem 1rem; border:1px solid var(--line); border-radius:12px; background:var(--surface); transition:border-color .15s, transform .15s; }
+  .modgrid a:hover { border-color:var(--accent); transform:translateY(-1px); }
+  .modgrid .num { font-family:var(--mono); color:var(--brass); font-size:0.8rem; }
+  .modgrid .lbl { font-weight:600; font-size:0.92rem; }
+  .modgrid .cnt { margin-left:auto; font-family:var(--mono); font-size:0.72rem; color:var(--ink-faint); }
+
+  /* Module section */
+  .module { padding:3.4rem 0; border-bottom:1px solid var(--line-soft); scroll-margin-top:1rem; }
+  .module-head { display:flex; align-items:flex-end; justify-content:space-between; gap:1rem; margin-bottom:1.8rem; flex-wrap:wrap; }
+  .module-head .l { max-width:44rem; }
+  .module-head .kicker { font-family:var(--mono); font-size:0.72rem; letter-spacing:0.18em; text-transform:uppercase; color:var(--brass); margin:0 0 0.5rem; }
+  .module-head h2 { font-size:clamp(1.6rem,3vw,2.1rem); margin:0 0 0.4rem; }
+  .module-head p { margin:0; color:var(--ink-muted); }
+
+  .feats { display:grid; grid-template-columns:repeat(2,1fr); gap:1rem; }
+  .feat { background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:1.25rem 1.3rem; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:0.6rem; }
+  .feat.live { border-color:var(--accent-wash); }
+  .feat > header { display:flex; align-items:flex-start; justify-content:space-between; gap:0.8rem; }
+  .feat h3 { font-family:var(--sans); font-weight:650; font-size:1.02rem; margin:0; letter-spacing:0; line-height:1.3; }
+  .feat h3 .live-dot { display:inline-block; width:0.5rem; height:0.5rem; border-radius:50%; background:var(--accent); margin-left:0.45rem; vertical-align:middle; }
+  .stars { font-size:0.85rem; white-space:nowrap; letter-spacing:0.04em; flex:none; margin-top:0.15rem; }
+  .stars .on { color:var(--star); }
+  .stars .off { color:var(--star-off); }
+  .feat .desc { margin:0; color:var(--ink-muted); font-size:0.92rem; }
+  .chips { display:flex; flex-wrap:wrap; gap:0.35rem; margin:0.1rem 0 0; padding:0; list-style:none; }
+  .chips li { font-size:0.76rem; color:var(--ink-muted); background:var(--surface-2); border:1px solid var(--line-soft); border-radius:6px; padding:0.16rem 0.5rem; }
+  .roles { font-family:var(--mono); font-size:0.72rem; color:var(--ink-faint); }
+
+  /* Count summary */
+  .summary { padding:3.4rem 0; }
+  .summary h2 { font-size:clamp(1.5rem,2.6vw,1.9rem); margin:0 0 1.4rem; }
+  .counts { width:100%; border-collapse:collapse; font-size:0.95rem; }
+  .counts td { padding:0.7rem 0.5rem; border-bottom:1px solid var(--line-soft); }
+  .counts td:first-child { color:var(--ink); }
+  .counts td:last-child { text-align:right; font-family:var(--mono); color:var(--accent-ink); font-variant-numeric:tabular-nums; }
+  .counts tr.total td { border-top:2px solid var(--line); border-bottom:none; font-weight:700; padding-top:1rem; }
+  .counts tr.total td:last-child { font-size:1.1rem; color:var(--ink); }
+  .closing { max-width:var(--read); color:var(--ink-muted); margin:2rem 0 0; }
+
+  footer { padding:2.5rem 0 4rem; border-top:1px solid var(--line-soft); }
+  .foot { display:flex; justify-content:space-between; flex-wrap:wrap; gap:1rem; align-items:center; font-family:var(--mono); font-size:0.74rem; color:var(--ink-faint); }
+
+  @media (max-width:860px){ .modgrid{grid-template-columns:1fr 1fr;} .feats{grid-template-columns:1fr;} }
+  @media (max-width:560px){ .modgrid{grid-template-columns:1fr;} }
+</style>
+<header class="cover">
+  <div class="wrap cover-inner">
+    <div class="brandline"><span class="mark">◈</span><span class="n">SALESIQ&nbsp;/&nbsp;DECISION INTELLIGENCE PLATFORM</span></div>
+    <p class="eyebrow">Enterprise Product Bible</p>
+    <h1 class="title">Master Features Catalog</h1>
+    <p class="subtitle">Version 1.1 &mdash; Pilot Edition</p>
+    <p class="lede">The complete functional scope of SalesIQ: every module and feature planned for the platform, each with its priority and current build status. This catalog is the single source of truth for development.</p>
+    <dl class="meta">
+      <div><dt>Modules</dt><dd>12</dd></div>
+      <div><dt>Catalogued features</dt><dd>90+</dd></div>
+      <div><dt>Estimated scope</dt><dd>450&ndash;600</dd></div>
+      <div><dt>Updated</dt><dd>30 Jul 2026</dd></div>
+    </dl>
+    <div class="legend">
+      <span><span class="dot"></span>Live in the current pilot build</span>
+      <span><span class="st">★★★★★</span> Priority (out of five)</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <nav class="index" aria-label="Module index">
+    <h2>Modules</h2>
+    <div class="modgrid">
+      <a href="#m1"><span class="num">01</span><span class="lbl">Platform Foundation</span><span class="cnt">6</span></a>
+      <a href="#m2"><span class="num">02</span><span class="lbl">Customer Display</span><span class="cnt">8</span></a>
+      <a href="#m3"><span class="num">03</span><span class="lbl">Sales Companion</span><span class="cnt">8</span></a>
+      <a href="#m4"><span class="num">04</span><span class="lbl">Company Dashboard</span><span class="cnt">12</span></a>
+      <a href="#m5"><span class="num">05</span><span class="lbl">Platform Admin</span><span class="cnt">6</span></a>
+      <a href="#m6"><span class="num">06</span><span class="lbl">AI Engine</span><span class="cnt">7</span></a>
+      <a href="#m7"><span class="num">07</span><span class="lbl">MQTT Real-Time</span><span class="cnt">9</span></a>
+      <a href="#m8"><span class="num">08</span><span class="lbl">Analytics</span><span class="cnt">5</span></a>
+      <a href="#m9"><span class="num">09</span><span class="lbl">Industry Packs</span><span class="cnt">10</span></a>
+      <a href="#m10"><span class="num">10</span><span class="lbl">Enterprise</span><span class="cnt">10</span></a>
+      <a href="#m11"><span class="num">11</span><span class="lbl">Client Success</span><span class="cnt">8</span></a>
+      <a href="#m12"><span class="num">12</span><span class="lbl">Future Platform</span><span class="cnt">9</span></a>
+    </div>
+  </nav>
+
+  <!-- MODULE 1 -->
+  <section class="module" id="m1">
+    <div class="module-head"><div class="l"><p class="kicker">Module 01</p><h2>Platform Foundation</h2><p>Tenancy, identity, access control and billing &mdash; the ground every tenant stands on.</p></div></div>
+    <div class="feats">
+      <article class="feat live"><header><h3>Organization Management<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Create and manage an organization with complete tenant isolation.</p><ul class="chips"><li>Company profile</li><li>Logo</li><li>Branches</li><li>Business units</li><li>Language</li><li>Currency</li><li>Working hours</li><li>Timezone</li></ul></article>
+      <article class="feat live"><header><h3>Branch Management<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Unlimited branches, each with its own team, inventory and devices.</p><ul class="chips"><li>Address &amp; GPS</li><li>Working hours</li><li>Sales team</li><li>Inventory</li><li>Analytics</li><li>Displays</li><li>Companions</li></ul></article>
+      <article class="feat live"><header><h3>User Management<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Invite, suspend and manage users across the organization.</p><ul class="chips"><li>Invite / remove</li><li>Password reset</li><li>MFA</li><li>Device history</li><li>Session history</li></ul></article>
+      <article class="feat live"><header><h3>Role &amp; Permission Engine<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Granular, per-capability permissions across every resource.</p><p class="roles">Owner · Admin · Manager · Salesperson · Viewer</p></article>
+      <article class="feat live"><header><h3>Authentication<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Flexible sign-in with enterprise identity support.</p><ul class="chips"><li>Email</li><li>Google</li><li>Microsoft</li><li>Apple</li><li>SSO</li><li>MFA</li><li>Passwordless</li></ul></article>
+      <article class="feat live"><header><h3>Subscription Management<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Trial, monthly, annual and enterprise plans with self-serve changes.</p><ul class="chips"><li>Upgrade / downgrade</li><li>Cancel</li><li>Billing history</li></ul></article>
+    </div>
+  </section>
+
+  <!-- MODULE 2 -->
+  <section class="module" id="m2">
+    <div class="module-head"><div class="l"><p class="kicker">Module 02</p><h2>Customer Display</h2><p>The big-screen customer experience &mdash; cinematic, guided and always in sync.</p></div></div>
+    <div class="feats">
+      <article class="feat live"><header><h3>Welcome Screen<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">A large, immersive branded opening.</p><ul class="chips"><li>Company branding</li><li>Animated logo</li><li>Video background</li><li>AI greeting</li><li>Multi-language</li></ul></article>
+      <article class="feat live"><header><h3>Idle Mode<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★</span><span class="off">★</span></span></header><p class="desc">Attract loop when no one is interacting.</p><ul class="chips"><li>Videos</li><li>Promotions</li><li>Featured products</li><li>Interactive map</li><li>AI avatar</li></ul></article>
+      <article class="feat live"><header><h3>Interactive Decision Journey<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">The main customer experience, real-time synchronized with the companion.</p><ul class="chips"><li>Questions</li><li>Images</li><li>Videos</li><li>Maps</li><li>Animations</li></ul></article>
+      <article class="feat live"><header><h3>Lifestyle Map<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">An interactive, cinematic 3D map of the surrounding life.</p><ul class="chips"><li>3D</li><li>Day / night</li><li>Walking routes</li><li>Schools</li><li>Hospitals</li><li>Restaurants</li><li>Parks</li><li>POIs</li><li>Custom layers</li></ul></article>
+      <article class="feat live"><header><h3>AI Recommendation Screen<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">The best-fit product with transparent reasoning.</p><ul class="chips"><li>Reasoning</li><li>Advantages</li><li>Disadvantages</li><li>Comparison</li><li>Confidence score</li></ul></article>
+      <article class="feat live"><header><h3>Product Comparison<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Multiple products side by side with an AI summary.</p><ul class="chips"><li>Images</li><li>Features</li><li>Pros / cons</li><li>Pricing</li><li>AI summary</li></ul></article>
+      <article class="feat live"><header><h3>Proposal Screen<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">A client-ready quotation generated from the session, pushed live from the companion straight onto this screen.</p><ul class="chips"><li>Quotation</li><li>Monthly payment</li><li>Financing</li><li>Documents</li><li>QR code</li><li>Email</li></ul></article>
+      <article class="feat live"><header><h3>QR Continue Experience<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★</span><span class="off">★</span></span></header><p class="desc">Customer scans a QR to continue the journey on their phone.</p></article>
+    </div>
+  </section>
+
+  <!-- MODULE 3 -->
+  <section class="module" id="m3">
+    <div class="module-head"><div class="l"><p class="kicker">Module 03</p><h2>Sales Companion</h2><p>The salesperson&rsquo;s phone &mdash; it drives the display and captures the deal.</p></div></div>
+    <div class="feats">
+      <article class="feat live"><header><h3>Device Pairing<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Connect a phone to a display in seconds.</p><ul class="chips"><li>QR</li><li>PIN</li><li>NFC</li><li>Bluetooth (future)</li></ul></article>
+      <article class="feat live"><header><h3>Customer Registration<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Capture the customer profile at the start of a session.</p><ul class="chips"><li>Name</li><li>Phone</li><li>Email</li><li>Company</li><li>Budget</li><li>Interests</li><li>Notes</li></ul></article>
+      <article class="feat live"><header><h3>Guided Questions<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">An AI-assisted questionnaire with conditional logic.</p><ul class="chips"><li>Conditional logic</li><li>Sections</li><li>Images</li><li>Videos</li></ul></article>
+      <article class="feat live"><header><h3>Live Controller<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Drive the customer display &mdash; jump, pause, resume, restart.</p></article>
+      <article class="feat live"><header><h3>AI Search<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Search inventory in plain language, e.g. &ldquo;villas under 250k near schools.&rdquo;</p></article>
+      <article class="feat live"><header><h3>Lead Management<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Capture and track leads from a live session (assignment &amp; follow-up planned).</p><ul class="chips"><li>Create / edit</li><li>Assign</li><li>Follow-up</li><li>Status</li></ul></article>
+      <article class="feat live"><header><h3>Proposal Generator<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Generate a proposal from the session (PDF/print today; email &amp; WhatsApp planned).</p><ul class="chips"><li>PDF</li><li>Email</li><li>WhatsApp</li><li>Print</li></ul></article>
+      <article class="feat live"><header><h3>Session Timeline<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★</span><span class="off">★</span></span></header><p class="desc">A stored record of every interaction in a session.</p></article>
+    </div>
+  </section>
+
+  <!-- MODULE 4 -->
+  <section class="module" id="m4">
+    <div class="module-head"><div class="l"><p class="kicker">Module 04</p><h2>Company Dashboard</h2><p>Per-tenant configuration and insight &mdash; the no-code control room.</p></div></div>
+    <div class="feats">
+      <article class="feat live"><header><h3>Dashboard Home<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">The overview: revenue, sessions, leads and AI usage at a glance.</p></article>
+      <article class="feat live"><header><h3>Inventory Management<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Create and manage the catalogue, including a real photo gallery per item (360°/video planned).</p><ul class="chips"><li>Images</li><li>Photo gallery</li><li>Videos</li><li>360°</li><li>Pricing</li><li>Availability</li></ul></article>
+      <article class="feat live"><header><h3>Question Builder<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">A visual builder for the question flow (drag &amp; drop planned).</p></article>
+      <article class="feat live"><header><h3>Rule Builder<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">A visual scoring engine &mdash; configure ranking with no code.</p></article>
+      <article class="feat live"><header><h3>Lifestyle Builder<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Compose map scenes: routes, POIs, pins and positioning.</p></article>
+      <article class="feat live"><header><h3>Branding Studio<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Customize colours, logo and theme with a live preview (fonts/animations planned).</p></article>
+      <article class="feat live"><header><h3>AI Settings<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Configure prompts, models and guardrails per tenant.</p><ul class="chips"><li>Prompts</li><li>Temperature</li><li>Models</li><li>Knowledge</li><li>Guardrails</li></ul></article>
+      <article class="feat live"><header><h3>Analytics Dashboard<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Conversions, sessions and sales (heatmaps &amp; funnels expanding).</p></article>
+      <article class="feat live"><header><h3>Team Management<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Manage the sales team, managers and performance.</p></article>
+      <article class="feat"><header><h3>CRM</h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Customers, notes, timeline, activities and deals.</p></article>
+      <article class="feat live"><header><h3>Integrations<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Connect the tools tenants already run on.</p><ul class="chips"><li>CRM</li><li>ERP</li><li>Calendar</li><li>Email</li><li>SMS</li><li>WhatsApp</li></ul></article>
+      <article class="feat live"><header><h3>Notification Center<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★</span><span class="off">★</span></span></header><p class="desc">Alerts, tasks, approvals and system notifications.</p></article>
+    </div>
+  </section>
+
+  <!-- MODULE 5 -->
+  <section class="module" id="m5">
+    <div class="module-head"><div class="l"><p class="kicker">Module 05</p><h2>Platform Administration</h2><p>The operator&rsquo;s control plane across every tenant on the platform.</p></div></div>
+    <div class="feats">
+      <article class="feat live"><header><h3>Tenant Management<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">View and manage every customer organization.</p></article>
+      <article class="feat live"><header><h3>System Monitoring<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Live infrastructure health across the stack.</p><ul class="chips"><li>CPU / memory</li><li>MQTT</li><li>WebSockets</li><li>Queues</li><li>Database</li></ul></article>
+      <article class="feat live"><header><h3>Usage Analytics<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Usage by vertical today; metered API/storage/tokens planned.</p><ul class="chips"><li>API calls</li><li>Sessions</li><li>Storage</li><li>Bandwidth</li><li>AI tokens</li></ul></article>
+      <article class="feat live"><header><h3>Billing Center<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Invoices, payments, plans, taxes and coupons.</p></article>
+      <article class="feat live"><header><h3>Audit Logs<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Every action, logged and searchable.</p></article>
+      <article class="feat live"><header><h3>Feature Flags<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Enable, disable and gate beta features per tenant.</p></article>
+    </div>
+  </section>
+
+  <!-- MODULE 6 -->
+  <section class="module" id="m6">
+    <div class="module-head"><div class="l"><p class="kicker">Module 06</p><h2>AI Engine</h2><p>Recommendation, explanation and generation &mdash; always grounded in verified facts.</p></div></div>
+    <div class="feats">
+      <article class="feat live"><header><h3>Recommendation Engine<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Calculates the best-fit product from the customer&rsquo;s answers.</p></article>
+      <article class="feat live"><header><h3>Explainable AI<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Explains <em>why</em> &mdash; reasons only from verified facts, never invented.</p></article>
+      <article class="feat live"><header><h3>AI Narrator<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Turns the engine&rsquo;s reasons into warm, confident product narration.</p></article>
+      <article class="feat live"><header><h3>Proposal Writer<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Drafts complete proposals automatically.</p></article>
+      <article class="feat live"><header><h3>Email Generator<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★</span><span class="off">★</span></span></header><p class="desc">Writes tailored follow-up emails.</p></article>
+      <article class="feat live"><header><h3>Objection Handler<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★</span><span class="off">★</span></span></header><p class="desc">Coaches the salesperson through customer objections.</p></article>
+      <article class="feat live"><header><h3>Knowledge Base<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">A private, tenant-scoped AI knowledge source.</p></article>
+    </div>
+  </section>
+
+  <!-- MODULE 7 -->
+  <section class="module" id="m7">
+    <div class="module-head"><div class="l"><p class="kicker">Module 07</p><h2>MQTT Real-Time Engine</h2><p>Live multi-device synchronization &mdash; the nervous system of every session.</p></div></div>
+    <div class="feats">
+      <article class="feat live"><header><h3>Live Session<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Real-time synchronization between companion and display.</p></article>
+      <article class="feat"><header><h3>Device Discovery</h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Automatically detects available displays.</p></article>
+      <article class="feat live"><header><h3>Session Recovery<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Reconnects and restores state after an interruption.</p></article>
+      <article class="feat live"><header><h3>Offline Mode<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★</span><span class="off">★</span></span></header><p class="desc">Same-device fallback and deterministic AI keep sessions running without a network.</p></article>
+      <article class="feat live"><header><h3>Event Streaming<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Every interaction becomes a durable event.</p></article>
+      <article class="feat live"><header><h3>Presence Detection<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Know which devices are connected in real time.</p></article>
+      <article class="feat live"><header><h3>Heartbeat Monitoring<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Continuous device-health checks.</p></article>
+      <article class="feat live"><header><h3>Topic Management<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Structured, per-room MQTT topic organization.</p></article>
+      <article class="feat live"><header><h3>Secure Messaging<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Encrypted device-to-device communication.</p></article>
+    </div>
+  </section>
+
+  <!-- MODULE 8 -->
+  <section class="module" id="m8">
+    <div class="module-head"><div class="l"><p class="kicker">Module 08</p><h2>Analytics</h2><p>Measurement across sales, AI and the whole customer journey.</p></div></div>
+    <div class="feats">
+      <article class="feat live"><header><h3>Sales Analytics<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Revenue, conversion and product performance.</p></article>
+      <article class="feat live"><header><h3>AI Analytics<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Acceptance rate, confidence and accuracy of recommendations.</p></article>
+      <article class="feat live"><header><h3>Customer Journey Analytics<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Every click, question and recommendation across a session.</p></article>
+      <article class="feat live"><header><h3>Funnel Analytics<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Stage-by-stage drop-off analysis.</p></article>
+      <article class="feat live"><header><h3>Heatmaps<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★</span><span class="off">★</span></span></header><p class="desc">Which products and areas draw the most attention.</p></article>
+    </div>
+  </section>
+
+  <!-- MODULE 9 -->
+  <section class="module" id="m9">
+    <div class="module-head"><div class="l"><p class="kicker">Module 09</p><h2>Industry Packs</h2><p>Verticals, shipped and buildable &mdash; the same engine, any market.</p></div></div>
+    <div class="feats">
+      <article class="feat live"><header><h3>Industry Builder<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Create a whole new industry &mdash; questions, inventory, rules &mdash; without code.</p></article>
+      <article class="feat live"><header><h3>Real Estate Pack<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Shipped and demo-ready.</p></article>
+      <article class="feat live"><header><h3>Automotive Pack<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Shipped and demo-ready.</p></article>
+      <article class="feat live"><header><h3>Aviation Pack<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★</span><span class="off">★</span></span></header><p class="desc">Shipped (private jets).</p></article>
+      <article class="feat live"><header><h3>Yacht Pack<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Shipped and demo-ready.</p></article>
+      <article class="feat"><header><h3>Medical Pack</h3><span class="stars"><span class="on">★★★★</span><span class="off">★</span></span></header><p class="desc">Planned.</p></article>
+      <article class="feat"><header><h3>Solar Pack</h3><span class="stars"><span class="on">★★★★</span><span class="off">★</span></span></header><p class="desc">Planned.</p></article>
+      <article class="feat"><header><h3>Education Pack</h3><span class="stars"><span class="on">★★★</span><span class="off">★★</span></span></header><p class="desc">Planned.</p></article>
+      <article class="feat"><header><h3>Insurance Pack</h3><span class="stars"><span class="on">★★★★</span><span class="off">★</span></span></header><p class="desc">Planned.</p></article>
+      <article class="feat"><header><h3>Hospitality Pack</h3><span class="stars"><span class="on">★★★</span><span class="off">★★</span></span></header><p class="desc">Planned.</p></article>
+    </div>
+  </section>
+
+  <!-- MODULE 10 -->
+  <section class="module" id="m10">
+    <div class="module-head"><div class="l"><p class="kicker">Module 10</p><h2>Enterprise Features</h2><p>Security, compliance and resilience for large-scale deployments.</p></div></div>
+    <div class="feats">
+      <article class="feat"><header><h3>Single Sign-On (SSO)</h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Federated sign-in with the tenant&rsquo;s identity provider.</p></article>
+      <article class="feat"><header><h3>Active Directory</h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Sync users and groups from on-prem AD.</p></article>
+      <article class="feat"><header><h3>Azure AD</h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Entra ID / Azure AD integration.</p></article>
+      <article class="feat live"><header><h3>Multi-Factor Authentication<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Second-factor enforcement across accounts.</p></article>
+      <article class="feat live"><header><h3>Audit Trails<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Tamper-evident records of sensitive actions.</p></article>
+      <article class="feat live"><header><h3>GDPR Compliance<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★</span><span class="off">★</span></span></header><p class="desc">Data-subject rights, retention and consent tooling.</p></article>
+      <article class="feat"><header><h3>Encryption</h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Encryption in transit and at rest.</p></article>
+      <article class="feat"><header><h3>Disaster Recovery</h3><span class="stars"><span class="on">★★★★</span><span class="off">★</span></span></header><p class="desc">Failover and recovery procedures with tested RTO/RPO.</p></article>
+      <article class="feat live"><header><h3>Backup Management<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Scheduled, restorable backups.</p></article>
+      <article class="feat"><header><h3>High Availability</h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Redundant, horizontally-scalable infrastructure.</p></article>
+    </div>
+  </section>
+
+  <!-- MODULE 11 -->
+  <section class="module" id="m11">
+    <div class="module-head"><div class="l"><p class="kicker">Module 11</p><h2>Client Success</h2><p>Onboarding, adoption and health &mdash; turning pilots into renewals.</p></div></div>
+    <div class="feats">
+      <article class="feat live"><header><h3>Onboarding Wizard<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Guided first-run setup for a new tenant.</p></article>
+      <article class="feat live"><header><h3>Guided Tutorials<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★</span><span class="off">★</span></span></header><p class="desc">Step-by-step, in-product learning.</p></article>
+      <article class="feat live"><header><h3>Product Tours<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★</span><span class="off">★</span></span></header><p class="desc">Contextual walkthroughs of key features.</p></article>
+      <article class="feat live"><header><h3>AI Coach<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★</span><span class="off">★</span></span></header><p class="desc">In-context guidance for salespeople.</p></article>
+      <article class="feat live"><header><h3>Help Center<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★</span><span class="off">★</span></span></header><p class="desc">Searchable documentation and support.</p></article>
+      <article class="feat live"><header><h3>Health Score<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★</span><span class="off">★</span></span></header><p class="desc">A single signal of tenant engagement and risk.</p></article>
+      <article class="feat live"><header><h3>Adoption Dashboard<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★</span><span class="off">★</span></span></header><p class="desc">Feature adoption across the organization.</p></article>
+      <article class="feat live"><header><h3>Customer Success Dashboard<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★</span><span class="off">★</span></span></header><p class="desc">The CS team&rsquo;s portfolio view.</p></article>
+    </div>
+  </section>
+
+  <!-- MODULE 12 -->
+  <section class="module" id="m12">
+    <div class="module-head"><div class="l"><p class="kicker">Module 12</p><h2>Future Platform</h2><p>Extensibility and the next horizons of the experience.</p></div></div>
+    <div class="feats">
+      <article class="feat live"><header><h3>Marketplace<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Industry packs, themes, plugins and AI models.</p></article>
+      <article class="feat live"><header><h3>Public API<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★★</span></span></header><p class="desc">Programmatic access to the platform.</p></article>
+      <article class="feat live"><header><h3>SDK<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★</span><span class="off">★</span></span></header><p class="desc">Developer libraries for building on SalesIQ.</p></article>
+      <article class="feat live"><header><h3>Mobile Apps<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★</span><span class="off">★</span></span></header><p class="desc">A real installable PWA today &mdash; add to home screen on iOS or Android, no app store needed. Native app-store apps remain planned.</p></article>
+      <article class="feat"><header><h3>Apple Vision Pro</h3><span class="stars"><span class="on">★★</span><span class="off">★★★</span></span></header><p class="desc">Spatial customer experiences.</p></article>
+      <article class="feat"><header><h3>AR Experience</h3><span class="stars"><span class="on">★★</span><span class="off">★★★</span></span></header><p class="desc">Augmented product visualization.</p></article>
+      <article class="feat"><header><h3>VR Experience</h3><span class="stars"><span class="on">★★</span><span class="off">★★★</span></span></header><p class="desc">Fully immersive walkthroughs.</p></article>
+      <article class="feat"><header><h3>IoT Integration</h3><span class="stars"><span class="on">★★</span><span class="off">★★★</span></span></header><p class="desc">Connected showroom devices and sensors.</p></article>
+      <article class="feat"><header><h3>Digital Twin</h3><span class="stars"><span class="on">★★</span><span class="off">★★★</span></span></header><p class="desc">Live virtual replicas of physical inventory.</p></article>
+    </div>
+  </section>
+
+  <!-- Summary -->
+  <section class="summary">
+    <p class="eyebrow muted">Scope</p>
+    <h2>Estimated feature count</h2>
+    <table class="counts">
+      <tbody>
+        <tr><td>Platform Foundation</td><td>30+</td></tr>
+        <tr><td>Customer Display</td><td>25+</td></tr>
+        <tr><td>Sales Companion</td><td>35+</td></tr>
+        <tr><td>Company Dashboard</td><td>70+</td></tr>
+        <tr><td>Platform Administration</td><td>40+</td></tr>
+        <tr><td>AI Engine</td><td>40+</td></tr>
+        <tr><td>MQTT Engine</td><td>30+</td></tr>
+        <tr><td>Analytics</td><td>35+</td></tr>
+        <tr><td>Industry Packs</td><td>Unlimited</td></tr>
+        <tr><td>Enterprise Features</td><td>30+</td></tr>
+        <tr><td>Client Success</td><td>20+</td></tr>
+        <tr><td>Future Platform</td><td>Unlimited</td></tr>
+        <tr class="total"><td>Estimated total</td><td>450&ndash;600</td></tr>
+      </tbody>
+    </table>
+    <p class="closing">This catalog represents the complete functional scope of the SalesIQ Enterprise Pilot (v1.0) and serves as the foundation for expanding into a full enterprise-grade Decision Intelligence Platform. Features marked <span style="color:var(--accent-ink);font-weight:600;">● live</span> are shipped in the current build; all others are planned scope.</p>
+  </section>
+
+</main>
+
+<footer class="wrap">
+  <div class="foot">
+    <span>SalesIQ &middot; Enterprise Product Bible &middot; v1.1 Pilot Edition</span>
+    <span>Single source of truth for development</span>
+  </div>
+</footer>

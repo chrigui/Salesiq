@@ -292,7 +292,7 @@
       <span class="mark">◈</span>
       <span class="name">SALESIQ&nbsp;/&nbsp;DECISION INTELLIGENCE PLATFORM</span>
     </div>
-    <p class="eyebrow">Product overview &middot; v0.1 working build</p>
+    <p class="eyebrow">Product overview &middot; v0.2 working build</p>
     <h1 class="title">Guide any customer through the decision that matters&nbsp;<em>most</em>.</h1>
     <p class="lede">
       An industry-agnostic platform that turns complex, high-consideration purchases
@@ -302,8 +302,8 @@
     <dl class="meta">
       <div><dt>Status</dt><dd>Shipped to GitHub</dd></div>
       <div><dt>Surfaces</dt><dd>5 live</dd></div>
-      <div><dt>Industry packs</dt><dd>3 shipped</dd></div>
-      <div><dt>Updated</dt><dd>28 Jul 2026</dd></div>
+      <div><dt>Industry packs</dt><dd>4 shipped</dd></div>
+      <div><dt>Updated</dt><dd>30 Jul 2026</dd></div>
     </dl>
   </div>
 </header>
@@ -380,9 +380,9 @@
         <p>The master console: tenants, subscriptions, MRR/ARR, usage by vertical and system health &mdash; the operator&rsquo;s view across every company on the platform.</p>
       </div>
       <div class="card surface-card">
-        <div class="top"><span class="idx">v.</span><span class="route">/api/ai</span></div>
-        <h3>AI Decision Engine</h3>
-        <p>Scores inventory against answers and returns self-explaining recommendations, plus natural-language customer search. Claude-powered when configured, with a deterministic fallback that always works.</p>
+        <div class="top"><span class="idx">v.</span><span class="route">/api/ai &middot; /api/public/v1</span></div>
+        <h3>AI Decision Engine &amp; Public API</h3>
+        <p>Scores inventory against answers and returns self-explaining recommendations, plus natural-language customer search. Claude-powered when configured, with a deterministic fallback that always works. The same scoring engine is also reachable from outside the app via a public, working REST API.</p>
       </div>
       <div class="card surface-card" style="justify-content:center;background:var(--surface-2);">
         <p style="color:var(--ink-faint);font-size:0.9rem;margin:0;">
@@ -412,7 +412,9 @@
         <span class="chip">Cinematic arrival descent</span>
         <span class="chip">Family walking-radius</span>
         <span class="chip">Investment mode</span>
-        <span class="chip">Real photography w/ graceful fallback</span>
+        <span class="chip">Original photo + gallery per item</span>
+        <span class="chip">Live Proposal Presentation</span>
+        <span class="chip">Installable PWA (add to home screen)</span>
       </div>
     </div>
 
@@ -425,6 +427,11 @@
         <span class="chip">Live Claude narration (key-gated)</span>
         <span class="chip">Deterministic offline fallback</span>
         <span class="chip">Serializable scoring rules</span>
+        <span class="chip">AI proposal writer</span>
+        <span class="chip">AI email generator</span>
+        <span class="chip">AI objection handler</span>
+        <span class="chip">Tenant Knowledge Base</span>
+        <span class="chip">Public recommendation API</span>
       </div>
     </div>
 
@@ -438,7 +445,10 @@
         <span class="chip">Branding &amp; live preview</span>
         <span class="chip">Lifestyle map scenes</span>
         <span class="chip">Runtime tenant theming</span>
-        <span class="chip">Industry packs &times;3</span>
+        <span class="chip">Industry packs &times;4</span>
+        <span class="chip">No-code Industry Builder</span>
+        <span class="chip">Smart Wizard (AI-assisted setup)</span>
+        <span class="chip">Marketplace &amp; theme presets</span>
       </div>
     </div>
 
@@ -451,6 +461,8 @@
         <span class="chip">Cross-device over WebSocket</span>
         <span class="chip">Receive-only display safety</span>
         <span class="chip">Reconnect handling</span>
+        <span class="chip">Encrypted sync (AES-GCM)</span>
+        <span class="chip">Offline queue &amp; auto-flush</span>
       </div>
     </div>
 
@@ -459,7 +471,13 @@
       <div class="cap-list">
         <span class="chip accent">Lead capture &rarr; CRM</span>
         <span class="chip">Funnel &amp; conversion analytics</span>
+        <span class="chip">AI performance &amp; journey analytics</span>
+        <span class="chip">Product heatmaps</span>
         <span class="chip">Platform metrics (MRR / usage / health)</span>
+        <span class="chip">Tenant audit trails</span>
+        <span class="chip">GDPR export &amp; PII redaction</span>
+        <span class="chip">Data backup &amp; restore</span>
+        <span class="chip">CI pipeline (typecheck / lint / build / e2e)</span>
         <span class="chip">Demo-safety kit</span>
         <span class="chip">Screen wake-lock &amp; fullscreen</span>
         <span class="chip">Error boundaries &amp; auto-retry</span>
@@ -485,6 +503,14 @@
       <li class="tl-item done"><span class="tl-node">07</span><h3>Visual Builder &mdash; rules, branding, scenes</h3><p>Serializable scoring rules, a branding editor with live re-skin, and a full lifestyle-map scene editor.</p></li>
       <li class="tl-item done"><span class="tl-node">08</span><h3>Dashboards redesigned</h3><p>Company and platform consoles rebuilt in a clean, light SaaS UI with a signature dot-matrix analytics chart.</p></li>
       <li class="tl-item done"><span class="tl-node">09</span><h3>Dashboards made responsive</h3><p>A mobile drawer, adaptive top bar and scroll-safe charts &mdash; verified from phone to desktop with zero overflow.</p></li>
+      <li class="tl-item done"><span class="tl-node">10</span><h3>Platform Admin &amp; security console</h3><p>Real tenant management, billing center, audit logs and feature flags, plus SSO settings, GDPR export/redaction, and AES-GCM encrypted cross-device sync.</p></li>
+      <li class="tl-item done"><span class="tl-node">11</span><h3>AI Engine completed</h3><p>Proposal writer, email generator and objection handler join the recommendation engine &mdash; each Claude-authored when configured, always with a working deterministic fallback, grounded in a tenant Knowledge Base.</p></li>
+      <li class="tl-item done"><span class="tl-node">12</span><h3>Analytics deepened</h3><p>AI performance, customer journey and product-heatmap analytics, computed from real session and lead data rather than mock numbers.</p></li>
+      <li class="tl-item done"><span class="tl-node">13</span><h3>A fourth industry pack, and a no-code way to add more</h3><p>Yacht Charter ships alongside real estate, automotive and private jets; the Industry Builder now lets a tenant create a whole new vertical &mdash; questions, inventory, rules &mdash; without code, with an AI Smart Wizard to bootstrap it.</p></li>
+      <li class="tl-item done"><span class="tl-node">14</span><h3>Client Success suite</h3><p>An onboarding checklist, health score, adoption dashboard, guided product tour, in-context AI coach and searchable help center &mdash; turning a pilot into a renewal.</p></li>
+      <li class="tl-item done"><span class="tl-node">15</span><h3>Future Platform: PWA, Public API, Marketplace</h3><p>The Sales Companion installs like a native app (add to home screen, no store needed); a public REST API exposes the real scoring engine outside the app; a Marketplace lets tenants browse packs and apply color themes.</p></li>
+      <li class="tl-item done"><span class="tl-node">16</span><h3>CI pipeline &amp; a real test suite</h3><p>GitHub Actions runs typecheck, lint and build on every push; ESLint &mdash; never actually wired up before &mdash; is configured and clean; a growing Playwright end-to-end suite covers auth, the dashboard, the public API and the customer display.</p></li>
+      <li class="tl-item done"><span class="tl-node">17</span><h3>Live Proposal Presentation &amp; real sample photography</h3><p>The AI-authored proposal now presents live on the customer display, pushed there by the salesperson&rsquo;s phone. Every demo item across all four industries ships with an original photo and 3-image gallery &mdash; no more broken external image links.</p></li>
     </ol>
   </section>
 
@@ -507,19 +533,19 @@
         <header><span class="tag next">Next up</span></header>
         <p class="hint">Build work to move from demo to production-grade.</p>
         <ul class="task">
-          <li><span><b>Persistent backend</b> for leads and pack drafts (KV / database) &mdash; today they use browser storage for the demo.</span></li>
-          <li><span><b>More industry packs</b> &mdash; yachts, medical, insurance, education (three ship today).</span></li>
-          <li><span><b>Authentication &amp; enforced tenant isolation</b> &mdash; the demo is currently open.</span></li>
-          <li><span><b>Live analytics source</b> to replace the deterministic mock data.</span></li>
+          <li><span><b>Persistent backend</b> (real database) for leads, packs and audit data &mdash; today it&rsquo;s all browser storage, by design, for the pilot.</span></li>
+          <li><span><b>Real payment processing</b> &mdash; the Billing Center UI (plans, invoices, coupons) is real; wiring a live processor (e.g. Stripe) is next.</span></li>
+          <li><span><b>SSO wired to a real identity provider</b> &mdash; the settings UI, enforcement toggle and audit trail are real; federated sign-in itself isn&rsquo;t yet.</span></li>
+          <li><span><b>More industry packs</b> &mdash; medical, solar, insurance, education, hospitality (four ship today).</span></li>
         </ul>
       </div>
       <div class="status-col b">
         <header><span class="tag blueprint">Blueprint</span></header>
         <p class="hint">Designed in the product, not yet wired up.</p>
         <ul class="task">
-          <li><span><b>Admin sub-consoles</b> &mdash; Subscriptions, Billing, System health, Audit logs.</span></li>
-          <li><span><b>Dashboard modules</b> &mdash; Integrations, Team &amp; roles, Settings.</span></li>
-          <li><span><b>Custom scoring math</b> beyond the five built-in rule types.</span></li>
+          <li><span><b>Native iOS/Android apps</b> &mdash; the installable PWA ships today; app-store clients are next.</span></li>
+          <li><span><b>Apple Vision Pro, AR, VR, IoT, digital twin</b> &mdash; honestly labelled &ldquo;Planned&rdquo; on the Marketplace&rsquo;s own roadmap panel.</span></li>
+          <li><span><b>Custom scoring math</b> beyond the built-in rule types.</span></li>
           <li><span><b>Drag-on-map POI placement</b> in the lifestyle scene editor.</span></li>
         </ul>
       </div>
