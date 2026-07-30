@@ -5,13 +5,17 @@ import { logTenantAudit } from "./tenantAuditLog";
 /**
  * Backup Management & GDPR Data Export (Module 10 · Enterprise Features).
  *
- * A real, working local backup — every `salesiq-*` key this tenant's
- * browser has written (organization, users, branches, leads, knowledge
- * base, custom packs, drafts, notifications, settings…) is bundled into one
- * JSON file and downloaded. Restore reverses it. This is genuinely
- * functional, just honestly scoped: it backs up *this browser's* local
- * data, not a server-side, cross-device, multi-region backup — there's no
- * backend to hold one in this pilot.
+ * A real, working local backup of every `salesiq-*` key this tenant's
+ * browser still has written directly (organization, branches, knowledge
+ * base, custom packs, drafts, notifications, settings…), bundled into one
+ * JSON file and downloaded; restore reverses it.
+ *
+ * Users, leads and sessions moved to Postgres (see src/lib/db.ts and
+ * src/app/api/{users,leads,auth}/*.ts) and are deliberately NOT included
+ * here anymore — a real cross-device backup would need a server-side
+ * export endpoint, which is the natural next step once more stores make
+ * the same move. Until then this covers what's genuinely still
+ * browser-local, not the whole tenant.
  */
 const PREFIX = "salesiq-";
 
@@ -32,7 +36,7 @@ function collectAll(): Record<string, unknown> {
 export function downloadBackup(actor: string): void {
   const data = {
     exportedAt: new Date().toISOString(),
-    scope: "browser-local",
+    scope: "browser-local-settings",
     data: collectAll(),
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
@@ -42,7 +46,7 @@ export function downloadBackup(actor: string): void {
   a.download = `salesiq-backup-${new Date().toISOString().slice(0, 10)}.json`;
   a.click();
   URL.revokeObjectURL(url);
-  logTenantAudit({ actor, action: "Exported backup", target: "All tenant data", detail: `${Object.keys(data.data).length} keys` });
+  logTenantAudit({ actor, action: "Exported backup", target: "Browser-local settings", detail: `${Object.keys(data.data).length} keys — users/leads/sessions live in Postgres, not included` });
 }
 
 export async function restoreBackup(file: File, actor: string): Promise<{ ok: boolean; error?: string }> {

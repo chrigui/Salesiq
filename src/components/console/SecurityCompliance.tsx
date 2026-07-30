@@ -117,14 +117,16 @@ function DataPrivacyPanel({ actor }: { actor: string }) {
     <Panel title="Data & privacy (GDPR)">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-zinc-500">
-          Export every record this workspace holds, or redact a lead&rsquo;s
-          personal details on request.
+          Redact a lead&rsquo;s personal details on request — this writes
+          straight to the real lead record below, not a local copy. Export
+          covers this workspace&rsquo;s configuration; lead data lives in the
+          database and isn&rsquo;t part of this file yet.
         </p>
         <button
           onClick={() => downloadBackup(actor)}
           className="inline-flex items-center gap-1.5 rounded-xl bg-zinc-900 px-3 py-2 text-xs font-semibold text-white transition hover:brightness-110"
         >
-          <Download className="h-3.5 w-3.5" /> Export all data
+          <Download className="h-3.5 w-3.5" /> Export settings
         </button>
       </div>
 
@@ -170,9 +172,11 @@ function BackupPanel({ actor }: { actor: string }) {
   return (
     <Panel title="Backup & restore">
       <p className="mb-4 text-sm text-zinc-500">
-        Downloads every record this browser holds for this workspace as one
-        JSON file, and can restore from one — scoped to this browser&rsquo;s local
-        data, since there&rsquo;s no server-side store behind this pilot.
+        Downloads this workspace&rsquo;s configuration (branding, question flow,
+        settings…) as one JSON file, and can restore from one. Users, leads
+        and sessions live in the database now and aren&rsquo;t part of this
+        file — a server-side export is the natural next step once more of
+        this settings surface makes the same move.
       </p>
       <div className="flex flex-wrap gap-2">
         <button

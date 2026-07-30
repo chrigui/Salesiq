@@ -489,6 +489,18 @@
     </div>
 
     <div class="cap-group">
+      <h3>Backend &amp; data</h3>
+      <div class="cap-list">
+        <span class="chip accent">Postgres (Prisma)</span>
+        <span class="chip accent">Multi-tenant schema</span>
+        <span class="chip accent">Real bcrypt + session auth</span>
+        <span class="chip accent">Server-enforced permissions</span>
+        <span class="chip accent">Cross-tenant isolation, tested</span>
+        <span class="chip">CI against a real test database</span>
+      </div>
+    </div>
+
+    <div class="cap-group">
       <h3>Growth &amp; reliability</h3>
       <div class="cap-list">
         <span class="chip accent">Lead capture &rarr; CRM</span>
@@ -542,6 +554,7 @@
       <li class="tl-item done"><span class="tl-node">19</span><h3>Decision Simulator, ROI Calculator &amp; Deal Probability Radar</h3><p>A salesperson can now drag budget or any other answer in a local what-if scratchpad and watch the recommendation recompute instantly, without ever touching the real session. A transparent ROI Calculator turns the pitch into an editable formula with every assumption exposed. A deterministic Deal Probability Radar blends pipeline stage with the engine&rsquo;s real match score into a close probability and risk-adjusted pipeline value &mdash; no fabricated momentum, no black-box ML.</p></li>
       <li class="tl-item done"><span class="tl-node">20</span><h3>Sales Copilot, AI Sales Twin &amp; Buying Committee Intelligence</h3><p>Three proposed features that all described the same underlying capability &mdash; proactive, real-time coaching &mdash; shipped as one Sales Copilot instead of three overlapping panels, per a second enterprise audit&rsquo;s own consolidation finding. A new AI Sales Twin reads the live session &mdash; pace, budget posture, confidence, decision drivers &mdash; from the same real data, not a fabricated persona. The customer panel now tracks every stakeholder in a deal, not just the primary contact.</p></li>
       <li class="tl-item done"><span class="tl-node">21</span><h3>AI Meeting Replay &amp; Demo Experience Mode</h3><p>The Session Timeline gained a deterministic recap and a &ldquo;jump to this moment&rdquo; that drives the live customer display back to any point in the session. A new 7-beat Guided Demo orchestrates a full walkthrough &mdash; recommendation, compare, what-if, objection handling, proposal &mdash; across the companion and display together, with presenter narration at every step.</p></li>
+      <li class="tl-item done"><span class="tl-node">22</span><h3>A real persistent backend, at last</h3><p>The single biggest item on this roadmap&rsquo;s own &ldquo;Next up&rdquo; list is done: Postgres via Prisma, a genuinely multi-tenant schema, and real authentication &mdash; bcrypt-hashed passwords, a signed session cookie verified server-side on every request, a real Session table so a suspension actually revokes access. Users, Permissions and Leads are fully migrated end to end; every mutation is scoped by tenant so one workspace can never see another&rsquo;s data &mdash; proven by a dedicated cross-tenant isolation test, not just asserted. The other browser-storage-backed modules (industry pack drafts, audit logs, settings) keep their exact seam, ready to move the same way in the next pass. CI now runs the full suite against a real, isolated Postgres database on every push.</p></li>
     </ol>
   </section>
 
@@ -558,13 +571,14 @@
         <ul class="task">
           <li><span><b>Set the Claude API key</b> on Vercel to switch the AI from deterministic fallback to live generation.</span></li>
           <li><span><b>Confirm the Vercel deploy</b> &mdash; verify the GitHub connection and production branch so pushes ship automatically.</span></li>
+          <li><span><b>Provision production Postgres</b> (Vercel Postgres/Neon/Supabase) and set <code>DATABASE_URL</code> &mdash; the backend itself is built and tested (see milestone below); this is the one deploy step left to go live.</span></li>
         </ul>
       </div>
       <div class="status-col n">
         <header><span class="tag next">Next up</span></header>
         <p class="hint">Build work to move from demo to production-grade.</p>
         <ul class="task">
-          <li><span><b>Persistent backend</b> (real database) for leads, packs and audit data &mdash; today it&rsquo;s all browser storage, by design, for the pilot.</span></li>
+          <li><span><b>The rest of the localStorage stores</b> (industry pack drafts, audit logs, knowledge base, AI/SSO/billing settings) move to the same Postgres backend, following the pattern auth/users/leads already proved out.</span></li>
           <li><span><b>Real payment processing</b> &mdash; the Billing Center UI (plans, invoices, coupons) is real; wiring a live processor (e.g. Stripe) is next.</span></li>
           <li><span><b>SSO wired to a real identity provider</b> &mdash; the settings UI, enforcement toggle and audit trail are real; federated sign-in itself isn&rsquo;t yet.</span></li>
           <li><span><b>More industry packs</b> &mdash; medical, solar, insurance, education, hospitality (four ship today).</span></li>
