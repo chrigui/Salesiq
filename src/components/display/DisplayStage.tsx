@@ -680,6 +680,11 @@ function ItemStage({
   score: number;
   reasons: string[];
 }) {
+  const photos = [item.photo, ...(item.gallery ?? [])].filter(
+    (p): p is string => !!p,
+  );
+  const [activePhoto, setActivePhoto] = useState(item.photo);
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.97 }}
@@ -688,7 +693,28 @@ function ItemStage({
       transition={spring}
       className="grid w-full max-w-6xl grid-cols-1 gap-8 lg:grid-cols-2 lg:items-center"
     >
-      <ItemHero item={item} score={score} large />
+      <div>
+        <ItemHero item={item} score={score} large photoOverride={activePhoto} />
+        {photos.length > 1 && (
+          <div className="mt-3 flex gap-2.5">
+            {photos.map((p, i) => (
+              <button
+                key={p}
+                onClick={() => setActivePhoto(p)}
+                aria-label={`Show photo ${i + 1}`}
+                className={cx(
+                  "h-16 w-24 shrink-0 overflow-hidden rounded-xl ring-2 transition",
+                  activePhoto === p
+                    ? "ring-brand"
+                    : "opacity-60 ring-transparent hover:opacity-90",
+                )}
+              >
+                <ItemImage image={item.image} photo={p} className="h-full w-full" />
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
       <div>
         <h2 className="text-5xl font-semibold tracking-tight">{item.name}</h2>
         <p className="mt-2 text-xl text-ink-muted">{item.subtitle}</p>
@@ -724,15 +750,18 @@ function ItemHero({
   item,
   score,
   large,
+  photoOverride,
 }: {
   item: InventoryItem;
   score: number;
   large?: boolean;
+  /** Swaps in a gallery photo in place of the item's default hero shot. */
+  photoOverride?: string;
 }) {
   return (
     <ItemImage
       image={item.image}
-      photo={item.photo}
+      photo={photoOverride ?? item.photo}
       rounded="rounded-[2rem]"
       className={cx(
         "shadow-2xl shadow-black/50 ring-1 ring-white/10",

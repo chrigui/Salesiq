@@ -52,3 +52,37 @@ test("Compare view also mirrors live from companion to display", async ({ contex
   await companion.getByRole("button", { name: "Recommend" }).click();
   await expect(display.getByText("Based on your preferences")).toBeVisible({ timeout: 5000 });
 });
+
+test("an item's photo gallery loads real local images and swaps the hero on click", async ({ context }) => {
+  const { companion, display } = await openCompanionAndDisplay(context);
+
+  const pairingClose = display.locator('div:has-text("Connect your phone") button').first();
+  if (await pairingClose.isVisible({ timeout: 2000 }).catch(() => false)) {
+    await pairingClose.click();
+  }
+
+  // Automotive's inventory has no lifestyle-map data, so its item view is
+  // the plain ItemStage — the one with the gallery thumbnail strip.
+  await companion.getByRole("button", { name: "Automotive", exact: true }).click();
+  await companion.getByRole("button", { name: /Apex S/ }).click();
+
+  const thumbs = display.locator('button[aria-label^="Show photo"]');
+  await expect(thumbs).toHaveCount(4, { timeout: 5000 });
+
+  const heroImg = display.locator("img").first();
+  await expect(heroImg).toHaveAttribute("src", /\/industries\/automotive\/apex-s\/hero\.png/);
+
+  // Every generated photo actually resolves (200), not a broken link.
+  for (const src of [
+    "/industries/automotive/apex-s/hero.png",
+    "/industries/automotive/apex-s/gallery-detail.png",
+    "/industries/automotive/apex-s/gallery-twilight.png",
+    "/industries/automotive/apex-s/gallery-texture.png",
+  ]) {
+    const res = await display.request.get(src);
+    expect(res.ok(), src).toBeTruthy();
+  }
+
+  await thumbs.nth(2).click();
+  await expect(heroImg).toHaveAttribute("src", /gallery-twilight\.png/, { timeout: 3000 });
+});

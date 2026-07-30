@@ -86,6 +86,12 @@ export const privateJetsPack: IndustryPack = {
       price: 68000000,
       currency: "USD",
       image: "sky",
+      photo: "/industries/private-jets/meridian-900/hero.png",
+      gallery: [
+        "/industries/private-jets/meridian-900/gallery-detail.png",
+        "/industries/private-jets/meridian-900/gallery-twilight.png",
+        "/industries/private-jets/meridian-900/gallery-texture.png",
+      ],
       appreciation: 0,
       attributes: {
         passengers: 16,
@@ -103,6 +109,12 @@ export const privateJetsPack: IndustryPack = {
       price: 24000000,
       currency: "USD",
       image: "violet",
+      photo: "/industries/private-jets/meridian-600/hero.png",
+      gallery: [
+        "/industries/private-jets/meridian-600/gallery-detail.png",
+        "/industries/private-jets/meridian-600/gallery-twilight.png",
+        "/industries/private-jets/meridian-600/gallery-texture.png",
+      ],
       appreciation: 0,
       attributes: {
         passengers: 10,
@@ -120,6 +132,12 @@ export const privateJetsPack: IndustryPack = {
       price: 8500000,
       currency: "USD",
       image: "emerald",
+      photo: "/industries/private-jets/meridian-300/hero.png",
+      gallery: [
+        "/industries/private-jets/meridian-300/gallery-detail.png",
+        "/industries/private-jets/meridian-300/gallery-twilight.png",
+        "/industries/private-jets/meridian-300/gallery-texture.png",
+      ],
       appreciation: 0,
       attributes: {
         passengers: 7,

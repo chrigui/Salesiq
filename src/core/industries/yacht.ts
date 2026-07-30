@@ -87,8 +87,12 @@ export const yachtPack: IndustryPack = {
       price: 180000,
       currency: "USD",
       image: "sky",
-      photo:
-        "https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?auto=format&fit=crop&w=1200&q=70",
+      photo: "/industries/yacht/azure-breeze/hero.png",
+      gallery: [
+        "/industries/yacht/azure-breeze/gallery-detail.png",
+        "/industries/yacht/azure-breeze/gallery-twilight.png",
+        "/industries/yacht/azure-breeze/gallery-texture.png",
+      ],
       appreciation: 0,
       attributes: {
         length: 42,
@@ -107,8 +111,12 @@ export const yachtPack: IndustryPack = {
       price: 65000,
       currency: "USD",
       image: "emerald",
-      photo:
-        "https://images.unsplash.com/photo-1540946485063-a40da27545f8?auto=format&fit=crop&w=1200&q=70",
+      photo: "/industries/yacht/wind-dancer/hero.png",
+      gallery: [
+        "/industries/yacht/wind-dancer/gallery-detail.png",
+        "/industries/yacht/wind-dancer/gallery-twilight.png",
+        "/industries/yacht/wind-dancer/gallery-texture.png",
+      ],
       appreciation: 0,
       attributes: {
         length: 24,
@@ -127,8 +135,12 @@ export const yachtPack: IndustryPack = {
       price: 420000,
       currency: "USD",
       image: "violet",
-      photo:
-        "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=70",
+      photo: "/industries/yacht/meridian-one/hero.png",
+      gallery: [
+        "/industries/yacht/meridian-one/gallery-detail.png",
+        "/industries/yacht/meridian-one/gallery-twilight.png",
+        "/industries/yacht/meridian-one/gallery-texture.png",
+      ],
       appreciation: 0,
       attributes: {
         length: 55,
@@ -147,8 +159,12 @@ export const yachtPack: IndustryPack = {
       price: 22000,
       currency: "USD",
       image: "amber",
-      photo:
-        "https://images.unsplash.com/photo-1500627964684-141351970a7f?auto=format&fit=crop&w=1200&q=70",
+      photo: "/industries/yacht/coastal-spirit/hero.png",
+      gallery: [
+        "/industries/yacht/coastal-spirit/gallery-detail.png",
+        "/industries/yacht/coastal-spirit/gallery-twilight.png",
+        "/industries/yacht/coastal-spirit/gallery-texture.png",
+      ],
       appreciation: 0,
       attributes: {
         length: 18,

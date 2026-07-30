@@ -87,6 +87,12 @@ export const automotivePack: IndustryPack = {
       price: 96000,
       currency: "USD",
       image: "violet",
+      photo: "/industries/automotive/eon-gt/hero.png",
+      gallery: [
+        "/industries/automotive/eon-gt/gallery-detail.png",
+        "/industries/automotive/eon-gt/gallery-twilight.png",
+        "/industries/automotive/eon-gt/gallery-texture.png",
+      ],
       appreciation: 0,
       attributes: {
         seats: 4,
@@ -104,6 +110,12 @@ export const automotivePack: IndustryPack = {
       price: 68000,
       currency: "USD",
       image: "amber",
+      photo: "/industries/automotive/terra-x/hero.png",
+      gallery: [
+        "/industries/automotive/terra-x/gallery-detail.png",
+        "/industries/automotive/terra-x/gallery-twilight.png",
+        "/industries/automotive/terra-x/gallery-texture.png",
+      ],
       appreciation: 0,
       attributes: {
         seats: 7,
@@ -121,6 +133,12 @@ export const automotivePack: IndustryPack = {
       price: 34000,
       currency: "USD",
       image: "sky",
+      photo: "/industries/automotive/civ-e/hero.png",
+      gallery: [
+        "/industries/automotive/civ-e/gallery-detail.png",
+        "/industries/automotive/civ-e/gallery-twilight.png",
+        "/industries/automotive/civ-e/gallery-texture.png",
+      ],
       appreciation: 0,
       attributes: {
         seats: 5,
@@ -138,6 +156,12 @@ export const automotivePack: IndustryPack = {
       price: 168000,
       currency: "USD",
       image: "rose",
+      photo: "/industries/automotive/apex-s/hero.png",
+      gallery: [
+        "/industries/automotive/apex-s/gallery-detail.png",
+        "/industries/automotive/apex-s/gallery-twilight.png",
+        "/industries/automotive/apex-s/gallery-texture.png",
+      ],
       appreciation: 0,
       attributes: {
         seats: 2,
