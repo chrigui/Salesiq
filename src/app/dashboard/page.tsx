@@ -27,6 +27,8 @@ import { Integrations } from "@/components/console/Integrations";
 import { NotificationCenter } from "@/components/console/NotificationCenter";
 import { AiAnalytics } from "@/components/console/AiAnalytics";
 import { BusinessImpact } from "@/components/console/BusinessImpact";
+import { RoiCalculator } from "@/components/console/RoiCalculator";
+import { DealProbability } from "@/components/console/DealProbability";
 import { CustomerJourney } from "@/components/console/CustomerJourney";
 import { ProductHeatmap } from "@/components/console/ProductHeatmap";
 import { SecurityCompliance } from "@/components/console/SecurityCompliance";
@@ -57,6 +59,7 @@ const NAV_CAPABILITY: Record<string, string> = {
   Scoring: "scoring.edit",
   Branding: "branding.edit",
   Leads: "leads.view",
+  "Deal Probability": "leads.view",
   Analytics: "analytics.view",
   "Business Impact": "analytics.view",
   Branches: "branches.manage",
@@ -87,7 +90,9 @@ const NAV: NavGroup[] = [
     heading: "Insights",
     items: [
       { id: "Leads", label: "Leads", icon: "UserPlus" },
+      { id: "Deal Probability", label: "Deal Probability", icon: "Radar" },
       { id: "Business Impact", label: "Business Impact", icon: "TrendingUp" },
+      { id: "ROI Calculator", label: "ROI Calculator", icon: "Calculator" },
       { id: "Analytics", label: "Analytics", icon: "BarChart3" },
       { id: "Notifications", label: "Notifications", icon: "Bell" },
     ],
@@ -224,8 +229,12 @@ export default function DashboardPage() {
         <AiSettings />
       ) : tab === "Leads" ? (
         <LeadManagement />
+      ) : tab === "Deal Probability" ? (
+        <DealProbability />
       ) : tab === "Business Impact" ? (
         <BusinessImpact />
+      ) : tab === "ROI Calculator" ? (
+        <RoiCalculator />
       ) : tab === "Analytics" ? (
         <Analytics />
       ) : tab === "Notifications" ? (

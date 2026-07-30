@@ -18,6 +18,7 @@ import {
   Loader2,
   History,
   ShieldQuestion,
+  Sliders,
 } from "lucide-react";
 import Link from "next/link";
 import { useSession } from "@/core/store/session";
@@ -30,6 +31,7 @@ import type { Question, BudgetValue } from "@/core/types";
 import { ProposalSheet } from "./ProposalSheet";
 import { SessionTimeline } from "./SessionTimeline";
 import { ObjectionHandler } from "./ObjectionHandler";
+import { DecisionSimulator } from "./DecisionSimulator";
 import { CompanionSyncBar } from "@/components/sync/Pairing";
 
 export function CompanionApp() {
@@ -40,6 +42,7 @@ export function CompanionApp() {
   const [proposalOpen, setProposalOpen] = useState(false);
   const [timelineOpen, setTimelineOpen] = useState(false);
   const [objectionOpen, setObjectionOpen] = useState(false);
+  const [simulatorOpen, setSimulatorOpen] = useState(false);
 
   const visibleQuestions = useMemo(
     () =>
@@ -76,6 +79,13 @@ export function CompanionApp() {
             </div>
           </div>
           <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setSimulatorOpen(true)}
+              aria-label="Decision simulator"
+              className="grid h-8 w-8 place-items-center rounded-full border border-white/10 bg-white/5 text-ink-muted transition hover:bg-white/10"
+            >
+              <Sliders className="h-3.5 w-3.5" />
+            </button>
             <button
               onClick={() => setObjectionOpen(true)}
               aria-label="Objection handler"
@@ -281,6 +291,13 @@ export function CompanionApp() {
         onClose={() => setTimelineOpen(false)}
         events={session.timeline}
         pack={pack}
+      />
+
+      <DecisionSimulator
+        open={simulatorOpen}
+        onClose={() => setSimulatorOpen(false)}
+        pack={pack}
+        answers={session.answers}
       />
     </div>
   );
@@ -551,7 +568,7 @@ function QuestionControl({ question }: { question: Question }) {
   );
 }
 
-function Stepper({
+export function Stepper({
   value,
   min,
   max,
@@ -581,7 +598,7 @@ function Stepper({
   );
 }
 
-function SingleSlider({
+export function SingleSlider({
   value,
   min,
   max,
@@ -614,7 +631,7 @@ function SingleSlider({
   );
 }
 
-function BudgetControl({
+export function BudgetControl({
   question,
   value,
   onChange,
