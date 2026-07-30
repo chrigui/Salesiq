@@ -80,3 +80,22 @@ test("Buying Committee lets a salesperson track and remove real stakeholders", a
   await page.getByLabel("Remove Karim Haddad").click();
   await expect(page.getByText("Karim Haddad")).toHaveCount(0);
 });
+
+test("AI Meeting Replay recaps the real session and jumps the shared display to that moment", async ({ context }) => {
+  const companion = await context.newPage();
+  const display = await context.newPage();
+
+  await display.goto("/display");
+  await companion.goto("/companion");
+  await companion.getByText("Load demo", { exact: true }).click();
+
+  const toggles = companion.locator('span[role="button"]:has(svg.lucide-bookmark)');
+  await toggles.nth(0).click();
+
+  await companion.getByRole("button", { name: "Session timeline" }).click();
+  await expect(companion.getByText("Session recap")).toBeVisible();
+  await expect(companion.getByText(/interactions? recorded\./)).toBeVisible();
+
+  await companion.getByLabel("Jump to this moment").first().click();
+  await expect(display.getByText("Green Hills", { exact: true }).first()).toBeVisible({ timeout: 5000 });
+});

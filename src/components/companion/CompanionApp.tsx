@@ -24,7 +24,7 @@ import {
   Users,
 } from "lucide-react";
 import Link from "next/link";
-import { useSession, type Stakeholder } from "@/core/store/session";
+import { useSession, type Stakeholder, type TimelineEvent } from "@/core/store/session";
 import { useLivePack, useAllPacks, getEffectivePack } from "@/core/store/packs";
 import { scoreInventory, isVisible } from "@/core/engine/scoring";
 import { formatMoney } from "@/core/engine/explain";
@@ -322,6 +322,21 @@ export function CompanionApp() {
         onClose={() => setTimelineOpen(false)}
         events={session.timeline}
         pack={pack}
+        scored={scored}
+        onJump={(event: TimelineEvent) => {
+          if ((event.kind === "focus" || event.kind === "bookmark-add") && event.itemId) {
+            session.focusItem(event.itemId);
+            session.setView("item");
+          } else if (event.kind === "answer" && event.questionId) {
+            const q = pack.questions.find((qq) => qq.id === event.questionId);
+            if (q) setActiveSection(q.section);
+            session.setActiveQuestion(event.questionId);
+            session.setView("question");
+          } else if (event.kind === "proposal") {
+            session.setView("proposal");
+          }
+          setTimelineOpen(false);
+        }}
       />
 
       <DecisionSimulator

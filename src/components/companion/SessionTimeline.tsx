@@ -16,9 +16,13 @@ import {
   RotateCcw,
   ShieldQuestion,
   Users,
+  ArrowUpRight,
+  Clock,
 } from "lucide-react";
 import type { IndustryPack } from "@/core/types";
 import type { TimelineEvent } from "@/core/store/session";
+import type { ScoredItem } from "@/core/engine/scoring";
+import { summarizeSession, isJumpable } from "@/core/engine/replay";
 
 const ICONS: Record<TimelineEvent["kind"], typeof History> = {
   pack: Layers,
@@ -141,13 +145,18 @@ export function SessionTimeline({
   onClose,
   events,
   pack,
+  scored = [],
+  onJump,
 }: {
   open: boolean;
   onClose: () => void;
   events: TimelineEvent[];
   pack: IndustryPack;
+  scored?: ScoredItem[];
+  onJump?: (event: TimelineEvent) => void;
 }) {
   const ordered = [...events].reverse();
+  const recap = summarizeSession(events, scored);
 
   return (
     <AnimatePresence>
@@ -187,31 +196,59 @@ export function SessionTimeline({
                   session will appear here.
                 </p>
               ) : (
-                <ol className="space-y-1">
-                  {ordered.map((event, i) => {
-                    const Icon = ICONS[event.kind] ?? History;
-                    return (
-                      <li key={event.id} className="flex gap-3">
-                        <div className="flex flex-col items-center">
-                          <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white/5 text-ink-muted">
-                            <Icon className="h-3.5 w-3.5" />
-                          </span>
-                          {i < ordered.length - 1 && (
-                            <span className="w-px flex-1 bg-white/10" />
-                          )}
-                        </div>
-                        <div className="pb-4">
-                          <p className="text-sm leading-snug text-ink">
-                            {describe(event, pack)}
-                          </p>
-                          <p className="text-[11px] text-ink-faint">
-                            {timeAgo(event.ts)}
-                          </p>
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ol>
+                <>
+                  {recap.length > 0 && (
+                    <div className="mb-4 rounded-2xl border border-white/10 bg-white/[0.03] p-3.5">
+                      <div className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-ink-faint">
+                        <Clock className="h-3.5 w-3.5" /> Session recap
+                      </div>
+                      <ul className="space-y-1">
+                        {recap.map((line) => (
+                          <li key={line} className="text-sm leading-snug text-ink-muted">
+                            {line}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  <ol className="space-y-1">
+                    {ordered.map((event, i) => {
+                      const Icon = ICONS[event.kind] ?? History;
+                      const jumpable = Boolean(onJump) && isJumpable(event);
+                      return (
+                        <li key={event.id} className="flex gap-3">
+                          <div className="flex flex-col items-center">
+                            <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white/5 text-ink-muted">
+                              <Icon className="h-3.5 w-3.5" />
+                            </span>
+                            {i < ordered.length - 1 && (
+                              <span className="w-px flex-1 bg-white/10" />
+                            )}
+                          </div>
+                          <div className="flex flex-1 items-start justify-between gap-2 pb-4">
+                            <div>
+                              <p className="text-sm leading-snug text-ink">
+                                {describe(event, pack)}
+                              </p>
+                              <p className="text-[11px] text-ink-faint">
+                                {timeAgo(event.ts)}
+                              </p>
+                            </div>
+                            {jumpable && (
+                              <button
+                                onClick={() => onJump?.(event)}
+                                aria-label="Jump to this moment"
+                                className="mt-0.5 flex shrink-0 items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2 py-1 text-[10px] font-medium text-ink-muted transition hover:border-brand/40 hover:text-ink"
+                              >
+                                Jump <ArrowUpRight className="h-3 w-3" />
+                              </button>
+                            )}
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ol>
+                </>
               )}
             </div>
 
