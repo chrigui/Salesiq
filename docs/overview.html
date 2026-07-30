@@ -1,3 +1,11 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SalesIQ — Product Overview</title>
+</head>
+<body>
 <style>
   :root {
     --paper: #f0f3f0;
@@ -278,6 +286,15 @@
     .grid.cols-2, .grid.cols-3, .status-grid { grid-template-columns: 1fr; }
     .cap-group { grid-template-columns: 1fr; gap: 0.7rem; }
     .hero-inner { padding: 4rem 0 3rem; }
+  }
+
+  @media (max-width: 480px) {
+    .hero-inner { padding: 3.2rem 0 2.4rem; }
+    h1.title { font-size: clamp(2.2rem, 9vw, 2.8rem); max-width: 20ch; }
+    .meta { gap: 0 1.4rem; }
+    section { padding: 3rem 0; }
+    .status-col { padding: 1.1rem; }
+    .cap-group { padding: 1.2rem 0; }
   }
 
   @media (prefers-reduced-motion: no-preference) {
@@ -568,3 +585,6 @@
     <p class="note">SalesIQ &middot; Decision Intelligence Platform &middot; working build</p>
   </div>
 </footer>
+
+</body>
+</html>

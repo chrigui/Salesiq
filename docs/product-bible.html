@@ -1,3 +1,9 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SalesIQ — Enterprise Product Bible</title>
 <style>
   :root {
     --paper: #f0f3f0; --surface: #ffffff; --surface-2: #f7f9f7;
@@ -102,7 +108,19 @@
 
   @media (max-width:860px){ .modgrid{grid-template-columns:1fr 1fr;} .feats{grid-template-columns:1fr;} }
   @media (max-width:560px){ .modgrid{grid-template-columns:1fr;} }
+  @media (max-width:480px){
+    .cover-inner{padding:3.6rem 0 2.6rem;}
+    h1.title{font-size:clamp(2.1rem,9vw,2.6rem);}
+    .meta{gap:0 1.6rem;}
+    .module{padding:2.4rem 0;}
+    .feat{padding:1.1rem 1.15rem;}
+    .feat > header{flex-direction:column;align-items:flex-start;gap:0.35rem;}
+    .stars{margin-top:0;}
+  }
 </style>
+</head>
+<body>
+
 <header class="cover">
   <div class="wrap cover-inner">
     <div class="brandline"><span class="mark">◈</span><span class="n">SALESIQ&nbsp;/&nbsp;DECISION INTELLIGENCE PLATFORM</span></div>
@@ -357,3 +375,6 @@
     <span>Single source of truth for development</span>
   </div>
 </footer>
+
+</body>
+</html>
