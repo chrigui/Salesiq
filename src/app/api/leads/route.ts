@@ -52,18 +52,28 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "invalid-request" }, { status: 400 });
   }
 
-  const ctx = await getSessionContext();
-  const tenant = ctx ? { id: ctx.tenantId } : await getDefaultTenant();
+  try {
+    const ctx = await getSessionContext();
+    const tenant = ctx ? { id: ctx.tenantId } : await getDefaultTenant();
 
-  const lead = await prisma.lead.create({
-    data: {
-      ...parsed.data,
-      tenantId: tenant.id,
-      branchId: ctx?.branchId ?? null,
-      createdById: ctx?.userId ?? null,
-      source: ctx ? "dashboard" : "companion-anon",
-    },
-  });
+    const lead = await prisma.lead.create({
+      data: {
+        ...parsed.data,
+        tenantId: tenant.id,
+        branchId: ctx?.branchId ?? null,
+        createdById: ctx?.userId ?? null,
+        source: ctx ? "dashboard" : "companion-anon",
+      },
+    });
 
-  return NextResponse.json({ lead: toLeadDTO(lead) }, { status: 201 });
+    return NextResponse.json({ lead: toLeadDTO(lead) }, { status: 201 });
+  } catch (err) {
+    // Unlike every other route here, this one has no session to blame a
+    // failure on (it's deliberately reachable anonymously — see the
+    // SECURITY comment above) — getDefaultTenant() or the DB write itself
+    // can throw for reasons a generic 500 would otherwise hide completely.
+    // Logged here so it's visible in the deployment's function logs.
+    console.error("POST /api/leads failed:", err);
+    return NextResponse.json({ error: "server-error" }, { status: 500 });
+  }
 }
