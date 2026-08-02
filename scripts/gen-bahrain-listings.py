@@ -40,11 +40,22 @@ GRADIENTS = ["emerald", "sky", "amber", "violet", "rose"]
 TYPE_ATTR = {"Apartment": "apartment", "Studio": "studio", "Townhouse": "townhouse", "Villa": "villa"}
 
 
-def jitter(seed, spread=0.02):
-    # Deterministic pseudo-random offset in [-spread, spread], seeded by id —
-    # reproducible, no randomness at build time.
-    x = (seed * 9301 + 49297) % 233280
-    return (x / 233280 - 0.5) * 2 * spread
+def _hash01(n):
+    # A small integer mix (splitmix64-style) so consecutive ids don't produce
+    # visibly correlated (linear/spiral) jitter — deterministic, no randomness
+    # at build time, but scatters like real noise on a map.
+    n = (n ^ 0x2545F4914F6CDD1D) & 0xFFFFFFFFFFFFFFFF
+    n = (n * 0xFF51AFD7ED558CCD) & 0xFFFFFFFFFFFFFFFF
+    n ^= n >> 33
+    n = (n * 0xC4CEB9FE1A85EC53) & 0xFFFFFFFFFFFFFFFF
+    n ^= n >> 33
+    return (n & 0xFFFFFFFF) / 0xFFFFFFFF
+
+
+def jitter(seed, spread=0.028):
+    # Deterministic pseudo-random offset in [-spread, spread] (~3km at this
+    # spread), seeded by id — reproducible, no randomness at build time.
+    return (_hash01(seed) - 0.5) * 2 * spread
 
 
 def esc(s):
@@ -88,6 +99,41 @@ for r in rows:
 
     gradient = GRADIENTS[id_ % len(GRADIENTS)]
 
+    # Lifestyle stub — powers the Interactive Lifestyle Map. Every field is
+    # derived directly from real columns in the dataset (type, beds, baths,
+    # area, city); there's no per-property amenity/POI data in the source, so
+    # `pois` stays empty rather than inventing schools, parks, or walk times.
+    if type_ == "Studio":
+        tags = json.dumps(["Studio", city], ensure_ascii=False)
+        summary = esc(f"A {area_sqm} m² studio in {city} with {bathrooms} bathroom{'' if bathrooms == 1 else 's'}.")
+    else:
+        bed_word = "bedroom" if bedrooms == 1 else "bedrooms"
+        tags = json.dumps([type_, f"{bedrooms} Bed", city], ensure_ascii=False)
+        summary = esc(
+            f"A {area_sqm} m² {type_.lower()} in {city} with {bedrooms} {bed_word} "
+            f"and {bathrooms} bathroom{'' if bathrooms == 1 else 's'}."
+        )
+
+    lifestyle_ts = f"""{{
+      district: {esc(city)},
+      tags: {tags},
+      summary: {summary},
+      beds: {bedrooms},
+      sqm: {area_sqm},
+      at: {{ x: 50, y: 50 }},
+      metrics: [
+        {{ icon: "BedDouble", label: "Bedrooms", detail: {esc(str(bedrooms))} }},
+        {{ icon: "Bath", label: "Bathrooms", detail: {esc(str(bathrooms))} }},
+        {{ icon: "Ruler", label: "Floor area", detail: {esc(f"{area_sqm} m²")} }},
+      ],
+      pois: [],
+      headline: [
+        {{ icon: "Ruler", label: {esc(f"{area_sqm} m²")}, detail: "Floor area" }},
+        {{ icon: "BedDouble", label: {esc(str(bedrooms))}, detail: "Bedrooms" }},
+        {{ icon: "Bath", label: {esc(str(bathrooms))}, detail: "Bathrooms" }},
+      ],
+    }}"""
+
     item_ts = f"""  {{
     id: "bh-{id_}",
     name: {esc(title)},
@@ -100,6 +146,7 @@ for r in rows:
     location: {{ label: {esc(city)}, lat: {lat}, lng: {lng} }},
     attributes: {json.dumps(attrs, ensure_ascii=False)},
     highlights: {json.dumps(highlights, ensure_ascii=False)},
+    lifestyle: {lifestyle_ts},
   }}"""
     items.append(item_ts)
 
@@ -115,6 +162,12 @@ header = '''import type { InventoryItem } from "@/core/types";
  * not real per-property addresses — the source dataset has no street-level
  * detail. Generated once from a spreadsheet, not hand-authored — see
  * src/core/industries/real-estate-bahrain.ts for the pack this powers.
+ *
+ * Each item also carries a minimal `lifestyle` object (district/tags/
+ * summary/metrics/headline) so the Interactive Lifestyle Map renders for
+ * this pack — every field is derived from the property's own real specs
+ * (type, beds, baths, area, city); `pois` is intentionally empty since the
+ * source data has no amenity/walk-time detail to draw on.
  */
 export const bahrainListings: InventoryItem[] = [
 '''
