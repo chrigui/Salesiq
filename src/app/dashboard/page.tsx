@@ -21,6 +21,7 @@ import { UserManagement } from "@/components/console/UserManagement";
 import { PermissionsEditor } from "@/components/console/PermissionsEditor";
 import { SubscriptionManagement } from "@/components/console/SubscriptionManagement";
 import { LeadManagement } from "@/components/console/LeadManagement";
+import { Brochures, type BrochureSeed } from "@/components/console/Brochures";
 import { IndustryBuilder } from "@/components/console/IndustryBuilder";
 import { KnowledgeBase } from "@/components/console/KnowledgeBase";
 import { AiSettings } from "@/components/console/AiSettings";
@@ -60,6 +61,7 @@ const NAV_CAPABILITY: Record<string, string> = {
   Scoring: "scoring.edit",
   Branding: "branding.edit",
   Leads: "leads.view",
+  Brochures: "brochures.manage",
   "Deal Probability": "leads.view",
   Analytics: "analytics.view",
   "Business Impact": "analytics.view",
@@ -91,6 +93,7 @@ const NAV: NavGroup[] = [
     heading: "Insights",
     items: [
       { id: "Leads", label: "Leads", icon: "UserPlus" },
+      { id: "Brochures", label: "Brochures", icon: "Globe" },
       { id: "Deal Probability", label: "Deal Probability", icon: "Radar" },
       { id: "Business Impact", label: "Business Impact", icon: "TrendingUp" },
       { id: "ROI Calculator", label: "ROI Calculator", icon: "Calculator" },
@@ -162,6 +165,7 @@ function useRealCompanyKpis() {
 export default function DashboardPage() {
   const [tab, setTab] = useState<string>("Overview");
   const [builderPack, setBuilderPack] = useState<string>(DEFAULT_PACK_ID);
+  const [brochureSeed, setBrochureSeed] = useState<BrochureSeed | null>(null);
   const org = useOrganization();
   const { session, status } = useSessionStatus();
   const unreadCount = useUnreadCount();
@@ -230,7 +234,16 @@ export default function DashboardPage() {
       ) : tab === "Questions" ? (
         <BuilderSection kind="questions" packId={builderPack} onPackChange={setBuilderPack} onNavigate={setTab} />
       ) : tab === "Inventory" ? (
-        <BuilderSection kind="inventory" packId={builderPack} onPackChange={setBuilderPack} onNavigate={setTab} />
+        <BuilderSection
+          kind="inventory"
+          packId={builderPack}
+          onPackChange={setBuilderPack}
+          onNavigate={setTab}
+          onGenerateBrochure={(packId, itemId) => {
+            setBrochureSeed({ packId, itemId });
+            setTab("Brochures");
+          }}
+        />
       ) : tab === "Scoring" ? (
         <BuilderSection kind="rules" packId={builderPack} onPackChange={setBuilderPack} onNavigate={setTab} />
       ) : tab === "Branding" ? (
@@ -241,6 +254,8 @@ export default function DashboardPage() {
         <AiSettings />
       ) : tab === "Leads" ? (
         <LeadManagement />
+      ) : tab === "Brochures" ? (
+        <Brochures seed={brochureSeed} onSeedConsumed={() => setBrochureSeed(null)} />
       ) : tab === "Deal Probability" ? (
         <DealProbability />
       ) : tab === "Business Impact" ? (

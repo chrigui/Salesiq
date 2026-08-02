@@ -31,12 +31,15 @@ export function BuilderSection({
   packId,
   onPackChange,
   onNavigate,
+  onGenerateBrochure,
 }: {
   kind: BuilderKind;
   packId: string;
   onPackChange: (id: string) => void;
   /** Optional: lets "Take me to Questions" in the Smart Wizard switch tabs. */
   onNavigate?: (tab: "Questions") => void;
+  /** Optional: lets "Generate Brochure" in the Inventory Builder hand off to the Brochures tab. */
+  onGenerateBrochure?: (packId: string, itemId: string) => void;
 }) {
   // Re-render when drafts change so the "Customised" badge stays accurate.
   const drafted = useDraftedPackIds();
@@ -111,7 +114,7 @@ export function BuilderSection({
       {kind === "questions" ? (
         <QuestionBuilder key={builderKey} packId={packId} />
       ) : kind === "inventory" ? (
-        <InventoryBuilder key={builderKey} packId={packId} />
+        <InventoryBuilder key={builderKey} packId={packId} onGenerateBrochure={onGenerateBrochure} />
       ) : kind === "rules" ? (
         <RulesBuilder key={builderKey} packId={packId} />
       ) : (

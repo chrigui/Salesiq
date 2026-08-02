@@ -35,6 +35,7 @@ export const CAPABILITIES: Capability[] = [
   { id: "leads.edit", label: "Edit leads", group: "Leads & CRM" },
   { id: "leads.export", label: "Export reports", group: "Leads & CRM" },
   { id: "analytics.view", label: "View analytics", group: "Leads & CRM" },
+  { id: "brochures.manage", label: "Generate & manage brochures", group: "Marketing" },
   { id: "branches.manage", label: "Manage branches", group: "Organization" },
   { id: "users.manage", label: "Manage users", group: "Organization" },
   { id: "billing.manage", label: "Manage billing", group: "Organization" },
@@ -51,7 +52,14 @@ export function defaultMatrix(): PermissionMatrix {
   const managerSet = all.filter(
     (id) => !["billing.manage", "users.manage", "branches.manage", "security.manage"].includes(id),
   );
-  const salesSet = ["inventory.view", "questions.edit", "leads.view", "leads.edit", "analytics.view"];
+  const salesSet = [
+    "inventory.view",
+    "questions.edit",
+    "leads.view",
+    "leads.edit",
+    "analytics.view",
+    "brochures.manage",
+  ];
   const viewerSet = ["inventory.view", "leads.view", "analytics.view"];
 
   return {

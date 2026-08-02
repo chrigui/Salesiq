@@ -49,6 +49,32 @@ enum LeadStatus {
   lost
 }
 
+enum BrochureTemplate {
+  Modern
+  Luxury
+  Minimal
+}
+
+enum BrochureTheme {
+  Light
+  Dark
+  Auto
+  Brand
+}
+
+enum BrochureStatus {
+  Draft
+  Published
+  Archived
+}
+
+enum BrochureEventKind {
+  View
+  Scan
+  Click
+  LeadSubmitted
+}
+
 model Tenant {
   id              String   @id @default(cuid())
   slug            String   @unique
@@ -81,6 +107,9 @@ model Tenant {
   sessions        Session[]
   rolePermissions RolePermission[]
   leads           Lead[]
+  brochures       Brochure[]
+  brochureEvents  BrochureEvent[]
+  brochureAssets  BrochureAsset[]
 
   /// TODO(pass-2): src/core/data/knowledgeBase.ts
   knowledgeEntries KnowledgeEntry[]
@@ -154,6 +183,7 @@ model User {
   sessions      Session[]
   assignedLeads Lead[] @relation("LeadAssignee")
   createdLeads  Lead[] @relation("LeadCreator")
+  createdBrochures Brochure[]
 
   @@unique([tenantId, email])
   @@index([tenantId, status])
@@ -224,6 +254,10 @@ model Lead {
   // problem" for why this exists and what it's a deliberate tradeoff for.
   source String @default("dashboard")
 
+  // Plain string ref (same convention as packId/itemName above, not a
+  // relation) to the brochure microsite this lead was captured from, if any.
+  brochureId String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -231,6 +265,81 @@ model Lead {
   @@index([tenantId, status])
   @@index([tenantId, assignedToId])
   @@index([tenantId, followUpAt])
+}
+
+// A property listing's shareable microsite. Listings themselves have no DB
+// row (see core/industries/*.ts) — packId/itemId is a plain string pair
+// resolved live against the shipped pack config at request time, the same
+// convention Lead.packId/itemName already uses. That's what makes "listing
+// edits reflect on the microsite instantly" true for free: the microsite
+// re-resolves the item on every request instead of storing a copy of it.
+model Brochure {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  packId String
+  itemId String
+
+  // The microsite's own URL segment (/b/[slug]) — this *is* the permanent
+  // short link; there's no separate redirect layer.
+  slug String @unique
+
+  template BrochureTemplate @default(Modern)
+  theme    BrochureTheme    @default(Light)
+
+  // Ordered widget composition: [{ id, type, enabled, order, config }].
+  sections          Json
+  brandingOverrides Json?
+
+  status      BrochureStatus @default(Draft)
+  createdById String?
+  createdBy   User?          @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  publishedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  events BrochureEvent[]
+  assets BrochureAsset[]
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+}
+
+// Document Center attachment (floor plans, spec sheets, title-deed samples,
+// etc). No object storage is configured for this app, so bytes are stored
+// directly in Postgres — fine at modest volume, worth moving to real object
+// storage (S3/Vercel Blob) once usage justifies it.
+model BrochureAsset {
+  id         String   @id @default(cuid())
+  brochureId String
+  brochure   Brochure @relation(fields: [brochureId], references: [id], onDelete: Cascade)
+  tenantId   String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  name      String
+  mimeType  String
+  sizeBytes Int
+  data      Bytes
+  createdAt DateTime @default(now())
+
+  @@index([brochureId])
+}
+
+// Real analytics events (view/scan/click/lead) — no fabricated counts.
+model BrochureEvent {
+  id         String            @id @default(cuid())
+  brochureId String
+  brochure   Brochure          @relation(fields: [brochureId], references: [id], onDelete: Cascade)
+  tenantId   String
+  tenant     Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  kind       BrochureEventKind
+  meta       Json?
+  createdAt  DateTime          @default(now())
+
+  @@index([brochureId, createdAt(sort: Desc)])
+  @@index([brochureId, kind])
 }
 
 // ---------------------------------------------------------------------

@@ -16,7 +16,13 @@ import { SESSION_COOKIE, verifySessionToken } from "@/lib/auth/jwt";
  * with {session:null}, not 401.
  */
 export const config = {
-  matcher: ["/api/leads/:path*", "/api/users/:path*", "/api/permissions/:path*"],
+  matcher: [
+    "/api/leads/:path*",
+    "/api/users/:path*",
+    "/api/permissions/:path*",
+    "/api/brochures/:path*",
+    "/api/audit/:path*",
+  ],
 };
 
 export async function middleware(request: NextRequest) {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ChevronDown, Plus, Trash2, ArrowUp, ArrowDown, X } from "lucide-react";
+import { ChevronDown, Plus, Trash2, ArrowUp, ArrowDown, X, Globe } from "lucide-react";
 import { cx, GRADIENTS } from "@/components/ui/primitives";
 import { getEffectivePack, saveInventory } from "@/core/store/packs";
 import type { InventoryItem } from "@/core/types";
@@ -23,7 +23,14 @@ function blankItem(currency: string): InventoryItem {
   };
 }
 
-export function InventoryBuilder({ packId }: { packId: string }) {
+export function InventoryBuilder({
+  packId,
+  onGenerateBrochure,
+}: {
+  packId: string;
+  /** Optional: lets "Generate Brochure" hand off to the Brochures tab for this exact listing. */
+  onGenerateBrochure?: (packId: string, itemId: string) => void;
+}) {
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [openId, setOpenId] = useState<string | null>(null);
   const currency = getEffectivePack(packId).currency;
@@ -84,6 +91,7 @@ export function InventoryBuilder({ packId }: { packId: string }) {
             onChange={(patch) => update(it.id, patch)}
             onRemove={() => remove(it.id)}
             onMove={(dir) => move(i, dir)}
+            onGenerateBrochure={onGenerateBrochure && (() => onGenerateBrochure(packId, it.id))}
           />
         ))}
         {items.length === 0 && (
@@ -105,6 +113,7 @@ function ItemRow({
   onChange,
   onRemove,
   onMove,
+  onGenerateBrochure,
 }: {
   item: InventoryItem;
   index: number;
@@ -114,6 +123,7 @@ function ItemRow({
   onChange: (patch: Partial<InventoryItem>) => void;
   onRemove: () => void;
   onMove: (dir: -1 | 1) => void;
+  onGenerateBrochure?: () => void;
 }) {
   return (
     <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
@@ -132,6 +142,11 @@ function ItemRow({
           </div>
         </button>
         <div className="flex items-center gap-0.5">
+          {onGenerateBrochure && (
+            <IconBtn label="Generate brochure" onClick={onGenerateBrochure}>
+              <Globe className="h-3.5 w-3.5" />
+            </IconBtn>
+          )}
           <IconBtn label="Move up" disabled={index === 0} onClick={() => onMove(-1)}>
             <ArrowUp className="h-3.5 w-3.5" />
           </IconBtn>

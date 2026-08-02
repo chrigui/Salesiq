@@ -26,6 +26,7 @@ const CAPABILITIES = [
   "leads.edit",
   "leads.export",
   "analytics.view",
+  "brochures.manage",
   "branches.manage",
   "users.manage",
   "billing.manage",
@@ -35,7 +36,14 @@ const CAPABILITIES = [
 const MANAGER_SET = CAPABILITIES.filter(
   (id) => !["billing.manage", "users.manage", "branches.manage", "security.manage"].includes(id),
 );
-const SALES_SET = ["inventory.view", "questions.edit", "leads.view", "leads.edit", "analytics.view"];
+const SALES_SET = [
+  "inventory.view",
+  "questions.edit",
+  "leads.view",
+  "leads.edit",
+  "analytics.view",
+  "brochures.manage",
+];
 const VIEWER_SET = ["inventory.view", "leads.view", "analytics.view"];
 
 const ROLE_GRANTS: Record<string, string[]> = {
