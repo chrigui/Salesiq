@@ -31,6 +31,9 @@ enum UserRole {
   Owner
   Admin
   Manager
+  // Template Builder / Deal Room design role — can build and publish
+  // DealRoomTemplates but isn't granted the broader Manager permission set.
+  Designer
   Salesperson
   Viewer
 }
@@ -75,6 +78,61 @@ enum BrochureEventKind {
   LeadSubmitted
 }
 
+enum DealRoomTemplateStatus {
+  Draft
+  Published
+  Archived
+}
+
+enum DealRoomStatus {
+  Draft
+  Published
+  Archived
+}
+
+enum DealRoomTheme {
+  Light
+  Dark
+  Auto
+  Brand
+}
+
+enum DealRoomAccessMode {
+  PublicLink
+  Restricted
+}
+
+enum DealRoomEventKind {
+  View
+  Scan
+  Click
+  WidgetInteraction
+  Download
+  Share
+  ProposalAccepted
+  TaskCompleted
+  SignatureRequested
+  SignatureSigned
+}
+
+enum DealRoomTaskStatus {
+  Open
+  InProgress
+  Done
+}
+
+enum DealRoomApprovalStepStatus {
+  Pending
+  Approved
+  Rejected
+}
+
+enum DealRoomSignatureStatus {
+  Requested
+  Signed
+  Declined
+}
+
 model Tenant {
   id              String   @id @default(cuid())
   slug            String   @unique
@@ -110,6 +168,16 @@ model Tenant {
   brochures       Brochure[]
   brochureEvents  BrochureEvent[]
   brochureAssets  BrochureAsset[]
+
+  dealRoomTemplates        DealRoomTemplate[]
+  dealRoomTemplateVersions DealRoomTemplateVersion[]
+  dealRooms                DealRoom[]
+  dealRoomAssets           DealRoomAsset[]
+  dealRoomEvents           DealRoomEvent[]
+  dealRoomTasks            DealRoomTask[]
+  dealRoomMessages         DealRoomMessage[]
+  dealRoomApprovalSteps    DealRoomApprovalStep[]
+  dealRoomSignatureRequests DealRoomSignatureRequest[]
 
   /// TODO(pass-2): src/core/data/knowledgeBase.ts
   knowledgeEntries KnowledgeEntry[]
@@ -185,6 +253,13 @@ model User {
   createdLeads  Lead[] @relation("LeadCreator")
   createdBrochures Brochure[]
 
+  createdDealRoomTemplates DealRoomTemplate[]
+  authoredDealRoomVersions DealRoomTemplateVersion[]
+  createdDealRooms         DealRoom[]
+  assignedDealRoomTasks    DealRoomTask[]
+  dealRoomMessages         DealRoomMessage[]
+  dealRoomApprovalSteps    DealRoomApprovalStep[]
+
   @@unique([tenantId, email])
   @@index([tenantId, status])
 }
@@ -257,6 +332,8 @@ model Lead {
   // Plain string ref (same convention as packId/itemName above, not a
   // relation) to the brochure microsite this lead was captured from, if any.
   brochureId String?
+
+  dealRooms DealRoom[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -340,6 +417,242 @@ model BrochureEvent {
 
   @@index([brochureId, createdAt(sort: Desc)])
   @@index([brochureId, kind])
+}
+
+// ---------------------------------------------------------------------
+// Deal Room & Template Engine — generalizes the Brochure module above into
+// a reusable, versioned, industry-agnostic template system. A
+// DealRoomTemplate is edited/versioned/published independently of any
+// specific deal; a DealRoom is an instance created from a template for a
+// real customer/lead, frozen to the template version it was built from so
+// a live negotiation never silently reflows when the master template is
+// edited later. Nothing here is industry-specific in code — "category" and
+// "industry" are free text, and an industry's starter template is just a
+// row with a chosen widget composition, same as core/industries/*.ts packs
+// are config, not code, for the product's other engine.
+// ---------------------------------------------------------------------
+
+model DealRoomTemplate {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  name     String
+  category String // e.g. "Proposal", "Renewal", "Onboarding" — user-defined, unlimited
+  industry String // e.g. "Insurance", "Real Estate" — user-defined, unlimited
+
+  status DealRoomTemplateStatus @default(Draft)
+
+  createdById String?
+  createdBy   User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  versions  DealRoomTemplateVersion[]
+  dealRooms DealRoom[]
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+}
+
+// Immutable snapshot. Publishing or rolling back always creates a new row
+// here rather than mutating an old one — that's what makes Compare/Rollback
+// honest instead of just overwriting history.
+model DealRoomTemplateVersion {
+  id         String           @id @default(cuid())
+  templateId String
+  template   DealRoomTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  tenantId   String
+  tenant     Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  version Int
+  // Ordered widget composition — same shape as Brochure.sections:
+  // [{ id, type, enabled, order, config }].
+  sections Json
+  theme    Json
+
+  // At most one version per template has isCurrent = true — the version a
+  // freshly-created DealRoom is instantiated from. Toggled in a transaction
+  // (unset old, set new) rather than modeled as a circular FK pointer.
+  isCurrent Boolean @default(false)
+
+  authorId     String?
+  author       User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  changeReason String  @default("")
+  createdAt    DateTime @default(now())
+
+  dealRooms DealRoom[]
+
+  @@unique([templateId, version])
+  @@index([templateId, isCurrent])
+}
+
+// The direct generalization of Brochure: a real, shareable instance
+// created from a template for an actual deal. Like Brochure, any inventory
+// item it references (packId/itemId) is a plain string pair resolved live
+// against the shipped pack config, not a stored copy.
+model DealRoom {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  templateId        String
+  template          DealRoomTemplate        @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  templateVersionId String
+  templateVersion   DealRoomTemplateVersion @relation(fields: [templateVersionId], references: [id], onDelete: Restrict)
+
+  // The room's own URL segment (/d/[slug]) — same "the link IS the
+  // permanent short URL" convention as Brochure.slug.
+  slug       String             @unique
+  accessMode DealRoomAccessMode @default(PublicLink)
+  // Set only when accessMode = Restricted — a capability-URL secret sent to
+  // the specific recipient, same trust model as the unguessable slug itself,
+  // not a login credential, so it isn't hashed.
+  accessCode String?
+
+  packId String?
+  itemId String?
+  leadId String?
+  lead   Lead?   @relation(fields: [leadId], references: [id], onDelete: SetNull)
+
+  // Per-instance widget config overrides layered on top of the frozen
+  // template version's sections (e.g. this room's own Financing Calculator
+  // inputs) — same overlay idea as core/store/packs.ts's draft-over-shipped
+  // pattern, just per-room instead of per-tenant.
+  sectionOverrides Json?
+  theme            DealRoomTheme?
+
+  status      DealRoomStatus @default(Draft)
+  createdById String?
+  createdBy   User?          @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  publishedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  assets            DealRoomAsset[]
+  events            DealRoomEvent[]
+  tasks             DealRoomTask[]
+  messages          DealRoomMessage[]
+  approvalSteps     DealRoomApprovalStep[]
+  signatureRequests DealRoomSignatureRequest[]
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([templateId])
+}
+
+// Document Center attachment — same Postgres-blob storage tradeoff as
+// BrochureAsset (no object storage configured; fine at modest volume).
+model DealRoomAsset {
+  id         String   @id @default(cuid())
+  dealRoomId String
+  dealRoom   DealRoom @relation(fields: [dealRoomId], references: [id], onDelete: Cascade)
+  tenantId   String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  name      String
+  mimeType  String
+  sizeBytes Int
+  data      Bytes
+  createdAt DateTime @default(now())
+
+  @@index([dealRoomId])
+}
+
+// Real analytics events only — no fabricated counts.
+model DealRoomEvent {
+  id         String            @id @default(cuid())
+  dealRoomId String
+  dealRoom   DealRoom          @relation(fields: [dealRoomId], references: [id], onDelete: Cascade)
+  tenantId   String
+  tenant     Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  kind       DealRoomEventKind
+  meta       Json?
+  createdAt  DateTime          @default(now())
+
+  @@index([dealRoomId, createdAt(sort: Desc)])
+  @@index([dealRoomId, kind])
+}
+
+model DealRoomTask {
+  id         String   @id @default(cuid())
+  dealRoomId String
+  dealRoom   DealRoom @relation(fields: [dealRoomId], references: [id], onDelete: Cascade)
+  tenantId   String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  title        String
+  detail       String             @default("")
+  status       DealRoomTaskStatus @default(Open)
+  assignedToId String?
+  assignedTo   User?              @relation(fields: [assignedToId], references: [id], onDelete: SetNull)
+  dueAt        DateTime?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  @@index([dealRoomId])
+}
+
+// Persisted chat thread — real messages, real timestamps. Delivery is
+// polling-based (no realtime/push provider configured), not fabricated.
+model DealRoomMessage {
+  id         String   @id @default(cuid())
+  dealRoomId String
+  dealRoom   DealRoom @relation(fields: [dealRoomId], references: [id], onDelete: Cascade)
+  tenantId   String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Null when sent by the external customer through the public room (no
+  // login there); set when sent by a tenant user from the dashboard side.
+  authorId   String?
+  author     User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  authorName String
+  body       String
+  createdAt  DateTime @default(now())
+
+  @@index([dealRoomId, createdAt])
+}
+
+model DealRoomApprovalStep {
+  id         String   @id @default(cuid())
+  dealRoomId String
+  dealRoom   DealRoom @relation(fields: [dealRoomId], references: [id], onDelete: Cascade)
+  tenantId   String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  label      String
+  order      Int
+  status     DealRoomApprovalStepStatus @default(Pending)
+  approverId String?
+  approver   User?                      @relation(fields: [approverId], references: [id], onDelete: SetNull)
+  decidedAt  DateTime?
+  note       String                     @default("")
+
+  @@index([dealRoomId, order])
+}
+
+// A real click-to-sign audit record (typed name + timestamp + IP) — not a
+// legally-binding e-signature. No vendor (DocuSign/HelloSign/Dropbox Sign/
+// etc) is configured for this project; shown as "not connected" in the UI
+// rather than faked, same disclosure pattern as Integrations.tsx.
+model DealRoomSignatureRequest {
+  id          String                  @id @default(cuid())
+  dealRoomId  String
+  dealRoom    DealRoom                @relation(fields: [dealRoomId], references: [id], onDelete: Cascade)
+  tenantId    String
+  tenant      Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  signerName  String
+  signerEmail String
+  status      DealRoomSignatureStatus @default(Requested)
+
+  signedName  String?
+  signedAt    DateTime?
+  signedIp    String?
+  createdAt   DateTime                @default(now())
+
+  @@index([dealRoomId])
 }
 
 // ---------------------------------------------------------------------

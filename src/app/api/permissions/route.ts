@@ -6,7 +6,7 @@ import { requireSession, requireCapability, AuthError } from "@/lib/auth/server"
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const ROLES = ["Owner", "Admin", "Manager", "Salesperson", "Viewer"] as const;
+const ROLES = ["Owner", "Admin", "Manager", "Designer", "Salesperson", "Viewer"] as const;
 
 const matrixSchema = z.record(
   z.enum(ROLES),

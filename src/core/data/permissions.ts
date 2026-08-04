@@ -36,6 +36,9 @@ export const CAPABILITIES: Capability[] = [
   { id: "leads.export", label: "Export reports", group: "Leads & CRM" },
   { id: "analytics.view", label: "View analytics", group: "Leads & CRM" },
   { id: "brochures.manage", label: "Generate & manage brochures", group: "Marketing" },
+  { id: "dealroom-templates.manage", label: "Build & publish Deal Room templates", group: "Deal Rooms" },
+  { id: "dealrooms.manage", label: "Create & manage Deal Rooms", group: "Deal Rooms" },
+  { id: "dealrooms.view", label: "View Deal Rooms", group: "Deal Rooms" },
   { id: "branches.manage", label: "Manage branches", group: "Organization" },
   { id: "users.manage", label: "Manage users", group: "Organization" },
   { id: "billing.manage", label: "Manage billing", group: "Organization" },
@@ -59,13 +62,22 @@ export function defaultMatrix(): PermissionMatrix {
     "leads.edit",
     "analytics.view",
     "brochures.manage",
+    "dealrooms.manage",
+    "dealrooms.view",
   ];
-  const viewerSet = ["inventory.view", "leads.view", "analytics.view"];
+  const designerSet = [
+    "inventory.view",
+    "branding.edit",
+    "dealroom-templates.manage",
+    "dealrooms.view",
+  ];
+  const viewerSet = ["inventory.view", "leads.view", "analytics.view", "dealrooms.view"];
 
   return {
     Owner: grant(all),
     Admin: grant(all),
     Manager: grant(managerSet),
+    Designer: grant(designerSet),
     Salesperson: grant(salesSet),
     Viewer: grant(viewerSet),
   };

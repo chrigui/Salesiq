@@ -16,7 +16,7 @@ export const MFA_COOKIE = "salesiq_mfa";
 export const SESSION_TTL_S = 12 * 60 * 60; // 12h — matches the pilot's prior localStorage TTL
 export const MFA_TTL_S = 5 * 60;
 
-export type AppUserRole = "Owner" | "Admin" | "Manager" | "Salesperson" | "Viewer";
+export type AppUserRole = "Owner" | "Admin" | "Manager" | "Designer" | "Salesperson" | "Viewer";
 
 export interface SessionClaims extends JWTPayload {
   sid: string; // Session row id — enables server-side revocation
