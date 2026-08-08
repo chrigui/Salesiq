@@ -27,6 +27,9 @@ const CAPABILITIES = [
   "leads.export",
   "analytics.view",
   "brochures.manage",
+  "dealroom-templates.manage",
+  "dealrooms.manage",
+  "dealrooms.view",
   "branches.manage",
   "users.manage",
   "billing.manage",
@@ -43,13 +46,17 @@ const SALES_SET = [
   "leads.edit",
   "analytics.view",
   "brochures.manage",
+  "dealrooms.manage",
+  "dealrooms.view",
 ];
-const VIEWER_SET = ["inventory.view", "leads.view", "analytics.view"];
+const DESIGNER_SET = ["inventory.view", "branding.edit", "dealroom-templates.manage", "dealrooms.view"];
+const VIEWER_SET = ["inventory.view", "leads.view", "analytics.view", "dealrooms.view"];
 
 const ROLE_GRANTS: Record<string, string[]> = {
   Owner: CAPABILITIES,
   Admin: CAPABILITIES,
   Manager: MANAGER_SET,
+  Designer: DESIGNER_SET,
   Salesperson: SALES_SET,
   Viewer: VIEWER_SET,
 };

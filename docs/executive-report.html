@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SalesIQ — Executive Report</title>
+<style>
+  :root{
+    --paper:#f0f3f0; --surface:#ffffff; --surface-2:#f7f9f7; --bg-tertiary:#eae8df;
+    --ink:#15201b; --ink-muted:#55605a; --ink-faint:#8a938c;
+    --accent:#0e8f5b; --accent-ink:#0a6f47; --accent-wash:rgba(14,143,91,.10);
+    --brass:#9c7622; --star:#d8a72a;
+    --good:#0e8f5b; --good-wash:rgba(14,143,91,.12);
+    --pending:#a9701a; --pending-wash:rgba(169,112,26,.13);
+    --blueprint:#5f6b7a; --blueprint-wash:rgba(95,107,122,.12);
+    --line:rgba(21,32,27,.08); --line-strong:rgba(21,32,27,.16);
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,ui-serif,serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:"SF Mono",ui-monospace,"JetBrains Mono","Cascadia Code",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);background:var(--paper);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+  a{color:var(--accent-ink);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .topbar{position:sticky;top:0;z-index:50;background:rgba(240,243,240,.88);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .topbar .in{max-width:52rem;margin:0 auto;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .brandmark{display:inline-flex;align-items:center;gap:8px;font-weight:600;letter-spacing:-.025em;font-size:16px;font-family:var(--serif)}
+  .brandmark .bx{width:22px;height:22px;border-radius:6px;background:var(--accent-ink);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;font-family:var(--sans)}
+  .fam{font-size:12.5px;color:var(--ink-muted);display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .pdfbtn{background:var(--accent-ink);color:#fff;border:none;border-radius:9999px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--sans)}
+  .pdfbtn:hover{background:var(--accent)}
+
+  main{max-width:52rem;margin:0 auto;padding:0 24px}
+  .page{padding:48px 0;border-bottom:1px solid var(--line)}
+  .page:last-child{border-bottom:none}
+  .kick{display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);color:var(--accent-ink);font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:4px 12px;border-radius:9999px;font-family:var(--mono)}
+  .kick::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent-ink)}
+  h1{font-family:var(--serif);font-size:42px;font-weight:600;letter-spacing:-.02em;line-height:1.1;margin:20px 0 14px}
+  h1 .hl{background:linear-gradient(180deg,transparent 62%,rgba(216,167,42,.4) 62%);border-radius:2px;padding:0 2px}
+  h2{font-family:var(--serif);font-size:25px;font-weight:600;letter-spacing:-.015em;margin:12px 0 10px}
+  h3{font-family:var(--serif);font-size:16px;font-weight:600;letter-spacing:-.01em;margin:22px 0 10px}
+  p{font-size:14px;color:var(--ink);margin-bottom:12px;max-width:45rem}
+  p.lede{color:var(--ink-muted);font-size:15px;margin-bottom:18px}
+  ul.b{margin:0 0 12px 18px;font-size:13.5px}
+  ul.b li{margin-bottom:6px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;box-shadow:0 1px 2px rgba(21,32,27,.05)}
+  .grid{display:grid;gap:12px}
+  .g2{grid-template-columns:repeat(auto-fit,minmax(290px,1fr))}
+  .g4{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+  .stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:15px;box-shadow:0 1px 2px rgba(21,32,27,.05)}
+  .stat .n{font-family:var(--serif);font-size:24px;font-weight:600;letter-spacing:-.01em}
+  .stat .l{font-size:12px;color:var(--ink-muted);margin-top:3px}
+  table{width:100%;border-collapse:separate;border-spacing:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:12.5px;margin:12px 0}
+  th{background:var(--surface-2);color:var(--ink-muted);text-align:left;padding:9px 12px;font-size:10px;letter-spacing:.07em;text-transform:uppercase;font-weight:600;font-family:var(--mono)}
+  td{padding:9px 12px;border-top:1px solid var(--line);vertical-align:top}
+  td b{color:var(--ink)}
+  .pill{display:inline-block;font-size:10px;font-weight:700;padding:2px 9px;border-radius:9999px;letter-spacing:.04em}
+  .pill.live{background:var(--good-wash);color:var(--good)}
+  .pill.next{background:var(--pending-wash);color:var(--pending)}
+  .pill.blue{background:var(--blueprint-wash);color:var(--blueprint)}
+  .note{background:var(--pending-wash);border:1px solid rgba(169,112,26,.22);border-radius:10px;padding:13px 15px;font-size:13px;color:#6d4712;margin:14px 0}
+  .good{background:var(--good-wash);border:1px solid rgba(14,143,91,.25);border-radius:10px;padding:13px 15px;font-size:13px;color:#0a4f30;margin:14px 0}
+  .timeline{border-left:2px solid var(--line-strong);margin-left:8px;padding-left:22px}
+  .tl{position:relative;margin-bottom:18px}
+  .tl::before{content:"";position:absolute;left:-29px;top:5px;width:10px;height:10px;border-radius:50%;background:var(--surface);border:2.5px solid var(--brass)}
+  .tl h4{font-size:14.5px;font-weight:600}
+  .tl p{font-size:13px;color:var(--ink-muted);margin:0}
+  .dark{background:#15201b;color:#c9d1cb;border-radius:16px;padding:24px}
+  .dark h3{color:#fff;margin-top:0}
+  .dark p{color:#9fb0a6}
+  .toc{font-size:14px;column-count:2;column-gap:36px}
+  .toc div{padding:6px 0;border-bottom:1px dashed var(--line);break-inside:avoid;display:flex;justify-content:space-between;gap:10px}
+  .toc span{color:var(--ink-faint);font-variant-numeric:tabular-nums}
+  .cover{min-height:66vh;display:flex;flex-direction:column;justify-content:center}
+  .cover .meta{color:var(--ink-faint);font-size:13px;margin-top:22px}
+  .suite{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+  .suite .prod{border:1px solid var(--line);border-left:3px solid var(--accent);background:var(--surface);border-radius:8px;padding:8px 10px;font-size:12px;font-weight:600}
+  .suite .prod.next{border-left-color:var(--pending)}
+  .suite .prod.blue{border-left-color:var(--blueprint);opacity:.7}
+  footer{max-width:52rem;margin:40px auto;background:#15201b;color:#8ba095;text-align:center;padding:30px 24px;font-size:12px;border-radius:16px}
+  footer b{color:#e9eee9}
+  @media print{
+    @page{size:A4;margin:14mm}
+    body{background:#fff}
+    .topbar{display:none}
+    main{max-width:100%;padding:0}
+    .page{padding:0;border-bottom:none;break-after:page}
+    .cover{min-height:240mm}
+    .card,.stat,table,.tl,.note,.good,.suite .prod{break-inside:avoid}
+    h2,h3{break-after:avoid}
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    a{color:inherit;text-decoration:none}
+    footer{break-inside:avoid;margin:0 auto}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="in">
+  <span class="brandmark"><span class="bx">IQ</span>SalesIQ</span>
+  <span class="fam">
+    <a href="master-report.html">Master Report</a>
+    <b style="color:var(--ink)">Executive Report</b>
+    <a href="prd.html">PRD</a>
+    <a href="sales-deck.html">Sales Deck</a>
+    <button class="pdfbtn" onclick="window.print()" title="Export as A4 PDF">Export PDF</button>
+  </span>
+</div></div>
+
+<main>
+
+<!-- COVER -->
+<div class="page cover">
+  <div><span class="kick">Confidential · Executive Report</span></div>
+  <h1>SalesIQ<br><span class="hl">The Decision Intelligence Platform</span> for enterprise buying</h1>
+  <p class="lede" style="font-size:17px">One engine that turns any high-consideration purchase into a live, explainable, guided decision — running the same code across five industries today, extendable to any vertical without a rebuild.</p>
+  <div class="meta">Prepared for leadership &amp; board review · Derived from the live codebase · Figures marked "illustrative" are product-design examples or pilot placeholders, not measured results</div>
+</div>
+
+<!-- CONTENTS -->
+<div class="page">
+  <span class="kick">Contents</span>
+  <h2>In this report</h2>
+  <div class="toc">
+    <div>Executive summary <span>3</span></div>
+    <div>The problem <span>4</span></div>
+    <div>The solution <span>5</span></div>
+    <div>Product today: five surfaces <span>6</span></div>
+    <div>Industry-agnostic packs <span>7</span></div>
+    <div>AI intelligence suite <span>8</span></div>
+    <div>Business impact &amp; analytics <span>9</span></div>
+    <div>Brochure &amp; Microsite module <span>10</span></div>
+    <div>Deal Room &amp; Template Engine <span>11</span></div>
+    <div>Visual Builder &amp; no-code <span>12</span></div>
+    <div>Security &amp; backend <span>13</span></div>
+    <div>Category &amp; positioning <span>14</span></div>
+    <div>Platform roadmap <span>15</span></div>
+    <div>Risks &amp; honest caveats <span>16</span></div>
+    <div>The ask <span>17</span></div>
+    <div>Appendix: full feature list <span>18</span></div>
+  </div>
+</div>
+
+<!-- SUMMARY -->
+<div class="page">
+  <span class="kick">Summary</span>
+  <h2>Executive summary</h2>
+  <p><b>SalesIQ is not a CRM add-on.</b> It's the layer CRM never built: a live, explainable decision engine that runs the actual moment of choice — in front of the customer, on a screen they're looking at, with reasons a buying committee could defend.</p>
+  <p>The platform proves its own "industry-agnostic" thesis in code, not slides: the identical engine and UI already power real estate (two packs — one hand-curated, one at 500-listing scale), automotive, private aviation, and yacht charter. A new vertical is configuration, authored through a no-code Visual Builder — not an engineering rebuild.</p>
+  <div class="grid g4" style="margin:18px 0">
+    <div class="stat"><div class="n">5</div><div class="l">industry packs shipped from one engine</div></div>
+    <div class="stat"><div class="n">5</div><div class="l">live product surfaces, one shared decision engine</div></div>
+    <div class="stat"><div class="n">real</div><div class="l">multi-tenant Postgres backend with role-based auth</div></div>
+    <div class="stat"><div class="n">2</div><div class="l">new modules this phase — Brochure/Microsite (shipped), Deal Room (in progress)</div></div>
+  </div>
+  <div class="good"><b>North Star:</b> every recommendation shown to a customer must be explainable from real, inspectable facts — enforced by a deterministic scoring/narration engine, with Claude layered on top only as an optional writing upgrade that never gets to invent a reason.</div>
+</div>
+
+<!-- PROBLEM -->
+<div class="page">
+  <span class="kick">Problem</span>
+  <h2>Enterprise buying is improvised and invisible</h2>
+  <p>A six-figure decision — a property, a fleet vehicle, a private aircraft — is still sold the way it was twenty years ago: a rep talking, a customer nodding, and a CRM that only learns about the deal after the fact.</p>
+  <table>
+    <tr><th>Gap</th><th>Today's reality</th></tr>
+    <tr><td><b>Improvised pitch</b></td><td>Every rep builds their own mental model of fit — inconsistent, unmeasurable, uncoachable</td></tr>
+    <tr><td><b>Invisible reasoning</b></td><td>"Trust me" is not a reason a buying committee can defend, or a manager can audit</td></tr>
+    <tr><td><b>Activity, not judgment</b></td><td>CRM logs that a call happened, never why option A beat option B</td></tr>
+    <tr><td><b>One-vertical tools</b></td><td>Sales-enablement and CPQ tools are typically built for a single industry's data shape</td></tr>
+  </table>
+  <p>CRM, sales-enablement libraries, and configure-price-quote tools each own a slice — none of them own the live moment of decision. That gap is the category SalesIQ was built for.</p>
+</div>
+
+<!-- SOLUTION -->
+<div class="page">
+  <span class="kick">Solution</span>
+  <h2>One core loop: configure → question → score → explain → present → propose</h2>
+  <p>A rep's questions feed a live scoring engine; the engine ranks every inventory item and generates a plain-language explanation from its own real rule breakdown — never a canned script. The customer sees this unfold live, on their own screen.</p>
+  <div class="card" style="text-align:center;padding:26px">
+    <div style="font-size:13.5px;font-weight:600;letter-spacing:.02em;color:var(--ink-muted)">COMPANION&nbsp;&nbsp;→&nbsp;&nbsp;<span style="color:var(--accent-ink)">DECISION ENGINE</span> <span style="color:var(--ink-faint)">(rules · explanations · AI upgrade)</span>&nbsp;&nbsp;→&nbsp;&nbsp;DISPLAY&nbsp;&nbsp;→&nbsp;&nbsp;PROPOSAL</div>
+    <div style="font-size:12px;color:var(--ink-faint);margin-top:10px">The engine doesn't know or care what it's selling — the pack supplies the questions, inventory, and rules.</div>
+  </div>
+  <h3>What this changes for the business</h3>
+  <ul class="b">
+    <li><b>Consistency:</b> every rep runs the same explainable logic, not their own improvisation.</li>
+    <li><b>Coachability:</b> the AI Sales Twin and Sales Copilot read the same real session data a manager could review.</li>
+    <li><b>Defensibility:</b> a recommendation traces to real facts a buying committee can actually interrogate.</li>
+    <li><b>Portability:</b> the exact same product runs a new vertical as configuration, not a rebuild.</li>
+  </ul>
+</div>
+
+<!-- PRODUCT TODAY -->
+<div class="page">
+  <span class="kick">Product</span>
+  <h2>Five surfaces, one decision engine</h2>
+  <table>
+    <tr><th>Surface</th><th>What it does</th><th>Status</th></tr>
+    <tr><td><b>Customer Experience Display</b></td><td>Interactive Lifestyle Map, ranked recommendations, live proposal presentation</td><td><span class="pill live">LIVE</span></td></tr>
+    <tr><td><b>Sales Companion</b></td><td>Question flow, AI Sales Twin, Buying Committee Intelligence, Sales Copilot</td><td><span class="pill live">LIVE</span></td></tr>
+    <tr><td><b>Company Dashboard</b></td><td>Leads/CRM, Business Impact Dashboard, Deal Probability Radar, Visual Builder</td><td><span class="pill live">LIVE</span></td></tr>
+    <tr><td><b>Platform Administration</b></td><td>Multi-tenant org, users, real permissions, audit trail, security &amp; compliance</td><td><span class="pill live">LIVE</span></td></tr>
+    <tr><td><b>AI Decision Engine &amp; Public API</b></td><td>The scoring/explanation engine, exposed as a public REST API</td><td><span class="pill live">LIVE</span></td></tr>
+  </table>
+  <p style="font-size:13px;color:var(--ink-muted)">Real-time sync ties Display and Companion together live via QR pairing, cross-device MQTT/WebSocket transport, and AES-GCM encrypted room keys.</p>
+</div>
+
+<!-- PACKS -->
+<div class="page">
+  <span class="kick">Product</span>
+  <h2>Industry-agnostic by design</h2>
+  <p class="lede">Representative shipped packs, real data.</p>
+  <table>
+    <tr><th>Pack</th><th>Brand</th><th>Currency</th><th>Inventory</th></tr>
+    <tr><td>Real Estate</td><td>Green Hills Living</td><td>USD</td><td>9 curated listings</td></tr>
+    <tr><td>Real Estate — Bahrain</td><td>Pearl Coast Properties</td><td>BHD</td><td>500 listings</td></tr>
+    <tr><td>Automotive</td><td>Vantage Motors</td><td>USD</td><td>8 vehicles</td></tr>
+    <tr><td>Private Jets</td><td>Meridian Aviation</td><td>USD</td><td>7 aircraft</td></tr>
+    <tr><td>Yacht Charter</td><td>Meridian Yachts</td><td>USD</td><td>7 yachts</td></tr>
+  </table>
+  <div class="note"><b>Why it matters commercially:</b> the Bahrain pack proves the engine at 500 real inventory items, not just a curated nine — a sixth vertical is additive config work, not a rebuild.</div>
+</div>
+
+<!-- AI SUITE -->
+<div class="page">
+  <span class="kick">Product</span>
+  <h2>The AI intelligence suite</h2>
+  <div class="grid g2">
+    <div class="card"><h3 style="margin-top:0">Why-This / Why-Not</h3><p style="font-size:13.5px">Explanations sourced directly from the scoring engine's own breakdown — never invented, always traceable.</p></div>
+    <div class="card"><h3 style="margin-top:0">AI Sales Twin</h3><p style="font-size:13.5px">Reads live session signals — pace, budget posture, confidence — to coach the rep mid-conversation.</p></div>
+    <div class="card"><h3 style="margin-top:0">Buying Committee Intelligence</h3><p style="font-size:13.5px">Tracks every stakeholder, role, and influence level across a multi-signoff enterprise deal.</p></div>
+    <div class="card"><h3 style="margin-top:0">Sales Copilot &amp; Meeting Replay</h3><p style="font-size:13.5px">Proactive coaching plus a deterministic session recap with "jump to this moment."</p></div>
+  </div>
+</div>
+
+<!-- BUSINESS IMPACT -->
+<div class="page">
+  <span class="kick">Analytics</span>
+  <h2>Business impact, computed from real data</h2>
+  <div class="dark">
+    <h3>Business Impact Dashboard, Deal Probability Radar, ROI Calculator</h3>
+    <p>Every KPI is computed live from real captured leads — revenue influenced, win rate, risk-adjusted pipeline value. Metrics the app has no underlying data for are honestly omitted rather than estimated. The ROI Calculator exposes every assumption as an editable input, not a hidden formula.</p>
+  </div>
+</div>
+
+<!-- BROCHURE -->
+<div class="page">
+  <span class="kick">Module · Shipped</span>
+  <h2>Digital Property Brochure &amp; Microsite</h2>
+  <p>A single inventory item becomes a shareable public microsite that is itself the permanent short link — plus print-to-PDF, a QR code, and WhatsApp/email share, all reading live off the same pack/item data.</p>
+  <table>
+    <tr><th>Capability</th><th>Real detail</th></tr>
+    <tr><td>Templates</td><td>3 shipped (Modern, Luxury, Minimal) on a widget engine built for more</td></tr>
+    <tr><td>PDF export</td><td>Browser print-to-PDF — zero new runtime dependencies</td></tr>
+    <tr><td>Comparables</td><td>Computed from real inventory, never invented market data</td></tr>
+    <tr><td>Audit trail</td><td>First real DB-backed audit log in the product</td></tr>
+  </table>
+</div>
+
+<!-- DEAL ROOM -->
+<div class="page">
+  <span class="kick">Module · In progress</span>
+  <h2>Deal Room &amp; Template Engine</h2>
+  <p>Generalizes the Brochure engine into a reusable, versioned, industry-agnostic Deal Room. A template is built and versioned independently of any deal, then instantiated into a room frozen to the exact version it was built from.</p>
+  <div class="note"><b>Status:</b> PR 1 of a 10-PR plan is complete — data model, migration, and permissions only. No user-facing Deal Room feature exists yet. Signature and Chat will ship with real data models honestly marked "not connected" until a real vendor is chosen.</div>
+</div>
+
+<!-- BUILDER -->
+<div class="page">
+  <span class="kick">No-code</span>
+  <h2>Visual Builder — a new vertical without a deploy</h2>
+  <div class="suite">
+    <div class="prod">Question Builder</div>
+    <div class="prod">Inventory Builder</div>
+    <div class="prod">Scoring Rules Builder</div>
+    <div class="prod">Branding Studio</div>
+    <div class="prod">Lifestyle Map Editor</div>
+    <div class="prod">Industry Builder</div>
+    <div class="prod">AI Smart Wizard</div>
+    <div class="prod">Marketplace</div>
+  </div>
+</div>
+
+<!-- SECURITY -->
+<div class="page">
+  <span class="kick">Foundation</span>
+  <h2>A real backend, not a demo login screen</h2>
+  <ul class="b">
+    <li><b>Multi-tenant Postgres, real auth:</b> bcrypt-hashed passwords, signed sessions verified server-side against a real <code>Session</code> table; suspension actually locks a user out immediately.</li>
+    <li><b>Real RBAC:</b> Owner / Admin / Manager / Designer / Salesperson / Viewer, enforced server-side on every route.</li>
+    <li><b>Proven isolation:</b> cross-tenant data isolation verified by a dedicated automated test, not assumed.</li>
+    <li><b>Real CI:</b> typecheck/lint/build/e2e against an isolated Postgres database on every push.</li>
+  </ul>
+</div>
+
+<!-- CATEGORY -->
+<div class="page">
+  <span class="kick">Positioning</span>
+  <h2>A category, not a CRM feature</h2>
+  <table>
+    <tr><th></th><th>CRM</th><th>Sales enablement</th><th>CPQ</th><th>SalesIQ</th></tr>
+    <tr><td><b>Live, explainable recommendation</b></td><td>—</td><td>—</td><td>partial</td><td><span class="pill live">YES</span></td></tr>
+    <tr><td><b>Customer-facing decision screen</b></td><td>—</td><td>—</td><td>—</td><td><span class="pill live">YES</span></td></tr>
+    <tr><td><b>Industry-agnostic, config-driven</b></td><td>partial</td><td>partial</td><td>partial</td><td><span class="pill live">YES</span></td></tr>
+    <tr><td><b>AI grounded only in verified facts</b></td><td>—</td><td>—</td><td>—</td><td><span class="pill live">YES</span></td></tr>
+  </table>
+  <p style="font-size:12.5px;color:var(--ink-faint)">Directional positioning, not a competitor-by-competitor claim — no named vendor comparison has been formally benchmarked.</p>
+</div>
+
+<!-- ROADMAP -->
+<div class="page">
+  <span class="kick">Roadmap</span>
+  <h2>What's next, honestly labeled</h2>
+  <div class="timeline">
+    <div class="tl"><h4>To activate</h4><p>Production Claude API key, confirmed Vercel auto-deploy, production Postgres provisioning — code already exists.</p></div>
+    <div class="tl"><h4>Next up</h4><p>Remaining localStorage stores migrated to Postgres, live payment processing, federated SSO, five more industry verticals.</p></div>
+    <div class="tl"><h4>Blueprint</h4><p>Native mobile apps, AR/VR/IoT/digital-twin, custom scoring math, drag-on-map POI placement.</p></div>
+  </div>
+</div>
+
+<!-- RISKS -->
+<div class="page">
+  <span class="kick">Governance</span>
+  <h2>Risks &amp; honest caveats</h2>
+  <table>
+    <tr><th>Risk</th><th>Reality check</th></tr>
+    <tr><td><b>No published case studies</b></td><td>Website stats are explicitly labeled illustrative/pilot-representative, not measured outcomes</td></tr>
+    <tr><td><b>Deal Room is schema-only</b></td><td>Only PR 1 of 10 is complete — no user-facing feature yet</td></tr>
+    <tr><td><b>No live billing processor</b></td><td>UI is real; self-serve commercial signup isn't live</td></tr>
+    <tr><td><b>Two docs are stale</b></td><td><code>docs/overview.html</code> / <code>docs/product-bible.html</code> predate this report's newest facts</td></tr>
+  </table>
+</div>
+
+<!-- ASK -->
+<div class="page">
+  <span class="kick">Next steps</span>
+  <h2>The ask</h2>
+  <div class="dark">
+    <h3>What moves this forward</h3>
+    <p>1 · <b style="color:#fff">Pilot customers</b> — real deployments to turn "illustrative" pilot stats into published case studies.</p>
+    <p>2 · <b style="color:#fff">Production deploy</b> — the "to activate" checklist is short: API key, Postgres, confirmed auto-deploy.</p>
+    <p>3 · <b style="color:#fff">Deal Room continuation</b> — nine remaining PRs on an already-designed, already-approved plan.</p>
+  </div>
+</div>
+
+<!-- APPENDIX -->
+<div class="page">
+  <span class="kick">Appendix</span>
+  <h2>The SalesIQ product surface, in full</h2>
+  <div class="suite">
+    <div class="prod">Explainable Decision Engine</div>
+    <div class="prod">AI Sales Twin</div>
+    <div class="prod">Buying Committee Intelligence</div>
+    <div class="prod">Sales Copilot</div>
+    <div class="prod">AI Meeting Replay</div>
+    <div class="prod">Demo Experience Mode</div>
+    <div class="prod">Decision Simulator</div>
+    <div class="prod">Business Impact Dashboard</div>
+    <div class="prod">Deal Probability Radar</div>
+    <div class="prod">ROI Calculator</div>
+    <div class="prod">Visual Builder</div>
+    <div class="prod">Industry Builder</div>
+    <div class="prod">Brochure &amp; Microsite</div>
+    <div class="prod next">Deal Room &amp; Template Engine</div>
+    <div class="prod next">Live payments</div>
+    <div class="prod next">Federated SSO</div>
+    <div class="prod blue">Native mobile apps</div>
+    <div class="prod blue">AR / VR / IoT</div>
+  </div>
+  <p style="font-size:12px;color:var(--ink-faint);margin-top:10px">Green border = live today · Amber border = next up · Grey border = blueprint/roadmap</p>
+</div>
+
+</main>
+
+<footer>
+  <b>SalesIQ — Executive Report</b> · Confidential<br>
+  Every "live" claim traces to running code in the repository; every roadmap item is labeled as such.<br>
+  Marketing stats referenced from the website are explicitly illustrative pilot placeholders, not measured results.
+</footer>
+
+</body>
+</html>

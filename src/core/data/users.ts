@@ -10,7 +10,7 @@ import useSWR, { mutate as globalMutate } from "swr";
  * shapes from the localStorage era; every read/write call site outside this
  * file needed only its own async handling, not a shape change.
  */
-export type UserRole = "Owner" | "Admin" | "Manager" | "Salesperson" | "Viewer";
+export type UserRole = "Owner" | "Admin" | "Manager" | "Designer" | "Salesperson" | "Viewer";
 export type UserStatus = "active" | "invited" | "suspended";
 
 export interface AppUser {
@@ -26,7 +26,7 @@ export interface AppUser {
   device: string | null;
 }
 
-export const ROLES: UserRole[] = ["Owner", "Admin", "Manager", "Salesperson", "Viewer"];
+export const ROLES: UserRole[] = ["Owner", "Admin", "Manager", "Designer", "Salesperson", "Viewer"];
 
 const USERS_KEY = "/api/users";
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
