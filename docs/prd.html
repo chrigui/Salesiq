@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SalesIQ — Product Requirements Document</title>
+<style>
+  :root{
+    --paper:#f0f3f0; --surface:#ffffff; --surface-2:#f7f9f7; --bg-tertiary:#eae8df;
+    --ink:#15201b; --ink-muted:#55605a; --ink-faint:#8a938c;
+    --accent:#0e8f5b; --accent-ink:#0a6f47; --accent-wash:rgba(14,143,91,.10);
+    --brass:#9c7622;
+    --good:#0e8f5b; --good-wash:rgba(14,143,91,.12);
+    --pending:#a9701a; --pending-wash:rgba(169,112,26,.13);
+    --blueprint:#5f6b7a; --blueprint-wash:rgba(95,107,122,.12);
+    --danger:#a3312d; --danger-wash:rgba(163,49,45,.09);
+    --line:rgba(21,32,27,.08); --line-strong:rgba(21,32,27,.16);
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,ui-serif,serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:"SF Mono",ui-monospace,"JetBrains Mono","Cascadia Code",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);background:var(--paper);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+  a{color:var(--accent-ink);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code{font-family:var(--mono);font-size:.92em;background:var(--surface-2);border-radius:4px;padding:1px 5px}
+  .topbar{position:sticky;top:0;z-index:50;background:rgba(240,243,240,.88);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .topbar .in{max-width:56rem;margin:0 auto;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .brandmark{display:inline-flex;align-items:center;gap:8px;font-weight:600;letter-spacing:-.025em;font-size:16px;font-family:var(--serif)}
+  .brandmark .bx{width:22px;height:22px;border-radius:6px;background:var(--accent-ink);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;font-family:var(--sans)}
+  .fam{font-size:12.5px;color:var(--ink-muted);display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .pdfbtn{background:var(--accent-ink);color:#fff;border:none;border-radius:9999px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--sans)}
+  .pdfbtn:hover{background:var(--accent)}
+  main{max-width:56rem;margin:0 auto;padding:0 24px 40px}
+  section{padding:44px 0;border-bottom:1px solid var(--line)}
+  section:last-of-type{border-bottom:none}
+  .kick{display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);color:var(--accent-ink);font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:4px 12px;border-radius:9999px;font-family:var(--mono)}
+  .kick::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent-ink)}
+  h1{font-family:var(--serif);font-size:36px;font-weight:600;letter-spacing:-.02em;line-height:1.1;margin:18px 0 12px}
+  h1 .hl{background:linear-gradient(180deg,transparent 62%,rgba(216,167,42,.4) 62%);border-radius:2px;padding:0 2px}
+  h2{font-family:var(--serif);font-size:23px;font-weight:600;letter-spacing:-.015em;margin:12px 0 10px}
+  h3{font-family:var(--serif);font-size:16px;font-weight:600;margin:22px 0 8px}
+  p{font-size:14px;margin-bottom:10px;max-width:47rem}
+  p.lede{color:var(--ink-muted);font-size:15px}
+  ul.b{margin:0 0 12px 18px;font-size:13.5px}
+  ul.b li{margin-bottom:5px}
+  table{width:100%;border-collapse:separate;border-spacing:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:13px;margin:12px 0}
+  th{background:var(--surface-2);color:var(--ink-muted);text-align:left;padding:9px 12px;font-size:10px;letter-spacing:.07em;text-transform:uppercase;font-weight:600;font-family:var(--mono)}
+  td{padding:9px 12px;border-top:1px solid var(--line);vertical-align:top}
+  td b{color:var(--ink)}
+  .pill{display:inline-block;font-size:10px;font-weight:700;padding:2px 9px;border-radius:9999px;letter-spacing:.04em}
+  .pill.p0{background:var(--danger-wash);color:var(--danger)}
+  .pill.p1{background:var(--pending-wash);color:var(--pending)}
+  .pill.p2{background:var(--blueprint-wash);color:var(--blueprint)}
+  .pill.done{background:var(--good-wash);color:var(--good)}
+  .epic{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px;margin:16px 0;box-shadow:0 1px 2px rgba(21,32,27,.05)}
+  .epic .eh{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:12px}
+  .epic .eh h3{margin:0;font-size:17px}
+  .epic .eh .mtag{font-size:11px;font-weight:700;color:var(--accent-ink);background:var(--accent-wash);border-radius:9999px;padding:3px 10px;letter-spacing:.04em;font-family:var(--mono)}
+  .epic .goal{font-size:13.5px;color:var(--ink-muted);margin-bottom:12px}
+  .story{border-left:3px solid var(--accent);background:var(--surface-2);border-radius:0 10px 10px 0;padding:12px 14px;margin:10px 0}
+  .story .s{font-size:13.5px;font-weight:500}
+  .story .s b{color:var(--accent-ink)}
+  .ac{margin-top:8px}
+  .ac li{list-style:none;font-size:12.5px;color:var(--ink);padding:3px 0 3px 22px;position:relative}
+  .ac li::before{content:"☐";position:absolute;left:2px;color:var(--ink-faint)}
+  .ac li.done::before{content:"☑";color:var(--good)}
+  .ac .acl{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;padding-left:0;font-family:var(--mono)}
+  .ac .acl::before{content:""}
+  .dep{font-size:12px;color:var(--ink-muted);margin-top:10px}
+  .dep b{color:var(--ink)}
+  .note{background:var(--pending-wash);border:1px solid rgba(169,112,26,.22);border-radius:10px;padding:13px 15px;font-size:13px;color:#6d4712;margin:14px 0}
+  footer{max-width:56rem;margin:0 auto 40px;background:#15201b;color:#8ba095;text-align:center;padding:28px 24px;font-size:12px;border-radius:16px}
+  footer b{color:#e9eee9}
+  @media print{
+    @page{size:A4;margin:14mm}
+    body{background:#fff}
+    .topbar{display:none}
+    main{max-width:100%;padding:0}
+    section{padding:0 0 8mm;border-bottom:none;break-before:page}
+    section:first-of-type{break-before:auto}
+    .epic,.story,table,.note{break-inside:avoid}
+    h2,h3{break-after:avoid}
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    a{color:inherit;text-decoration:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="in">
+  <span class="brandmark"><span class="bx">IQ</span>SalesIQ</span>
+  <span class="fam">
+    <a href="master-report.html">Master Report</a>
+    <a href="executive-report.html">Executive Report</a>
+    <b style="color:var(--ink)">PRD</b>
+    <a href="sales-deck.html">Sales Deck</a>
+    <button class="pdfbtn" onclick="window.print()" title="Export as A4 PDF">Export PDF</button>
+  </span>
+</div></div>
+
+<main>
+
+<section>
+  <span class="kick">Engineering · Product Requirements</span>
+  <h1>SalesIQ <span class="hl">Product Requirements Document</span></h1>
+  <p class="lede">The buildable specification for the Deal Room &amp; Template Engine — the platform's current initiative, generalizing the shipped Brochure &amp; Microsite module into a reusable, versioned, industry-agnostic template system. Written for the engineering and product team; grounded in the actual approved plan and what's shipped so far.</p>
+  <table>
+    <tr><th>Field</th><th>Value</th></tr>
+    <tr><td><b>Version / status</b></td><td>1.0 · PR 1 of 10 shipped; PRs 2–10 specified below</td></tr>
+    <tr><td><b>Source</b></td><td>The approved Deal Room &amp; Template Engine plan; generalizes <code>Brochure</code>/<code>BrochureAsset</code>/<code>BrochureEvent</code> (shipped) into <code>DealRoomTemplate</code>/<code>DealRoomTemplateVersion</code>/<code>DealRoom</code> and children</td></tr>
+    <tr><td><b>Review gate</b></td><td>One PR per milestone, each with its own GitHub Issue, reviewed and merged before the next begins</td></tr>
+    <tr><td><b>Priorities</b></td><td><span class="pill p0">P0</span> blocking the next milestone · <span class="pill p1">P1</span> in-window · <span class="pill p2">P2</span> can slip a milestone · <span class="pill done">DONE</span> shipped</td></tr>
+  </table>
+</section>
+
+<section>
+  <span class="kick">Scope</span>
+  <h2>1 · Goals, non-goals, personas</h2>
+  <h3>Goals</h3>
+  <ul class="b">
+    <li>Any tenant builds a reusable, versioned Deal Room template for any industry — insurance, real estate, automotive, or a vertical that doesn't exist yet — with zero code changes, mirroring how industry packs already work for the core recommendation engine.</li>
+    <li>A template is edited and published independently of any specific deal; an instantiated room is frozen to the exact template version it was built from, so a live negotiation never silently reflows.</li>
+    <li>Every widget is real, configurable, permission-aware, and theme-aware — no placeholder buttons, no "coming soon" states shipped as if they were live.</li>
+    <li>The builder works completely without an AI key configured; AI only ever enhances, never blocks or replaces a working default.</li>
+  </ul>
+  <h3>Non-goals (this phase)</h3>
+  <ul class="b">
+    <li>No live e-signature vendor integration (DocuSign/HelloSign/etc.) — Signature ships with a real click-to-sign audit record, explicitly marked "not connected" to a legal e-sign provider.</li>
+    <li>No realtime push delivery for Chat — messages are real and persisted; delivery is polling-based until a realtime provider is chosen.</li>
+    <li>No arbitrary code execution in "Custom Components" — a small allow-listed set of configurable blocks only, for the same reason a multi-tenant rendering engine should never execute admin-authored code in front of another tenant's customers.</li>
+    <li>No product-wide i18n framework or full dashboard dark-mode — theming/localization work is scoped to the rendered Deal Room output, following the same narrow scope the Brochure module already shipped.</li>
+  </ul>
+  <h3>Personas</h3>
+  <table>
+    <tr><th>Persona</th><th>Description</th><th>Primary surfaces</th></tr>
+    <tr><td><b>Designer</b> <i>(new role)</i></td><td>Builds and publishes Deal Room templates; not a full Manager</td><td>Template Builder, Branding, Theme &amp; Template Engine</td></tr>
+    <tr><td><b>Salesperson</b></td><td>Instantiates a room from a template for a real deal, shares it, tracks tasks/signatures</td><td>Deal Room list, Rendering Engine (as author), Analytics</td></tr>
+    <tr><td><b>Manager / Admin / Owner</b></td><td>Full template + room management, permission administration</td><td>Everything, plus Permissions</td></tr>
+    <tr><td><b>Viewer</b></td><td>Read-only visibility into rooms and templates</td><td>Read-only list/detail views</td></tr>
+    <tr><td><b>External recipient</b></td><td>The customer opening a shared Deal Room link — no login</td><td>The public/restricted Rendering Engine only</td></tr>
+  </table>
+</section>
+
+<section>
+  <span class="kick">Constraints</span>
+  <h2>2 · Architecture constraints (binding)</h2>
+  <table>
+    <tr><th>Constraint</th><th>Rule</th></tr>
+    <tr><td><b>Reuse over rebuild</b></td><td>The widget registry, section-composer, theme/branding CSS-var mechanism, tenant-scoped CRUD pattern, audit wiring, and deterministic-first/AI-optional content pattern are the same machinery built for Brochures, generalized — never duplicated.</td></tr>
+    <tr><td><b>Tenant scoping</b></td><td>Every model carries <code>tenantId</code> + an index on it; natural keys are composite (<code>@@unique([tenantId, x])</code>), never a bare global unique — the schema's own stated convention.</td></tr>
+    <tr><td><b>Additive migrations only</b></td><td>Every schema change is verified additive (new tables/columns/enum values, never a destructive statement) before it ships, exactly as PR 1's migration was.</td></tr>
+    <tr><td><b>Immutable versioning</b></td><td>Publishing or rolling back a template always creates a new <code>DealRoomTemplateVersion</code> row; nothing overwrites history.</td></tr>
+    <tr><td><b>Frozen instances</b></td><td>A <code>DealRoom</code> stores the exact <code>templateVersionId</code> it was created from — it never silently follows later template edits.</td></tr>
+    <tr><td><b>No fabricated functionality</b></td><td>Anything requiring infrastructure this project doesn't have (a paid e-sign vendor, a realtime delivery service) ships with real data models and UI, explicitly marked not-connected — never faked as working.</td></tr>
+  </table>
+</section>
+
+<section>
+  <span class="kick">Epics</span>
+  <h2>3 · Epics, user stories, acceptance criteria</h2>
+
+  <div class="epic">
+    <div class="eh"><h3>PR 1 · Data model &amp; schema</h3><span class="mtag">DONE</span></div>
+    <p class="goal">The reusable-template/frozen-instance split, plus every genuinely new data surface (tasks, chat, approvals, signatures) the Brochure module never needed.</p>
+    <div class="story"><div class="s"><b>As a</b> platform engineer, <b>I can</b> add the Deal Room schema without touching a single existing table's data <b>so that</b> the migration is provably safe.</div>
+      <ul class="ac"><li class="acl">Acceptance criteria</li>
+        <li class="done">New models only: <code>DealRoomTemplate</code>, <code>DealRoomTemplateVersion</code>, <code>DealRoom</code>, <code>DealRoomAsset</code>, <code>DealRoomEvent</code>, <code>DealRoomTask</code>, <code>DealRoomMessage</code>, <code>DealRoomApprovalStep</code>, <code>DealRoomSignatureRequest</code></li>
+        <li class="done">One additive enum value (<code>Designer</code> added to <code>UserRole</code>) — no destructive statement in the generated migration</li>
+        <li class="done"><code>npx prisma migrate dev</code> applied cleanly against a real local Postgres instance; migration SQL manually reviewed</li>
+      </ul></div>
+    <div class="story"><div class="s"><b>As a</b> tenant admin, <b>I can</b> grant the new Designer role and Deal Room capabilities <b>so that</b> template-building is a real, enforced permission, not an assumption.</div>
+      <ul class="ac"><li class="acl">Acceptance criteria</li>
+        <li class="done">Three capabilities added: <code>dealroom-templates.manage</code>, <code>dealrooms.manage</code>, <code>dealrooms.view</code></li>
+        <li class="done">Wired into both <code>core/data/permissions.ts</code> and the seed script's independent capability list in the same commit — the seed list drifting from the real one is exactly how an earlier <code>brochures.manage</code> seeding gap happened</li>
+      </ul></div>
+    <div class="dep"><b>Dependencies:</b> none · <b>Exit:</b> clean typecheck/lint/build; reseed confirms the expected permission row count.</div>
+  </div>
+
+  <div class="epic">
+    <div class="eh"><h3>PR 2 · Template Builder UI</h3><span class="mtag">P0</span></div>
+    <p class="goal">Real visual drag-and-drop — the brief explicitly calls for it, so this is where a new dependency (<code>@dnd-kit/core</code> + <code>@dnd-kit/sortable</code>) is justified, unlike the Brochure Editor's up/down-arrow reuse.</p>
+    <div class="story"><div class="s"><b>As a</b> Designer, <b>I can</b> create, duplicate, archive, publish, and preview a template <b>so that</b> the full template lifecycle is real, not partial.</div>
+      <ul class="ac"><li class="acl">Acceptance criteria</li>
+        <li>Template list view: create / duplicate / archive / publish / preview, each a real state transition against <code>DealRoomTemplate.status</code></li>
+        <li>Duplicate copies the current published version's sections into a new Draft template — not a shallow reference</li>
+      </ul></div>
+    <div class="story"><div class="s"><b>As a</b> Designer, <b>I can</b> drag to reorder and toggle widgets <b>so that</b> layout composition is genuinely visual, keyboard-accessible, and screen-reader friendly.</div>
+      <ul class="ac"><li class="acl">Acceptance criteria</li>
+        <li>Real pointer drag-and-drop reorder via <code>@dnd-kit</code>; keyboard reorder works without a mouse</li>
+        <li>Enable/disable toggle per widget persists to the working draft version</li>
+      </ul></div>
+    <div class="dep"><b>Dependencies:</b> PR 1 · <b>Exit:</b> a Designer builds a template end-to-end with zero backend changes needed.</div>
+  </div>
+
+  <div class="epic">
+    <div class="eh"><h3>PR 3 · Widget Library</h3><span class="mtag">P0</span></div>
+    <p class="goal">Every requested widget except Signature/Chat (deferred to PR 8, alongside their data models), each real, configurable, and honest about what it can and can't do.</p>
+    <div class="story"><div class="s"><b>As a</b> Designer, <b>I can</b> add Hero, Gallery, Comparison Table, Financing/Coverage/Risk calculators, Timeline, Documents, Tasks, Approval-status, Feedback, and allow-listed Custom Components <b>so that</b> one engine covers insurance, real estate, or any other vertical.</div>
+      <ul class="ac"><li class="acl">Acceptance criteria</li>
+        <li>Financing/Coverage/Risk calculators use transparent, user-editable formulas — the same honest pattern the existing ROI Calculator already uses, not a fabricated actuarial model</li>
+        <li>Custom Components render only from a fixed, reviewed component set (stat block, callout, two-column text, spacer) — never arbitrary admin-authored code</li>
+        <li>Every widget respects the room's theme and the viewer's permission level</li>
+      </ul></div>
+    <div class="dep"><b>Dependencies:</b> PR 2 (registry pattern) · <b>Exit:</b> every widget in the approved list (minus Signature/Chat) renders real data in at least one demo room.</div>
+  </div>
+
+  <div class="epic">
+    <div class="eh"><h3>PR 4 · Rendering Engine</h3><span class="mtag">P0</span></div>
+    <p class="goal">Generalizes <code>/b/[slug]</code> into <code>/d/[slug]</code>, resolving a <code>DealRoom</code> against its frozen template version, with real public and restricted access.</p>
+    <div class="story"><div class="s"><b>As a</b> salesperson, <b>I can</b> share a Deal Room link that either anyone-with-the-link can open, or that requires a per-recipient access code <b>so that</b> sensitive negotiation content isn't public by default.</div>
+      <ul class="ac"><li class="acl">Acceptance criteria</li>
+        <li><code>accessMode: PublicLink</code> behaves like today's Brochure microsite; <code>Restricted</code> requires the room's real <code>accessCode</code></li>
+        <li>SEO metadata (title/description/OG image) generated only for <code>PublicLink</code> rooms — a <code>Restricted</code> room is never indexable</li>
+        <li>An unpublished or archived room 404s publicly, exactly like Brochure's existing preview-gating behavior</li>
+      </ul></div>
+    <div class="dep"><b>Dependencies:</b> PR 1, PR 3 · <b>Exit:</b> a real, published Deal Room renders correctly for both access modes, verified against a live server.</div>
+  </div>
+
+  <div class="epic">
+    <div class="eh"><h3>PR 5 · Theme &amp; Branding Engine</h3><span class="mtag">P1</span></div>
+    <p class="goal">Extends the existing CSS-variable brand injection with real, bounded customization — never an open door to arbitrary assets.</p>
+    <div class="story"><div class="s"><b>As a</b> Designer, <b>I can</b> pick a font, radius, and spacing scale, and upload a logo <b>so that</b> a Deal Room matches the tenant's brand without touching code.</div>
+      <ul class="ac"><li class="acl">Acceptance criteria</li>
+        <li>Font choice is an allow-listed <code>next/font</code> set — not arbitrary font-URL injection</li>
+        <li>Logo upload reuses the existing Postgres-blob asset storage pattern, size-capped</li>
+      </ul></div>
+    <div class="dep"><b>Dependencies:</b> PR 4 · <b>Effort:</b> small, mostly additive to existing theme plumbing.</div>
+  </div>
+
+  <div class="epic">
+    <div class="eh"><h3>PR 6 · Versioning</h3><span class="mtag">P1</span></div>
+    <p class="goal">Publish, rollback, and compare — all built on the immutable version rows from PR 1.</p>
+    <div class="story"><div class="s"><b>As a</b> Designer, <b>I can</b> see exactly what changed between two versions and roll back <b>so that</b> a bad publish is recoverable without losing history.</div>
+      <ul class="ac"><li class="acl">Acceptance criteria</li>
+        <li>Publish requires a change-reason field, stored on the new version row</li>
+        <li>Compare view shows added/removed/reordered widgets and changed config keys structurally, not a raw JSON diff</li>
+        <li>Rollback creates a new version copying an old snapshot forward — never rewrites history in place</li>
+      </ul></div>
+    <div class="dep"><b>Dependencies:</b> PR 1, PR 2 · <b>Exit:</b> a rollback demo, then confirm the rolled-back version is a new row, not a mutation.</div>
+  </div>
+
+  <div class="epic">
+    <div class="eh"><h3>PR 7 · Permissions</h3><span class="mtag">P0</span></div>
+    <p class="goal">Full enforcement of all six roles across every Deal Room route.</p>
+    <div class="story"><div class="s"><b>As a</b> platform admin, <b>I can</b> trust that every Deal Room route is capability-gated <b>so that</b> a Viewer can never mutate a template or room.</div>
+      <ul class="ac"><li class="acl">Acceptance criteria</li>
+        <li>Every mutating route calls <code>requireCapability</code> with the correct Deal Room capability, tenant-scoped via the existing <code>updateMany</code>-with-compound-<code>where</code> pattern</li>
+        <li>A dedicated cross-tenant isolation test, mirroring the existing Lead-route precedent</li>
+      </ul></div>
+    <div class="dep"><b>Dependencies:</b> PR 1 (capabilities already exist) · <b>Effort:</b> mostly a verification pass across PRs 2–6's routes.</div>
+  </div>
+
+  <div class="epic">
+    <div class="eh"><h3>PR 8 · Analytics, Signature &amp; Chat</h3><span class="mtag">P1</span></div>
+    <p class="goal">Real event capture plus the two honestly-scoped widgets whose data the analytics funnel needs to be real rather than aspirational.</p>
+    <div class="story"><div class="s"><b>As a</b> salesperson, <b>I can</b> see real views, clicks, task completions, and signature status for a room <b>so that</b> the dashboard reflects only recorded events, never fabricated ones.</div>
+      <ul class="ac"><li class="acl">Acceptance criteria</li>
+        <li><code>DealRoomEvent</code> kinds recorded on real user actions only (View, WidgetInteraction, Download, Share, ProposalAccepted, TaskCompleted, SignatureRequested, SignatureSigned)</li>
+        <li>Signature widget records a real click-to-sign audit entry (typed name, timestamp, IP) with a visible "not connected to a legal e-signature provider" disclosure</li>
+        <li>Chat persists real messages with real timestamps; delivery is polling-based, disclosed as such</li>
+      </ul></div>
+    <div class="dep"><b>Dependencies:</b> PR 1, PR 3, PR 4 · <b>Effort:</b> the largest remaining PR — data-model wiring plus two full widgets.</div>
+  </div>
+
+  <div class="epic">
+    <div class="eh"><h3>PR 9 · AI Layout Assistant</h3><span class="mtag">P2</span></div>
+    <p class="goal">Deterministic-first suggestions that work with zero AI dependency; Claude only ever proposes a reviewable diff.</p>
+    <div class="story"><div class="s"><b>As a</b> Designer, <b>I can</b> get a recommended starting widget set for a category with no AI key configured <b>so that</b> the builder never blocks on AI.</div>
+      <ul class="ac"><li class="acl">Acceptance criteria</li>
+        <li>A static per-category recommended-widget mapping ships with the feature — no AI call required for the baseline suggestion</li>
+        <li>Claude-optional suggestions (reorder rationale, missing-section flags) render as an explicit apply/reject diff — never silently overwrite existing content</li>
+      </ul></div>
+    <div class="dep"><b>Dependencies:</b> PR 2, PR 3 · <b>Effort:</b> moderate; reuses the existing deterministic-first/Claude-optional AI route pattern.</div>
+  </div>
+
+  <div class="epic">
+    <div class="eh"><h3>PR 10 · E2E testing &amp; production hardening</h3><span class="mtag">P0</span></div>
+    <p class="goal">Real automated coverage plus a first unit-test framework, since only Playwright e2e exists today.</p>
+    <div class="story"><div class="s"><b>As the</b> engineering team, <b>I can</b> rely on CI to catch a Deal Room regression <b>so that</b> the feature stays production-ready as it grows.</div>
+      <ul class="ac"><li class="acl">Acceptance criteria</li>
+        <li>Playwright suite: template create → widgets → publish → room create → public render → analytics → rollback → permission-denial cases</li>
+        <li>Vitest added for pure-logic unit tests (version diffing, permission checks, deterministic layout suggestions) — the standard lightweight pairing alongside the existing e2e suite, not a second heavyweight e2e runner</li>
+        <li>Final clean <code>typecheck</code>/<code>lint</code>/<code>build</code>; manual pass — light theme, mobile + desktop, keyboard-only navigation</li>
+      </ul></div>
+    <div class="dep"><b>Dependencies:</b> PRs 1–9 · <b>Exit:</b> green CI on the full suite; sign-off that nothing in the plan was silently descoped without disclosure.</div>
+  </div>
+</section>
+
+<section>
+  <span class="kick">Quality</span>
+  <h2>4 · Non-functional requirements</h2>
+  <table>
+    <tr><th>Category</th><th>Requirement</th></tr>
+    <tr><td><b>Security</b></td><td>No arbitrary code execution surfaces (Custom Components is allow-listed); every mutating route capability-gated; cross-tenant isolation verified by test, not assumption</td></tr>
+    <tr><td><b>Honesty</b></td><td>Any feature needing unavailable third-party infrastructure ships with real data + UI, explicitly marked not-connected — never a fabricated "it works" state</td></tr>
+    <tr><td><b>Data integrity</b></td><td>Every migration additive-only, verified by manual SQL review before merge, matching PR 1's precedent</td></tr>
+    <tr><td><b>Accessibility</b></td><td>Drag-and-drop reordering has a full keyboard-equivalent path (a direct benefit of choosing <code>@dnd-kit</code>)</td></tr>
+    <tr><td><b>Performance</b></td><td>Rendering Engine reuses the Brochure module's proven live-resolution pattern — no stored copies to go stale</td></tr>
+    <tr><td><b>Testability</b></td><td>Every PR from 4 onward verified against a real running server end-to-end, not just a type-check pass</td></tr>
+  </table>
+</section>
+
+<section>
+  <span class="kick">Plan</span>
+  <h2>5 · Milestone plan &amp; open questions</h2>
+  <table>
+    <tr><th>PR</th><th>Scope</th><th>Status</th></tr>
+    <tr><td>PR 1</td><td>Data model &amp; schema</td><td><span class="pill done">Done</span></td></tr>
+    <tr><td>PR 2</td><td>Template Builder UI</td><td><span class="pill p0">Next</span></td></tr>
+    <tr><td>PR 3</td><td>Widget Library</td><td><span class="pill p0">Planned</span></td></tr>
+    <tr><td>PR 4</td><td>Rendering Engine</td><td><span class="pill p0">Planned</span></td></tr>
+    <tr><td>PR 5</td><td>Theme &amp; Branding Engine</td><td><span class="pill p1">Planned</span></td></tr>
+    <tr><td>PR 6</td><td>Versioning</td><td><span class="pill p1">Planned</span></td></tr>
+    <tr><td>PR 7</td><td>Permissions</td><td><span class="pill p0">Planned</span></td></tr>
+    <tr><td>PR 8</td><td>Analytics, Signature &amp; Chat</td><td><span class="pill p1">Planned</span></td></tr>
+    <tr><td>PR 9</td><td>AI Layout Assistant</td><td><span class="pill p2">Planned</span></td></tr>
+    <tr><td>PR 10</td><td>E2E testing &amp; production hardening</td><td><span class="pill p0">Planned</span></td></tr>
+  </table>
+  <h3>Open questions</h3>
+  <ul class="b">
+    <li>Should <code>accessCode</code> for Restricted rooms expire, or remain valid for the room's lifetime? Not yet decided.</li>
+    <li>Which category → recommended-widget-set mappings ship in PR 9's static baseline — needs a short list of launch verticals confirmed with product.</li>
+    <li>Font allow-list for PR 5 — needs a short, deliberate list rather than an open <code>next/font</code> surface.</li>
+    <li>Whether Deal Room templates should be duplicable *across* tenants (a marketplace-style share) — out of scope for PRs 1–10, worth a future PRD.</li>
+  </ul>
+</section>
+
+</main>
+
+<footer>
+  <b>SalesIQ — Product Requirements Document</b> · Deal Room &amp; Template Engine · Internal<br>
+  Reflects the actually-approved 10-PR plan and what has genuinely shipped — updated as each PR merges.
+</footer>
+
+</body>
+</html>
