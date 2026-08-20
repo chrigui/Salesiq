@@ -5,6 +5,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Sparkles, MapPin, TrendingUp, Check, Star, Smartphone } from "lucide-react";
 import { useSession } from "@/core/store/session";
 import { useLivePack } from "@/core/store/packs";
+import { useResolvedDisplayProfile } from "@/core/store/displayProfiles";
+import { DisplayProfileRenderer } from "./DisplayProfileRenderer";
 import { scoreInventory, isVisible } from "@/core/engine/scoring";
 import { narrate, formatMoney } from "@/core/engine/explain";
 import { whyNotReasons } from "@/core/engine/whyNot";
@@ -52,6 +54,18 @@ export function DisplayStage() {
   const activeQuestion = pack.questions.find((q) => q.id === activeQuestionId);
   const focusedItem = pack.inventory.find((i) => i.id === focusedItemId);
 
+  // Display Studio seam: when the salesperson focuses an item that has a
+  // Published display profile, the customer sees that configured cinematic
+  // presentation instead of the hardcoded ItemStage below. No profile for
+  // this exact (packId, itemId) -> unchanged existing behavior. This is the
+  // *only* thing Display Studio governs during a live, companion-driven
+  // session — everything else (question/recommendation/compare/proposal)
+  // keeps rendering exactly as it does today.
+  const displayProfile = useResolvedDisplayProfile(
+    view === "item" ? pack.id : null,
+    view === "item" ? (focusedItemId ?? null) : null,
+  );
+
   // Idle Mode: only arm the attract loop while nobody has started a session —
   // any answer or a view change away from "welcome" keeps it fully disabled.
   const { isIdle, wake } = useIdleGate({
@@ -61,11 +75,14 @@ export function DisplayStage() {
   });
 
   // The Interactive Lifestyle Map is the hero for browsing/recommendation views
-  // whenever the active pack carries lifestyle-map data (e.g. real estate).
+  // whenever the active pack carries lifestyle-map data (e.g. real estate) —
+  // except on an item a Display Studio profile has been explicitly published
+  // for, which always wins: it's a deliberate per-listing configuration, not
+  // a generic fallback.
   const mapView =
-    view === "welcome" || view === "recommendation" || view === "item";
+    view === "welcome" || view === "recommendation" || (view === "item" && !displayProfile);
   const mapTarget =
-    view === "item" && focusedItem?.lifestyle ? focusedItem : scored[0]?.item;
+    view === "item" && focusedItem?.lifestyle && !displayProfile ? focusedItem : scored[0]?.item;
 
   const showMapStage = mapView && !!mapTarget?.lifestyle;
 
@@ -147,7 +164,25 @@ export function DisplayStage() {
               />
             )}
 
-            {view === "item" && focusedItem && (
+            {view === "item" && focusedItem && displayProfile && (
+              <motion.div
+                key={`display-profile-${focusedItem.id}`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={spring}
+                className="absolute inset-0 overflow-y-auto"
+              >
+                <DisplayProfileRenderer
+                  profile={displayProfile}
+                  pack={pack}
+                  item={focusedItem}
+                  mode="presentation"
+                />
+              </motion.div>
+            )}
+
+            {view === "item" && focusedItem && !displayProfile && (
               <ItemStage
                 key={`item-${focusedItem.id}`}
                 item={focusedItem}

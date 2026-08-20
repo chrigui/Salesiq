@@ -78,6 +78,23 @@ enum BrochureEventKind {
   LeadSubmitted
 }
 
+enum DisplayTemplate {
+  Minimal
+  NewDevelopment
+  Detailed
+  Lifestyle
+  Investment
+  LuxuryCinematic
+  Masterplan
+  Custom
+}
+
+enum DisplayProfileStatus {
+  Draft
+  Published
+  Archived
+}
+
 enum DealRoomTemplateStatus {
   Draft
   Published
@@ -169,6 +186,8 @@ model Tenant {
   brochureEvents  BrochureEvent[]
   brochureAssets  BrochureAsset[]
 
+  displayProfiles DisplayProfile[]
+
   dealRoomTemplates        DealRoomTemplate[]
   dealRoomTemplateVersions DealRoomTemplateVersion[]
   dealRooms                DealRoom[]
@@ -252,6 +271,8 @@ model User {
   assignedLeads Lead[] @relation("LeadAssignee")
   createdLeads  Lead[] @relation("LeadCreator")
   createdBrochures Brochure[]
+
+  createdDisplayProfiles DisplayProfile[]
 
   createdDealRoomTemplates DealRoomTemplate[]
   authoredDealRoomVersions DealRoomTemplateVersion[]
@@ -417,6 +438,57 @@ model BrochureEvent {
 
   @@index([brochureId, createdAt(sort: Desc)])
   @@index([brochureId, kind])
+}
+
+// ---------------------------------------------------------------------
+// Display Studio — configuration for the Customer Display (the in-person,
+// customer-facing screen), addressed the same way as Brochure/DealRoom
+// (packId + itemId, resolved live against the shipped pack — never a
+// stored copy). PR1 ships a pre-versioning shape (publish is a status
+// flip, same as Brochure before Deal Room's versioning pattern was built);
+// DisplayProfileVersion, BrandProfile, Display (the physical-kiosk
+// registry) and SharedExperience land in later PRs of the same initiative.
+// ---------------------------------------------------------------------
+
+model DisplayProfile {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Admin-facing label — a tenant may run several profiles per item.
+  name String
+
+  packId String
+  itemId String
+
+  template DisplayTemplate @default(Minimal)
+
+  // Per-profile brand color overrides ({ brand, brandSoft } rgb triplets,
+  // same convention as Branding.brand) — layered on top of the pack's own
+  // branding when set. A reusable BrandProfile library lands in a later PR.
+  brandOverrides Json?
+
+  // Ordered widget composition: [{ id, type, enabled, order, config }] —
+  // identical shape to Brochure.sections.
+  sections Json
+
+  // Motion/idle config — stored from PR1 onward so later PRs (preset
+  // system, idle experience) are additive, not a schema change; inert
+  // defaults until then.
+  motion Json  @default("{\"preset\": \"Cinematic\"}")
+  idle   Json?
+
+  status      DisplayProfileStatus @default(Draft)
+  createdById String?
+  createdBy   User?                @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  publishedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, packId, itemId])
 }
 
 // ---------------------------------------------------------------------
