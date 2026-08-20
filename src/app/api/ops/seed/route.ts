@@ -20,25 +20,7 @@ export async function GET(request: NextRequest) {
   const provided = request.nextUrl.searchParams.get("secret");
 
   if (!configured || !provided || !secretsMatch(configured, provided)) {
-    // TEMPORARY diagnostic (remove once the deploy env var mismatch is
-    // resolved): reveals only booleans/lengths, never the actual secret
-    // value, so it's safe to leave visible in a response body while we
-    // figure out why this deployment isn't seeing SEED_TRIGGER_SECRET.
-    return NextResponse.json(
-      {
-        ok: false,
-        error: "secret-mismatch",
-        diagnostic: {
-          deploymentHasSecretConfigured: Boolean(configured),
-          configuredSecretLength: configured?.length ?? 0,
-          requestProvidedSecret: Boolean(provided),
-          providedSecretLength: provided?.length ?? 0,
-          vercelEnv: process.env.VERCEL_ENV ?? null,
-          gitCommitSha: process.env.VERCEL_GIT_COMMIT_SHA ?? null,
-        },
-      },
-      { status: 404 },
-    );
+    return new NextResponse(null, { status: 404 });
   }
 
   const summary = await seedDatabase(prisma);
