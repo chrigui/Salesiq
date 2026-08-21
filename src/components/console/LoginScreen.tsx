@@ -21,6 +21,7 @@ const ERROR_COPY: Record<LoginError, string> = {
   suspended: "This account is suspended. Contact an admin.",
   invited: "This invite hasn't been accepted yet.",
   network: "Couldn't reach the server. Check your connection.",
+  "server-error": "Something went wrong on the server — this isn't about your email or password. Try again, or use the guaranteed demo account below.",
 };
 
 interface DemoAccount {

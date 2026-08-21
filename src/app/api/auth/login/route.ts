@@ -30,26 +30,40 @@ export async function POST(request: Request) {
   // A guaranteed-to-work login, checked first and independent of
   // DEFAULT_TENANT_SLUG / whether this database has ever been seeded — see
   // src/lib/auth/demoLogin.ts. Self-provisions its own tenant + user on
-  // first use, then signs straight in.
+  // first use, then signs straight in. Its own try/catch (distinct from the
+  // normal path's below) so a failure here is unambiguously logged as the
+  // demo path breaking, not conflated with a real account's login failing.
   if (isHardcodedDemoLogin(email, parsed.data.password)) {
-    const { tenant, user } = await ensureHardcodedDemoAccount();
-    const { token, ...session } = await establishSession(
-      user.id,
-      tenant.id,
-      user.role,
-      user.branchId,
-      user.name,
-      user.email,
-    );
-    const res = NextResponse.json({ ok: true, needsMfa: false, session });
-    res.cookies.set(SESSION_COOKIE, token, SESSION_COOKIE_OPTIONS);
-    return res;
+    try {
+      const { tenant, user } = await ensureHardcodedDemoAccount();
+      const { token, ...session } = await establishSession(
+        user.id,
+        tenant.id,
+        user.role,
+        user.branchId,
+        user.name,
+        user.email,
+      );
+      const res = NextResponse.json({ ok: true, needsMfa: false, session });
+      res.cookies.set(SESSION_COOKIE, token, SESSION_COOKIE_OPTIONS);
+      return res;
+    } catch (err) {
+      console.error("[auth/login] hardcoded demo login failed:", err);
+      return NextResponse.json({ ok: false, error: "server-error" }, { status: 500 });
+    }
   }
 
-  const tenant = await getDefaultTenant();
-  const user = await prisma.user.findUnique({
-    where: { tenantId_email: { tenantId: tenant.id, email } },
-  });
+  let tenant: Awaited<ReturnType<typeof getDefaultTenant>>;
+  let user: Awaited<ReturnType<typeof prisma.user.findUnique>>;
+  try {
+    tenant = await getDefaultTenant();
+    user = await prisma.user.findUnique({
+      where: { tenantId_email: { tenantId: tenant.id, email } },
+    });
+  } catch (err) {
+    console.error("[auth/login] tenant/user lookup failed:", err);
+    return NextResponse.json({ ok: false, error: "server-error" }, { status: 500 });
+  }
 
   // Always run a compare (against a constant dummy hash when the user
   // doesn't exist) so response timing doesn't leak whether the email is
