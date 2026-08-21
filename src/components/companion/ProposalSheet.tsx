@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { X, FileText, Check, Mail, MessageCircle, Printer, Sparkles, Loader2, Presentation } from "lucide-react";
+import QRCode from "qrcode";
+import { X, FileText, Check, Mail, MessageCircle, Printer, Sparkles, Loader2, Presentation, Smartphone, Copy } from "lucide-react";
 import { useSession } from "@/core/store/session";
 import { narrate, formatMoney } from "@/core/engine/explain";
 import { saveLead } from "@/core/store/leads";
+import { createSharedExperience, useSharedExperienceAnalytics } from "@/core/store/sharedExperiences";
 import { getKnowledgeBase, knowledgePayload } from "@/core/data/knowledgeBase";
 import { getAiSettings } from "@/core/data/aiSettings";
 import { fireWebhook } from "@/core/data/integrations";
@@ -62,7 +64,7 @@ export function ProposalSheet({
   pack: IndustryPack;
   scored: ScoredItem[];
 }) {
-  const { customer, answers, logEvent, presentProposal } = useSession();
+  const { customer, answers, bookmarks, logEvent, presentProposal } = useSession();
   const best = scored[0];
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -71,6 +73,13 @@ export function ProposalSheet({
   const [aiEngine, setAiEngine] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [presented, setPresented] = useState(false);
+  const [shareId, setShareId] = useState<string | null>(null);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [shareQr, setShareQr] = useState<string | null>(null);
+  const shareAnalytics = useSharedExperienceAnalytics(shareId);
+  const [sharing, setSharing] = useState(false);
+  const [shareError, setShareError] = useState<string | null>(null);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   // Reset the saved state whenever the sheet is reopened, and record it on
   // the session timeline — this is the "Generate proposal" interaction.
@@ -80,6 +89,11 @@ export function ProposalSheet({
       setPresented(false);
       setAiProposal(null);
       setAiEngine(null);
+      setShareId(null);
+      setShareUrl(null);
+      setShareQr(null);
+      setShareError(null);
+      setLinkCopied(false);
       if (best) {
         logEvent({
           kind: "proposal",
@@ -129,6 +143,49 @@ export function ProposalSheet({
     presentProposal(aiProposal ?? narrate(best, pack), aiProposal ? aiEngine : null);
     setPresented(true);
     window.setTimeout(() => setPresented(false), 2500);
+  };
+
+  const handleShare = async () => {
+    if (!best || sharing) return;
+    setSharing(true);
+    setShareError(null);
+    try {
+      const itemIds = bookmarks.length > 0 ? bookmarks : [best.item.id];
+      const shared = await createSharedExperience({
+        packId: pack.id,
+        itemIds,
+        focusedItemId: best.item.id,
+        proposalText: aiProposal ?? narrate(best, pack),
+        proposalEngine: aiProposal ? aiEngine : null,
+        customerName: customer.name || null,
+      });
+      if (!shared) {
+        setShareError("Couldn't create the share link — try again.");
+        return;
+      }
+      const url = `${window.location.origin}/s/${shared.code}`;
+      setShareId(shared.id);
+      setShareUrl(url);
+      QRCode.toDataURL(url, { margin: 1, width: 180, color: { dark: "#0a0f1c", light: "#ffffff" } })
+        .then(setShareQr)
+        .catch(() => setShareQr(null));
+      logEvent({ kind: "proposal", detail: `Shared session with ${customer.name || "customer"}` });
+    } catch {
+      setShareError("Couldn't reach the server — check your connection.");
+    } finally {
+      setSharing(false);
+    }
+  };
+
+  const copyShareUrl = async () => {
+    if (!shareUrl) return;
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setLinkCopied(true);
+      window.setTimeout(() => setLinkCopied(false), 2000);
+    } catch {
+      // Clipboard API unavailable — the link is still visible to copy by hand.
+    }
   };
 
   const handleSaveLead = async () => {
@@ -333,6 +390,46 @@ export function ProposalSheet({
                 </>
               )}
             </button>
+
+            {shareUrl ? (
+              <div className="mt-2 flex items-center gap-3 rounded-2xl border border-white/10 p-3">
+                {shareQr ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={shareQr} alt="Share link QR code" width={72} height={72} className="shrink-0 rounded-lg bg-white p-1" />
+                ) : (
+                  <div className="h-[72px] w-[72px] shrink-0 animate-pulse rounded-lg bg-white/10" />
+                )}
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-xs text-ink-muted">{shareUrl}</div>
+                  <button
+                    onClick={() => void copyShareUrl()}
+                    className="mt-1 inline-flex items-center gap-1.5 text-xs font-medium text-brand transition hover:brightness-110"
+                  >
+                    {linkCopied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                    {linkCopied ? "Copied" : "Copy link"}
+                  </button>
+                  {shareAnalytics && (
+                    <div className="mt-1 text-[10px] text-ink-faint">
+                      {shareAnalytics.views === 0
+                        ? "Not opened yet"
+                        : `${shareAnalytics.views} view${shareAnalytics.views === 1 ? "" : "s"}${shareAnalytics.itemClicks > 0 ? ` · ${shareAnalytics.itemClicks} item${shareAnalytics.itemClicks === 1 ? "" : "s"} opened` : ""}`}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={() => void handleShare()}
+                disabled={!best || sharing}
+                className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 py-3 text-sm font-semibold text-ink-muted transition hover:bg-white/5 disabled:opacity-50"
+              >
+                {sharing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Smartphone className="h-4 w-4" />}
+                {sharing ? "Creating link…" : "Share on customer's phone"}
+              </button>
+            )}
+            {shareError && (
+              <p className="mt-1.5 text-center text-xs text-rose-400">{shareError}</p>
+            )}
 
             <button
               onClick={() => void handleSaveLead()}

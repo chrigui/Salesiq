@@ -192,6 +192,9 @@ model Tenant {
   brandProfiles          BrandProfile[]
   displayProfileAssets   DisplayProfileAsset[]
 
+  sharedExperiences      SharedExperience[]
+  sharedExperienceEvents SharedExperienceEvent[]
+
   dealRoomTemplates         DealRoomTemplate[]
   dealRoomTemplateVersions  DealRoomTemplateVersion[]
   dealRooms                 DealRoom[]
@@ -283,6 +286,7 @@ model User {
   authoredDisplayProfileVersions DisplayProfileVersion[]
   createdDisplays                Display[]
   createdBrandProfiles           BrandProfile[]
+  createdSharedExperiences       SharedExperience[]
 
   createdDealRoomTemplates DealRoomTemplate[]
   authoredDealRoomVersions DealRoomTemplateVersion[]
@@ -649,6 +653,61 @@ model Display {
 
   @@index([tenantId])
   @@index([tenantId, status])
+}
+
+enum SharedExperienceEventKind {
+  View
+  ItemClick
+  ProposalView
+}
+
+// A snapshot of a live Companion session — not a Brochure reuse, since it
+// captures multiple viewed/bookmarked items plus a proposal in one shareable
+// link, which a single-item Brochure row can't represent. Created from an
+// authenticated Companion session with no capability gate (same ungated
+// pattern as the rest of the live-session experience today); resolved
+// publicly by `code` the same trust model as a Brochure slug. Snapshotted at
+// share time — itemIds/proposalText are frozen, never re-derived, so the
+// customer's link doesn't silently change if the salesperson keeps working
+// the same session afterward. Only the customer's first name is carried,
+// never scoring/probability — see the Buyer Intelligence privacy boundary.
+model SharedExperience {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  code String @unique
+
+  packId         String
+  itemIds        Json
+  focusedItemId  String?
+  proposalText   String?
+  proposalEngine String?
+  customerName   String?
+
+  createdById String?
+  createdBy   User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime?
+
+  events SharedExperienceEvent[]
+
+  @@index([tenantId])
+  @@index([tenantId, createdAt(sort: Desc)])
+}
+
+model SharedExperienceEvent {
+  id                 String                    @id @default(cuid())
+  sharedExperienceId String
+  sharedExperience   SharedExperience          @relation(fields: [sharedExperienceId], references: [id], onDelete: Cascade)
+  tenantId           String
+  tenant             Tenant                    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  kind               SharedExperienceEventKind
+  meta               Json?
+  createdAt          DateTime                  @default(now())
+
+  @@index([sharedExperienceId, createdAt(sort: Desc)])
+  @@index([sharedExperienceId, kind])
 }
 
 // ---------------------------------------------------------------------
