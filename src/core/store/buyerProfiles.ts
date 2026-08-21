@@ -112,3 +112,67 @@ export function useBuyerRequirementChanges(id: string | null): { changes: BuyerR
   );
   return { changes: data?.changes ?? [], isLoading: isLoading && data === undefined };
 }
+
+export interface BuyerExtractionFields {
+  familySize?: number;
+  propertyType?: string;
+  bedrooms?: number;
+  bathrooms?: number;
+  budget?: string;
+  preferredLocation?: string;
+  purposes?: string[];
+  priorityLabel?: string;
+  secondaryLabel?: string;
+}
+
+/** Proposes structured fields from free text — never writes anywhere on its own. The caller must still confirm/edit/reject via submitConversationNote. */
+export async function extractBuyerText(
+  text: string,
+): Promise<{ extracted: BuyerExtractionFields; engine: string } | null> {
+  const res = await fetch("/api/ai/buyer-extract", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text }),
+  });
+  if (!res.ok) return null;
+  return res.json();
+}
+
+/** CONFIRM/EDIT/REJECT for a natural-language capture — the only place an extraction is actually trusted onto a BuyerProfile. */
+export async function submitConversationNote(
+  buyerProfileId: string,
+  input: {
+    rawText: string;
+    extracted: BuyerExtractionFields;
+    status: "confirmed" | "edited" | "rejected";
+    confirmedFields?: BuyerExtractionFields;
+  },
+): Promise<boolean> {
+  const res = await fetch(`${BUYER_PROFILES_KEY}/${buyerProfileId}/conversation-notes`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  globalMutate(`${BUYER_PROFILES_KEY}/${buyerProfileId}`);
+  globalMutate(`${BUYER_PROFILES_KEY}/${buyerProfileId}/requirement-changes`);
+  globalMutate(`${BUYER_PROFILES_KEY}/${buyerProfileId}/conversation-notes`);
+  return res.ok;
+}
+
+export interface BuyerConversationNote {
+  id: string;
+  rawText: string;
+  extracted: BuyerExtractionFields;
+  status: "pending" | "confirmed" | "edited" | "rejected";
+  confirmedFields: BuyerExtractionFields | null;
+  createdByName: string | null;
+  createdAt: number;
+}
+
+export function useBuyerConversationNotes(id: string | null): { notes: BuyerConversationNote[]; isLoading: boolean } {
+  const { data, isLoading } = useSWR<{ notes: BuyerConversationNote[] }>(
+    id ? `${BUYER_PROFILES_KEY}/${id}/conversation-notes` : null,
+    fetcher,
+  );
+  return { notes: data?.notes ?? [], isLoading: isLoading && data === undefined };
+}

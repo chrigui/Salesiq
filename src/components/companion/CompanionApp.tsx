@@ -26,7 +26,13 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useSession, type Stakeholder, type TimelineEvent } from "@/core/store/session";
-import { linkBuyerProfile, useBuyerProfile } from "@/core/store/buyerProfiles";
+import {
+  linkBuyerProfile,
+  useBuyerProfile,
+  extractBuyerText,
+  submitConversationNote,
+  type BuyerExtractionFields,
+} from "@/core/store/buyerProfiles";
 import { toPriorityWeights } from "@/core/buyerIntelligence/priorityWeights";
 import { useLivePack, useAllPacks, getEffectivePack } from "@/core/store/packs";
 import { scoreInventory, isVisible } from "@/core/engine/scoring";
@@ -561,8 +567,156 @@ function CustomerBlock() {
             rows={2}
             className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none placeholder:text-ink-faint focus:border-brand/50"
           />
+          {buyerProfileId && <UnderstoodCustomerPanel buyerProfileId={buyerProfileId} />}
           <BuyingCommittee />
         </div>
+      )}
+    </div>
+  );
+}
+
+const EXTRACTION_FIELD_LABELS: { key: keyof BuyerExtractionFields; label: string }[] = [
+  { key: "familySize", label: "Family size" },
+  { key: "propertyType", label: "Property type" },
+  { key: "bedrooms", label: "Bedrooms" },
+  { key: "bathrooms", label: "Bathrooms" },
+  { key: "budget", label: "Budget" },
+  { key: "preferredLocation", label: "Location" },
+  { key: "priorityLabel", label: "Priority" },
+  { key: "secondaryLabel", label: "Secondary" },
+];
+
+/**
+ * "Describe the customer" for Buyer Intelligence (spec §10) — distinct from
+ * AiSearchBox above, which auto-fills the CURRENT pack's live-scoring
+ * Answers. This one proposes persistent BuyerProfile fields and always
+ * requires an explicit CONFIRM/EDIT/REJECT — nothing is written just from
+ * generating a proposal.
+ */
+function UnderstoodCustomerPanel({ buyerProfileId }: { buyerProfileId: string }) {
+  const [text, setText] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [proposal, setProposal] = useState<{ extracted: BuyerExtractionFields; engine: string } | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [edited, setEdited] = useState<BuyerExtractionFields>({});
+  const [done, setDone] = useState<"confirmed" | "edited" | "rejected" | null>(null);
+
+  const run = async () => {
+    const q = text.trim();
+    if (!q || loading) return;
+    setLoading(true);
+    setDone(null);
+    const result = await extractBuyerText(q);
+    setLoading(false);
+    if (!result || Object.keys(result.extracted).length === 0) {
+      setProposal(null);
+      return;
+    }
+    setProposal(result);
+    setEdited(result.extracted);
+    setEditing(false);
+  };
+
+  const finish = async (status: "confirmed" | "edited" | "rejected") => {
+    if (!proposal) return;
+    await submitConversationNote(buyerProfileId, {
+      rawText: text,
+      extracted: proposal.extracted,
+      status,
+      confirmedFields: status === "rejected" ? undefined : status === "edited" ? edited : proposal.extracted,
+    });
+    setDone(status);
+    setProposal(null);
+    setText("");
+  };
+
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3">
+      <Eyebrow>Understood customer</Eyebrow>
+      <textarea
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder='"Family of four, looking for a 3-bedroom, budget around 2M, wants schools nearby but also cares about investment potential."'
+        rows={2}
+        className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs outline-none placeholder:text-ink-faint focus:border-brand/50"
+      />
+      <button
+        onClick={() => void run()}
+        disabled={!text.trim() || loading}
+        className="mt-2 inline-flex items-center gap-1.5 rounded-xl bg-white/10 px-3 py-1.5 text-xs font-medium text-ink transition hover:bg-white/15 disabled:opacity-40"
+      >
+        {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wand2 className="h-3.5 w-3.5" />}
+        {loading ? "Reading…" : "Understand"}
+      </button>
+
+      {proposal && (
+        <div className="mt-3 rounded-xl border border-white/10 p-3">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-[10px] font-medium uppercase tracking-wide text-ink-faint">Understood</span>
+            <span className="text-[10px] text-ink-faint">
+              {proposal.engine === "claude+writer" ? "Authored by Claude" : "Deterministic writer"}
+            </span>
+          </div>
+          <div className="space-y-1.5">
+            {EXTRACTION_FIELD_LABELS.filter(({ key }) => proposal.extracted[key] !== undefined).map(({ key, label }) => (
+              <div key={key} className="flex items-center justify-between gap-2 text-xs">
+                <span className="text-ink-faint">{label}</span>
+                {editing ? (
+                  <input
+                    value={String(edited[key] ?? "")}
+                    onChange={(e) =>
+                      setEdited((prev) => ({
+                        ...prev,
+                        [key]: key === "familySize" || key === "bedrooms" || key === "bathrooms"
+                          ? Number(e.target.value) || undefined
+                          : e.target.value,
+                      }))
+                    }
+                    className="w-32 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-right text-xs outline-none"
+                  />
+                ) : (
+                  <span className="text-ink">{String(proposal.extracted[key])}</span>
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="mt-3 flex gap-1.5">
+            {editing ? (
+              <button
+                onClick={() => void finish("edited")}
+                className="flex-1 rounded-lg bg-brand px-2 py-1.5 text-xs font-semibold text-white transition hover:brightness-110"
+              >
+                Save & confirm
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={() => void finish("confirmed")}
+                  className="flex-1 rounded-lg bg-brand px-2 py-1.5 text-xs font-semibold text-white transition hover:brightness-110"
+                >
+                  Confirm
+                </button>
+                <button
+                  onClick={() => setEditing(true)}
+                  className="rounded-lg border border-white/10 px-2 py-1.5 text-xs text-ink-muted transition hover:bg-white/5"
+                >
+                  Edit
+                </button>
+              </>
+            )}
+            <button
+              onClick={() => void finish("rejected")}
+              className="rounded-lg border border-white/10 px-2 py-1.5 text-xs text-ink-muted transition hover:bg-white/5"
+            >
+              Reject
+            </button>
+          </div>
+        </div>
+      )}
+      {done && (
+        <p className="mt-2 text-[11px] text-ink-faint">
+          {done === "rejected" ? "Discarded — nothing was saved." : "Saved to this buyer's profile."}
+        </p>
       )}
     </div>
   );

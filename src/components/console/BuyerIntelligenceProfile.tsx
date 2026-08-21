@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, Loader2, Mail, Phone, Plus, Trash2, History } from "lucide-react";
+import { ArrowLeft, Loader2, Mail, Phone, Plus, Trash2, History, MessageSquareText } from "lucide-react";
 import { Panel } from "@/components/console/light-ui";
 import { cx } from "@/components/ui/primitives";
 import { PACKS } from "@/core/industries";
 import {
   useBuyerProfile,
   useBuyerRequirementChanges,
+  useBuyerConversationNotes,
   updateBuyerProfile,
   type BuyerProfile,
 } from "@/core/store/buyerProfiles";
@@ -139,6 +140,7 @@ export function BuyerIntelligenceProfile({ id, onBack }: { id: string; onBack: (
         <MotivationsPanel buyerProfile={buyerProfile} />
         <PrioritiesPanel buyerProfile={buyerProfile} />
         <HistoryPanel buyerProfileId={id} />
+        <ConversationMemoryPanel buyerProfileId={id} />
       </div>
     </div>
   );
@@ -418,6 +420,50 @@ function HistoryPanel({ buyerProfileId }: { buyerProfileId: string }) {
                 <span className="text-zinc-900">{String(c.newValue)}</span>
                 <div className="text-[11px] text-zinc-400">
                   {new Date(c.createdAt).toLocaleString()} · {c.source}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </Panel>
+  );
+}
+
+const STATUS_STYLE: Record<string, string> = {
+  confirmed: "bg-emerald-100 text-emerald-700",
+  edited: "bg-sky-100 text-sky-700",
+  rejected: "bg-zinc-100 text-zinc-500",
+};
+
+/** Conversation memory (spec §11) — every "describe the customer" capture, confirmed/edited/rejected, in one chronological list. No separate per-session grouping construct: date order already tells the story of how requirements evolved. */
+function ConversationMemoryPanel({ buyerProfileId }: { buyerProfileId: string }) {
+  const { notes, isLoading } = useBuyerConversationNotes(buyerProfileId);
+  return (
+    <Panel title="Conversation memory" className="lg:col-span-2">
+      {isLoading ? (
+        <div className="flex items-center gap-2 py-4 text-sm text-zinc-400">
+          <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+        </div>
+      ) : notes.length === 0 ? (
+        <p className="text-sm text-zinc-400">
+          Nothing captured yet. Describe this customer in their own words from the Companion — SalesIQ extracts
+          structured fields for you to confirm, edit, or reject.
+        </p>
+      ) : (
+        <div className="space-y-2">
+          {notes.map((n) => (
+            <div key={n.id} className="flex items-start gap-2 rounded-xl border border-zinc-200 px-3 py-2 text-sm">
+              <MessageSquareText className="mt-0.5 h-3.5 w-3.5 shrink-0 text-zinc-400" />
+              <div className="min-w-0 flex-1">
+                <p className="italic text-zinc-500">&ldquo;{n.rawText}&rdquo;</p>
+                <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                  <span className={cx("rounded-full px-2 py-0.5 text-[10px] font-medium capitalize", STATUS_STYLE[n.status])}>
+                    {n.status}
+                  </span>
+                  <span className="text-[11px] text-zinc-400">
+                    {new Date(n.createdAt).toLocaleString()} · {n.createdByName ?? "Unknown"}
+                  </span>
                 </div>
               </div>
             </div>

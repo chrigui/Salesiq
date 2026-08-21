@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { Prisma } from "@/generated/prisma/client";
 import { requireCapability, AuthError } from "@/lib/auth/server";
 import { toBuyerProfileDTO } from "@/lib/serializers/buyerProfile";
 import { buildBuyerProfileScope } from "@/lib/buyerProfiles/scope";
-import type { BuyerField } from "@/core/buyerIntelligence/types";
+import { applyBuyerProfileFieldUpdate } from "@/lib/buyerProfiles/applyUpdates";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -81,36 +80,13 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const existing = await prisma.buyerProfile.findFirst({ where: { id, ...buildBuyerProfileScope(ctx) } });
     if (!existing) return NextResponse.json({ error: "not-found" }, { status: 404 });
 
-    const changes: { field: string; previousValue: unknown; newValue: unknown; source: string }[] = [];
-    for (const category of ["requirements", "financial"] as const) {
-      const incoming = parsed.data[category];
-      if (!incoming) continue;
-      const before = (existing[category] as Record<string, BuyerField<unknown>> | null) ?? {};
-      for (const [key, field] of Object.entries(incoming)) {
-        const prev = before[key];
-        if (prev && JSON.stringify(prev.value) !== JSON.stringify(field.value)) {
-          changes.push({ field: `${category}.${key}`, previousValue: prev.value, newValue: field.value, source: "manual" });
-        }
-      }
-    }
-
-    await prisma.buyerProfile.updateMany({
-      where: { id },
-      data: parsed.data as unknown as Prisma.BuyerProfileUpdateManyMutationInput,
+    await applyBuyerProfileFieldUpdate({
+      buyerProfileId: id,
+      tenantId: ctx.tenantId,
+      existing,
+      update: parsed.data,
+      source: "manual",
     });
-
-    if (changes.length > 0) {
-      await prisma.buyerRequirementChange.createMany({
-        data: changes.map((c) => ({
-          buyerProfileId: id,
-          tenantId: ctx.tenantId,
-          field: c.field,
-          previousValue: c.previousValue as Prisma.InputJsonValue,
-          newValue: c.newValue as Prisma.InputJsonValue,
-          source: c.source,
-        })),
-      });
-    }
 
     const profile = await prisma.buyerProfile.findUniqueOrThrow({
       where: { id },
