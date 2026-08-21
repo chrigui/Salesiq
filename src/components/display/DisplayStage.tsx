@@ -6,6 +6,7 @@ import { Sparkles, MapPin, TrendingUp, Check, Star, Smartphone } from "lucide-re
 import { useSession } from "@/core/store/session";
 import { useLivePack } from "@/core/store/packs";
 import { useResolvedDisplayProfile } from "@/core/store/displayProfiles";
+import { useDeviceIdleProfile } from "@/core/store/displayDevice";
 import { DisplayProfileRenderer } from "./DisplayProfileRenderer";
 import { scoreInventory, isVisible } from "@/core/engine/scoring";
 import { narrate, formatMoney } from "@/core/engine/explain";
@@ -32,7 +33,13 @@ function readIdleTimeoutMs(): number {
   return Number.isFinite(n) && n > 0 ? n : DEFAULT_IDLE_TIMEOUT_MS;
 }
 
-export function DisplayStage() {
+export function DisplayStage({
+  deviceId,
+  deviceToken,
+}: {
+  deviceId: string | null;
+  deviceToken: string | null;
+}) {
   const {
     packId,
     answers,
@@ -73,6 +80,16 @@ export function DisplayStage() {
     timeoutMs: readIdleTimeoutMs(),
     resetKey: revision,
   });
+
+  // Display Studio seam #2: if this physical Display has been claimed (see
+  // DevicePairingPrompt) and assigned an idle profile, the attract loop
+  // shows that configured composition instead of the hardcoded IdleScreen
+  // carousel below. Unclaimed, or no idle profile assigned -> unchanged
+  // existing behavior. Resolved against whatever pack the idle profile
+  // targets, which may differ from the live session's current pack.
+  const idleProfile = useDeviceIdleProfile(deviceId, deviceToken);
+  const idlePack = useLivePack(idleProfile?.packId ?? packId);
+  const idleItem = idleProfile ? idlePack.inventory.find((i) => i.id === idleProfile.itemId) : undefined;
 
   // The Interactive Lifestyle Map is the hero for browsing/recommendation views
   // whenever the active pack carries lifestyle-map data (e.g. real estate) —
@@ -204,7 +221,24 @@ export function DisplayStage() {
     <>
       {stage}
       <AnimatePresence>
-        {isIdle && <IdleScreen pack={pack} onWake={wake} />}
+        {isIdle && idleProfile && idleItem ? (
+          <motion.div
+            key="idle-profile"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={spring}
+            onClick={wake}
+            role="button"
+            tabIndex={0}
+            aria-label="Tap to begin"
+            className="fixed inset-0 z-[80] cursor-pointer overflow-y-auto bg-zinc-950"
+          >
+            <DisplayProfileRenderer profile={idleProfile} pack={idlePack} item={idleItem} mode="idle" />
+          </motion.div>
+        ) : isIdle ? (
+          <IdleScreen pack={pack} onWake={wake} />
+        ) : null}
       </AnimatePresence>
       {!showMapStage && (
         <ContinueQrModal open={qrOpen} onClose={() => setQrOpen(false)} />

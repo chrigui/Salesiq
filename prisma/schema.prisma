@@ -168,11 +168,11 @@ model Tenant {
   // Platform-operator view (src/core/data/platformTenants.ts) — folded
   // into Tenant rather than a parallel table, so the admin console's
   // headline numbers and this row can never drift apart once wired.
-  plan     String @default("Starter")
-  seats    Int    @default(1)
+  plan     String  @default("Starter")
+  seats    Int     @default(1)
   mrr      Decimal @default(0) @db.Decimal(12, 2)
-  health   String @default("healthy")
-  vertical String @default("real-estate")
+  health   String  @default("healthy")
+  vertical String  @default("real-estate")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -187,39 +187,40 @@ model Tenant {
   brochureAssets  BrochureAsset[]
 
   displayProfiles DisplayProfile[]
+  displays        Display[]
 
-  dealRoomTemplates        DealRoomTemplate[]
-  dealRoomTemplateVersions DealRoomTemplateVersion[]
-  dealRooms                DealRoom[]
-  dealRoomAssets           DealRoomAsset[]
-  dealRoomEvents           DealRoomEvent[]
-  dealRoomTasks            DealRoomTask[]
-  dealRoomMessages         DealRoomMessage[]
-  dealRoomApprovalSteps    DealRoomApprovalStep[]
+  dealRoomTemplates         DealRoomTemplate[]
+  dealRoomTemplateVersions  DealRoomTemplateVersion[]
+  dealRooms                 DealRoom[]
+  dealRoomAssets            DealRoomAsset[]
+  dealRoomEvents            DealRoomEvent[]
+  dealRoomTasks             DealRoomTask[]
+  dealRoomMessages          DealRoomMessage[]
+  dealRoomApprovalSteps     DealRoomApprovalStep[]
   dealRoomSignatureRequests DealRoomSignatureRequest[]
 
   /// TODO(pass-2): src/core/data/knowledgeBase.ts
-  knowledgeEntries KnowledgeEntry[]
+  knowledgeEntries    KnowledgeEntry[]
   /// TODO(pass-2): src/core/data/tenantAuditLog.ts
-  tenantAuditEntries TenantAuditEntry[]
+  tenantAuditEntries  TenantAuditEntry[]
   /// TODO(pass-2): src/core/data/notifications.ts
-  notifications Notification[]
+  notifications       Notification[]
   /// TODO(pass-2): src/core/data/featureFlags.ts
-  featureFlags FeatureFlag[]
+  featureFlags        FeatureFlag[]
   /// TODO(pass-2): src/core/data/ssoSettings.ts
-  ssoSettings SsoSettings?
+  ssoSettings         SsoSettings?
   /// TODO(pass-2): src/core/data/aiSettingsShared.ts
-  aiSettings AiSettings?
+  aiSettings          AiSettings?
   /// TODO(pass-2): src/core/data/integrations.ts
   integrationSettings IntegrationSettings?
   /// TODO(pass-2): src/core/data/billingSettings.ts
-  billingSettings BillingSettings?
+  billingSettings     BillingSettings?
   /// TODO(pass-2): src/core/data/subscription.ts
-  subscription Subscription?
+  subscription        Subscription?
   /// TODO(pass-2): src/core/data/customPacks.ts
-  customPacks CustomPack[]
+  customPacks         CustomPack[]
   /// TODO(pass-2): src/core/store/packs.ts
-  packDrafts PackDraft[]
+  packDrafts          PackDraft[]
 
   @@index([slug])
 }
@@ -241,8 +242,11 @@ model Branch {
   companions   Int      @default(0)
   createdAt    DateTime @default(now())
 
-  users User[]
-  leads Lead[]
+  users          User[]
+  leads          Lead[]
+  // Named to avoid colliding with the `displays Int` counter field above,
+  // which is a separate, pre-existing manual tally, not backed by real rows.
+  displayDevices Display[]
 
   @@unique([tenantId, code])
   @@index([tenantId])
@@ -267,12 +271,13 @@ model User {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
-  sessions      Session[]
-  assignedLeads Lead[] @relation("LeadAssignee")
-  createdLeads  Lead[] @relation("LeadCreator")
+  sessions         Session[]
+  assignedLeads    Lead[]     @relation("LeadAssignee")
+  createdLeads     Lead[]     @relation("LeadCreator")
   createdBrochures Brochure[]
 
   createdDisplayProfiles DisplayProfile[]
+  createdDisplays        Display[]
 
   createdDealRoomTemplates DealRoomTemplate[]
   authoredDealRoomVersions DealRoomTemplateVersion[]
@@ -486,9 +491,59 @@ model DisplayProfile {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  displaysAsIdle Display[] @relation("IdleProfile")
+  displaysAsLive Display[] @relation("LiveProfile")
+
   @@index([tenantId])
   @@index([tenantId, status])
   @@index([tenantId, packId, itemId])
+}
+
+enum DisplayStatus {
+  Pending
+  Active
+  Archived
+}
+
+// A physical kiosk/browser's persistent identity — independent of the
+// ephemeral MQTT room code src/core/sync minted per page load for the live
+// companion<->display session sync. An admin registers a Display here (gets
+// a one-time pairingCode + QR to /display?pair=CODE); the kiosk exchanges
+// that code for a deviceToken once, persisted client-side, and sends it on
+// every config poll from then on. The pairingCode itself is the credential
+// — same trust model as a Brochure/DealRoom slug.
+model Display {
+  id       String  @id @default(cuid())
+  tenantId String
+  tenant   Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branchId String?
+  branch   Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  name        String
+  pairingCode String  @unique
+  deviceToken String? @unique
+
+  idleProfileId String?
+  idleProfile   DisplayProfile? @relation("IdleProfile", fields: [idleProfileId], references: [id], onDelete: SetNull)
+  // Optional pin to a specific profile regardless of what the companion
+  // focuses live — e.g. a single-listing showroom screen. Not consumed by
+  // any route yet (PR2 only wires idleProfile); reserved so later PRs don't
+  // need another migration for it.
+  liveProfileId String?
+  liveProfile   DisplayProfile? @relation("LiveProfile", fields: [liveProfileId], references: [id], onDelete: SetNull)
+
+  status          DisplayStatus @default(Pending)
+  lastSeenAt      DateTime?
+  lastSeenVersion Int?
+  userAgent       String        @default("")
+
+  createdById String?
+  createdBy   User?    @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([tenantId, status])
 }
 
 // ---------------------------------------------------------------------
@@ -516,7 +571,7 @@ model DealRoomTemplate {
   status DealRoomTemplateStatus @default(Draft)
 
   createdById String?
-  createdBy   User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdBy   User?    @relation(fields: [createdById], references: [id], onDelete: SetNull)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -537,7 +592,7 @@ model DealRoomTemplateVersion {
   tenantId   String
   tenant     Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  version Int
+  version  Int
   // Ordered widget composition — same shape as Brochure.sections:
   // [{ id, type, enabled, order, config }].
   sections Json
@@ -549,8 +604,8 @@ model DealRoomTemplateVersion {
   isCurrent Boolean @default(false)
 
   authorId     String?
-  author       User?   @relation(fields: [authorId], references: [id], onDelete: SetNull)
-  changeReason String  @default("")
+  author       User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  changeReason String   @default("")
   createdAt    DateTime @default(now())
 
   dealRooms DealRoom[]
@@ -709,20 +764,20 @@ model DealRoomApprovalStep {
 // etc) is configured for this project; shown as "not connected" in the UI
 // rather than faked, same disclosure pattern as Integrations.tsx.
 model DealRoomSignatureRequest {
-  id          String                  @id @default(cuid())
-  dealRoomId  String
-  dealRoom    DealRoom                @relation(fields: [dealRoomId], references: [id], onDelete: Cascade)
-  tenantId    String
-  tenant      Tenant                  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id         String   @id @default(cuid())
+  dealRoomId String
+  dealRoom   DealRoom @relation(fields: [dealRoomId], references: [id], onDelete: Cascade)
+  tenantId   String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   signerName  String
   signerEmail String
   status      DealRoomSignatureStatus @default(Requested)
 
-  signedName  String?
-  signedAt    DateTime?
-  signedIp    String?
-  createdAt   DateTime                @default(now())
+  signedName String?
+  signedAt   DateTime?
+  signedIp   String?
+  createdAt  DateTime  @default(now())
 
   @@index([dealRoomId])
 }
@@ -799,12 +854,12 @@ model SsoSettings {
 
 /// TODO(pass-2): src/core/data/aiSettingsShared.ts
 model AiSettings {
-  tenantId          String @id
-  tenant            Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  tone              String @default("professional")
-  creativity        Float  @default(0.5)
+  tenantId          String  @id
+  tenant            Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tone              String  @default("professional")
+  creativity        Float   @default(0.5)
   knowledgeOnly     Boolean @default(false)
-  maxKnowledgeFacts Int    @default(5)
+  maxKnowledgeFacts Int     @default(5)
 }
 
 /// TODO(pass-2): src/core/data/integrations.ts
@@ -820,21 +875,21 @@ model IntegrationSettings {
 
 /// TODO(pass-2): src/core/data/billingSettings.ts
 model BillingSettings {
-  tenantId    String  @id
-  tenant      Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  taxRatePct  Decimal @default(0) @db.Decimal(5, 2)
+  tenantId   String  @id
+  tenant     Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  taxRatePct Decimal @default(0) @db.Decimal(5, 2)
 }
 
 /// TODO(pass-2): src/core/data/subscription.ts
 model Subscription {
-  tenantId     String    @id
-  tenant       Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  plan         String    @default("Starter")
-  status       String    @default("active")
-  seats        Int       @default(1)
-  renewsAt     DateTime?
-  trialEndsAt  DateTime?
-  canceledAt   DateTime?
+  tenantId    String    @id
+  tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  plan        String    @default("Starter")
+  status      String    @default("active")
+  seats       Int       @default(1)
+  renewsAt    DateTime?
+  trialEndsAt DateTime?
+  canceledAt  DateTime?
 
   billingEntries BillingEntry[]
 }
@@ -871,28 +926,28 @@ model CustomPack {
 
 /// TODO(pass-2): src/core/store/packs.ts — draft overrides for shipped packs
 model PackDraft {
-  id         String   @id @default(cuid())
-  tenantId   String
-  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  packId     String
-  sections   Json?
-  questions  Json?
-  inventory  Json?
-  ruleSpecs  Json?
-  branding   Json?
-  updatedAt  DateTime @updatedAt
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  packId    String
+  sections  Json?
+  questions Json?
+  inventory Json?
+  ruleSpecs Json?
+  branding  Json?
+  updatedAt DateTime @updatedAt
 
   @@unique([tenantId, packId])
 }
 
 /// TODO(pass-2): src/core/data/coupons.ts — platform-level, no tenantId
 model Coupon {
-  id           String    @id @default(cuid())
-  code         String    @unique
-  discountPct  Int
-  expiresAt    DateTime?
-  active       Boolean   @default(true)
-  createdAt    DateTime  @default(now())
+  id          String    @id @default(cuid())
+  code        String    @unique
+  discountPct Int
+  expiresAt   DateTime?
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
 }
 
 /// TODO(pass-2): src/core/data/auditLog.ts — platform-level, no tenantId
