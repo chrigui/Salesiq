@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import QRCode from "qrcode";
-import { X, FileText, Check, Mail, MessageCircle, Printer, Sparkles, Loader2, Presentation, Smartphone, Copy } from "lucide-react";
+import { X, FileText, Check, Mail, MessageCircle, Printer, Sparkles, Loader2, Presentation, Smartphone, Copy, MonitorPlay } from "lucide-react";
 import { useSession } from "@/core/store/session";
 import { narrate, formatMoney } from "@/core/engine/explain";
 import { saveLead } from "@/core/store/leads";
@@ -64,7 +64,7 @@ export function ProposalSheet({
   pack: IndustryPack;
   scored: ScoredItem[];
 }) {
-  const { customer, answers, bookmarks, logEvent, presentProposal } = useSession();
+  const { customer, answers, bookmarks, logEvent, presentProposal, focusItem } = useSession();
   const best = scored[0];
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -143,6 +143,13 @@ export function ProposalSheet({
     presentProposal(aiProposal ?? narrate(best, pack), aiProposal ? aiEngine : null);
     setPresented(true);
     window.setTimeout(() => setPresented(false), 2500);
+  };
+
+  /** Focuses this item on the customer's screen — the exact seam DisplayStage.tsx already reads: a Published Display Studio profile for this (packId, itemId) renders its cinematic composition; no profile just falls back to the existing item view. No new session-state shape, just an explicit, discoverable affordance for what "Jump to" already does per-item. */
+  const handlePresentOnDisplayStudio = () => {
+    if (!best) return;
+    focusItem(best.item.id);
+    onClose();
   };
 
   const handleShare = async () => {
@@ -389,6 +396,14 @@ export function ProposalSheet({
                   <Presentation className="h-4 w-4" /> Present on customer screen
                 </>
               )}
+            </button>
+
+            <button
+              onClick={handlePresentOnDisplayStudio}
+              disabled={!best}
+              className="mt-2 flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 py-3 text-sm font-semibold text-ink-muted transition hover:bg-white/5 disabled:opacity-50"
+            >
+              <MonitorPlay className="h-4 w-4" /> Present on Display Studio
             </button>
 
             {shareUrl ? (
