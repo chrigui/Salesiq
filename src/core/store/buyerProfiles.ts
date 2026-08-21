@@ -270,3 +270,42 @@ export async function overrideRejectedItem(buyerProfileId: string, rejectedItemI
   globalMutate(`${BUYER_PROFILES_KEY}/${buyerProfileId}/rejected-items`);
   return res.ok;
 }
+
+export interface BuyerObjection {
+  id: string;
+  kind: string;
+  confidence: "high" | "medium" | "low";
+  evidence: string[];
+  resolvedAt: number | null;
+  createdAt: number;
+}
+
+/** Persists an objection raised in the live Objection Handler onto this buyer's record — best-effort, never blocks the handler's own response flow. */
+export async function logBuyerObjection(buyerProfileId: string, rawText: string): Promise<void> {
+  try {
+    await fetch(`${BUYER_PROFILES_KEY}/${buyerProfileId}/objections`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ rawText }),
+    });
+  } catch {
+    // best-effort
+  }
+  globalMutate(`${BUYER_PROFILES_KEY}/${buyerProfileId}/objections`);
+  globalMutate(`${BUYER_PROFILES_KEY}/${buyerProfileId}`);
+}
+
+export function useBuyerObjections(id: string | null): { objections: BuyerObjection[]; isLoading: boolean } {
+  const { data, isLoading } = useSWR<{ objections: BuyerObjection[] }>(
+    id ? `${BUYER_PROFILES_KEY}/${id}/objections` : null,
+    fetcher,
+  );
+  return { objections: data?.objections ?? [], isLoading: isLoading && data === undefined };
+}
+
+export async function resolveBuyerObjection(buyerProfileId: string, objectionId: string): Promise<boolean> {
+  const res = await fetch(`${BUYER_PROFILES_KEY}/${buyerProfileId}/objections/${objectionId}`, { method: "PATCH" });
+  globalMutate(`${BUYER_PROFILES_KEY}/${buyerProfileId}/objections`);
+  globalMutate(`${BUYER_PROFILES_KEY}/${buyerProfileId}`);
+  return res.ok;
+}

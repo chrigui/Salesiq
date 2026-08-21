@@ -19,11 +19,10 @@ import {
   History,
   ShieldQuestion,
   Sliders,
-  Compass,
-  Fingerprint,
   Users,
   Presentation,
   Ban,
+  BrainCircuit,
 } from "lucide-react";
 import Link from "next/link";
 import { useSession, type Stakeholder, type TimelineEvent } from "@/core/store/session";
@@ -48,9 +47,8 @@ import { ProposalSheet } from "./ProposalSheet";
 import { SessionTimeline } from "./SessionTimeline";
 import { ObjectionHandler } from "./ObjectionHandler";
 import { DecisionSimulator } from "./DecisionSimulator";
-import { SalesCopilot } from "./SalesCopilot";
+import { BuyerIntelligencePanel } from "./BuyerIntelligencePanel";
 import { detectSignals } from "@/core/engine/copilot";
-import { SalesTwin } from "./SalesTwin";
 import { DemoScript, type DemoStep } from "./DemoScript";
 import { CompanionSyncBar } from "@/components/sync/Pairing";
 
@@ -63,8 +61,7 @@ export function CompanionApp() {
   const [timelineOpen, setTimelineOpen] = useState(false);
   const [objectionOpen, setObjectionOpen] = useState(false);
   const [simulatorOpen, setSimulatorOpen] = useState(false);
-  const [copilotOpen, setCopilotOpen] = useState(false);
-  const [twinOpen, setTwinOpen] = useState(false);
+  const [buyerIntelOpen, setBuyerIntelOpen] = useState(false);
   const [demoScriptOpen, setDemoScriptOpen] = useState(false);
   const [rejectingItem, setRejectingItem] = useState<{ id: string; name: string } | null>(null);
   const [rejectReason, setRejectReason] = useState("");
@@ -74,8 +71,7 @@ export function CompanionApp() {
     setTimelineOpen(false);
     setObjectionOpen(false);
     setSimulatorOpen(false);
-    setCopilotOpen(false);
-    setTwinOpen(false);
+    setBuyerIntelOpen(false);
   };
 
   const demoSteps: DemoStep[] = useMemo(
@@ -123,10 +119,10 @@ export function CompanionApp() {
       },
       {
         title: "Read the room",
-        script: `"The Sales Twin and Copilot read the session itself — pace, budget posture, hesitation — all from real signals."`,
+        script: `"Buyer Intelligence reads the session itself — pace, budget posture, hesitation — plus this buyer's evidence-backed intent and readiness across every session."`,
         run: () => {
           closeAllPanels();
-          setTwinOpen(true);
+          setBuyerIntelOpen(true);
         },
       },
       {
@@ -202,18 +198,11 @@ export function CompanionApp() {
           </div>
           <div className="flex items-center gap-1.5">
             <button
-              onClick={() => setTwinOpen(true)}
-              aria-label="Sales twin"
-              className="grid h-8 w-8 place-items-center rounded-full border border-white/10 bg-white/5 text-ink-muted transition hover:bg-white/10"
-            >
-              <Fingerprint className="h-3.5 w-3.5" />
-            </button>
-            <button
-              onClick={() => setCopilotOpen(true)}
-              aria-label="Sales copilot"
+              onClick={() => setBuyerIntelOpen(true)}
+              aria-label="Buyer intelligence"
               className="relative grid h-8 w-8 place-items-center rounded-full border border-white/10 bg-white/5 text-ink-muted transition hover:bg-white/10"
             >
-              <Compass className="h-3.5 w-3.5" />
+              <BrainCircuit className="h-3.5 w-3.5" />
               {copilotSignals.length > 0 && (
                 <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-brand px-1 text-[9px] font-semibold text-white">
                   {copilotSignals.length}
@@ -535,19 +524,12 @@ export function CompanionApp() {
         answers={session.answers}
       />
 
-      <SalesCopilot
-        open={copilotOpen}
-        onClose={() => setCopilotOpen(false)}
+      <BuyerIntelligencePanel
+        open={buyerIntelOpen}
+        onClose={() => setBuyerIntelOpen(false)}
         pack={pack}
         scored={scored}
         onOpenObjectionHandler={() => setObjectionOpen(true)}
-      />
-
-      <SalesTwin
-        open={twinOpen}
-        onClose={() => setTwinOpen(false)}
-        pack={pack}
-        scored={scored}
       />
 
       <DemoScript

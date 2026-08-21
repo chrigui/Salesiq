@@ -7,6 +7,7 @@ import { useSession } from "@/core/store/session";
 import { COMMON_OBJECTIONS } from "@/core/engine/objection";
 import { getKnowledgeBase, knowledgePayload } from "@/core/data/knowledgeBase";
 import { getAiSettings } from "@/core/data/aiSettings";
+import { logBuyerObjection } from "@/core/store/buyerProfiles";
 import type { IndustryPack } from "@/core/types";
 import type { ScoredItem } from "@/core/engine/scoring";
 
@@ -31,7 +32,7 @@ export function ObjectionHandler({
   pack: IndustryPack;
   scored: ScoredItem[];
 }) {
-  const { answers, logEvent } = useSession();
+  const { answers, logEvent, buyerProfileId } = useSession();
   const best = scored[0];
   const [objection, setObjection] = useState("");
   const [response, setResponse] = useState<string | null>(null);
@@ -69,6 +70,7 @@ export function ObjectionHandler({
         setResponse(data.response);
         setEngine(data.engine ?? null);
         logEvent({ kind: "objection", detail: `Handled objection: "${q}"` });
+        if (buyerProfileId) void logBuyerObjection(buyerProfileId, q);
       }
     } catch {
       setResponse("Couldn't reach the response engine — check the connection and try again.");

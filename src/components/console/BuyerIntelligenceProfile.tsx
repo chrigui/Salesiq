@@ -13,6 +13,10 @@ import {
   Activity,
   Ban,
   Undo2,
+  Gauge,
+  Compass,
+  ShieldQuestion,
+  CheckCircle2,
 } from "lucide-react";
 import { Panel } from "@/components/console/light-ui";
 import { cx } from "@/components/ui/primitives";
@@ -23,7 +27,9 @@ import {
   useBuyerConversationNotes,
   useBuyerActivity,
   useBuyerRejectedItems,
+  useBuyerObjections,
   overrideRejectedItem,
+  resolveBuyerObjection,
   updateBuyerProfile,
   type BuyerProfile,
 } from "@/core/store/buyerProfiles";
@@ -136,6 +142,8 @@ export function BuyerIntelligenceProfile({ id, onBack }: { id: string; onBack: (
         </div>
       </div>
 
+      <IntentReadinessPanel buyerProfile={buyerProfile} />
+
       <div className="grid gap-4 lg:grid-cols-2">
         <KeyValuePanel
           title="Requirements"
@@ -157,6 +165,7 @@ export function BuyerIntelligenceProfile({ id, onBack }: { id: string; onBack: (
         <HistoryPanel buyerProfileId={id} />
         <ActivityPanel buyerProfileId={id} />
         <RejectedItemsPanel buyerProfileId={id} />
+        <ObjectionsPanel buyerProfileId={id} />
         <ConversationMemoryPanel buyerProfileId={id} />
       </div>
     </div>
@@ -237,6 +246,83 @@ function KeyValuePanel({
         >
           <Plus className="h-3.5 w-3.5" />
         </button>
+      </div>
+    </Panel>
+  );
+}
+
+const INTENT_STYLE: Record<string, string> = {
+  low: "bg-zinc-100 text-zinc-500",
+  medium: "bg-amber-100 text-amber-700",
+  high: "bg-sky-100 text-sky-700",
+  very_high: "bg-emerald-100 text-emerald-700",
+};
+
+const INTENT_LABEL: Record<string, string> = {
+  low: "Low",
+  medium: "Medium",
+  high: "High",
+  very_high: "Very high",
+};
+
+/** Buyer intent + purchase readiness (spec §5-6) — evidence-backed, computed from this buyer's persisted cross-session record, never a bare score. Replaces what used to live only in the ephemeral, per-session Sales Twin/Copilot. */
+function IntentReadinessPanel({ buyerProfile }: { buyerProfile: BuyerProfile }) {
+  const hasIntent = Boolean(buyerProfile.intentLevel);
+  return (
+    <Panel title="Buyer intelligence">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-zinc-400">
+            <Compass className="h-3.5 w-3.5" /> Intent
+          </div>
+          {hasIntent ? (
+            <span
+              className={cx(
+                "inline-block rounded-full px-2.5 py-1 text-sm font-semibold",
+                INTENT_STYLE[buyerProfile.intentLevel ?? "low"],
+              )}
+            >
+              {INTENT_LABEL[buyerProfile.intentLevel ?? "low"]}
+            </span>
+          ) : (
+            <p className="text-sm text-zinc-400">No activity recorded yet.</p>
+          )}
+          {buyerProfile.intentReasons && buyerProfile.intentReasons.length > 0 && (
+            <ul className="mt-2 space-y-1 text-xs text-zinc-500">
+              {buyerProfile.intentReasons.map((r) => (
+                <li key={r}>· {r}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+        <div>
+          <div className="mb-1.5 flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-zinc-400">
+            <Gauge className="h-3.5 w-3.5" /> Purchase readiness
+          </div>
+          {buyerProfile.purchaseReadiness ? (
+            <>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold text-zinc-900">{buyerProfile.purchaseReadiness}</span>
+                <span className="text-xs text-zinc-400">{buyerProfile.purchaseReadinessConfidence ?? 0}% confidence</span>
+              </div>
+              <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-zinc-100">
+                <div
+                  className="h-full rounded-full bg-zinc-900"
+                  style={{ width: `${buyerProfile.purchaseReadinessConfidence ?? 0}%` }}
+                />
+              </div>
+            </>
+          ) : (
+            <p className="text-sm text-zinc-400">Exploring — nothing recorded yet.</p>
+          )}
+          {buyerProfile.purchaseReadinessSignals && buyerProfile.purchaseReadinessSignals.length > 0 && (
+            <ul className="mt-2 space-y-1 text-xs text-zinc-500">
+              {buyerProfile.purchaseReadinessSignals.map((s) => (
+                <li key={s}>· {s}</li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
     </Panel>
   );
@@ -522,6 +608,59 @@ function RejectedItemsPanel({ buyerProfileId }: { buyerProfileId: string }) {
                   className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-zinc-200 px-2 py-1 text-[11px] text-zinc-500 hover:bg-zinc-50"
                 >
                   <Undo2 className="h-3 w-3" /> Override
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </Panel>
+  );
+}
+
+const OBJECTION_CONFIDENCE_STYLE: Record<string, string> = {
+  high: "bg-rose-100 text-rose-700",
+  medium: "bg-amber-100 text-amber-700",
+  low: "bg-zinc-100 text-zinc-500",
+};
+
+/** Objection tracking (spec §8) — every objection raised through the live Objection Handler, persisted with the exact quote as evidence. A repeated objection of the same kind is recorded at higher confidence, a real signal rather than a guess. */
+function ObjectionsPanel({ buyerProfileId }: { buyerProfileId: string }) {
+  const { objections, isLoading } = useBuyerObjections(buyerProfileId);
+  return (
+    <Panel title="Objections">
+      {isLoading ? (
+        <div className="flex items-center gap-2 py-4 text-sm text-zinc-400">
+          <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+        </div>
+      ) : objections.length === 0 ? (
+        <p className="text-sm text-zinc-400">No objections logged yet.</p>
+      ) : (
+        <div className="space-y-2">
+          {objections.map((o) => (
+            <div key={o.id} className="flex items-start gap-2 rounded-xl border border-zinc-200 px-3 py-2 text-sm">
+              <ShieldQuestion className="mt-0.5 h-3.5 w-3.5 shrink-0 text-zinc-400" />
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="font-medium capitalize text-zinc-900">{o.kind.replace(/-/g, " ")}</span>
+                  <span className={cx("rounded-full px-2 py-0.5 text-[10px] font-medium capitalize", OBJECTION_CONFIDENCE_STYLE[o.confidence])}>
+                    {o.confidence}
+                  </span>
+                  {o.resolvedAt && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
+                      <CheckCircle2 className="h-3 w-3" /> Resolved
+                    </span>
+                  )}
+                </div>
+                {o.evidence[0] && <p className="mt-0.5 italic text-zinc-500">&ldquo;{o.evidence[0]}&rdquo;</p>}
+                <div className="text-[11px] text-zinc-400">{new Date(o.createdAt).toLocaleString()}</div>
+              </div>
+              {!o.resolvedAt && (
+                <button
+                  onClick={() => void resolveBuyerObjection(buyerProfileId, o.id)}
+                  className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-zinc-200 px-2 py-1 text-[11px] text-zinc-500 hover:bg-zinc-50"
+                >
+                  <CheckCircle2 className="h-3 w-3" /> Resolve
                 </button>
               )}
             </div>

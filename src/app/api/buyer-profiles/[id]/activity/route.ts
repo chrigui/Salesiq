@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { Prisma } from "@/generated/prisma/client";
 import { requireSession, requireCapability, AuthError } from "@/lib/auth/server";
 import { buildBuyerProfileScope } from "@/lib/buyerProfiles/scope";
+import { recomputeBuyerIntelligence } from "@/lib/buyerProfiles/recompute";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -99,6 +100,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }
 
     await prisma.buyerProfile.update({ where: { id }, data: { lastInteractionAt: new Date() } });
+    await recomputeBuyerIntelligence(id);
 
     return NextResponse.json({ ok: true }, { status: 201 });
   } catch (err) {

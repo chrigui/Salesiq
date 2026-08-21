@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireCapability, AuthError } from "@/lib/auth/server";
 import { buildBuyerProfileScope } from "@/lib/buyerProfiles/scope";
+import { recomputeBuyerIntelligence } from "@/lib/buyerProfiles/recompute";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -69,6 +70,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     await prisma.buyerItemRelationship.create({
       data: { buyerProfileId: id, tenantId: ctx.tenantId, packId, itemId, state: "rejected", context: { reason } },
     });
+    await recomputeBuyerIntelligence(id);
 
     return NextResponse.json({ rejectedItemId: rejected.id }, { status: 201 });
   } catch (err) {
