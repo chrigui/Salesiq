@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import useSWR, { mutate as globalMutate } from "swr";
-import { ArrowLeft, ArrowUp, ArrowDown, Loader2, Eye, Upload, FileText, Trash2 } from "lucide-react";
+import { ArrowLeft, ArrowUp, ArrowDown, Loader2, Eye, Upload, FileText, Trash2, RotateCcw, Check } from "lucide-react";
 import { Panel } from "@/components/console/light-ui";
 import { cx } from "@/components/ui/primitives";
 import { Field, TextInput } from "@/components/console/builder/fields";
@@ -10,6 +10,8 @@ import { PACKS } from "@/core/industries";
 import {
   useDisplayProfile,
   updateDisplayProfile,
+  useDisplayProfileVersions,
+  revertDisplayProfile,
   type DisplayProfile,
   type DisplayTemplate,
 } from "@/core/store/displayProfiles";
@@ -18,7 +20,7 @@ import { useBrandProfiles } from "@/core/store/brandProfiles";
 import { DisplayProfileRenderer } from "@/components/display/DisplayProfileRenderer";
 import type { IndustryPack, InventoryItem } from "@/core/types";
 
-const TABS = ["Widgets", "Brand", "Preview"] as const;
+const TABS = ["Widgets", "Brand", "History", "Preview"] as const;
 type Tab = (typeof TABS)[number];
 
 const TEMPLATES: DisplayTemplate[] = [
@@ -35,6 +37,7 @@ const TEMPLATES: DisplayTemplate[] = [
 export function DisplayProfileEditor({ id, onBack }: { id: string; onBack: () => void }) {
   const { profile, isLoading } = useDisplayProfile(id);
   const [tab, setTab] = useState<Tab>("Widgets");
+  const [publishDialogOpen, setPublishDialogOpen] = useState(false);
 
   if (isLoading || !profile) {
     return (
@@ -68,6 +71,10 @@ export function DisplayProfileEditor({ id, onBack }: { id: string; onBack: () =>
             value={profile.status}
             onChange={(e) => {
               const status = e.target.value as DisplayProfile["status"];
+              if (status === "Published") {
+                setPublishDialogOpen(true);
+                return;
+              }
               updateDisplayProfile(id, { status });
             }}
             className="rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900"
@@ -102,8 +109,118 @@ export function DisplayProfileEditor({ id, onBack }: { id: string; onBack: () =>
 
       {tab === "Widgets" && <WidgetsTab id={id} profile={profile} />}
       {tab === "Brand" && <BrandTab id={id} profile={profile} />}
+      {tab === "History" && <HistoryTab id={id} />}
       {tab === "Preview" && pack && item && <PreviewTab profile={profile} pack={pack} item={item} />}
+
+      {publishDialogOpen && (
+        <PublishDialog
+          onClose={() => setPublishDialogOpen(false)}
+          onPublish={(changeReason) => {
+            updateDisplayProfile(id, { status: "Published", changeReason });
+            setPublishDialogOpen(false);
+          }}
+        />
+      )}
     </div>
+  );
+}
+
+function PublishDialog({ onClose, onPublish }: { onClose: () => void; onPublish: (changeReason: string) => void }) {
+  const [reason, setReason] = useState("");
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
+      <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <h3 className="text-base font-semibold text-zinc-900">Publish this profile</h3>
+        <p className="mt-1 text-xs text-zinc-400">
+          Freezes the current draft as a new version — the real Customer Display picks it up on its next poll.
+        </p>
+        <label className="mt-4 block">
+          <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-zinc-400">
+            Change reason (optional)
+          </span>
+          <input
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder="e.g. Updated pricing and gallery"
+            className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900"
+          />
+        </label>
+        <div className="mt-5 flex justify-end gap-2">
+          <button onClick={onClose} className="rounded-xl border border-zinc-200 px-3 py-2 text-sm text-zinc-600 transition hover:bg-zinc-50">
+            Cancel
+          </button>
+          <button
+            onClick={() => onPublish(reason.trim())}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-zinc-900 px-3 py-2 text-sm font-semibold text-white transition hover:brightness-110"
+          >
+            Publish
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HistoryTab({ id }: { id: string }) {
+  const { versions, isLoading } = useDisplayProfileVersions(id);
+  const [reverting, setReverting] = useState<string | null>(null);
+
+  return (
+    <Panel title="Publish history">
+      <p className="mb-3 text-xs text-zinc-400">
+        Every published version, oldest to newest. Revert clones an old version into the draft and republishes it as
+        a new version — history is never rewritten.
+      </p>
+      {isLoading ? (
+        <div className="flex items-center justify-center gap-2 py-6 text-sm text-zinc-400">
+          <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+        </div>
+      ) : versions.length === 0 ? (
+        <p className="py-6 text-center text-sm text-zinc-400">Not published yet — publish once to start a history.</p>
+      ) : (
+        <div className="space-y-2">
+          {versions.map((v) => (
+            <div
+              key={v.id}
+              className={cx(
+                "flex items-center gap-3 rounded-2xl border px-4 py-3",
+                v.isCurrent ? "border-emerald-200 bg-emerald-50" : "border-zinc-200 bg-white",
+              )}
+            >
+              <div className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-zinc-100 text-xs font-semibold text-zinc-500">
+                v{v.version}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-sm font-medium text-zinc-900">
+                  {v.changeReason || "No change reason given"}
+                </div>
+                <div className="truncate text-xs text-zinc-400">
+                  {v.authorName ?? "Unknown"} · {new Date(v.createdAt).toLocaleString()}
+                </div>
+              </div>
+              {v.isCurrent ? (
+                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-medium text-emerald-700">
+                  <Check className="h-3 w-3" /> Live
+                </span>
+              ) : (
+                <button
+                  disabled={reverting === v.id}
+                  onClick={async () => {
+                    setReverting(v.id);
+                    await revertDisplayProfile(id, v.id);
+                    setReverting(null);
+                  }}
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-zinc-200 px-3 py-1.5 text-xs text-zinc-600 transition hover:bg-zinc-50 disabled:opacity-50"
+                >
+                  {reverting === v.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />}
+                  Revert
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </Panel>
   );
 }
 

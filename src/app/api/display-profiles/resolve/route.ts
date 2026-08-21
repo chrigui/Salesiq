@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import { getSessionContext } from "@/lib/auth/server";
 import { getDefaultTenant } from "@/lib/auth/tenant";
 import { getBasePack } from "@/core/industries";
-import { toDisplayProfileDTO } from "@/lib/serializers/displayProfile";
+import { toPublishedDisplayProfileDTO } from "@/lib/serializers/displayProfile";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -35,9 +35,13 @@ export async function GET(request: NextRequest) {
   const profile = await prisma.displayProfile.findFirst({
     where: { tenantId: tenant.id, packId, itemId, status: "Published" },
     orderBy: { publishedAt: "desc" },
-    include: { brandProfile: true, assets: { select: { id: true, name: true, mimeType: true, sizeBytes: true } } },
+    include: {
+      assets: { select: { id: true, name: true, mimeType: true, sizeBytes: true } },
+      versions: { where: { isCurrent: true }, take: 1 },
+    },
   });
-  if (!profile) {
+  const currentVersion = profile?.versions[0];
+  if (!profile || !currentVersion) {
     return NextResponse.json({ profile: null });
   }
 
@@ -47,5 +51,5 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ profile: null });
   }
 
-  return NextResponse.json({ profile: toDisplayProfileDTO(profile) });
+  return NextResponse.json({ profile: toPublishedDisplayProfileDTO(profile, currentVersion) });
 }

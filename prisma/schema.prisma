@@ -186,10 +186,11 @@ model Tenant {
   brochureEvents  BrochureEvent[]
   brochureAssets  BrochureAsset[]
 
-  displayProfiles      DisplayProfile[]
-  displays             Display[]
-  brandProfiles        BrandProfile[]
-  displayProfileAssets DisplayProfileAsset[]
+  displayProfiles        DisplayProfile[]
+  displayProfileVersions DisplayProfileVersion[]
+  displays               Display[]
+  brandProfiles          BrandProfile[]
+  displayProfileAssets   DisplayProfileAsset[]
 
   dealRoomTemplates         DealRoomTemplate[]
   dealRoomTemplateVersions  DealRoomTemplateVersion[]
@@ -278,9 +279,10 @@ model User {
   createdLeads     Lead[]     @relation("LeadCreator")
   createdBrochures Brochure[]
 
-  createdDisplayProfiles DisplayProfile[]
-  createdDisplays        Display[]
-  createdBrandProfiles   BrandProfile[]
+  createdDisplayProfiles         DisplayProfile[]
+  authoredDisplayProfileVersions DisplayProfileVersion[]
+  createdDisplays                Display[]
+  createdBrandProfiles           BrandProfile[]
 
   createdDealRoomTemplates DealRoomTemplate[]
   authoredDealRoomVersions DealRoomTemplateVersion[]
@@ -500,13 +502,55 @@ model DisplayProfile {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  displaysAsIdle Display[]             @relation("IdleProfile")
-  displaysAsLive Display[]             @relation("LiveProfile")
+  displaysAsIdle Display[]               @relation("IdleProfile")
+  displaysAsLive Display[]               @relation("LiveProfile")
   assets         DisplayProfileAsset[]
+  versions       DisplayProfileVersion[]
 
   @@index([tenantId])
   @@index([tenantId, status])
   @@index([tenantId, packId, itemId])
+}
+
+// Immutable publish snapshot — DealRoomTemplateVersion's pattern, collapsed
+// to profile-level (a DisplayProfile already plays the "one addressable
+// unit" role DealRoomTemplate+DealRoom split into two). Publish and Revert
+// both create a new row here rather than mutating an old one, which is what
+// makes History/Revert honest instead of quietly overwriting the past. The
+// live DisplayProfile row above stays the editable *draft*; the Customer
+// Display and idle poll resolve against whichever version has isCurrent
+// true, so a published listing never silently reflows mid-negotiation when
+// someone keeps editing the draft afterward.
+model DisplayProfileVersion {
+  id        String         @id @default(cuid())
+  profileId String
+  profile   DisplayProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  tenantId  String
+  tenant    Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  version Int
+
+  sections      Json
+  motion        Json
+  idle          Json?
+  // Brand fully flattened at publish time ({ brand, brandSoft } rgb
+  // triplets) — immune to a later edit or deletion of the attached
+  // BrandProfile, unlike the live draft's brandProfileId/brandOverrides
+  // resolution chain which is intentionally always-live.
+  brandSnapshot Json?
+
+  // At most one true per profileId, toggled inside a transaction on
+  // publish/revert — never two, never zero once a profile has published at
+  // least once.
+  isCurrent Boolean @default(false)
+
+  authorId     String?
+  author       User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  changeReason String   @default("")
+  createdAt    DateTime @default(now())
+
+  @@unique([profileId, version])
+  @@index([profileId, isCurrent])
 }
 
 // Reusable brand kit, shareable across many DisplayProfiles — build once

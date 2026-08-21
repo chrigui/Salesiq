@@ -2,7 +2,7 @@ import { timingSafeEqual } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { toDisplayDTO } from "@/lib/serializers/display";
-import { toDisplayProfileDTO } from "@/lib/serializers/displayProfile";
+import { toPublishedDisplayProfileDTO } from "@/lib/serializers/displayProfile";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -37,9 +37,13 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   if (display.idleProfileId) {
     const profile = await prisma.displayProfile.findFirst({
       where: { id: display.idleProfileId, tenantId: display.tenantId, status: "Published" },
-      include: { brandProfile: true, assets: { select: { id: true, name: true, mimeType: true, sizeBytes: true } } },
+      include: {
+        assets: { select: { id: true, name: true, mimeType: true, sizeBytes: true } },
+        versions: { where: { isCurrent: true }, take: 1 },
+      },
     });
-    if (profile) idleProfile = toDisplayProfileDTO(profile);
+    const currentVersion = profile?.versions[0];
+    if (profile && currentVersion) idleProfile = toPublishedDisplayProfileDTO(profile, currentVersion);
   }
 
   await prisma.display.update({

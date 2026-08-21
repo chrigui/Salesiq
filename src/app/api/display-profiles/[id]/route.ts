@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { Prisma } from "@/generated/prisma/client";
 import { requireCapability, serverCan, AuthError } from "@/lib/auth/server";
 import { toDisplayProfileDTO } from "@/lib/serializers/displayProfile";
+import { publishDisplayProfileVersion } from "@/lib/displayProfiles/publish";
 import { logTenantAudit } from "@/lib/audit";
 
 export const runtime = "nodejs";
@@ -42,6 +43,7 @@ const patchSchema = z.object({
   brandProfileId: z.string().min(1).max(100).nullable().optional(),
   brandOverrides: z.object({ brand: z.string().optional(), brandSoft: z.string().optional() }).nullable().optional(),
   status: z.enum(["Draft", "Published", "Archived"]).optional(),
+  changeReason: z.string().max(500).optional(),
 });
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -52,7 +54,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     if (!parsed.success) {
       return NextResponse.json({ error: "invalid-request" }, { status: 400 });
     }
-    const { status, brandProfileId, ...rest } = parsed.data;
+    const { status, brandProfileId, changeReason, ...rest } = parsed.data;
 
     if (brandProfileId) {
       const brandProfile = await prisma.brandProfile.findFirst({
@@ -70,21 +72,34 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const result = await prisma.displayProfile.updateMany({
+    // Ordinary field edits (name/template/sections/brand) always apply
+    // first, so a "Publish" request that also carries fresh edits snapshots
+    // the version off the just-updated draft, not a stale one.
+    const fieldResult = await prisma.displayProfile.updateMany({
       where: { id, tenantId: ctx.tenantId },
       data: {
         ...(rest as unknown as Prisma.DisplayProfileUpdateManyMutationInput),
         ...(brandProfileId !== undefined ? { brandProfileId } : {}),
-        ...(status !== undefined
-          ? { status, publishedAt: status === "Published" ? new Date() : undefined }
-          : {}),
       },
     });
-    if (result.count === 0) {
+    if (fieldResult.count === 0) {
       return NextResponse.json({ error: "not-found" }, { status: 404 });
     }
 
-    if (status !== undefined) {
+    if (status === "Published") {
+      await publishDisplayProfileVersion({ tenantId: ctx.tenantId, profileId: id, authorId: ctx.userId, changeReason });
+      await logTenantAudit({
+        tenantId: ctx.tenantId,
+        actor: ctx.name,
+        action: "display-profile.published",
+        target: id,
+        detail: changeReason ? `Published a new version: ${changeReason}` : "Published a new version",
+      });
+    } else if (status !== undefined) {
+      await prisma.displayProfile.updateMany({
+        where: { id, tenantId: ctx.tenantId },
+        data: { status, publishedAt: undefined },
+      });
       await logTenantAudit({
         tenantId: ctx.tenantId,
         actor: ctx.name,

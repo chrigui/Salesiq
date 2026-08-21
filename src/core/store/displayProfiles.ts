@@ -87,7 +87,9 @@ export async function createDisplayProfile(input: {
 
 export async function updateDisplayProfile(
   id: string,
-  patch: Partial<Pick<DisplayProfile, "name" | "template" | "sections" | "brandProfileId" | "brandOverrides" | "status">>,
+  patch: Partial<Pick<DisplayProfile, "name" | "template" | "sections" | "brandProfileId" | "brandOverrides" | "status">> & {
+    changeReason?: string;
+  },
 ): Promise<DisplayProfile | null> {
   const res = await fetch(`${PROFILES_KEY}/${id}`, {
     method: "PATCH",
@@ -96,6 +98,34 @@ export async function updateDisplayProfile(
   });
   globalMutate(`${PROFILES_KEY}/${id}`);
   globalMutate(PROFILES_KEY);
+  globalMutate(`${PROFILES_KEY}/${id}/versions`);
+  if (!res.ok) return null;
+  const { profile } = await res.json();
+  return profile as DisplayProfile;
+}
+
+export interface DisplayProfileVersion {
+  id: string;
+  version: number;
+  isCurrent: boolean;
+  authorName: string | null;
+  changeReason: string;
+  createdAt: number;
+}
+
+export function useDisplayProfileVersions(id: string | null): { versions: DisplayProfileVersion[]; isLoading: boolean } {
+  const { data, isLoading } = useSWR<{ versions: DisplayProfileVersion[] }>(
+    id ? `${PROFILES_KEY}/${id}/versions` : null,
+    fetcher,
+  );
+  return { versions: data?.versions ?? [], isLoading: isLoading && data === undefined };
+}
+
+export async function revertDisplayProfile(id: string, versionId: string): Promise<DisplayProfile | null> {
+  const res = await fetch(`${PROFILES_KEY}/${id}/versions/${versionId}/revert`, { method: "POST" });
+  globalMutate(`${PROFILES_KEY}/${id}`);
+  globalMutate(PROFILES_KEY);
+  globalMutate(`${PROFILES_KEY}/${id}/versions`);
   if (!res.ok) return null;
   const { profile } = await res.json();
   return profile as DisplayProfile;
