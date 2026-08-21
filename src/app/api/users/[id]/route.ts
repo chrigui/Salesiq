@@ -8,7 +8,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const patchSchema = z.object({
-  role: z.enum(["Owner", "Admin", "Manager", "Salesperson", "Viewer"]).optional(),
+  role: z.enum(["Owner", "Admin", "Manager", "Designer", "Salesperson", "Viewer"]).optional(),
   branchId: z.string().nullable().optional(),
   status: z.enum(["active", "invited", "suspended"]).optional(),
   mfaEnabled: z.boolean().optional(),

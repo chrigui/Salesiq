@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { getBasePack } from "@/core/industries";
 import type { IndustryPack, InventoryItem } from "@/core/types";
 import { toBrochureDTO, type BrochureDTO } from "@/lib/serializers/brochure";
+import { nearestComparables } from "@/lib/comparables";
 
 export interface ResolvedBrochure {
   brochure: BrochureDTO;
@@ -62,21 +63,4 @@ export async function resolvePublicBrochure(
     comparables,
     assets,
   };
-}
-
-/** Nearest 3 other items in the same pack by price distance, preferring matching property-type attributes when present. */
-function nearestComparables(inventory: InventoryItem[], item: InventoryItem, limit = 3): InventoryItem[] {
-  const sameTypeKeys = Object.keys(item.attributes).filter(
-    (k) => typeof item.attributes[k] === "boolean" && item.attributes[k] === true,
-  );
-  return inventory
-    .filter((i) => i.id !== item.id)
-    .map((i) => {
-      const priceDelta = Math.abs(i.price - item.price) / Math.max(item.price, 1);
-      const typeMismatch = sameTypeKeys.some((k) => i.attributes[k] !== true) ? 1 : 0;
-      return { item: i, distance: priceDelta + typeMismatch };
-    })
-    .sort((a, b) => a.distance - b.distance)
-    .slice(0, limit)
-    .map((x) => x.item);
 }

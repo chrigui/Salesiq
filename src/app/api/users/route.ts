@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 const inviteSchema = z.object({
   name: z.string().min(1).max(200),
   email: z.string().min(1).max(200),
-  role: z.enum(["Owner", "Admin", "Manager", "Salesperson", "Viewer"]),
+  role: z.enum(["Owner", "Admin", "Manager", "Designer", "Salesperson", "Viewer"]),
   branchId: z.string().nullable(),
 });
 

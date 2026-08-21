@@ -21,6 +21,7 @@ export const config = {
     "/api/users/:path*",
     "/api/permissions/:path*",
     "/api/brochures/:path*",
+    "/api/display-profiles/:path*",
     "/api/audit/:path*",
   ],
 };
@@ -34,6 +35,12 @@ export async function middleware(request: NextRequest) {
   // permissions path requires a real session.
   const { pathname } = request.nextUrl;
   if (pathname === "/api/leads" && request.method === "POST") {
+    return NextResponse.next();
+  }
+  // GET /api/display-profiles/resolve is the live Customer Display's runtime
+  // poll — same deliberately-anonymous shape as the leads exception above;
+  // see that route's own doc comment for the tenant-resolution tradeoff.
+  if (pathname === "/api/display-profiles/resolve" && request.method === "GET") {
     return NextResponse.next();
   }
 

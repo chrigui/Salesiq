@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SalesIQ — Sales &amp; Marketing Deck</title>
+<style>
+  :root{
+    --paper:#f0f3f0; --surface:#ffffff; --surface-2:#f7f9f7; --bg-tertiary:#eae8df;
+    --ink:#15201b; --ink-muted:#55605a; --ink-faint:#8a938c;
+    --accent:#0e8f5b; --accent-ink:#0a6f47; --accent-wash:rgba(14,143,91,.10);
+    --brass:#9c7622; --star:#d8a72a;
+    --good:#0e8f5b; --good-wash:rgba(14,143,91,.12);
+    --pending:#a9701a; --pending-wash:rgba(169,112,26,.13);
+    --blueprint:#5f6b7a; --blueprint-wash:rgba(95,107,122,.12);
+    --line:rgba(21,32,27,.08);
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,ui-serif,serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:"SF Mono",ui-monospace,"JetBrains Mono","Cascadia Code",Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);background:var(--bg-tertiary);color:var(--ink);line-height:1.45;-webkit-font-smoothing:antialiased}
+  a{color:var(--accent-ink);text-decoration:none}
+  .topbar{position:sticky;top:0;z-index:50;background:rgba(240,243,240,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .topbar .in{max-width:70rem;margin:0 auto;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .brandmark{display:inline-flex;align-items:center;gap:8px;font-weight:600;letter-spacing:-.025em;font-size:16px;font-family:var(--serif)}
+  .brandmark .bx{width:22px;height:22px;border-radius:6px;background:var(--accent-ink);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;font-family:var(--sans)}
+  .fam{font-size:12.5px;color:var(--ink-muted);display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .pdfbtn{background:var(--accent-ink);color:#fff;border:none;border-radius:9999px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--sans)}
+  .pdfbtn:hover{background:var(--accent)}
+
+  .deck{max-width:70rem;margin:0 auto;padding:24px}
+  .slide{background:var(--paper);border:1px solid var(--line);border-radius:16px;aspect-ratio:16/9;margin:0 0 24px;padding:48px 56px;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden;box-shadow:0 1px 3px rgba(21,32,27,.08)}
+  .slide.ink{background:#15201b;color:#e9eee9}
+  .slide .num{position:absolute;bottom:18px;right:24px;font-size:11px;color:var(--ink-faint);font-variant-numeric:tabular-nums}
+  .slide .brand{position:absolute;bottom:18px;left:24px;font-size:11px;color:var(--ink-faint);font-weight:600}
+  .kick{display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);color:var(--accent-ink);font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:3px 11px;border-radius:9999px;align-self:flex-start;margin-bottom:14px;font-family:var(--mono)}
+  .kick::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent-ink)}
+  .ink .kick{background:#1e2b24;border-color:#2c3a33;color:#4fd394}
+  .ink .kick::before{background:#4fd394}
+  h1{font-family:var(--serif);font-size:44px;font-weight:600;letter-spacing:-.02em;line-height:1.08;margin-bottom:14px}
+  h1 .hl{background:linear-gradient(180deg,transparent 62%,rgba(216,167,42,.4) 62%);border-radius:2px;padding:0 2px}
+  .ink h1 .hl{background:linear-gradient(180deg,transparent 62%,rgba(216,167,42,.3) 62%)}
+  h2{font-family:var(--serif);font-size:31px;font-weight:600;letter-spacing:-.015em;line-height:1.12;margin-bottom:12px}
+  .sub{font-size:16.5px;color:var(--ink-muted);max-width:44rem}
+  .ink .sub{color:#9fb0a6}
+  .cols{display:grid;gap:14px;margin-top:22px}
+  .c2{grid-template-columns:1fr 1fr}
+  .c3{grid-template-columns:1fr 1fr 1fr}
+  .c4{grid-template-columns:repeat(4,1fr)}
+  .kcard{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;box-shadow:0 1px 2px rgba(21,32,27,.05)}
+  .ink .kcard{background:#1c2820;border-color:#2c3a33}
+  .kcard .n{font-family:var(--serif);font-size:27px;font-weight:600;letter-spacing:-.01em}
+  .ink .kcard .n{color:#fff}
+  .kcard .l{font-size:12.5px;color:var(--ink-muted);margin-top:3px}
+  .ink .kcard .l{color:#8ba095}
+  .kcard h4{font-size:15px;font-weight:600;margin-bottom:4px}
+  .ink .kcard h4{color:#fff}
+  .kcard p{font-size:12.5px;color:var(--ink-muted)}
+  .ink .kcard p{color:#9fb0a6}
+  .flow{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:26px 0;font-size:13px;font-weight:600}
+  .flow .nd{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px;box-shadow:0 1px 2px rgba(21,32,27,.05)}
+  .flow .nd.hero{background:var(--accent-ink);color:#fff;border-color:var(--accent-ink)}
+  .flow .ar{color:var(--ink-faint);font-size:16px}
+  .shot{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:0 1px 2px rgba(21,32,27,.05)}
+  .shot .tb{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .shot .tb .t{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;font-family:var(--mono)}
+  .dots{display:flex;gap:5px}.dots i{width:7px;height:7px;border-radius:50%;background:var(--bg-tertiary);display:block}
+  .bign{font-size:26px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums;font-family:var(--serif)}
+  .delta{font-size:11.5px;font-weight:500}.delta.up{color:var(--good)}
+  .rowl{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:12px}
+  .rowl:last-child{border-bottom:none;padding-bottom:0}
+  .rowl b{font-size:12.5px}.rowl .meta{color:var(--ink-muted);font-size:11px}
+  .mchip{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:9999px;text-transform:uppercase;white-space:nowrap}
+  .mchip.ok{background:var(--good-wash);color:var(--good)}
+  .mchip.tri{background:var(--pending-wash);color:var(--pending)}
+  .mchip.mig{background:var(--blueprint-wash);color:var(--blueprint)}
+  table{width:100%;border-collapse:separate;border-spacing:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:13px;margin-top:16px}
+  th{background:var(--surface-2);color:var(--ink-muted);text-align:left;padding:8px 12px;font-size:10px;letter-spacing:.07em;text-transform:uppercase;font-weight:600;font-family:var(--mono)}
+  td{padding:8px 12px;border-top:1px solid var(--line)}
+  td b{color:var(--ink)}
+  .pill{display:inline-block;font-size:10px;font-weight:700;padding:2px 9px;border-radius:9999px}
+  .pill.ok{background:var(--good-wash);color:var(--good)}
+  .big-line{font-size:22px;font-weight:600;letter-spacing:-.01em;line-height:1.3;max-width:46rem;font-family:var(--serif)}
+  .ink .big-line{color:#fff}
+  @media(max-width:900px){.slide{aspect-ratio:auto;padding:32px 24px}.c2,.c3,.c4{grid-template-columns:1fr}h1{font-size:32px}h2{font-size:24px}}
+
+  .suite{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:8px;margin-top:16px}
+  .suite .prod{border:1px solid var(--line);border-left:3px solid var(--accent);background:var(--surface);border-radius:8px;padding:8px 10px;font-size:11.5px;font-weight:600;box-shadow:0 1px 2px rgba(21,32,27,.04)}
+  .suite .prod span{display:block;font-size:9.5px;font-weight:500;color:var(--ink-muted);margin-top:1px}
+  .suite .prod.next{border-left-color:var(--pending)}
+  .suite .prod.blue{border-left-color:var(--blueprint);opacity:.6}
+  .ic{width:17px;height:17px;stroke:var(--accent-ink);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;vertical-align:-3.5px;margin-right:7px;display:inline-block}
+  .ink .ic{stroke:#4fd394}
+  .msgq{background:#15201b;color:#f0f4f0;border-radius:10px 10px 3px 10px;padding:7px 10px;font-size:11px;margin:6px 0 6px 18%}
+  .msga{background:var(--paper);border:1px solid var(--line);border-radius:10px 10px 10px 3px;padding:7px 10px;font-size:11px;margin:6px 18% 6px 0;color:var(--ink)}
+  .msga b{color:var(--accent-ink)}
+  @media print{
+    @page{size:A4 landscape;margin:8mm}
+    body{background:#fff}
+    .topbar{display:none}
+    .deck{max-width:100%;padding:0}
+    .slide{aspect-ratio:auto;height:180mm;margin:0;border-radius:12px;break-after:page;box-shadow:none}
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    a{color:inherit;text-decoration:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="in">
+  <span class="brandmark"><span class="bx">IQ</span>SalesIQ</span>
+  <span class="fam">
+    <a href="master-report.html">Master Report</a>
+    <a href="executive-report.html">Executive Report</a>
+    <a href="prd.html">PRD</a>
+    <b style="color:var(--ink)">Sales Deck</b>
+    <button class="pdfbtn" onclick="window.print()" title="Export as A4-landscape PDF">Export PDF</button>
+  </span>
+</div></div>
+
+<div class="deck">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-brain" viewBox="0 0 24 24"><path d="M11 3l1.7 4.6L17.3 9.3l-4.6 1.7L11 15.6l-1.7-4.6L4.7 9.3l4.6-1.7z"/><path d="M18.2 14.8l.8 2.1 2.1.8-2.1.8-.8 2.1-.8-2.1-2.1-.8 2.1-.8z"/></symbol>
+<symbol id="i-route" viewBox="0 0 24 24"><path d="M4 17h9a5 5 0 0 0 5-5V7"/><polyline points="15 9.5 18 6.5 21 9.5"/><circle cx="4" cy="17" r="1.5"/></symbol>
+<symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3"/><path d="M3.5 19c.5-3.2 2.9-4.8 5.5-4.8s5 1.6 5.5 4.8"/><circle cx="17" cy="9.5" r="2.4"/><path d="M16.2 14.5c2.2.4 3.9 1.9 4.3 4.4"/></symbol>
+<symbol id="i-replay" viewBox="0 0 24 24"><path d="M3 5v5h5"/><path d="M4 10a8.5 8.5 0 1 1 1 5.5"/><polyline points="12 8.5 12 13 15.3 14.4"/></symbol>
+<symbol id="i-doc" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><polyline points="9 12.5 11.2 14.7 15.5 9.5"/></symbol>
+<symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 20h18"/><path d="M7 20v-6M12 20V6M17 20v-9"/></symbol>
+<symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><ellipse cx="12" cy="12" rx="3.8" ry="8.5"/><path d="M3.5 12h17"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V6z"/><polyline points="9 12 11.5 14.5 15.5 9.5"/></symbol>
+</defs></svg>
+
+<!-- TITLE -->
+<div class="slide ink">
+  <span class="kick">SalesIQ · Sales &amp; Marketing</span>
+  <h1>Every big decision deserves<br>a reason someone can <span class="hl">defend.</span></h1>
+  <p class="sub">SalesIQ is the Decision Intelligence Platform for enterprise buying — a live, explainable engine that ranks and recommends in front of the customer, on any industry, from one shared codebase.</p>
+  <span class="brand">SalesIQ</span><span class="num">1</span>
+</div>
+
+<!-- WHY IT EXISTS -->
+<div class="slide">
+  <span class="kick">Why SalesIQ exists</span>
+  <h2>CRM tells you what happened. Nothing tells you what to do next.</h2>
+  <div class="flow" style="margin:30px 0">
+    <span class="nd">Customer answers questions</span><span class="ar">→</span>
+    <span class="nd hero">Decision Engine scores &amp; explains, live</span><span class="ar">→</span>
+    <span class="nd">Customer sees why, on screen</span><span class="ar">→</span>
+    <span class="nd">Proposal, generated from the same facts</span>
+  </div>
+  <p class="big-line">CRM logs the call happened. <span style="color:var(--accent-ink)">SalesIQ reasons through what to recommend — live, and explains why.</span></p>
+  <span class="brand">SalesIQ</span><span class="num">2</span>
+</div>
+
+<!-- PROBLEM -->
+<div class="slide">
+  <span class="kick">The problem</span>
+  <h2>Enterprise buying is improvised, invisible, and unmeasurable</h2>
+  <div class="cols c4">
+    <div class="kcard"><h4>Improvised pitch</h4><p>Every rep builds their own mental model of fit — inconsistent, uncoachable, unmeasurable.</p></div>
+    <div class="kcard"><h4>Invisible reasoning</h4><p>"Trust me" isn't a reason a buying committee can defend, or a manager can audit.</p></div>
+    <div class="kcard"><h4>Activity, not judgment</h4><p>CRM records that a call happened — never why one option beat another.</p></div>
+    <div class="kcard"><h4>One-size tools</h4><p>Sales-enablement and CPQ tools are typically built for one industry's data shape at a time.</p></div>
+  </div>
+  <span class="brand">SalesIQ</span><span class="num">3</span>
+</div>
+
+<!-- OPPORTUNITY (honest, no invented sizing) -->
+<div class="slide">
+  <span class="kick">The opportunity</span>
+  <h2>A category with no incumbent owner</h2>
+  <p class="sub">CRM, sales-enablement content libraries, and configure-price-quote tools each hold a slice of the enterprise buying stack. None of them own the live moment of decision — the explainable, in-person comparison that ends in a recommendation someone can defend.</p>
+  <div class="cols c3" style="margin-top:18px">
+    <div class="kcard"><div class="n">5</div><div class="l">verticals already proven on one engine — real estate ×2, automotive, aviation, yachting</div></div>
+    <div class="kcard"><div class="n">0</div><div class="l">code changes needed to add a sixth vertical — it's configuration</div></div>
+    <div class="kcard"><div class="n">real</div><div class="l">multi-tenant backend, ready for pilot customers today</div></div>
+  </div>
+  <p class="sub" style="margin-top:14px;font-size:12.5px;color:var(--ink-faint)">Formal market sizing (TAM/SAM/SOM) hasn't been quantified yet — this deck deliberately doesn't invent a number where no research exists.</p>
+  <span class="brand">SalesIQ</span><span class="num">4</span>
+</div>
+
+<!-- SOLUTION -->
+<div class="slide">
+  <span class="kick">The solution</span>
+  <h2>One engine. Any vertical. Explainable by design.</h2>
+  <div class="cols c3">
+    <div class="kcard"><h4><svg class="ic"><use href="#i-route"/></svg>Live, weighted scoring</h4><p>Every item ranked by real rules against the customer's actual answers — not a static catalog sort.</p></div>
+    <div class="kcard"><h4><svg class="ic"><use href="#i-eye"/></svg>Explainable, always</h4><p>Every reason traces to the engine's own real breakdown — no invented statistics, no black box.</p></div>
+    <div class="kcard"><h4><svg class="ic"><use href="#i-globe"/></svg>Industry-agnostic</h4><p>The same pack architecture already runs five different businesses from one codebase.</p></div>
+  </div>
+  <span class="brand">SalesIQ</span><span class="num">5</span>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="slide">
+  <span class="kick">How it works</span>
+  <h2>The life of a decision on SalesIQ</h2>
+  <div class="flow" style="margin:30px 0">
+    <span class="nd">1 · Rep asks questions</span><span class="ar">→</span>
+    <span class="nd">2 · Answers feed the engine</span><span class="ar">→</span>
+    <span class="nd hero">3 · Rules rank &amp; explain, live</span><span class="ar">→</span>
+    <span class="nd">4 · Customer sees it on screen</span><span class="ar">→</span>
+    <span class="nd">5 · Proposal drafted from the same facts</span>
+  </div>
+  <p class="sub">Real-time sync keeps the rep's phone and the customer's screen in lockstep — QR pairing, encrypted room keys, offline queue with auto-flush on reconnect.</p>
+  <span class="brand">SalesIQ</span><span class="num">6</span>
+</div>
+
+<!-- PRODUCT EXPERIENCE -->
+<div class="slide">
+  <span class="kick">Product experience</span>
+  <h2>One console. Every decision, explained.</h2>
+  <p class="sub" style="font-size:13px">Production surfaces, live theme, explainability-first — illustrative data shown, real product design.</p>
+  <div class="cols c3" style="margin-top:12px">
+    <div class="shot">
+      <div class="tb"><span class="t">Business Impact Dashboard</span><span class="dots"><i></i><i></i><i></i></span></div>
+      <div class="bign">Real leads</div>
+      <div class="delta up">▲ computed from captured pipeline, not mock data</div>
+      <div class="rowl" style="margin-top:6px"><div><b>Win rate</b> <span class="meta">won ÷ decided</span></div><span class="mchip ok">Live</span></div>
+      <div class="rowl"><div><b>Pipeline value</b></div><span class="mchip ok">Real Σ</span></div>
+    </div>
+    <div class="shot">
+      <div class="tb"><span class="t">Why This / Why Not</span><span class="dots"><i></i><i></i><i></i></span></div>
+      <div class="msgq">Why is Green Hills recommended?</div>
+      <div class="msga"><b>Within budget at $285,000.</b> 4 bedrooms meets your need for 4, plus 3 schools within 5 min.</div>
+    </div>
+    <div class="shot">
+      <div class="tb"><span class="t">Scoring Rules · No code</span><span class="dots"><i></i><i></i><i></i></span></div>
+      <div class="rowl"><div><span class="mchip mig">RULE</span> <b>Budget fit</b></div><span class="meta">weight 3</span></div>
+      <div class="rowl"><div><span class="mchip mig">RULE</span> <b>Bedrooms ≥ need</b></div><span class="meta">weight 2.5</span></div>
+      <div class="rowl"><div><span class="mchip ok">EDIT</span> <b>publish · no deploy</b></div></div>
+    </div>
+  </div>
+  <span class="brand">SalesIQ</span><span class="num">7</span>
+</div>
+
+<!-- WHY EXISTING TOOLS FALL SHORT -->
+<div class="slide">
+  <span class="kick">Landscape</span>
+  <h2>Everyone owns a slice. Nobody owns the decision.</h2>
+  <table>
+    <tr><th style="width:22%">Category</th><th>What it's great at</th><th>Where it stops</th></tr>
+    <tr><td><b>CRM</b></td><td>Pipeline tracking, activity history, reporting</td><td>Records that a conversation happened — never why one option beat another</td></tr>
+    <tr><td><b>Sales enablement</b></td><td>Content libraries, playbooks, training</td><td>Static assets, not a live, per-customer decision engine</td></tr>
+    <tr><td><b>Configure-price-quote</b></td><td>Pricing rules, product configuration</td><td>Configures what's being sold — doesn't explain why it fits this customer</td></tr>
+  </table>
+  <p class="big-line" style="margin-top:16px;font-size:20px">We don't replace any of them. <span style="color:var(--accent-ink)">We own the moment none of them do.</span></p>
+  <span class="brand">SalesIQ</span><span class="num">8</span>
+</div>
+
+<!-- PLATFORM TREE -->
+<div class="slide">
+  <span class="kick">Platform</span>
+  <h2>Not a feature. An expanding platform.</h2>
+  <p class="sub" style="font-size:13.5px">Every module runs on the same decision engine and the same data.</p>
+  <div class="suite">
+    <div class="prod">Explainable Decision Engine<span>live — the wedge</span></div>
+    <div class="prod">AI Sales Twin<span>live session coaching</span></div>
+    <div class="prod">Buying Committee Intelligence<span>multi-stakeholder</span></div>
+    <div class="prod">Sales Copilot<span>objection &amp; negotiation</span></div>
+    <div class="prod">AI Meeting Replay<span>jump to the moment</span></div>
+    <div class="prod">Business Impact Dashboard<span>real KPIs</span></div>
+    <div class="prod">Visual Builder<span>no-code config</span></div>
+    <div class="prod">Brochure &amp; Microsite<span>shipped module</span></div>
+    <div class="prod next">Deal Room &amp; Template Engine<span>PR 1 of 10 shipped</span></div>
+    <div class="prod next">Live payments<span>UI real, processor pending</span></div>
+    <div class="prod next">Federated SSO<span>settings real, sign-in pending</span></div>
+    <div class="prod blue">Native mobile apps<span>PWA ships today</span></div>
+    <div class="prod blue">AR / VR / IoT<span>blueprint</span></div>
+  </div>
+  <p class="sub" style="margin-top:12px;font-size:11.5px;color:var(--ink-faint)">Green = live today · Amber = next up · Grey = blueprint/roadmap</p>
+  <span class="brand">SalesIQ</span><span class="num">9</span>
+</div>
+
+<!-- INDUSTRY PROOF -->
+<div class="slide">
+  <span class="kick">Proof, not a promise</span>
+  <h2>Five verticals. One engine. Zero rebuilds.</h2>
+  <table>
+    <tr><th>Pack</th><th>Brand</th><th>Inventory</th></tr>
+    <tr><td>Real Estate</td><td>Green Hills Living</td><td>9 curated listings</td></tr>
+    <tr><td>Real Estate — Bahrain</td><td>Pearl Coast Properties</td><td>500 listings</td></tr>
+    <tr><td>Automotive</td><td>Vantage Motors</td><td>8 vehicles</td></tr>
+    <tr><td>Private Jets</td><td>Meridian Aviation</td><td>7 aircraft</td></tr>
+    <tr><td>Yacht Charter</td><td>Meridian Yachts</td><td>7 yachts</td></tr>
+  </table>
+  <p class="sub" style="margin-top:12px">A sixth vertical — insurance, medical, solar, education, hospitality — is a configuration exercise through the no-code Visual Builder, not an engineering rebuild.</p>
+  <span class="brand">SalesIQ</span><span class="num">10</span>
+</div>
+
+<!-- AI EVERYWHERE -->
+<div class="slide">
+  <span class="kick">AI</span>
+  <h2>AI embedded throughout — <span style="background:linear-gradient(180deg,transparent 62%,rgba(216,167,42,.4) 62%);border-radius:2px;padding:0 2px">grounded, never bolted on</span></h2>
+  <div class="cols c3" style="margin-top:16px">
+    <div class="kcard"><h4><svg class="ic"><use href="#i-brain"/></svg>AI Sales Twin</h4><p>Coaches the rep from real live session signals — pace, budget posture, confidence.</p></div>
+    <div class="kcard"><h4><svg class="ic"><use href="#i-users"/></svg>Buying Committee Intelligence</h4><p>Tracks every stakeholder and influence level across a multi-signoff deal.</p></div>
+    <div class="kcard"><h4><svg class="ic"><use href="#i-replay"/></svg>AI Meeting Replay</h4><p>A deterministic recap with "jump to this moment," not a generic transcript.</p></div>
+    <div class="kcard"><h4><svg class="ic"><use href="#i-doc"/></svg>AI Proposal Writer</h4><p>Deterministic draft first; Claude-authored upgrade layered on top of verified facts only.</p></div>
+    <div class="kcard"><h4><svg class="ic"><use href="#i-shield"/></svg>Explainable by construction</h4><p>The scoring engine and narrator are deterministic — Claude never gets to invent a reason.</p></div>
+    <div class="kcard"><h4><svg class="ic"><use href="#i-chart"/></svg>Business Impact Dashboard</h4><p>Every KPI computed from real captured leads — nothing estimated that isn't measured.</p></div>
+  </div>
+  <span class="brand">SalesIQ</span><span class="num">11</span>
+</div>
+
+<!-- BROCHURE + DEAL ROOM -->
+<div class="slide">
+  <span class="kick">Latest modules</span>
+  <h2>From recommendation to a shareable, trackable deal</h2>
+  <div class="cols c2">
+    <div class="shot">
+      <div class="tb"><span class="t">Brochure &amp; Microsite · Shipped</span><span class="dots"><i></i><i></i><i></i></span></div>
+      <div class="rowl"><div><b>Public microsite</b> <span class="meta">is the permanent link</span></div><span class="mchip ok">Live</span></div>
+      <div class="rowl"><div><b>QR + WhatsApp + Email</b></div><span class="mchip ok">Live</span></div>
+      <div class="rowl"><div><b>Real analytics</b> <span class="meta">only recorded events</span></div><span class="mchip ok">Live</span></div>
+    </div>
+    <div class="shot">
+      <div class="tb"><span class="t">Deal Room &amp; Template Engine · In progress</span><span class="dots"><i></i><i></i><i></i></span></div>
+      <div class="rowl"><div><b>Versioned templates</b> <span class="meta">frozen room instances</span></div><span class="mchip tri">PR 1 done</span></div>
+      <div class="rowl"><div><b>Tasks, chat, approvals, signature</b></div><span class="mchip tri">Schema real</span></div>
+      <div class="rowl"><div><b>9 PRs remaining</b> <span class="meta">on an approved plan</span></div><span class="mchip mig">Roadmap</span></div>
+    </div>
+  </div>
+  <span class="brand">SalesIQ</span><span class="num">12</span>
+</div>
+
+<!-- ASK -->
+<div class="slide ink">
+  <span class="kick">Next steps</span>
+  <h2>Let's turn illustrative into proven.</h2>
+  <p class="sub">1 · Pilot customers to convert illustrative outcomes into published case studies.<br>
+  2 · A short production-deploy checklist — API key, Postgres, confirmed auto-deploy.<br>
+  3 · Continue the Deal Room build — nine remaining PRs on an already-approved plan.</p>
+  <span class="brand">SalesIQ</span><span class="num">13</span>
+</div>
+
+</div>
+
+</body>
+</html>

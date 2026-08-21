@@ -7,17 +7,12 @@ import type { IndustryPack } from "@/core/types";
 import { formatMoney } from "@/core/engine/explain";
 import { ItemImage } from "@/components/ui/ItemImage";
 import { cx } from "@/components/ui/primitives";
+import { DEFAULT_AI_PROMPTS as AI_PROMPTS } from "@/core/display/aiPrompts";
 
 /** How long the display waits with no activity before showing the attract loop. */
 export const DEFAULT_IDLE_TIMEOUT_MS = 45_000;
 /** How long each featured item holds before the carousel advances. */
 const SLIDE_MS = 6_000;
-
-const AI_PROMPTS = [
-  "Ask our AI: “Find me something under 300k near good schools.”",
-  "Ask our AI: “Which of these has the best investment upside?”",
-  "Ask our AI: “Compare the top two for a family of four.”",
-];
 
 /**
  * Idle-timeout gate. Arms a countdown whenever `enabled` is true; any local

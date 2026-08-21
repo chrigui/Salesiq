@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Sparkles,
   GitCompareArrows,
@@ -19,13 +19,24 @@ import {
   History,
   ShieldQuestion,
   Sliders,
-  Compass,
-  Fingerprint,
   Users,
   Presentation,
+  Ban,
+  BrainCircuit,
 } from "lucide-react";
 import Link from "next/link";
 import { useSession, type Stakeholder, type TimelineEvent } from "@/core/store/session";
+import {
+  linkBuyerProfile,
+  useBuyerProfile,
+  extractBuyerText,
+  submitConversationNote,
+  logBuyerActivity,
+  useBuyerRejectedItems,
+  rejectBuyerItem,
+  type BuyerExtractionFields,
+} from "@/core/store/buyerProfiles";
+import { toPriorityWeights } from "@/core/buyerIntelligence/priorityWeights";
 import { useLivePack, useAllPacks, getEffectivePack } from "@/core/store/packs";
 import { scoreInventory, isVisible } from "@/core/engine/scoring";
 import { formatMoney } from "@/core/engine/explain";
@@ -36,9 +47,8 @@ import { ProposalSheet } from "./ProposalSheet";
 import { SessionTimeline } from "./SessionTimeline";
 import { ObjectionHandler } from "./ObjectionHandler";
 import { DecisionSimulator } from "./DecisionSimulator";
-import { SalesCopilot } from "./SalesCopilot";
+import { BuyerIntelligencePanel } from "./BuyerIntelligencePanel";
 import { detectSignals } from "@/core/engine/copilot";
-import { SalesTwin } from "./SalesTwin";
 import { DemoScript, type DemoStep } from "./DemoScript";
 import { CompanionSyncBar } from "@/components/sync/Pairing";
 
@@ -51,17 +61,17 @@ export function CompanionApp() {
   const [timelineOpen, setTimelineOpen] = useState(false);
   const [objectionOpen, setObjectionOpen] = useState(false);
   const [simulatorOpen, setSimulatorOpen] = useState(false);
-  const [copilotOpen, setCopilotOpen] = useState(false);
-  const [twinOpen, setTwinOpen] = useState(false);
+  const [buyerIntelOpen, setBuyerIntelOpen] = useState(false);
   const [demoScriptOpen, setDemoScriptOpen] = useState(false);
+  const [rejectingItem, setRejectingItem] = useState<{ id: string; name: string } | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
 
   const closeAllPanels = () => {
     setProposalOpen(false);
     setTimelineOpen(false);
     setObjectionOpen(false);
     setSimulatorOpen(false);
-    setCopilotOpen(false);
-    setTwinOpen(false);
+    setBuyerIntelOpen(false);
   };
 
   const demoSteps: DemoStep[] = useMemo(
@@ -109,10 +119,10 @@ export function CompanionApp() {
       },
       {
         title: "Read the room",
-        script: `"The Sales Twin and Copilot read the session itself — pace, budget posture, hesitation — all from real signals."`,
+        script: `"Buyer Intelligence reads the session itself — pace, budget posture, hesitation — plus this buyer's evidence-backed intent and readiness across every session."`,
         run: () => {
           closeAllPanels();
-          setTwinOpen(true);
+          setBuyerIntelOpen(true);
         },
       },
       {
@@ -136,9 +146,29 @@ export function CompanionApp() {
     [pack, session.answers, activeSection],
   );
 
+  // Buyer Intelligence input, not a second scoring system: a linked buyer's
+  // stated priorities bias the real recommendation engine's rule weights —
+  // see src/core/buyerIntelligence/priorityWeights.ts. No linked profile
+  // (or no priorities set yet) leaves scoring exactly as it was.
+  const { buyerProfile } = useBuyerProfile(session.buyerProfileId);
+  const priorityWeights = useMemo(
+    () => toPriorityWeights(buyerProfile?.priorities ?? null),
+    [buyerProfile?.priorities],
+  );
+  // Buyer Intelligence input: an actively-rejected item never resurfaces as
+  // a recommendation for this buyer (an overridden rejection stops excluding
+  // it). Same additive-options pattern as priorityWeights.
+  const { rejectedItems } = useBuyerRejectedItems(session.buyerProfileId);
+  const excludeItemIds = useMemo(
+    () =>
+      rejectedItems
+        .filter((r) => r.packId === pack.id && !r.overriddenAt)
+        .map((r) => r.itemId),
+    [rejectedItems, pack.id],
+  );
   const scored = useMemo(
-    () => scoreInventory(pack, session.answers),
-    [pack, session.answers],
+    () => scoreInventory(pack, session.answers, { priorityWeights, excludeItemIds }),
+    [pack, session.answers, priorityWeights, excludeItemIds],
   );
   const copilotSignals = useMemo(
     () => detectSignals(pack, session.answers, session.timeline, session.bookmarks, scored),
@@ -168,18 +198,11 @@ export function CompanionApp() {
           </div>
           <div className="flex items-center gap-1.5">
             <button
-              onClick={() => setTwinOpen(true)}
-              aria-label="Sales twin"
-              className="grid h-8 w-8 place-items-center rounded-full border border-white/10 bg-white/5 text-ink-muted transition hover:bg-white/10"
-            >
-              <Fingerprint className="h-3.5 w-3.5" />
-            </button>
-            <button
-              onClick={() => setCopilotOpen(true)}
-              aria-label="Sales copilot"
+              onClick={() => setBuyerIntelOpen(true)}
+              aria-label="Buyer intelligence"
               className="relative grid h-8 w-8 place-items-center rounded-full border border-white/10 bg-white/5 text-ink-muted transition hover:bg-white/10"
             >
-              <Compass className="h-3.5 w-3.5" />
+              <BrainCircuit className="h-3.5 w-3.5" />
               {copilotSignals.length > 0 && (
                 <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-brand px-1 text-[9px] font-semibold text-white">
                   {copilotSignals.length}
@@ -340,7 +363,12 @@ export function CompanionApp() {
           <ActionButton
             icon={FileText}
             label="Proposal"
-            onClick={() => setProposalOpen(true)}
+            onClick={() => {
+              setProposalOpen(true);
+              if (session.buyerProfileId) {
+                void logBuyerActivity(session.buyerProfileId, { kind: "proposal_generated", packId: pack.id });
+              }
+            }}
           />
           <ActionButton
             icon={RotateCcw}
@@ -361,7 +389,16 @@ export function CompanionApp() {
               return (
                 <button
                   key={s.item.id}
-                  onClick={() => session.focusItem(s.item.id)}
+                  onClick={() => {
+                    session.focusItem(s.item.id);
+                    if (session.buyerProfileId) {
+                      void logBuyerActivity(session.buyerProfileId, {
+                        kind: "property_viewed",
+                        packId: pack.id,
+                        itemId: s.item.id,
+                      });
+                    }
+                  }}
                   className="group flex items-center gap-1.5 rounded-full bg-white/5 px-3 py-1.5 text-xs text-ink-muted transition hover:bg-white/10"
                 >
                   <span
@@ -369,7 +406,15 @@ export function CompanionApp() {
                     tabIndex={0}
                     onClick={(e) => {
                       e.stopPropagation();
+                      const adding = !marked;
                       session.toggleBookmark(s.item.id);
+                      if (adding && session.buyerProfileId) {
+                        void logBuyerActivity(session.buyerProfileId, {
+                          kind: "item_saved",
+                          packId: pack.id,
+                          itemId: s.item.id,
+                        });
+                      }
                     }}
                   >
                     {marked ? (
@@ -380,10 +425,59 @@ export function CompanionApp() {
                   </span>
                   {s.item.name}
                   <span className="text-ink-faint">{s.score}</span>
+                  {session.buyerProfileId && (
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      title="Not a fit for this buyer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setRejectingItem({ id: s.item.id, name: s.item.name });
+                        setRejectReason("");
+                      }}
+                    >
+                      <Ban className="h-3.5 w-3.5 opacity-30 hover:text-red-400 hover:opacity-100" />
+                    </span>
+                  )}
                 </button>
               );
             })}
           </div>
+          {rejectingItem && (
+            <div className="mt-2 flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 p-2">
+              <span className="shrink-0 text-[11px] text-ink-muted">
+                Reject &ldquo;{rejectingItem.name}&rdquo;:
+              </span>
+              <input
+                autoFocus
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                placeholder="Reason…"
+                className="min-w-0 flex-1 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs outline-none placeholder:text-ink-faint focus:border-brand/50"
+              />
+              <button
+                disabled={!rejectReason.trim()}
+                onClick={async () => {
+                  if (!session.buyerProfileId || !rejectingItem) return;
+                  await rejectBuyerItem(session.buyerProfileId, {
+                    packId: pack.id,
+                    itemId: rejectingItem.id,
+                    reason: rejectReason.trim(),
+                  });
+                  setRejectingItem(null);
+                }}
+                className="shrink-0 rounded-lg bg-red-500/20 px-2 py-1 text-[11px] font-medium text-red-300 transition hover:bg-red-500/30 disabled:opacity-40"
+              >
+                Reject
+              </button>
+              <button
+                onClick={() => setRejectingItem(null)}
+                className="shrink-0 rounded-lg px-2 py-1 text-[11px] text-ink-faint transition hover:text-ink"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -430,19 +524,12 @@ export function CompanionApp() {
         answers={session.answers}
       />
 
-      <SalesCopilot
-        open={copilotOpen}
-        onClose={() => setCopilotOpen(false)}
+      <BuyerIntelligencePanel
+        open={buyerIntelOpen}
+        onClose={() => setBuyerIntelOpen(false)}
         pack={pack}
         scored={scored}
         onOpenObjectionHandler={() => setObjectionOpen(true)}
-      />
-
-      <SalesTwin
-        open={twinOpen}
-        onClose={() => setTwinOpen(false)}
-        pack={pack}
-        scored={scored}
       />
 
       <DemoScript
@@ -475,12 +562,35 @@ function ActionButton({
 }
 
 function CustomerBlock() {
-  const { customer, updateCustomer } = useSession();
+  const { customer, updateCustomer, buyerProfileId } = useSession();
   const [open, setOpen] = useState(false);
+
+  // Buyer Intelligence identity: once there's a name plus an email or phone,
+  // resolve (match-or-create) a BuyerProfile and link this session to it —
+  // debounced so it fires once typing settles, not on every keystroke.
+  // Only runs while unlinked; re-typing an already-linked buyer's details
+  // doesn't re-match (matchOrCreateBuyerProfile is idempotent regardless,
+  // but there's no reason to call it again once resolved).
+  const debounceRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (buyerProfileId) return;
+    const name = customer.name.trim();
+    const hasContact = customer.email.trim() || customer.phone.trim();
+    if (!name || !hasContact) return;
+    if (debounceRef.current) window.clearTimeout(debounceRef.current);
+    debounceRef.current = window.setTimeout(() => {
+      void linkBuyerProfile({ name, email: customer.email, phone: customer.phone });
+    }, 800);
+    return () => {
+      if (debounceRef.current) window.clearTimeout(debounceRef.current);
+    };
+  }, [customer.name, customer.email, customer.phone, buyerProfileId]);
+
   return (
     <div className="border-b border-white/5 px-5 py-3">
       <button
         onClick={() => setOpen((o) => !o)}
+        aria-label="Customer details"
         className="flex w-full items-center justify-between"
       >
         <div className="flex items-center gap-2">
@@ -488,6 +598,14 @@ function CustomerBlock() {
           <span className="text-sm font-medium">
             {customer.name || "Add customer"}
           </span>
+          {buyerProfileId && (
+            <span
+              className="rounded-full bg-brand/15 px-2 py-0.5 text-[10px] font-medium text-brand"
+              title="This session is linked to a persistent Buyer Intelligence profile"
+            >
+              Linked
+            </span>
+          )}
         </div>
         <ChevronRight
           className={cx(
@@ -520,8 +638,156 @@ function CustomerBlock() {
             rows={2}
             className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none placeholder:text-ink-faint focus:border-brand/50"
           />
+          {buyerProfileId && <UnderstoodCustomerPanel buyerProfileId={buyerProfileId} />}
           <BuyingCommittee />
         </div>
+      )}
+    </div>
+  );
+}
+
+const EXTRACTION_FIELD_LABELS: { key: keyof BuyerExtractionFields; label: string }[] = [
+  { key: "familySize", label: "Family size" },
+  { key: "propertyType", label: "Property type" },
+  { key: "bedrooms", label: "Bedrooms" },
+  { key: "bathrooms", label: "Bathrooms" },
+  { key: "budget", label: "Budget" },
+  { key: "preferredLocation", label: "Location" },
+  { key: "priorityLabel", label: "Priority" },
+  { key: "secondaryLabel", label: "Secondary" },
+];
+
+/**
+ * "Describe the customer" for Buyer Intelligence (spec §10) — distinct from
+ * AiSearchBox above, which auto-fills the CURRENT pack's live-scoring
+ * Answers. This one proposes persistent BuyerProfile fields and always
+ * requires an explicit CONFIRM/EDIT/REJECT — nothing is written just from
+ * generating a proposal.
+ */
+function UnderstoodCustomerPanel({ buyerProfileId }: { buyerProfileId: string }) {
+  const [text, setText] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [proposal, setProposal] = useState<{ extracted: BuyerExtractionFields; engine: string } | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [edited, setEdited] = useState<BuyerExtractionFields>({});
+  const [done, setDone] = useState<"confirmed" | "edited" | "rejected" | null>(null);
+
+  const run = async () => {
+    const q = text.trim();
+    if (!q || loading) return;
+    setLoading(true);
+    setDone(null);
+    const result = await extractBuyerText(q);
+    setLoading(false);
+    if (!result || Object.keys(result.extracted).length === 0) {
+      setProposal(null);
+      return;
+    }
+    setProposal(result);
+    setEdited(result.extracted);
+    setEditing(false);
+  };
+
+  const finish = async (status: "confirmed" | "edited" | "rejected") => {
+    if (!proposal) return;
+    await submitConversationNote(buyerProfileId, {
+      rawText: text,
+      extracted: proposal.extracted,
+      status,
+      confirmedFields: status === "rejected" ? undefined : status === "edited" ? edited : proposal.extracted,
+    });
+    setDone(status);
+    setProposal(null);
+    setText("");
+  };
+
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-3">
+      <Eyebrow>Understood customer</Eyebrow>
+      <textarea
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder='"Family of four, looking for a 3-bedroom, budget around 2M, wants schools nearby but also cares about investment potential."'
+        rows={2}
+        className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs outline-none placeholder:text-ink-faint focus:border-brand/50"
+      />
+      <button
+        onClick={() => void run()}
+        disabled={!text.trim() || loading}
+        className="mt-2 inline-flex items-center gap-1.5 rounded-xl bg-white/10 px-3 py-1.5 text-xs font-medium text-ink transition hover:bg-white/15 disabled:opacity-40"
+      >
+        {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wand2 className="h-3.5 w-3.5" />}
+        {loading ? "Reading…" : "Understand"}
+      </button>
+
+      {proposal && (
+        <div className="mt-3 rounded-xl border border-white/10 p-3">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-[10px] font-medium uppercase tracking-wide text-ink-faint">Understood</span>
+            <span className="text-[10px] text-ink-faint">
+              {proposal.engine === "claude+writer" ? "Authored by Claude" : "Deterministic writer"}
+            </span>
+          </div>
+          <div className="space-y-1.5">
+            {EXTRACTION_FIELD_LABELS.filter(({ key }) => proposal.extracted[key] !== undefined).map(({ key, label }) => (
+              <div key={key} className="flex items-center justify-between gap-2 text-xs">
+                <span className="text-ink-faint">{label}</span>
+                {editing ? (
+                  <input
+                    value={String(edited[key] ?? "")}
+                    onChange={(e) =>
+                      setEdited((prev) => ({
+                        ...prev,
+                        [key]: key === "familySize" || key === "bedrooms" || key === "bathrooms"
+                          ? Number(e.target.value) || undefined
+                          : e.target.value,
+                      }))
+                    }
+                    className="w-32 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-right text-xs outline-none"
+                  />
+                ) : (
+                  <span className="text-ink">{String(proposal.extracted[key])}</span>
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="mt-3 flex gap-1.5">
+            {editing ? (
+              <button
+                onClick={() => void finish("edited")}
+                className="flex-1 rounded-lg bg-brand px-2 py-1.5 text-xs font-semibold text-white transition hover:brightness-110"
+              >
+                Save & confirm
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={() => void finish("confirmed")}
+                  className="flex-1 rounded-lg bg-brand px-2 py-1.5 text-xs font-semibold text-white transition hover:brightness-110"
+                >
+                  Confirm
+                </button>
+                <button
+                  onClick={() => setEditing(true)}
+                  className="rounded-lg border border-white/10 px-2 py-1.5 text-xs text-ink-muted transition hover:bg-white/5"
+                >
+                  Edit
+                </button>
+              </>
+            )}
+            <button
+              onClick={() => void finish("rejected")}
+              className="rounded-lg border border-white/10 px-2 py-1.5 text-xs text-ink-muted transition hover:bg-white/5"
+            >
+              Reject
+            </button>
+          </div>
+        </div>
+      )}
+      {done && (
+        <p className="mt-2 text-[11px] text-ink-faint">
+          {done === "rejected" ? "Discarded — nothing was saved." : "Saved to this buyer's profile."}
+        </p>
       )}
     </div>
   );

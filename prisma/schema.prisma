@@ -31,6 +31,9 @@ enum UserRole {
   Owner
   Admin
   Manager
+  // Template Builder / Deal Room design role — can build and publish
+  // DealRoomTemplates but isn't granted the broader Manager permission set.
+  Designer
   Salesperson
   Viewer
 }
@@ -75,6 +78,78 @@ enum BrochureEventKind {
   LeadSubmitted
 }
 
+enum DisplayTemplate {
+  Minimal
+  NewDevelopment
+  Detailed
+  Lifestyle
+  Investment
+  LuxuryCinematic
+  Masterplan
+  Custom
+}
+
+enum DisplayProfileStatus {
+  Draft
+  Published
+  Archived
+}
+
+enum DealRoomTemplateStatus {
+  Draft
+  Published
+  Archived
+}
+
+enum DealRoomStatus {
+  Draft
+  Published
+  Archived
+}
+
+enum DealRoomTheme {
+  Light
+  Dark
+  Auto
+  Brand
+}
+
+enum DealRoomAccessMode {
+  PublicLink
+  Restricted
+}
+
+enum DealRoomEventKind {
+  View
+  Scan
+  Click
+  WidgetInteraction
+  Download
+  Share
+  ProposalAccepted
+  TaskCompleted
+  SignatureRequested
+  SignatureSigned
+}
+
+enum DealRoomTaskStatus {
+  Open
+  InProgress
+  Done
+}
+
+enum DealRoomApprovalStepStatus {
+  Pending
+  Approved
+  Rejected
+}
+
+enum DealRoomSignatureStatus {
+  Requested
+  Signed
+  Declined
+}
+
 model Tenant {
   id              String   @id @default(cuid())
   slug            String   @unique
@@ -93,11 +168,11 @@ model Tenant {
   // Platform-operator view (src/core/data/platformTenants.ts) — folded
   // into Tenant rather than a parallel table, so the admin console's
   // headline numbers and this row can never drift apart once wired.
-  plan     String @default("Starter")
-  seats    Int    @default(1)
+  plan     String  @default("Starter")
+  seats    Int     @default(1)
   mrr      Decimal @default(0) @db.Decimal(12, 2)
-  health   String @default("healthy")
-  vertical String @default("real-estate")
+  health   String  @default("healthy")
+  vertical String  @default("real-estate")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -111,28 +186,55 @@ model Tenant {
   brochureEvents  BrochureEvent[]
   brochureAssets  BrochureAsset[]
 
+  displayProfiles        DisplayProfile[]
+  displayProfileVersions DisplayProfileVersion[]
+  displays               Display[]
+  brandProfiles          BrandProfile[]
+  displayProfileAssets   DisplayProfileAsset[]
+
+  sharedExperiences      SharedExperience[]
+  sharedExperienceEvents SharedExperienceEvent[]
+
+  buyerProfiles           BuyerProfile[]
+  buyerRequirementChanges BuyerRequirementChange[]
+  buyerObjections         BuyerObjection[]
+  buyerRejectedItems      BuyerRejectedItem[]
+  buyerItemRelationships  BuyerItemRelationship[]
+  buyerConversationNotes  BuyerConversationNote[]
+  buyerActivityEvents     BuyerActivityEvent[]
+
+  dealRoomTemplates         DealRoomTemplate[]
+  dealRoomTemplateVersions  DealRoomTemplateVersion[]
+  dealRooms                 DealRoom[]
+  dealRoomAssets            DealRoomAsset[]
+  dealRoomEvents            DealRoomEvent[]
+  dealRoomTasks             DealRoomTask[]
+  dealRoomMessages          DealRoomMessage[]
+  dealRoomApprovalSteps     DealRoomApprovalStep[]
+  dealRoomSignatureRequests DealRoomSignatureRequest[]
+
   /// TODO(pass-2): src/core/data/knowledgeBase.ts
-  knowledgeEntries KnowledgeEntry[]
+  knowledgeEntries    KnowledgeEntry[]
   /// TODO(pass-2): src/core/data/tenantAuditLog.ts
-  tenantAuditEntries TenantAuditEntry[]
+  tenantAuditEntries  TenantAuditEntry[]
   /// TODO(pass-2): src/core/data/notifications.ts
-  notifications Notification[]
+  notifications       Notification[]
   /// TODO(pass-2): src/core/data/featureFlags.ts
-  featureFlags FeatureFlag[]
+  featureFlags        FeatureFlag[]
   /// TODO(pass-2): src/core/data/ssoSettings.ts
-  ssoSettings SsoSettings?
+  ssoSettings         SsoSettings?
   /// TODO(pass-2): src/core/data/aiSettingsShared.ts
-  aiSettings AiSettings?
+  aiSettings          AiSettings?
   /// TODO(pass-2): src/core/data/integrations.ts
   integrationSettings IntegrationSettings?
   /// TODO(pass-2): src/core/data/billingSettings.ts
-  billingSettings BillingSettings?
+  billingSettings     BillingSettings?
   /// TODO(pass-2): src/core/data/subscription.ts
-  subscription Subscription?
+  subscription        Subscription?
   /// TODO(pass-2): src/core/data/customPacks.ts
-  customPacks CustomPack[]
+  customPacks         CustomPack[]
   /// TODO(pass-2): src/core/store/packs.ts
-  packDrafts PackDraft[]
+  packDrafts          PackDraft[]
 
   @@index([slug])
 }
@@ -154,8 +256,12 @@ model Branch {
   companions   Int      @default(0)
   createdAt    DateTime @default(now())
 
-  users User[]
-  leads Lead[]
+  users          User[]
+  leads          Lead[]
+  // Named to avoid colliding with the `displays Int` counter field above,
+  // which is a separate, pre-existing manual tally, not backed by real rows.
+  displayDevices Display[]
+  buyerProfiles  BuyerProfile[]
 
   @@unique([tenantId, code])
   @@index([tenantId])
@@ -180,10 +286,26 @@ model User {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
-  sessions      Session[]
-  assignedLeads Lead[] @relation("LeadAssignee")
-  createdLeads  Lead[] @relation("LeadCreator")
+  sessions         Session[]
+  assignedLeads    Lead[]     @relation("LeadAssignee")
+  createdLeads     Lead[]     @relation("LeadCreator")
   createdBrochures Brochure[]
+
+  createdDisplayProfiles         DisplayProfile[]
+  authoredDisplayProfileVersions DisplayProfileVersion[]
+  createdDisplays                Display[]
+  createdBrandProfiles           BrandProfile[]
+  createdSharedExperiences       SharedExperience[]
+
+  assignedBuyerProfiles       BuyerProfile[]
+  createdBuyerConversationNotes BuyerConversationNote[]
+
+  createdDealRoomTemplates DealRoomTemplate[]
+  authoredDealRoomVersions DealRoomTemplateVersion[]
+  createdDealRooms         DealRoom[]
+  assignedDealRoomTasks    DealRoomTask[]
+  dealRoomMessages         DealRoomMessage[]
+  dealRoomApprovalSteps    DealRoomApprovalStep[]
 
   @@unique([tenantId, email])
   @@index([tenantId, status])
@@ -258,6 +380,18 @@ model Lead {
   // relation) to the brochure microsite this lead was captured from, if any.
   brochureId String?
 
+  // Plain string ref to the Display Studio kiosk this lead was captured
+  // from, if any — same convention as brochureId.
+  displayId String?
+
+  // Real relation (not a plain string ref like brochureId/displayId above)
+  // to the Buyer Intelligence identity this lead resolved/linked to, when
+  // contact info matched — see BuyerProfile below.
+  buyerProfileId String?
+  buyerProfile   BuyerProfile? @relation(fields: [buyerProfileId], references: [id], onDelete: SetNull)
+
+  dealRooms DealRoom[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -265,6 +399,200 @@ model Lead {
   @@index([tenantId, status])
   @@index([tenantId, assignedToId])
   @@index([tenantId, followUpAt])
+  @@index([tenantId, buyerProfileId])
+}
+
+// ---------------------------------------------------------------------
+// Buyer Intelligence — "the SalesIQ Buyer Brain." A continuously-evolving,
+// private per-buyer profile that persists across sessions, in contrast to
+// Lead (a flat, disconnected fact table today — every capture creates a new
+// row with no linkage back to a prior one) and to the live Companion
+// session (src/core/store/session.ts, pure in-memory, gone on reset).
+// Matched by normalized email/phone at capture time (see
+// src/lib/buyerProfiles/match.ts) so the same person across multiple
+// sessions/leads resolves to one profile instead of duplicating.
+//
+// PRIVACY: everything in this section is private salesperson/management
+// intelligence. It must never be reachable from the public Brochure
+// resolver, the Shared Experience resolver/DTO, or any field DisplayStage.tsx
+// destructures from useSession() — see BI-PR6's verification pass.
+// ---------------------------------------------------------------------
+model BuyerProfile {
+  id       String  @id @default(cuid())
+  tenantId String
+  tenant   Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branchId String?
+  branch   Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  name              String
+  email             String  @default("")
+  phone             String  @default("")
+  // Matching keys — lowercased/trimmed email, digits-only phone. Nullable
+  // since a profile can exist with only one of the two contact channels.
+  emailNormalized   String?
+  phoneNormalized   String?
+  preferredLanguage String?
+  market            String?
+  leadSource        String  @default("")
+
+  assignedToId String?
+  assignedTo   User?   @relation(fields: [assignedToId], references: [id], onDelete: SetNull)
+
+  // Every Json field below stores BuyerField<T>-wrapped values (see
+  // src/core/buyerIntelligence/types.ts) — { value, provenance:
+  // "explicit"|"inferred"|"observed", confidence?, evidence?, updatedAt }
+  // — never a bare value, so provenance travels with the data itself.
+  requirements Json?
+  financial    Json?
+  purposes     String[] // endUser | investment | secondHome | holidayHome | rental | business | other — multiple allowed
+  motivations  Json?    // [{ id, label, tier: "primary"|"secondary", evidence: string[] }]
+  priorities   Json?    // [{ requirement, importance: "must"|"important"|"preferred"|"nice"|"not_important" }]
+  preferences  Json?    // { property, location, financial, lifestyle, investment } — project-specific attribute keys
+
+  intentLevel     String?   // low | medium | high | very_high
+  intentReasons   Json?     // string[] — the explainability requirement: never a bare score
+  intentUpdatedAt DateTime?
+
+  purchaseReadiness           String?   // Exploring|Researching|Shortlisting|Evaluating|Negotiating|DecisionReady|ReservationReady|Purchased
+  purchaseReadinessConfidence Int?      // 0-100
+  purchaseReadinessSignals    Json?     // string[]
+
+  lastInteractionAt DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  leads              Lead[]
+  requirementChanges BuyerRequirementChange[]
+  objections         BuyerObjection[]
+  rejectedItems      BuyerRejectedItem[]
+  itemRelationships  BuyerItemRelationship[]
+  conversationNotes  BuyerConversationNote[]
+  activityEvents     BuyerActivityEvent[]
+
+  @@index([tenantId])
+  @@index([tenantId, emailNormalized])
+  @@index([tenantId, phoneNormalized])
+  @@index([tenantId, branchId])
+  @@index([tenantId, assignedToId])
+}
+
+// Requirement-change history — never silently overwritten (spec §12).
+model BuyerRequirementChange {
+  id             String       @id @default(cuid())
+  buyerProfileId String
+  buyerProfile   BuyerProfile @relation(fields: [buyerProfileId], references: [id], onDelete: Cascade)
+  tenantId       String
+  tenant         Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  field         String // e.g. "budget", "bedrooms"
+  previousValue Json?
+  newValue      Json?
+  source        String // "sales-conversation" | "manual" | "questionnaire"
+
+  createdAt DateTime @default(now())
+
+  @@index([buyerProfileId, createdAt(sort: Desc)])
+}
+
+model BuyerObjection {
+  id             String       @id @default(cuid())
+  buyerProfileId String
+  buyerProfile   BuyerProfile @relation(fields: [buyerProfileId], references: [id], onDelete: Cascade)
+  tenantId       String
+  tenant         Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  kind       String // price | payment-plan | location | size | completion-date | financing | view | floor | amenities | investment-risk | legal | competitor | other
+  confidence String // high | medium | low
+  evidence   Json   // string[]
+  resolvedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([buyerProfileId, createdAt(sort: Desc)])
+}
+
+model BuyerRejectedItem {
+  id             String       @id @default(cuid())
+  buyerProfileId String
+  buyerProfile   BuyerProfile @relation(fields: [buyerProfileId], references: [id], onDelete: Cascade)
+  tenantId       String
+  tenant         Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  packId String
+  itemId String
+  reason String
+  source String // "sales-conversation" | "manual"
+  // Salesperson override — a rejected item stays excluded from that buyer's
+  // recommendations until this is set (spec §14).
+  overriddenAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@unique([buyerProfileId, packId, itemId])
+}
+
+// Append-only event log, not one row per (buyer,item) — the same item can
+// pass through viewed -> shortlisted -> proposal_created over time and each
+// transition is its own timestamped row (spec §15: "each state should have
+// timestamps and relevant context").
+model BuyerItemRelationship {
+  id             String       @id @default(cuid())
+  buyerProfileId String
+  buyerProfile   BuyerProfile @relation(fields: [buyerProfileId], references: [id], onDelete: Cascade)
+  tenantId       String
+  tenant         Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  packId  String
+  itemId  String
+  state   String // viewed|interested|saved|compared|shortlisted|recommended|rejected|proposal_created|proposal_viewed|negotiating|reserved|purchased|lost
+  context Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([buyerProfileId, packId, itemId])
+  @@index([buyerProfileId, createdAt(sort: Desc)])
+}
+
+// Natural-language "describe the customer" capture — always goes through
+// CONFIRM/EDIT/REJECT before anything is trusted as fact (spec §10).
+model BuyerConversationNote {
+  id             String       @id @default(cuid())
+  buyerProfileId String
+  buyerProfile   BuyerProfile @relation(fields: [buyerProfileId], references: [id], onDelete: Cascade)
+  tenantId       String
+  tenant         Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  rawText         String
+  extracted       Json   // structured candidate fields as returned by the extraction route
+  status          String // pending | confirmed | edited | rejected
+  confirmedFields Json?  // final fields actually written, after any edit
+
+  createdById String?
+  createdBy   User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+
+  @@index([buyerProfileId, createdAt(sort: Desc)])
+}
+
+// Behavioral tracking — begins once a live session is linked to a
+// BuyerProfile (spec §5). Anonymous pre-identification activity is
+// deliberately never retroactively attributed.
+model BuyerActivityEvent {
+  id             String       @id @default(cuid())
+  buyerProfileId String
+  buyerProfile   BuyerProfile @relation(fields: [buyerProfileId], references: [id], onDelete: Cascade)
+  tenantId       String
+  tenant         Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  kind   String // property_viewed|repeat_view|floor_plan_opened|gallery_viewed|payment_plan_opened|comparison_made|proposal_opened|shared_experience_opened|return_visit|cta_click|appointment_requested|callback_requested|reservation_action|question_asked
+  packId String?
+  itemId String?
+  meta   Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([buyerProfileId, createdAt(sort: Desc)])
+  @@index([buyerProfileId, kind])
 }
 
 // A property listing's shareable microsite. Listings themselves have no DB
@@ -343,6 +671,494 @@ model BrochureEvent {
 }
 
 // ---------------------------------------------------------------------
+// Display Studio — configuration for the Customer Display (the in-person,
+// customer-facing screen), addressed the same way as Brochure/DealRoom
+// (packId + itemId, resolved live against the shipped pack — never a
+// stored copy). PR1 ships a pre-versioning shape (publish is a status
+// flip, same as Brochure before Deal Room's versioning pattern was built);
+// DisplayProfileVersion, BrandProfile, Display (the physical-kiosk
+// registry) and SharedExperience land in later PRs of the same initiative.
+// ---------------------------------------------------------------------
+
+model DisplayProfile {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Admin-facing label — a tenant may run several profiles per item.
+  name String
+
+  packId String
+  itemId String
+
+  template DisplayTemplate @default(Minimal)
+
+  // Reusable brand kit (see BrandProfile below), optional. Per-profile
+  // brandOverrides layers on top of it when set. Resolution order the
+  // renderer/editor apply: brandOverrides -> brandProfile -> pack branding.
+  brandProfileId String?
+  brandProfile   BrandProfile? @relation(fields: [brandProfileId], references: [id], onDelete: SetNull)
+
+  // Per-profile brand color overrides ({ brand, brandSoft } rgb triplets,
+  // same convention as Branding.brand) — layered on top of brandProfile (or
+  // the pack's own branding, when neither is set).
+  brandOverrides Json?
+
+  // Ordered widget composition: [{ id, type, enabled, order, config }] —
+  // identical shape to Brochure.sections.
+  sections Json
+
+  // Motion/idle config — stored from PR1 onward so later PRs (preset
+  // system, idle experience) are additive, not a schema change; inert
+  // defaults until then.
+  motion Json  @default("{\"preset\": \"Cinematic\"}")
+  idle   Json?
+
+  status      DisplayProfileStatus @default(Draft)
+  createdById String?
+  createdBy   User?                @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  publishedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  displaysAsIdle Display[]               @relation("IdleProfile")
+  displaysAsLive Display[]               @relation("LiveProfile")
+  assets         DisplayProfileAsset[]
+  versions       DisplayProfileVersion[]
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, packId, itemId])
+}
+
+// Immutable publish snapshot — DealRoomTemplateVersion's pattern, collapsed
+// to profile-level (a DisplayProfile already plays the "one addressable
+// unit" role DealRoomTemplate+DealRoom split into two). Publish and Revert
+// both create a new row here rather than mutating an old one, which is what
+// makes History/Revert honest instead of quietly overwriting the past. The
+// live DisplayProfile row above stays the editable *draft*; the Customer
+// Display and idle poll resolve against whichever version has isCurrent
+// true, so a published listing never silently reflows mid-negotiation when
+// someone keeps editing the draft afterward.
+model DisplayProfileVersion {
+  id        String         @id @default(cuid())
+  profileId String
+  profile   DisplayProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  tenantId  String
+  tenant    Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  version Int
+
+  sections      Json
+  motion        Json
+  idle          Json?
+  // Brand fully flattened at publish time ({ brand, brandSoft } rgb
+  // triplets) — immune to a later edit or deletion of the attached
+  // BrandProfile, unlike the live draft's brandProfileId/brandOverrides
+  // resolution chain which is intentionally always-live.
+  brandSnapshot Json?
+
+  // At most one true per profileId, toggled inside a transaction on
+  // publish/revert — never two, never zero once a profile has published at
+  // least once.
+  isCurrent Boolean @default(false)
+
+  authorId     String?
+  author       User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  changeReason String   @default("")
+  createdAt    DateTime @default(now())
+
+  @@unique([profileId, version])
+  @@index([profileId, isCurrent])
+}
+
+// Reusable brand kit, shareable across many DisplayProfiles — build once
+// ("Green Hills Luxury"), attach to many. A profile's own brandOverrides
+// still layers on top for one-off tweaks without forking the whole kit.
+model BrandProfile {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  name        String
+  // rgb triplet strings, e.g. "16 185 129" — same convention as
+  // Branding.brand/brandSoft. Optional so a partial kit (just a logo, say)
+  // is valid; the renderer falls back to pack branding for anything unset.
+  brand       String?
+  brandSoft   String?
+  logoGlyph   String?
+  fontHeading String?
+  fontBody    String?
+
+  createdById String?
+  createdBy   User?    @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  profiles DisplayProfile[]
+
+  @@index([tenantId])
+}
+
+// Document Center attachment (floor plans, masterplans, spec sheets) for a
+// Display Studio profile — same Postgres-blob tradeoff as BrochureAsset (no
+// object storage configured for this app yet).
+model DisplayProfileAsset {
+  id        String         @id @default(cuid())
+  profileId String
+  profile   DisplayProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  tenantId  String
+  tenant    Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  name      String
+  mimeType  String
+  sizeBytes Int
+  data      Bytes
+  createdAt DateTime @default(now())
+
+  @@index([profileId])
+}
+
+enum DisplayStatus {
+  Pending
+  Active
+  Archived
+}
+
+// A physical kiosk/browser's persistent identity — independent of the
+// ephemeral MQTT room code src/core/sync minted per page load for the live
+// companion<->display session sync. An admin registers a Display here (gets
+// a one-time pairingCode + QR to /display?pair=CODE); the kiosk exchanges
+// that code for a deviceToken once, persisted client-side, and sends it on
+// every config poll from then on. The pairingCode itself is the credential
+// — same trust model as a Brochure/DealRoom slug.
+model Display {
+  id       String  @id @default(cuid())
+  tenantId String
+  tenant   Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branchId String?
+  branch   Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  name        String
+  pairingCode String  @unique
+  deviceToken String? @unique
+
+  idleProfileId String?
+  idleProfile   DisplayProfile? @relation("IdleProfile", fields: [idleProfileId], references: [id], onDelete: SetNull)
+  // Optional pin to a specific profile regardless of what the companion
+  // focuses live — e.g. a single-listing showroom screen. Not consumed by
+  // any route yet (PR2 only wires idleProfile); reserved so later PRs don't
+  // need another migration for it.
+  liveProfileId String?
+  liveProfile   DisplayProfile? @relation("LiveProfile", fields: [liveProfileId], references: [id], onDelete: SetNull)
+
+  status          DisplayStatus @default(Pending)
+  lastSeenAt      DateTime?
+  lastSeenVersion Int?
+  userAgent       String        @default("")
+
+  createdById String?
+  createdBy   User?    @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+}
+
+enum SharedExperienceEventKind {
+  View
+  ItemClick
+  ProposalView
+}
+
+// A snapshot of a live Companion session — not a Brochure reuse, since it
+// captures multiple viewed/bookmarked items plus a proposal in one shareable
+// link, which a single-item Brochure row can't represent. Created from an
+// authenticated Companion session with no capability gate (same ungated
+// pattern as the rest of the live-session experience today); resolved
+// publicly by `code` the same trust model as a Brochure slug. Snapshotted at
+// share time — itemIds/proposalText are frozen, never re-derived, so the
+// customer's link doesn't silently change if the salesperson keeps working
+// the same session afterward. Only the customer's first name is carried,
+// never scoring/probability — see the Buyer Intelligence privacy boundary.
+model SharedExperience {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  code String @unique
+
+  packId         String
+  itemIds        Json
+  focusedItemId  String?
+  proposalText   String?
+  proposalEngine String?
+  customerName   String?
+
+  createdById String?
+  createdBy   User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime?
+
+  events SharedExperienceEvent[]
+
+  @@index([tenantId])
+  @@index([tenantId, createdAt(sort: Desc)])
+}
+
+model SharedExperienceEvent {
+  id                 String                    @id @default(cuid())
+  sharedExperienceId String
+  sharedExperience   SharedExperience          @relation(fields: [sharedExperienceId], references: [id], onDelete: Cascade)
+  tenantId           String
+  tenant             Tenant                    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  kind               SharedExperienceEventKind
+  meta               Json?
+  createdAt          DateTime                  @default(now())
+
+  @@index([sharedExperienceId, createdAt(sort: Desc)])
+  @@index([sharedExperienceId, kind])
+}
+
+// ---------------------------------------------------------------------
+// Deal Room & Template Engine — generalizes the Brochure module above into
+// a reusable, versioned, industry-agnostic template system. A
+// DealRoomTemplate is edited/versioned/published independently of any
+// specific deal; a DealRoom is an instance created from a template for a
+// real customer/lead, frozen to the template version it was built from so
+// a live negotiation never silently reflows when the master template is
+// edited later. Nothing here is industry-specific in code — "category" and
+// "industry" are free text, and an industry's starter template is just a
+// row with a chosen widget composition, same as core/industries/*.ts packs
+// are config, not code, for the product's other engine.
+// ---------------------------------------------------------------------
+
+model DealRoomTemplate {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  name     String
+  category String // e.g. "Proposal", "Renewal", "Onboarding" — user-defined, unlimited
+  industry String // e.g. "Insurance", "Real Estate" — user-defined, unlimited
+
+  status DealRoomTemplateStatus @default(Draft)
+
+  createdById String?
+  createdBy   User?    @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  versions  DealRoomTemplateVersion[]
+  dealRooms DealRoom[]
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+}
+
+// Immutable snapshot. Publishing or rolling back always creates a new row
+// here rather than mutating an old one — that's what makes Compare/Rollback
+// honest instead of just overwriting history.
+model DealRoomTemplateVersion {
+  id         String           @id @default(cuid())
+  templateId String
+  template   DealRoomTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  tenantId   String
+  tenant     Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  version  Int
+  // Ordered widget composition — same shape as Brochure.sections:
+  // [{ id, type, enabled, order, config }].
+  sections Json
+  theme    Json
+
+  // At most one version per template has isCurrent = true — the version a
+  // freshly-created DealRoom is instantiated from. Toggled in a transaction
+  // (unset old, set new) rather than modeled as a circular FK pointer.
+  isCurrent Boolean @default(false)
+
+  authorId     String?
+  author       User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  changeReason String   @default("")
+  createdAt    DateTime @default(now())
+
+  dealRooms DealRoom[]
+
+  @@unique([templateId, version])
+  @@index([templateId, isCurrent])
+}
+
+// The direct generalization of Brochure: a real, shareable instance
+// created from a template for an actual deal. Like Brochure, any inventory
+// item it references (packId/itemId) is a plain string pair resolved live
+// against the shipped pack config, not a stored copy.
+model DealRoom {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  templateId        String
+  template          DealRoomTemplate        @relation(fields: [templateId], references: [id], onDelete: Restrict)
+  templateVersionId String
+  templateVersion   DealRoomTemplateVersion @relation(fields: [templateVersionId], references: [id], onDelete: Restrict)
+
+  // The room's own URL segment (/d/[slug]) — same "the link IS the
+  // permanent short URL" convention as Brochure.slug.
+  slug       String             @unique
+  accessMode DealRoomAccessMode @default(PublicLink)
+  // Set only when accessMode = Restricted — a capability-URL secret sent to
+  // the specific recipient, same trust model as the unguessable slug itself,
+  // not a login credential, so it isn't hashed.
+  accessCode String?
+
+  packId String?
+  itemId String?
+  leadId String?
+  lead   Lead?   @relation(fields: [leadId], references: [id], onDelete: SetNull)
+
+  // Per-instance widget config overrides layered on top of the frozen
+  // template version's sections (e.g. this room's own Financing Calculator
+  // inputs) — same overlay idea as core/store/packs.ts's draft-over-shipped
+  // pattern, just per-room instead of per-tenant.
+  sectionOverrides Json?
+  theme            DealRoomTheme?
+
+  status      DealRoomStatus @default(Draft)
+  createdById String?
+  createdBy   User?          @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  publishedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  assets            DealRoomAsset[]
+  events            DealRoomEvent[]
+  tasks             DealRoomTask[]
+  messages          DealRoomMessage[]
+  approvalSteps     DealRoomApprovalStep[]
+  signatureRequests DealRoomSignatureRequest[]
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([templateId])
+}
+
+// Document Center attachment — same Postgres-blob storage tradeoff as
+// BrochureAsset (no object storage configured; fine at modest volume).
+model DealRoomAsset {
+  id         String   @id @default(cuid())
+  dealRoomId String
+  dealRoom   DealRoom @relation(fields: [dealRoomId], references: [id], onDelete: Cascade)
+  tenantId   String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  name      String
+  mimeType  String
+  sizeBytes Int
+  data      Bytes
+  createdAt DateTime @default(now())
+
+  @@index([dealRoomId])
+}
+
+// Real analytics events only — no fabricated counts.
+model DealRoomEvent {
+  id         String            @id @default(cuid())
+  dealRoomId String
+  dealRoom   DealRoom          @relation(fields: [dealRoomId], references: [id], onDelete: Cascade)
+  tenantId   String
+  tenant     Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  kind       DealRoomEventKind
+  meta       Json?
+  createdAt  DateTime          @default(now())
+
+  @@index([dealRoomId, createdAt(sort: Desc)])
+  @@index([dealRoomId, kind])
+}
+
+model DealRoomTask {
+  id         String   @id @default(cuid())
+  dealRoomId String
+  dealRoom   DealRoom @relation(fields: [dealRoomId], references: [id], onDelete: Cascade)
+  tenantId   String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  title        String
+  detail       String             @default("")
+  status       DealRoomTaskStatus @default(Open)
+  assignedToId String?
+  assignedTo   User?              @relation(fields: [assignedToId], references: [id], onDelete: SetNull)
+  dueAt        DateTime?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  @@index([dealRoomId])
+}
+
+// Persisted chat thread — real messages, real timestamps. Delivery is
+// polling-based (no realtime/push provider configured), not fabricated.
+model DealRoomMessage {
+  id         String   @id @default(cuid())
+  dealRoomId String
+  dealRoom   DealRoom @relation(fields: [dealRoomId], references: [id], onDelete: Cascade)
+  tenantId   String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  // Null when sent by the external customer through the public room (no
+  // login there); set when sent by a tenant user from the dashboard side.
+  authorId   String?
+  author     User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  authorName String
+  body       String
+  createdAt  DateTime @default(now())
+
+  @@index([dealRoomId, createdAt])
+}
+
+model DealRoomApprovalStep {
+  id         String   @id @default(cuid())
+  dealRoomId String
+  dealRoom   DealRoom @relation(fields: [dealRoomId], references: [id], onDelete: Cascade)
+  tenantId   String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  label      String
+  order      Int
+  status     DealRoomApprovalStepStatus @default(Pending)
+  approverId String?
+  approver   User?                      @relation(fields: [approverId], references: [id], onDelete: SetNull)
+  decidedAt  DateTime?
+  note       String                     @default("")
+
+  @@index([dealRoomId, order])
+}
+
+// A real click-to-sign audit record (typed name + timestamp + IP) — not a
+// legally-binding e-signature. No vendor (DocuSign/HelloSign/Dropbox Sign/
+// etc) is configured for this project; shown as "not connected" in the UI
+// rather than faked, same disclosure pattern as Integrations.tsx.
+model DealRoomSignatureRequest {
+  id         String   @id @default(cuid())
+  dealRoomId String
+  dealRoom   DealRoom @relation(fields: [dealRoomId], references: [id], onDelete: Cascade)
+  tenantId   String
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  signerName  String
+  signerEmail String
+  status      DealRoomSignatureStatus @default(Requested)
+
+  signedName String?
+  signedAt   DateTime?
+  signedIp   String?
+  createdAt  DateTime  @default(now())
+
+  @@index([dealRoomId])
+}
+
+// ---------------------------------------------------------------------
 // Placeholders — schema only, not wired to routes this phase
 // ---------------------------------------------------------------------
 
@@ -414,12 +1230,12 @@ model SsoSettings {
 
 /// TODO(pass-2): src/core/data/aiSettingsShared.ts
 model AiSettings {
-  tenantId          String @id
-  tenant            Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  tone              String @default("professional")
-  creativity        Float  @default(0.5)
+  tenantId          String  @id
+  tenant            Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tone              String  @default("professional")
+  creativity        Float   @default(0.5)
   knowledgeOnly     Boolean @default(false)
-  maxKnowledgeFacts Int    @default(5)
+  maxKnowledgeFacts Int     @default(5)
 }
 
 /// TODO(pass-2): src/core/data/integrations.ts
@@ -435,21 +1251,21 @@ model IntegrationSettings {
 
 /// TODO(pass-2): src/core/data/billingSettings.ts
 model BillingSettings {
-  tenantId    String  @id
-  tenant      Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  taxRatePct  Decimal @default(0) @db.Decimal(5, 2)
+  tenantId   String  @id
+  tenant     Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  taxRatePct Decimal @default(0) @db.Decimal(5, 2)
 }
 
 /// TODO(pass-2): src/core/data/subscription.ts
 model Subscription {
-  tenantId     String    @id
-  tenant       Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  plan         String    @default("Starter")
-  status       String    @default("active")
-  seats        Int       @default(1)
-  renewsAt     DateTime?
-  trialEndsAt  DateTime?
-  canceledAt   DateTime?
+  tenantId    String    @id
+  tenant      Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  plan        String    @default("Starter")
+  status      String    @default("active")
+  seats       Int       @default(1)
+  renewsAt    DateTime?
+  trialEndsAt DateTime?
+  canceledAt  DateTime?
 
   billingEntries BillingEntry[]
 }
@@ -486,28 +1302,28 @@ model CustomPack {
 
 /// TODO(pass-2): src/core/store/packs.ts — draft overrides for shipped packs
 model PackDraft {
-  id         String   @id @default(cuid())
-  tenantId   String
-  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  packId     String
-  sections   Json?
-  questions  Json?
-  inventory  Json?
-  ruleSpecs  Json?
-  branding   Json?
-  updatedAt  DateTime @updatedAt
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  packId    String
+  sections  Json?
+  questions Json?
+  inventory Json?
+  ruleSpecs Json?
+  branding  Json?
+  updatedAt DateTime @updatedAt
 
   @@unique([tenantId, packId])
 }
 
 /// TODO(pass-2): src/core/data/coupons.ts — platform-level, no tenantId
 model Coupon {
-  id           String    @id @default(cuid())
-  code         String    @unique
-  discountPct  Int
-  expiresAt    DateTime?
-  active       Boolean   @default(true)
-  createdAt    DateTime  @default(now())
+  id          String    @id @default(cuid())
+  code        String    @unique
+  discountPct Int
+  expiresAt   DateTime?
+  active      Boolean   @default(true)
+  createdAt   DateTime  @default(now())
 }
 
 /// TODO(pass-2): src/core/data/auditLog.ts — platform-level, no tenantId

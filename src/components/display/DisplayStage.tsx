@@ -5,6 +5,10 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Sparkles, MapPin, TrendingUp, Check, Star, Smartphone } from "lucide-react";
 import { useSession } from "@/core/store/session";
 import { useLivePack } from "@/core/store/packs";
+import { useResolvedDisplayProfile } from "@/core/store/displayProfiles";
+import { resolveMotionConfig } from "@/core/display/motionPresets";
+import { useDeviceIdleProfile } from "@/core/store/displayDevice";
+import { DisplayProfileRenderer } from "./DisplayProfileRenderer";
 import { scoreInventory, isVisible } from "@/core/engine/scoring";
 import { narrate, formatMoney } from "@/core/engine/explain";
 import { whyNotReasons } from "@/core/engine/whyNot";
@@ -30,7 +34,13 @@ function readIdleTimeoutMs(): number {
   return Number.isFinite(n) && n > 0 ? n : DEFAULT_IDLE_TIMEOUT_MS;
 }
 
-export function DisplayStage() {
+export function DisplayStage({
+  deviceId,
+  deviceToken,
+}: {
+  deviceId: string | null;
+  deviceToken: string | null;
+}) {
   const {
     packId,
     answers,
@@ -52,6 +62,18 @@ export function DisplayStage() {
   const activeQuestion = pack.questions.find((q) => q.id === activeQuestionId);
   const focusedItem = pack.inventory.find((i) => i.id === focusedItemId);
 
+  // Display Studio seam: when the salesperson focuses an item that has a
+  // Published display profile, the customer sees that configured cinematic
+  // presentation instead of the hardcoded ItemStage below. No profile for
+  // this exact (packId, itemId) -> unchanged existing behavior. This is the
+  // *only* thing Display Studio governs during a live, companion-driven
+  // session — everything else (question/recommendation/compare/proposal)
+  // keeps rendering exactly as it does today.
+  const displayProfile = useResolvedDisplayProfile(
+    view === "item" ? pack.id : null,
+    view === "item" ? (focusedItemId ?? null) : null,
+  );
+
   // Idle Mode: only arm the attract loop while nobody has started a session —
   // any answer or a view change away from "welcome" keeps it fully disabled.
   const { isIdle, wake } = useIdleGate({
@@ -60,12 +82,41 @@ export function DisplayStage() {
     resetKey: revision,
   });
 
+  // Display Studio seam #2: if this physical Display has been claimed (see
+  // DevicePairingPrompt) and assigned an idle profile, the attract loop
+  // shows that configured composition instead of the hardcoded IdleScreen
+  // carousel below. Unclaimed, or no idle profile assigned -> unchanged
+  // existing behavior. Resolved against whatever pack the idle profile
+  // targets, which may differ from the live session's current pack.
+  const idleProfile = useDeviceIdleProfile(deviceId, deviceToken);
+  const idlePack = useLivePack(idleProfile?.packId ?? packId);
+  const idleItem = idleProfile ? idlePack.inventory.find((i) => i.id === idleProfile.itemId) : undefined;
+
+  // Display Studio's own transition, in place of the hardcoded spring, for
+  // the two profile-driven wrappers below only — every other stage transition
+  // in this file is the unrelated Companion-driven experience and keeps `spring`.
+  const displayProfileTransition = displayProfile
+    ? (() => {
+        const cfg = resolveMotionConfig(displayProfile.motion);
+        return { duration: cfg.transition.durationMs / 1000, ease: cfg.transition.ease };
+      })()
+    : spring;
+  const idleProfileTransition = idleProfile
+    ? (() => {
+        const cfg = resolveMotionConfig(idleProfile.motion);
+        return { duration: cfg.transition.durationMs / 1000, ease: cfg.transition.ease };
+      })()
+    : spring;
+
   // The Interactive Lifestyle Map is the hero for browsing/recommendation views
-  // whenever the active pack carries lifestyle-map data (e.g. real estate).
+  // whenever the active pack carries lifestyle-map data (e.g. real estate) —
+  // except on an item a Display Studio profile has been explicitly published
+  // for, which always wins: it's a deliberate per-listing configuration, not
+  // a generic fallback.
   const mapView =
-    view === "welcome" || view === "recommendation" || view === "item";
+    view === "welcome" || view === "recommendation" || (view === "item" && !displayProfile);
   const mapTarget =
-    view === "item" && focusedItem?.lifestyle ? focusedItem : scored[0]?.item;
+    view === "item" && focusedItem?.lifestyle && !displayProfile ? focusedItem : scored[0]?.item;
 
   const showMapStage = mapView && !!mapTarget?.lifestyle;
 
@@ -147,7 +198,27 @@ export function DisplayStage() {
               />
             )}
 
-            {view === "item" && focusedItem && (
+            {view === "item" && focusedItem && displayProfile && (
+              <motion.div
+                key={`display-profile-${focusedItem.id}`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={displayProfileTransition}
+                className="absolute inset-0 overflow-y-auto"
+              >
+                <DisplayProfileRenderer
+                  profile={displayProfile}
+                  pack={pack}
+                  item={focusedItem}
+                  mode="presentation"
+                  deviceId={deviceId ?? undefined}
+                  deviceToken={deviceToken ?? undefined}
+                />
+              </motion.div>
+            )}
+
+            {view === "item" && focusedItem && !displayProfile && (
               <ItemStage
                 key={`item-${focusedItem.id}`}
                 item={focusedItem}
@@ -169,7 +240,31 @@ export function DisplayStage() {
     <>
       {stage}
       <AnimatePresence>
-        {isIdle && <IdleScreen pack={pack} onWake={wake} />}
+        {isIdle && idleProfile && idleItem ? (
+          <motion.div
+            key="idle-profile"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={idleProfileTransition}
+            onClick={wake}
+            role="button"
+            tabIndex={0}
+            aria-label="Tap to begin"
+            className="fixed inset-0 z-[80] cursor-pointer overflow-y-auto bg-zinc-950"
+          >
+            <DisplayProfileRenderer
+              profile={idleProfile}
+              pack={idlePack}
+              item={idleItem}
+              mode="idle"
+              deviceId={deviceId ?? undefined}
+              deviceToken={deviceToken ?? undefined}
+            />
+          </motion.div>
+        ) : isIdle ? (
+          <IdleScreen pack={pack} onWake={wake} />
+        ) : null}
       </AnimatePresence>
       {!showMapStage && (
         <ContinueQrModal open={qrOpen} onClose={() => setQrOpen(false)} />

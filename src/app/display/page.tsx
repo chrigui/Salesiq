@@ -1,17 +1,9 @@
-import { DisplayStage } from "@/components/display/DisplayStage";
-import { PairingOverlay } from "@/components/sync/Pairing";
-import { DisplayKiosk } from "@/components/display/DisplayKiosk";
+import { DisplayRoot } from "@/components/display/DisplayRoot";
 
 export const metadata = {
   title: "Customer Display · SalesIQ",
 };
 
 export default function DisplayPage() {
-  return (
-    <>
-      <DisplayStage />
-      <PairingOverlay />
-      <DisplayKiosk />
-    </>
-  );
+  return <DisplayRoot />;
 }

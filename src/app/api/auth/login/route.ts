@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { getDefaultTenant } from "@/lib/auth/tenant";
 import { establishSession } from "@/lib/auth/session";
 import { SESSION_COOKIE, SESSION_COOKIE_OPTIONS, MFA_COOKIE, MFA_COOKIE_OPTIONS, signMfaToken } from "@/lib/auth/jwt";
+import { isHardcodedDemoLogin, ensureHardcodedDemoAccount } from "@/lib/auth/demoLogin";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -25,6 +26,26 @@ export async function POST(request: Request) {
   }
 
   const email = parsed.data.email.trim().toLowerCase();
+
+  // A guaranteed-to-work login, checked first and independent of
+  // DEFAULT_TENANT_SLUG / whether this database has ever been seeded — see
+  // src/lib/auth/demoLogin.ts. Self-provisions its own tenant + user on
+  // first use, then signs straight in.
+  if (isHardcodedDemoLogin(email, parsed.data.password)) {
+    const { tenant, user } = await ensureHardcodedDemoAccount();
+    const { token, ...session } = await establishSession(
+      user.id,
+      tenant.id,
+      user.role,
+      user.branchId,
+      user.name,
+      user.email,
+    );
+    const res = NextResponse.json({ ok: true, needsMfa: false, session });
+    res.cookies.set(SESSION_COOKIE, token, SESSION_COOKIE_OPTIONS);
+    return res;
+  }
+
   const tenant = await getDefaultTenant();
   const user = await prisma.user.findUnique({
     where: { tenantId_email: { tenantId: tenant.id, email } },
