@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { PACKS_BY_ID } from "@/core/industries";
 import { toLeadDTO } from "@/lib/serializers/lead";
+import { matchOrCreateBuyerProfile } from "@/lib/buyerProfiles/match";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -52,6 +53,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ dev
     return NextResponse.json({ error: "unknown-item" }, { status: 404 });
   }
 
+  const buyerProfile = await matchOrCreateBuyerProfile({
+    tenantId: display.tenantId,
+    name,
+    email,
+    phone,
+    branchId: display.branchId,
+  });
+
   const lead = await prisma.lead.create({
     data: {
       tenantId: display.tenantId,
@@ -68,6 +77,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ dev
       score: 0,
       source: "display",
       displayId: display.id,
+      buyerProfileId: buyerProfile?.id ?? null,
     },
   });
 

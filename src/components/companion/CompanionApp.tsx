@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Sparkles,
   GitCompareArrows,
@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useSession, type Stakeholder, type TimelineEvent } from "@/core/store/session";
+import { linkBuyerProfile } from "@/core/store/buyerProfiles";
 import { useLivePack, useAllPacks, getEffectivePack } from "@/core/store/packs";
 import { scoreInventory, isVisible } from "@/core/engine/scoring";
 import { formatMoney } from "@/core/engine/explain";
@@ -475,8 +476,30 @@ function ActionButton({
 }
 
 function CustomerBlock() {
-  const { customer, updateCustomer } = useSession();
+  const { customer, updateCustomer, buyerProfileId } = useSession();
   const [open, setOpen] = useState(false);
+
+  // Buyer Intelligence identity: once there's a name plus an email or phone,
+  // resolve (match-or-create) a BuyerProfile and link this session to it —
+  // debounced so it fires once typing settles, not on every keystroke.
+  // Only runs while unlinked; re-typing an already-linked buyer's details
+  // doesn't re-match (matchOrCreateBuyerProfile is idempotent regardless,
+  // but there's no reason to call it again once resolved).
+  const debounceRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (buyerProfileId) return;
+    const name = customer.name.trim();
+    const hasContact = customer.email.trim() || customer.phone.trim();
+    if (!name || !hasContact) return;
+    if (debounceRef.current) window.clearTimeout(debounceRef.current);
+    debounceRef.current = window.setTimeout(() => {
+      void linkBuyerProfile({ name, email: customer.email, phone: customer.phone });
+    }, 800);
+    return () => {
+      if (debounceRef.current) window.clearTimeout(debounceRef.current);
+    };
+  }, [customer.name, customer.email, customer.phone, buyerProfileId]);
+
   return (
     <div className="border-b border-white/5 px-5 py-3">
       <button
@@ -488,6 +511,14 @@ function CustomerBlock() {
           <span className="text-sm font-medium">
             {customer.name || "Add customer"}
           </span>
+          {buyerProfileId && (
+            <span
+              className="rounded-full bg-brand/15 px-2 py-0.5 text-[10px] font-medium text-brand"
+              title="This session is linked to a persistent Buyer Intelligence profile"
+            >
+              Linked
+            </span>
+          )}
         </div>
         <ChevronRight
           className={cx(

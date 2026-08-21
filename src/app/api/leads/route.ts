@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { requireCapability, getSessionContext, AuthError } from "@/lib/auth/server";
 import { getDefaultTenant } from "@/lib/auth/tenant";
 import { toLeadDTO } from "@/lib/serializers/lead";
+import { matchOrCreateBuyerProfile } from "@/lib/buyerProfiles/match";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -56,6 +57,19 @@ export async function POST(request: Request) {
     const ctx = await getSessionContext();
     const tenant = ctx ? { id: ctx.tenantId } : await getDefaultTenant();
 
+    // Resolve/link the Buyer Intelligence identity server-side (authoritative
+    // and idempotent — matches the same profile the Companion may have
+    // already linked via /api/buyer-profiles/match, or creates one if this
+    // lead reached contact-info completeness first).
+    const buyerProfile = await matchOrCreateBuyerProfile({
+      tenantId: tenant.id,
+      name: parsed.data.name,
+      email: parsed.data.email,
+      phone: parsed.data.phone,
+      branchId: ctx?.branchId ?? null,
+      assignedToId: ctx?.userId ?? null,
+    });
+
     const lead = await prisma.lead.create({
       data: {
         ...parsed.data,
@@ -63,6 +77,7 @@ export async function POST(request: Request) {
         branchId: ctx?.branchId ?? null,
         createdById: ctx?.userId ?? null,
         source: ctx ? "dashboard" : "companion-anon",
+        buyerProfileId: buyerProfile?.id ?? null,
       },
     });
 

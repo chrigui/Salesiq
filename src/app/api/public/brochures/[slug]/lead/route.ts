@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { resolvePublicBrochure } from "@/lib/brochures/resolve";
 import { toLeadDTO } from "@/lib/serializers/lead";
+import { matchOrCreateBuyerProfile } from "@/lib/buyerProfiles/match";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -31,6 +32,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
     return NextResponse.json({ error: "invalid-request" }, { status: 400 });
   }
 
+  const buyerProfile = await matchOrCreateBuyerProfile({
+    tenantId: resolved.tenantId,
+    name: parsed.data.name,
+    email: parsed.data.email,
+    phone: parsed.data.phone,
+  });
+
   const lead = await prisma.lead.create({
     data: {
       ...parsed.data,
@@ -43,6 +51,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ slu
       score: 0,
       source: "brochure",
       brochureId: resolved.brochureId,
+      buyerProfileId: buyerProfile?.id ?? null,
     },
   });
 

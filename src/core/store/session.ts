@@ -90,6 +90,15 @@ export interface SessionState {
   focusedItemId: string | null;
   bookmarks: string[];
   customer: CustomerInfo;
+  /**
+   * The persistent Buyer Intelligence identity this session has resolved to,
+   * once the salesperson has entered enough contact info to match/create one
+   * (see src/core/store/buyerProfiles.ts's linkBuyerProfile helper, called
+   * from the Companion). Null until then — behavioral tracking and the
+   * priority-weighted recommendation boost are both gated on this being set,
+   * so anonymous browsing is never retroactively attributed to a buyer.
+   */
+  buyerProfileId: string | null;
   stakeholders: Stakeholder[];
   timeline: TimelineEvent[];
   /**
@@ -113,6 +122,7 @@ interface SessionActions {
   focusItem: (itemId: string | null) => void;
   toggleBookmark: (itemId: string) => void;
   updateCustomer: (patch: Partial<CustomerInfo>) => void;
+  linkBuyerProfile: (buyerProfileId: string | null) => void;
   addStakeholder: (stakeholder: Omit<Stakeholder, "id">) => void;
   updateStakeholder: (id: string, patch: Partial<Stakeholder>) => void;
   removeStakeholder: (id: string) => void;
@@ -157,6 +167,7 @@ function initialState(): SessionState {
     focusedItemId: null,
     bookmarks: [],
     customer: { name: "", phone: "", email: "", notes: "" },
+    buyerProfileId: null,
     stakeholders: [],
     timeline: [],
     proposalText: null,
@@ -175,6 +186,7 @@ function snapshot(s: SessionState & SessionActions): SessionState {
     focusedItemId: s.focusedItemId,
     bookmarks: s.bookmarks,
     customer: s.customer,
+    buyerProfileId: s.buyerProfileId,
     stakeholders: s.stakeholders,
     timeline: s.timeline,
     proposalText: s.proposalText,
@@ -270,6 +282,13 @@ export const useSession = create<SessionState & SessionActions>((set, get) => {
       publish();
     },
 
+    linkBuyerProfile: (buyerProfileId) => {
+      // Not logged to the timeline — an implementation detail of resolving
+      // identity, not a customer-facing interaction worth surfacing there.
+      set({ buyerProfileId });
+      publish();
+    },
+
     addStakeholder: (stakeholder) =>
       bump({
         stakeholders: [
@@ -345,6 +364,7 @@ export const useSession = create<SessionState & SessionActions>((set, get) => {
         view: "recommendation",
         focusedItemId: null,
         bookmarks: [],
+        buyerProfileId: null,
         customer: {
           name: "Sara Haddad",
           phone: "+357 99 123 456",
@@ -376,6 +396,7 @@ export const useSession = create<SessionState & SessionActions>((set, get) => {
         stakeholders: state.stakeholders ?? [],
         proposalText: state.proposalText ?? null,
         proposalEngine: state.proposalEngine ?? null,
+        buyerProfileId: state.buyerProfileId ?? null,
       }),
 
     _hydrate: () => {
@@ -387,6 +408,7 @@ export const useSession = create<SessionState & SessionActions>((set, get) => {
           stakeholders: env.state.stakeholders ?? [],
           proposalText: env.state.proposalText ?? null,
           proposalEngine: env.state.proposalEngine ?? null,
+          buyerProfileId: env.state.buyerProfileId ?? null,
         });
       }
     },

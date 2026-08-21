@@ -195,6 +195,14 @@ model Tenant {
   sharedExperiences      SharedExperience[]
   sharedExperienceEvents SharedExperienceEvent[]
 
+  buyerProfiles           BuyerProfile[]
+  buyerRequirementChanges BuyerRequirementChange[]
+  buyerObjections         BuyerObjection[]
+  buyerRejectedItems      BuyerRejectedItem[]
+  buyerItemRelationships  BuyerItemRelationship[]
+  buyerConversationNotes  BuyerConversationNote[]
+  buyerActivityEvents     BuyerActivityEvent[]
+
   dealRoomTemplates         DealRoomTemplate[]
   dealRoomTemplateVersions  DealRoomTemplateVersion[]
   dealRooms                 DealRoom[]
@@ -253,6 +261,7 @@ model Branch {
   // Named to avoid colliding with the `displays Int` counter field above,
   // which is a separate, pre-existing manual tally, not backed by real rows.
   displayDevices Display[]
+  buyerProfiles  BuyerProfile[]
 
   @@unique([tenantId, code])
   @@index([tenantId])
@@ -287,6 +296,9 @@ model User {
   createdDisplays                Display[]
   createdBrandProfiles           BrandProfile[]
   createdSharedExperiences       SharedExperience[]
+
+  assignedBuyerProfiles       BuyerProfile[]
+  createdBuyerConversationNotes BuyerConversationNote[]
 
   createdDealRoomTemplates DealRoomTemplate[]
   authoredDealRoomVersions DealRoomTemplateVersion[]
@@ -372,6 +384,12 @@ model Lead {
   // from, if any — same convention as brochureId.
   displayId String?
 
+  // Real relation (not a plain string ref like brochureId/displayId above)
+  // to the Buyer Intelligence identity this lead resolved/linked to, when
+  // contact info matched — see BuyerProfile below.
+  buyerProfileId String?
+  buyerProfile   BuyerProfile? @relation(fields: [buyerProfileId], references: [id], onDelete: SetNull)
+
   dealRooms DealRoom[]
 
   createdAt DateTime @default(now())
@@ -381,6 +399,200 @@ model Lead {
   @@index([tenantId, status])
   @@index([tenantId, assignedToId])
   @@index([tenantId, followUpAt])
+  @@index([tenantId, buyerProfileId])
+}
+
+// ---------------------------------------------------------------------
+// Buyer Intelligence — "the SalesIQ Buyer Brain." A continuously-evolving,
+// private per-buyer profile that persists across sessions, in contrast to
+// Lead (a flat, disconnected fact table today — every capture creates a new
+// row with no linkage back to a prior one) and to the live Companion
+// session (src/core/store/session.ts, pure in-memory, gone on reset).
+// Matched by normalized email/phone at capture time (see
+// src/lib/buyerProfiles/match.ts) so the same person across multiple
+// sessions/leads resolves to one profile instead of duplicating.
+//
+// PRIVACY: everything in this section is private salesperson/management
+// intelligence. It must never be reachable from the public Brochure
+// resolver, the Shared Experience resolver/DTO, or any field DisplayStage.tsx
+// destructures from useSession() — see BI-PR6's verification pass.
+// ---------------------------------------------------------------------
+model BuyerProfile {
+  id       String  @id @default(cuid())
+  tenantId String
+  tenant   Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  branchId String?
+  branch   Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  name              String
+  email             String  @default("")
+  phone             String  @default("")
+  // Matching keys — lowercased/trimmed email, digits-only phone. Nullable
+  // since a profile can exist with only one of the two contact channels.
+  emailNormalized   String?
+  phoneNormalized   String?
+  preferredLanguage String?
+  market            String?
+  leadSource        String  @default("")
+
+  assignedToId String?
+  assignedTo   User?   @relation(fields: [assignedToId], references: [id], onDelete: SetNull)
+
+  // Every Json field below stores BuyerField<T>-wrapped values (see
+  // src/core/buyerIntelligence/types.ts) — { value, provenance:
+  // "explicit"|"inferred"|"observed", confidence?, evidence?, updatedAt }
+  // — never a bare value, so provenance travels with the data itself.
+  requirements Json?
+  financial    Json?
+  purposes     String[] // endUser | investment | secondHome | holidayHome | rental | business | other — multiple allowed
+  motivations  Json?    // [{ id, label, tier: "primary"|"secondary", evidence: string[] }]
+  priorities   Json?    // [{ requirement, importance: "must"|"important"|"preferred"|"nice"|"not_important" }]
+  preferences  Json?    // { property, location, financial, lifestyle, investment } — project-specific attribute keys
+
+  intentLevel     String?   // low | medium | high | very_high
+  intentReasons   Json?     // string[] — the explainability requirement: never a bare score
+  intentUpdatedAt DateTime?
+
+  purchaseReadiness           String?   // Exploring|Researching|Shortlisting|Evaluating|Negotiating|DecisionReady|ReservationReady|Purchased
+  purchaseReadinessConfidence Int?      // 0-100
+  purchaseReadinessSignals    Json?     // string[]
+
+  lastInteractionAt DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  leads              Lead[]
+  requirementChanges BuyerRequirementChange[]
+  objections         BuyerObjection[]
+  rejectedItems      BuyerRejectedItem[]
+  itemRelationships  BuyerItemRelationship[]
+  conversationNotes  BuyerConversationNote[]
+  activityEvents     BuyerActivityEvent[]
+
+  @@index([tenantId])
+  @@index([tenantId, emailNormalized])
+  @@index([tenantId, phoneNormalized])
+  @@index([tenantId, branchId])
+  @@index([tenantId, assignedToId])
+}
+
+// Requirement-change history — never silently overwritten (spec §12).
+model BuyerRequirementChange {
+  id             String       @id @default(cuid())
+  buyerProfileId String
+  buyerProfile   BuyerProfile @relation(fields: [buyerProfileId], references: [id], onDelete: Cascade)
+  tenantId       String
+  tenant         Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  field         String // e.g. "budget", "bedrooms"
+  previousValue Json?
+  newValue      Json?
+  source        String // "sales-conversation" | "manual" | "questionnaire"
+
+  createdAt DateTime @default(now())
+
+  @@index([buyerProfileId, createdAt(sort: Desc)])
+}
+
+model BuyerObjection {
+  id             String       @id @default(cuid())
+  buyerProfileId String
+  buyerProfile   BuyerProfile @relation(fields: [buyerProfileId], references: [id], onDelete: Cascade)
+  tenantId       String
+  tenant         Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  kind       String // price | payment-plan | location | size | completion-date | financing | view | floor | amenities | investment-risk | legal | competitor | other
+  confidence String // high | medium | low
+  evidence   Json   // string[]
+  resolvedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([buyerProfileId, createdAt(sort: Desc)])
+}
+
+model BuyerRejectedItem {
+  id             String       @id @default(cuid())
+  buyerProfileId String
+  buyerProfile   BuyerProfile @relation(fields: [buyerProfileId], references: [id], onDelete: Cascade)
+  tenantId       String
+  tenant         Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  packId String
+  itemId String
+  reason String
+  source String // "sales-conversation" | "manual"
+  // Salesperson override — a rejected item stays excluded from that buyer's
+  // recommendations until this is set (spec §14).
+  overriddenAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@unique([buyerProfileId, packId, itemId])
+}
+
+// Append-only event log, not one row per (buyer,item) — the same item can
+// pass through viewed -> shortlisted -> proposal_created over time and each
+// transition is its own timestamped row (spec §15: "each state should have
+// timestamps and relevant context").
+model BuyerItemRelationship {
+  id             String       @id @default(cuid())
+  buyerProfileId String
+  buyerProfile   BuyerProfile @relation(fields: [buyerProfileId], references: [id], onDelete: Cascade)
+  tenantId       String
+  tenant         Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  packId  String
+  itemId  String
+  state   String // viewed|interested|saved|compared|shortlisted|recommended|rejected|proposal_created|proposal_viewed|negotiating|reserved|purchased|lost
+  context Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([buyerProfileId, packId, itemId])
+  @@index([buyerProfileId, createdAt(sort: Desc)])
+}
+
+// Natural-language "describe the customer" capture — always goes through
+// CONFIRM/EDIT/REJECT before anything is trusted as fact (spec §10).
+model BuyerConversationNote {
+  id             String       @id @default(cuid())
+  buyerProfileId String
+  buyerProfile   BuyerProfile @relation(fields: [buyerProfileId], references: [id], onDelete: Cascade)
+  tenantId       String
+  tenant         Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  rawText         String
+  extracted       Json   // structured candidate fields as returned by the extraction route
+  status          String // pending | confirmed | edited | rejected
+  confirmedFields Json?  // final fields actually written, after any edit
+
+  createdById String?
+  createdBy   User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+
+  @@index([buyerProfileId, createdAt(sort: Desc)])
+}
+
+// Behavioral tracking — begins once a live session is linked to a
+// BuyerProfile (spec §5). Anonymous pre-identification activity is
+// deliberately never retroactively attributed.
+model BuyerActivityEvent {
+  id             String       @id @default(cuid())
+  buyerProfileId String
+  buyerProfile   BuyerProfile @relation(fields: [buyerProfileId], references: [id], onDelete: Cascade)
+  tenantId       String
+  tenant         Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  kind   String // property_viewed|repeat_view|floor_plan_opened|gallery_viewed|payment_plan_opened|comparison_made|proposal_opened|shared_experience_opened|return_visit|cta_click|appointment_requested|callback_requested|reservation_action|question_asked
+  packId String?
+  itemId String?
+  meta   Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([buyerProfileId, createdAt(sort: Desc)])
+  @@index([buyerProfileId, kind])
 }
 
 // A property listing's shareable microsite. Listings themselves have no DB

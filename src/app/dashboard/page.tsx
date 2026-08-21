@@ -23,6 +23,7 @@ import { SubscriptionManagement } from "@/components/console/SubscriptionManagem
 import { LeadManagement } from "@/components/console/LeadManagement";
 import { Brochures, type BrochureSeed } from "@/components/console/Brochures";
 import { DisplayStudio } from "@/components/console/DisplayStudio";
+import { BuyerIntelligence } from "@/components/console/BuyerIntelligence";
 import { IndustryBuilder } from "@/components/console/IndustryBuilder";
 import { KnowledgeBase } from "@/components/console/KnowledgeBase";
 import { AiSettings } from "@/components/console/AiSettings";
@@ -62,6 +63,7 @@ const NAV_CAPABILITY: Record<string, string> = {
   Scoring: "scoring.edit",
   Branding: "branding.edit",
   Leads: "leads.view",
+  BuyerIntelligence: "buyer-intelligence.view",
   Brochures: "brochures.manage",
   DisplayStudio: "display-studio.view",
   "Deal Probability": "leads.view",
@@ -95,6 +97,7 @@ const NAV: NavGroup[] = [
     heading: "Insights",
     items: [
       { id: "Leads", label: "Leads", icon: "UserPlus" },
+      { id: "BuyerIntelligence", label: "Buyer Intelligence", icon: "BrainCircuit" },
       { id: "Brochures", label: "Brochures", icon: "Globe" },
       { id: "DisplayStudio", label: "Display Studio", icon: "MonitorPlay" },
       { id: "Deal Probability", label: "Deal Probability", icon: "Radar" },
@@ -257,6 +260,8 @@ export default function DashboardPage() {
         <AiSettings />
       ) : tab === "Leads" ? (
         <LeadManagement />
+      ) : tab === "BuyerIntelligence" ? (
+        <BuyerIntelligence />
       ) : tab === "Brochures" ? (
         <Brochures seed={brochureSeed} onSeedConsumed={() => setBrochureSeed(null)} />
       ) : tab === "DisplayStudio" ? (

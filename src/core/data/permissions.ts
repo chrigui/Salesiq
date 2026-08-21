@@ -42,6 +42,8 @@ export const CAPABILITIES: Capability[] = [
   { id: "dealroom-templates.manage", label: "Build & publish Deal Room templates", group: "Deal Rooms" },
   { id: "dealrooms.manage", label: "Create & manage Deal Rooms", group: "Deal Rooms" },
   { id: "dealrooms.view", label: "View Deal Rooms", group: "Deal Rooms" },
+  { id: "buyer-intelligence.manage", label: "Edit buyer profiles, objections & rejections", group: "Buyer Intelligence" },
+  { id: "buyer-intelligence.view", label: "View buyer profiles & intelligence", group: "Buyer Intelligence" },
   { id: "branches.manage", label: "Manage branches", group: "Organization" },
   { id: "users.manage", label: "Manage users", group: "Organization" },
   { id: "billing.manage", label: "Manage billing", group: "Organization" },
@@ -68,6 +70,8 @@ export function defaultMatrix(): PermissionMatrix {
     "display-studio.view",
     "dealrooms.manage",
     "dealrooms.view",
+    "buyer-intelligence.manage",
+    "buyer-intelligence.view",
   ];
   const designerSet = [
     "inventory.view",
@@ -83,6 +87,7 @@ export function defaultMatrix(): PermissionMatrix {
     "analytics.view",
     "display-studio.view",
     "dealrooms.view",
+    "buyer-intelligence.view",
   ];
 
   return {

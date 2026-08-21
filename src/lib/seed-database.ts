@@ -33,6 +33,8 @@ const CAPABILITIES = [
   "dealroom-templates.manage",
   "dealrooms.manage",
   "dealrooms.view",
+  "buyer-intelligence.manage",
+  "buyer-intelligence.view",
   "branches.manage",
   "users.manage",
   "billing.manage",
@@ -52,6 +54,8 @@ const SALES_SET = [
   "display-studio.view",
   "dealrooms.manage",
   "dealrooms.view",
+  "buyer-intelligence.manage",
+  "buyer-intelligence.view",
 ];
 const DESIGNER_SET = [
   "inventory.view",
@@ -67,6 +71,7 @@ const VIEWER_SET = [
   "analytics.view",
   "display-studio.view",
   "dealrooms.view",
+  "buyer-intelligence.view",
 ];
 
 const ROLE_GRANTS: Record<string, string[]> = {
