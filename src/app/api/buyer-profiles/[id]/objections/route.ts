@@ -41,7 +41,9 @@ const bodySchema = z.object({ rawText: z.string().min(1).max(1000) });
  * is a byproduct of the salesperson's own live linked session, not a
  * privileged edit. A second objection of the same kind is recorded at
  * "high" confidence rather than "medium" — a real repeated-pushback signal,
- * not a guess.
+ * not a guess. Scoped with buildBuyerProfileScope, same reasoning as
+ * /activity: a Salesperson can log objections only for their own
+ * branch/assigned buyers.
  */
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -52,7 +54,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: "invalid-request" }, { status: 400 });
     }
 
-    const profile = await prisma.buyerProfile.findFirst({ where: { id, tenantId: ctx.tenantId }, select: { id: true } });
+    const profile = await prisma.buyerProfile.findFirst({ where: { id, ...buildBuyerProfileScope(ctx) }, select: { id: true } });
     if (!profile) return NextResponse.json({ error: "not-found" }, { status: 404 });
 
     const rawText = parsed.data.rawText.trim();

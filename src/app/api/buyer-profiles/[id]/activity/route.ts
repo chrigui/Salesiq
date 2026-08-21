@@ -66,6 +66,9 @@ const bodySchema = z.object({
  * privileged edit. Only ever called from Companion-specific interaction
  * points (never from the shared session store itself), so the customer-
  * facing Display/Brochure/Shared-Experience surfaces never trigger a write.
+ * Still scoped with buildBuyerProfileScope, not just tenantId — a
+ * Salesperson can log activity for their own branch/assigned buyers, not
+ * inject events onto a profile that belongs to someone else's branch.
  */
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -76,7 +79,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: "invalid-request" }, { status: 400 });
     }
 
-    const profile = await prisma.buyerProfile.findFirst({ where: { id, tenantId: ctx.tenantId }, select: { id: true } });
+    const profile = await prisma.buyerProfile.findFirst({ where: { id, ...buildBuyerProfileScope(ctx) }, select: { id: true } });
     if (!profile) return NextResponse.json({ error: "not-found" }, { status: 404 });
 
     const { kind, packId, itemId, meta } = parsed.data;

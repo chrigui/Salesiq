@@ -17,6 +17,7 @@ import {
   Compass,
   ShieldQuestion,
   CheckCircle2,
+  Lightbulb,
 } from "lucide-react";
 import { Panel } from "@/components/console/light-ui";
 import { cx } from "@/components/ui/primitives";
@@ -33,6 +34,7 @@ import {
   updateBuyerProfile,
   type BuyerProfile,
 } from "@/core/store/buyerProfiles";
+import { suggestNextBestAction } from "@/core/buyerIntelligence/nextBestAction";
 import type { BuyerField } from "@/core/buyerIntelligence/types";
 import type { BuyerPriority, PriorityImportance } from "@/core/buyerIntelligence/priorityWeights";
 
@@ -143,6 +145,7 @@ export function BuyerIntelligenceProfile({ id, onBack }: { id: string; onBack: (
       </div>
 
       <IntentReadinessPanel buyerProfile={buyerProfile} />
+      <NextBestActionPanel buyerProfile={buyerProfile} />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <KeyValuePanel
@@ -323,6 +326,33 @@ function IntentReadinessPanel({ buyerProfile }: { buyerProfile: BuyerProfile }) 
             </ul>
           )}
         </div>
+      </div>
+    </Panel>
+  );
+}
+
+/** Next Best Action (spec, Wave 1 scope) — a lightweight, real, rule-based hint read off this buyer's own objections/activity/readiness record, never a fabricated "reach out!" filler. The full configurable NBA rule engine is Wave 2. */
+function NextBestActionPanel({ buyerProfile }: { buyerProfile: BuyerProfile }) {
+  const { objections } = useBuyerObjections(buyerProfile.id);
+  const { events, relationships } = useBuyerActivity(buyerProfile.id);
+  const unresolvedObjections = objections.filter((o) => !o.resolvedAt).map((o) => ({ kind: o.kind, confidence: o.confidence }));
+  const hasProposal = events.some((e) => e.kind === "proposal_generated");
+  const savedCount = relationships.filter((r) => r.state === "saved").length;
+  const hasFinancialInfo = Boolean(buyerProfile.financial && Object.keys(buyerProfile.financial).length > 0);
+
+  const suggestion = suggestNextBestAction({
+    purchaseReadinessStage: buyerProfile.purchaseReadiness,
+    unresolvedObjections,
+    hasProposal,
+    savedCount,
+    hasFinancialInfo,
+  });
+
+  return (
+    <Panel title="Next best action">
+      <div className="flex items-start gap-2 text-sm">
+        <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
+        <p className="text-zinc-700">{suggestion ?? "Nothing urgent right now — keep the conversation going."}</p>
       </div>
     </Panel>
   );
