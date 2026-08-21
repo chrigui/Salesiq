@@ -35,6 +35,7 @@ export async function GET(request: NextRequest) {
   const profile = await prisma.displayProfile.findFirst({
     where: { tenantId: tenant.id, packId, itemId, status: "Published" },
     orderBy: { publishedAt: "desc" },
+    include: { brandProfile: true, assets: { select: { id: true, name: true, mimeType: true, sizeBytes: true } } },
   });
   if (!profile) {
     return NextResponse.json({ profile: null });

@@ -1,4 +1,5 @@
 import type { InventoryItem } from "@/core/types";
+import type { DisplayProfileAssetMeta } from "@/lib/serializers/displayProfile";
 
 export interface DisplayBranding {
   name: string;
@@ -40,4 +41,8 @@ export interface DisplayWidgetContext {
   template: DisplayTemplate;
   /** "presentation" = a companion-focused item on the real live Customer Display; "idle" = the same Display's unattended attract state; "preview" = Display Studio's editor preview. Widgets can use this for honest empty-state framing, never to fake data. */
   mode: "presentation" | "idle" | "preview";
+  /** This profile's uploaded documents (floor plans, masterplans, spec sheets) — real metadata only, never fabricated. */
+  assets: DisplayProfileAssetMeta[];
+  /** Base path a widget builds its own asset download URLs against, e.g. `${assetsBaseUrl}/${asset.id}`. */
+  assetsBaseUrl: string;
 }

@@ -186,8 +186,10 @@ model Tenant {
   brochureEvents  BrochureEvent[]
   brochureAssets  BrochureAsset[]
 
-  displayProfiles DisplayProfile[]
-  displays        Display[]
+  displayProfiles      DisplayProfile[]
+  displays             Display[]
+  brandProfiles        BrandProfile[]
+  displayProfileAssets DisplayProfileAsset[]
 
   dealRoomTemplates         DealRoomTemplate[]
   dealRoomTemplateVersions  DealRoomTemplateVersion[]
@@ -278,6 +280,7 @@ model User {
 
   createdDisplayProfiles DisplayProfile[]
   createdDisplays        Display[]
+  createdBrandProfiles   BrandProfile[]
 
   createdDealRoomTemplates DealRoomTemplate[]
   authoredDealRoomVersions DealRoomTemplateVersion[]
@@ -468,9 +471,15 @@ model DisplayProfile {
 
   template DisplayTemplate @default(Minimal)
 
+  // Reusable brand kit (see BrandProfile below), optional. Per-profile
+  // brandOverrides layers on top of it when set. Resolution order the
+  // renderer/editor apply: brandOverrides -> brandProfile -> pack branding.
+  brandProfileId String?
+  brandProfile   BrandProfile? @relation(fields: [brandProfileId], references: [id], onDelete: SetNull)
+
   // Per-profile brand color overrides ({ brand, brandSoft } rgb triplets,
-  // same convention as Branding.brand) — layered on top of the pack's own
-  // branding when set. A reusable BrandProfile library lands in a later PR.
+  // same convention as Branding.brand) — layered on top of brandProfile (or
+  // the pack's own branding, when neither is set).
   brandOverrides Json?
 
   // Ordered widget composition: [{ id, type, enabled, order, config }] —
@@ -491,12 +500,60 @@ model DisplayProfile {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  displaysAsIdle Display[] @relation("IdleProfile")
-  displaysAsLive Display[] @relation("LiveProfile")
+  displaysAsIdle Display[]             @relation("IdleProfile")
+  displaysAsLive Display[]             @relation("LiveProfile")
+  assets         DisplayProfileAsset[]
 
   @@index([tenantId])
   @@index([tenantId, status])
   @@index([tenantId, packId, itemId])
+}
+
+// Reusable brand kit, shareable across many DisplayProfiles — build once
+// ("Green Hills Luxury"), attach to many. A profile's own brandOverrides
+// still layers on top for one-off tweaks without forking the whole kit.
+model BrandProfile {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  name        String
+  // rgb triplet strings, e.g. "16 185 129" — same convention as
+  // Branding.brand/brandSoft. Optional so a partial kit (just a logo, say)
+  // is valid; the renderer falls back to pack branding for anything unset.
+  brand       String?
+  brandSoft   String?
+  logoGlyph   String?
+  fontHeading String?
+  fontBody    String?
+
+  createdById String?
+  createdBy   User?    @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  profiles DisplayProfile[]
+
+  @@index([tenantId])
+}
+
+// Document Center attachment (floor plans, masterplans, spec sheets) for a
+// Display Studio profile — same Postgres-blob tradeoff as BrochureAsset (no
+// object storage configured for this app yet).
+model DisplayProfileAsset {
+  id        String         @id @default(cuid())
+  profileId String
+  profile   DisplayProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  tenantId  String
+  tenant    Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  name      String
+  mimeType  String
+  sizeBytes Int
+  data      Bytes
+  createdAt DateTime @default(now())
+
+  @@index([profileId])
 }
 
 enum DisplayStatus {

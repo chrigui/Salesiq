@@ -37,6 +37,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   if (display.idleProfileId) {
     const profile = await prisma.displayProfile.findFirst({
       where: { id: display.idleProfileId, tenantId: display.tenantId, status: "Published" },
+      include: { brandProfile: true, assets: { select: { id: true, name: true, mimeType: true, sizeBytes: true } } },
     });
     if (profile) idleProfile = toDisplayProfileDTO(profile);
   }

@@ -13,7 +13,10 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   try {
     const ctx = await requireCapability("display-studio.view");
     const { id } = await params;
-    const profile = await prisma.displayProfile.findFirst({ where: { id, tenantId: ctx.tenantId } });
+    const profile = await prisma.displayProfile.findFirst({
+      where: { id, tenantId: ctx.tenantId },
+      include: { brandProfile: true, assets: { select: { id: true, name: true, mimeType: true, sizeBytes: true } } },
+    });
     if (!profile) return NextResponse.json({ error: "not-found" }, { status: 404 });
     return NextResponse.json({ profile: toDisplayProfileDTO(profile) });
   } catch (err) {
@@ -36,6 +39,7 @@ const patchSchema = z.object({
     .enum(["Minimal", "NewDevelopment", "Detailed", "Lifestyle", "Investment", "LuxuryCinematic", "Masterplan", "Custom"])
     .optional(),
   sections: z.array(sectionSchema).optional(),
+  brandProfileId: z.string().min(1).max(100).nullable().optional(),
   brandOverrides: z.object({ brand: z.string().optional(), brandSoft: z.string().optional() }).nullable().optional(),
   status: z.enum(["Draft", "Published", "Archived"]).optional(),
 });
@@ -48,7 +52,15 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     if (!parsed.success) {
       return NextResponse.json({ error: "invalid-request" }, { status: 400 });
     }
-    const { status, ...rest } = parsed.data;
+    const { status, brandProfileId, ...rest } = parsed.data;
+
+    if (brandProfileId) {
+      const brandProfile = await prisma.brandProfile.findFirst({
+        where: { id: brandProfileId, tenantId: ctx.tenantId },
+        select: { id: true },
+      });
+      if (!brandProfile) return NextResponse.json({ error: "unknown-brand-profile" }, { status: 404 });
+    }
 
     // Publishing (or reverting a Published profile to Draft/Archived) is a
     // step beyond ordinary editing — Designer, for example, holds .manage
@@ -62,6 +74,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       where: { id, tenantId: ctx.tenantId },
       data: {
         ...(rest as unknown as Prisma.DisplayProfileUpdateManyMutationInput),
+        ...(brandProfileId !== undefined ? { brandProfileId } : {}),
         ...(status !== undefined
           ? { status, publishedAt: status === "Published" ? new Date() : undefined }
           : {}),
@@ -81,7 +94,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       });
     }
 
-    const profile = await prisma.displayProfile.findUniqueOrThrow({ where: { id } });
+    const profile = await prisma.displayProfile.findUniqueOrThrow({
+      where: { id },
+      include: { brandProfile: true, assets: { select: { id: true, name: true, mimeType: true, sizeBytes: true } } },
+    });
     return NextResponse.json({ profile: toDisplayProfileDTO(profile) });
   } catch (err) {
     if (err instanceof AuthError) return NextResponse.json({ error: err.message }, { status: err.status });

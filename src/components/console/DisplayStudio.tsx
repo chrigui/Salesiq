@@ -14,7 +14,16 @@ import {
   type DisplayTemplate,
 } from "@/core/store/displayProfiles";
 import { createDisplay, updateDisplay, useDisplays, type Display } from "@/core/store/displays";
+import {
+  createBrandProfile,
+  deleteBrandProfile,
+  updateBrandProfile,
+  useBrandProfiles,
+  type BrandProfile,
+} from "@/core/store/brandProfiles";
 import { DisplayProfileEditor } from "@/components/console/DisplayProfileEditor";
+import { Field, TextInput } from "@/components/console/builder/fields";
+import { Palette, Trash2 } from "lucide-react";
 
 const STATUS_STYLE: Record<DisplayProfileStatus, string> = {
   Draft: "bg-zinc-200 text-zinc-500",
@@ -34,7 +43,7 @@ const TEMPLATES: { id: DisplayTemplate; label: string; blurb: string }[] = [
 ];
 
 export function DisplayStudio() {
-  const [tab, setTab] = useState<"profiles" | "displays">("profiles");
+  const [tab, setTab] = useState<"profiles" | "displays" | "brand">("profiles");
   const { profiles, isLoading } = useDisplayProfiles();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -46,7 +55,7 @@ export function DisplayStudio() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-1 rounded-xl border border-zinc-200 bg-white p-1 text-xs font-medium">
-        {(["profiles", "displays"] as const).map((t) => (
+        {(["profiles", "displays", "brand"] as const).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -55,13 +64,15 @@ export function DisplayStudio() {
               tab === t ? "bg-zinc-900 text-white" : "text-zinc-500 hover:bg-zinc-50",
             )}
           >
-            {t === "profiles" ? "Profiles" : "Displays"}
+            {t === "profiles" ? "Profiles" : t === "displays" ? "Displays" : "Brand"}
           </button>
         ))}
       </div>
 
       {tab === "displays" ? (
         <DisplaysPanel profiles={profiles} />
+      ) : tab === "brand" ? (
+        <BrandProfilesPanel />
       ) : (
         <Panel
           title="Display Studio"
@@ -302,6 +313,201 @@ function NewDisplayDialog({ onClose, onCreated }: { onClose: () => void; onCreat
               const display = await createDisplay({ name: name.trim() });
               setSubmitting(false);
               if (display) onCreated(display);
+            }}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-zinc-900 px-3 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-50"
+          >
+            {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+            Create
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function tripletToHex(triplet: string): string {
+  const [r, g, b] = triplet.trim().split(/\s+/).map((n) => Number(n) || 0);
+  const hex = (n: number) => Math.max(0, Math.min(255, n)).toString(16).padStart(2, "0");
+  return `#${hex(r)}${hex(g)}${hex(b)}`;
+}
+function hexToTriplet(hex: string): string {
+  const m = hex.replace("#", "");
+  const r = parseInt(m.slice(0, 2), 16) || 0;
+  const g = parseInt(m.slice(2, 4), 16) || 0;
+  const b = parseInt(m.slice(4, 6), 16) || 0;
+  return `${r} ${g} ${b}`;
+}
+
+function BrandProfilesPanel() {
+  const { brandProfiles, isLoading } = useBrandProfiles();
+  const [creating, setCreating] = useState(false);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  return (
+    <>
+      <Panel
+        title="Brand Profiles"
+        right={
+          <button
+            onClick={() => setCreating(true)}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-zinc-900 px-3 py-2 text-xs font-semibold text-white transition hover:brightness-110"
+          >
+            <Plus className="h-3.5 w-3.5" /> New brand profile
+          </button>
+        }
+      >
+        <p className="mb-3 text-xs text-zinc-400">
+          Reusable brand kits — build once (&ldquo;Green Hills Luxury&rdquo;), attach to as many display profiles as you like.
+          Editing a brand profile updates every profile it&apos;s attached to.
+        </p>
+        {isLoading ? (
+          <div className="flex items-center justify-center gap-2 py-6 text-sm text-zinc-400">
+            <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+          </div>
+        ) : brandProfiles.length === 0 ? (
+          <p className="py-6 text-center text-sm text-zinc-400">
+            No brand profiles yet. Create one to reuse a consistent look across multiple display profiles.
+          </p>
+        ) : (
+          <div className="space-y-2">
+            {brandProfiles.map((bp) => (
+              <BrandProfileRow
+                key={bp.id}
+                brandProfile={bp}
+                expanded={expandedId === bp.id}
+                onToggle={() => setExpandedId(expandedId === bp.id ? null : bp.id)}
+              />
+            ))}
+          </div>
+        )}
+      </Panel>
+
+      {creating && <NewBrandProfileDialog onClose={() => setCreating(false)} />}
+    </>
+  );
+}
+
+function BrandProfileRow({
+  brandProfile,
+  expanded,
+  onToggle,
+}: {
+  brandProfile: BrandProfile;
+  expanded: boolean;
+  onToggle: () => void;
+}) {
+  const [brand, setBrand] = useState(brandProfile.brand ?? "16 185 129");
+  const [brandSoft, setBrandSoft] = useState(brandProfile.brandSoft ?? "52 211 153");
+  useEffect(() => {
+    setBrand(brandProfile.brand ?? "16 185 129");
+    setBrandSoft(brandProfile.brandSoft ?? "52 211 153");
+  }, [brandProfile.id, brandProfile.brand, brandProfile.brandSoft]);
+
+  return (
+    <div className="rounded-2xl border border-zinc-200 bg-white">
+      <button onClick={onToggle} className="flex w-full items-center gap-3 px-4 py-3 text-left">
+        <div
+          className="grid h-9 w-9 shrink-0 place-items-center rounded-xl text-white"
+          style={{ background: `rgb(${brandProfile.brand ?? "16 185 129"})` }}
+        >
+          <Palette className="h-4 w-4" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-sm font-medium text-zinc-900">{brandProfile.name}</div>
+        </div>
+      </button>
+
+      {expanded && (
+        <div className="space-y-3 border-t border-zinc-100 px-4 py-3">
+          <Field label="Primary color">
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={tripletToHex(brand)}
+                onChange={(e) => {
+                  const next = hexToTriplet(e.target.value);
+                  setBrand(next);
+                  updateBrandProfile(brandProfile.id, { brand: next });
+                }}
+                className="h-9 w-12 shrink-0 cursor-pointer rounded-lg border border-zinc-200 bg-transparent"
+                aria-label="Primary color"
+              />
+              <TextInput
+                value={brand}
+                onChange={(e) => {
+                  setBrand(e.target.value);
+                  updateBrandProfile(brandProfile.id, { brand: e.target.value });
+                }}
+                className="flex-1"
+              />
+            </div>
+          </Field>
+          <Field label="Secondary / accent color">
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={tripletToHex(brandSoft)}
+                onChange={(e) => {
+                  const next = hexToTriplet(e.target.value);
+                  setBrandSoft(next);
+                  updateBrandProfile(brandProfile.id, { brandSoft: next });
+                }}
+                className="h-9 w-12 shrink-0 cursor-pointer rounded-lg border border-zinc-200 bg-transparent"
+                aria-label="Secondary color"
+              />
+              <TextInput
+                value={brandSoft}
+                onChange={(e) => {
+                  setBrandSoft(e.target.value);
+                  updateBrandProfile(brandProfile.id, { brandSoft: e.target.value });
+                }}
+                className="flex-1"
+              />
+            </div>
+          </Field>
+          <button
+            onClick={() => deleteBrandProfile(brandProfile.id)}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 px-3 py-1.5 text-xs text-red-600 transition hover:bg-red-50"
+          >
+            <Trash2 className="h-3.5 w-3.5" /> Delete brand profile
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function NewBrandProfileDialog({ onClose }: { onClose: () => void }) {
+  const [name, setName] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
+      <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
+        <h3 className="text-base font-semibold text-zinc-900">New brand profile</h3>
+        <p className="mt-1 text-xs text-zinc-400">Name it after the brand it represents — colors are editable after creating it.</p>
+
+        <label className="mt-4 block">
+          <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-zinc-400">Name</span>
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Green Hills Luxury"
+            className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900"
+          />
+        </label>
+
+        <div className="mt-5 flex justify-end gap-2">
+          <button onClick={onClose} className="rounded-xl border border-zinc-200 px-3 py-2 text-sm text-zinc-600 transition hover:bg-zinc-50">
+            Cancel
+          </button>
+          <button
+            disabled={!name.trim() || submitting}
+            onClick={async () => {
+              setSubmitting(true);
+              await createBrandProfile({ name: name.trim() });
+              setSubmitting(false);
+              onClose();
             }}
             className="inline-flex items-center gap-1.5 rounded-xl bg-zinc-900 px-3 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-50"
           >

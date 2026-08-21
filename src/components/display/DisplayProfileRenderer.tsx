@@ -22,8 +22,8 @@ export interface DisplayProfileRendererProps {
  * pattern so a profile's brand overrides don't touch the app-wide theme.
  */
 export function DisplayProfileRenderer({ profile, pack, item, mode }: DisplayProfileRendererProps) {
-  const brand = profile.brandOverrides?.brand || pack.branding.brand;
-  const brandSoft = profile.brandOverrides?.brandSoft || pack.branding.brandSoft;
+  const brand = profile.brandOverrides?.brand || profile.resolvedBrandProfile?.brand || pack.branding.brand;
+  const brandSoft = profile.brandOverrides?.brandSoft || profile.resolvedBrandProfile?.brandSoft || pack.branding.brandSoft;
   const brandVars = { "--brand": brand, "--brand-soft": brandSoft } as CSSProperties;
 
   const packSummary: DisplayPackSummary = {
@@ -50,12 +50,24 @@ export function DisplayProfileRenderer({ profile, pack, item, mode }: DisplayPro
     );
   }
 
+  const assetsBaseUrl = `/api/public/display-profiles/${profile.id}/assets`;
+
   return (
     <div style={brandVars} className="min-h-screen bg-zinc-950">
       {enabled.map((s) => {
         const Widget = WIDGET_REGISTRY[s.type];
         if (!Widget) return null;
-        return <Widget key={s.id} item={item} pack={packSummary} template={profile.template} mode={mode} />;
+        return (
+          <Widget
+            key={s.id}
+            item={item}
+            pack={packSummary}
+            template={profile.template}
+            mode={mode}
+            assets={profile.assets}
+            assetsBaseUrl={assetsBaseUrl}
+          />
+        );
       })}
     </div>
   );

@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ArrowLeft, ArrowUp, ArrowDown, Loader2, Eye } from "lucide-react";
+import useSWR, { mutate as globalMutate } from "swr";
+import { ArrowLeft, ArrowUp, ArrowDown, Loader2, Eye, Upload, FileText, Trash2 } from "lucide-react";
 import { Panel } from "@/components/console/light-ui";
 import { cx } from "@/components/ui/primitives";
 import { Field, TextInput } from "@/components/console/builder/fields";
@@ -13,6 +14,7 @@ import {
   type DisplayTemplate,
 } from "@/core/store/displayProfiles";
 import { WIDGET_LABELS } from "@/components/display/registry";
+import { useBrandProfiles } from "@/core/store/brandProfiles";
 import { DisplayProfileRenderer } from "@/components/display/DisplayProfileRenderer";
 import type { IndustryPack, InventoryItem } from "@/core/types";
 
@@ -183,7 +185,117 @@ function WidgetsTab({ id, profile }: { id: string; profile: DisplayProfile }) {
           above once you&apos;ve edited them.
         </p>
       </Panel>
+
+      <DocumentsPanel profileId={id} />
     </div>
+  );
+}
+
+interface AssetMeta {
+  id: string;
+  name: string;
+  mimeType: string;
+  sizeBytes: number;
+}
+
+function formatSize(bytes: number): string {
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+const ALLOWED_UPLOAD_MIME = new Set(["application/pdf", "image/png", "image/jpeg", "image/webp"]);
+
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result).split(",")[1] ?? "");
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+/** Upload/manage the profile's Documents — feeds the Masterplan widget (first image) and Documents widget (full list). Real bytes stored via /api/display-profiles/[id]/assets, same pattern as the Brochure module's asset storage. */
+function DocumentsPanel({ profileId }: { profileId: string }) {
+  const key = `/api/display-profiles/${profileId}/assets`;
+  const { data, isLoading } = useSWR<{ assets: AssetMeta[] }>(key, (url: string) =>
+    fetch(url).then((res) => res.json()),
+  );
+  const assets = data?.assets ?? [];
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleUpload = async (file: File) => {
+    setError(null);
+    if (!ALLOWED_UPLOAD_MIME.has(file.type)) {
+      setError("Only PDF, PNG, JPEG or WEBP files are supported.");
+      return;
+    }
+    setUploading(true);
+    const dataBase64 = await fileToBase64(file);
+    const res = await fetch(key, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: file.name, mimeType: file.type, dataBase64 }),
+    });
+    setUploading(false);
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      setError(body.error === "file-too-large" ? "File is larger than 8MB." : "Upload failed.");
+      return;
+    }
+    globalMutate(key);
+  };
+
+  const handleDelete = async (assetId: string) => {
+    await fetch(`${key}/${assetId}`, { method: "DELETE" });
+    globalMutate(key);
+  };
+
+  return (
+    <Panel title="Documents">
+      <p className="mb-3 text-xs text-zinc-400">
+        Floor plans, masterplans, spec sheets. The first uploaded image also feeds the Masterplan widget.
+      </p>
+      <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-zinc-300 px-4 py-3 text-sm text-zinc-500 transition hover:border-zinc-400 hover:bg-zinc-50">
+        {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+        {uploading ? "Uploading…" : "Upload a document"}
+        <input
+          type="file"
+          accept="application/pdf,image/png,image/jpeg,image/webp"
+          className="hidden"
+          disabled={uploading}
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) handleUpload(file);
+            e.target.value = "";
+          }}
+        />
+      </label>
+      {error && <p className="mt-2 text-xs text-red-500">{error}</p>}
+
+      {isLoading ? (
+        <div className="mt-3 flex items-center justify-center gap-2 py-4 text-sm text-zinc-400">
+          <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+        </div>
+      ) : assets.length > 0 ? (
+        <div className="mt-3 space-y-2">
+          {assets.map((a) => (
+            <div key={a.id} className="flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-3 py-2">
+              <FileText className="h-4 w-4 shrink-0 text-zinc-400" />
+              <span className="flex-1 truncate text-sm text-zinc-700">{a.name}</span>
+              <span className="shrink-0 text-xs text-zinc-400">{formatSize(a.sizeBytes)}</span>
+              <button
+                onClick={() => handleDelete(a.id)}
+                aria-label="Delete document"
+                className="shrink-0 text-zinc-300 hover:text-red-500"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          ))}
+        </div>
+      ) : null}
+    </Panel>
   );
 }
 
@@ -203,8 +315,10 @@ function hexToTriplet(hex: string): string {
 
 function BrandTab({ id, profile }: { id: string; profile: DisplayProfile }) {
   const pack = PACKS.find((p) => p.id === profile.packId);
-  const fallbackBrand = pack?.branding.brand ?? "16 185 129";
-  const fallbackSoft = pack?.branding.brandSoft ?? "52 211 153";
+  const { brandProfiles } = useBrandProfiles();
+  const attachedBrandProfile = brandProfiles.find((bp) => bp.id === profile.brandProfileId);
+  const fallbackBrand = profile.resolvedBrandProfile?.brand ?? pack?.branding.brand ?? "16 185 129";
+  const fallbackSoft = profile.resolvedBrandProfile?.brandSoft ?? pack?.branding.brandSoft ?? "52 211 153";
 
   const [brand, setBrand] = useState(profile.brandOverrides?.brand ?? fallbackBrand);
   const [brandSoft, setBrandSoft] = useState(profile.brandOverrides?.brandSoft ?? fallbackSoft);
@@ -230,7 +344,30 @@ function BrandTab({ id, profile }: { id: string; profile: DisplayProfile }) {
 
   return (
     <div className="grid gap-4 lg:grid-cols-2">
-      <Panel title="Brand colors">
+      <Panel title="Brand profile">
+        <div className="space-y-3">
+          <Field label="Attached brand kit">
+            <select
+              value={profile.brandProfileId ?? ""}
+              onChange={(e) => updateDisplayProfile(id, { brandProfileId: e.target.value || null })}
+              className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900"
+            >
+              <option value="">None — use {pack?.label ?? "pack"} branding</option>
+              {brandProfiles.map((bp) => (
+                <option key={bp.id} value={bp.id}>
+                  {bp.name}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <p className="text-[11px] text-zinc-400">
+            {attachedBrandProfile
+              ? `Colors below start from "${attachedBrandProfile.name}" — edit it from Display Studio's Brand tab to update every profile using it, or override just this one below.`
+              : `Manage the tenant's brand kit library from Display Studio's Brand tab.`}
+          </p>
+        </div>
+      </Panel>
+      <Panel title="Colors on this profile">
         <div className="space-y-3">
           <Field label="Primary color">
             <div className="flex items-center gap-2">
@@ -260,16 +397,13 @@ function BrandTab({ id, profile }: { id: string; profile: DisplayProfile }) {
             onClick={resetToPackBranding}
             className="text-xs font-medium text-zinc-500 underline decoration-dotted hover:text-zinc-900"
           >
-            Reset to {pack?.label ?? "pack"} branding
+            Reset to {attachedBrandProfile ? attachedBrandProfile.name : (pack?.label ?? "pack")} branding
           </button>
+          <p className="text-[11px] text-zinc-400">
+            These are per-profile overrides, layered on top of the attached brand profile (or pack branding when
+            none is attached) — editing them here never changes the shared brand kit itself.
+          </p>
         </div>
-      </Panel>
-      <Panel title="About brand profiles">
-        <p className="text-sm text-zinc-500">
-          These colors override this listing&apos;s pack branding on the Customer Display only — the pack itself
-          is unaffected. A reusable, shareable Brand Profile library (build once, apply to many displays) lands in a
-          later Display Studio update.
-        </p>
       </Panel>
     </div>
   );

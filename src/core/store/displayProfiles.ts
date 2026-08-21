@@ -1,7 +1,7 @@
 "use client";
 
 import useSWR, { mutate as globalMutate } from "swr";
-import type { DisplaySection, DisplayMotionConfig } from "@/lib/serializers/displayProfile";
+import type { DisplaySection, DisplayMotionConfig, DisplayProfileAssetMeta } from "@/lib/serializers/displayProfile";
 
 export type DisplayTemplate =
   | "Minimal"
@@ -24,10 +24,13 @@ export interface DisplayProfile {
   template: DisplayTemplate;
   status: DisplayProfileStatus;
   sections: DisplaySection[];
+  brandProfileId: string | null;
+  resolvedBrandProfile: { brand: string | null; brandSoft: string | null; logoGlyph: string | null } | null;
   brandOverrides: { brand?: string; brandSoft?: string } | null;
   motion: DisplayMotionConfig;
   idle: Record<string, unknown> | null;
   publishedAt: number | null;
+  assets: DisplayProfileAssetMeta[];
 }
 
 const PROFILES_KEY = "/api/display-profiles";
@@ -84,7 +87,7 @@ export async function createDisplayProfile(input: {
 
 export async function updateDisplayProfile(
   id: string,
-  patch: Partial<Pick<DisplayProfile, "name" | "template" | "sections" | "brandOverrides" | "status">>,
+  patch: Partial<Pick<DisplayProfile, "name" | "template" | "sections" | "brandProfileId" | "brandOverrides" | "status">>,
 ): Promise<DisplayProfile | null> {
   const res = await fetch(`${PROFILES_KEY}/${id}`, {
     method: "PATCH",

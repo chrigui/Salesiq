@@ -18,6 +18,7 @@ export async function GET() {
       where: { tenantId: ctx.tenantId },
       orderBy: { createdAt: "desc" },
       take: 200,
+      include: { brandProfile: true, assets: { select: { id: true, name: true, mimeType: true, sizeBytes: true } } },
     });
     return NextResponse.json({ profiles: profiles.map(toDisplayProfileDTO) });
   } catch (err) {
