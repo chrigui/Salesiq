@@ -34,7 +34,7 @@ export interface AuthSession {
 export const DEMO_PASSWORD = "demo1234";
 export const DEMO_MFA_CODE = "000000";
 
-export type LoginError = "not-found" | "wrong-password" | "suspended" | "invited" | "network";
+export type LoginError = "not-found" | "wrong-password" | "suspended" | "invited" | "network" | "server-error";
 
 export type LoginResult =
   | { ok: true; needsMfa: false; session: AuthSession }
@@ -55,11 +55,23 @@ async function postJson(url: string, body: unknown): Promise<{ status: number; d
   return { status: res.status, data };
 }
 
-/** Step 1 — verify email + password, decide whether MFA is required. */
+/**
+ * Step 1 — verify email + password, decide whether MFA is required.
+ *
+ * A response the server never labeled with a real LoginError (a 500, a
+ * crashed serverless function, an empty body) must NOT silently read as
+ * "not-found" — that's actively misleading ("No account found with that
+ * email" when the account may well exist and the server just broke). Only
+ * a genuine 401 with no body defaults to "not-found"; anything else
+ * unlabeled surfaces as "server-error" instead.
+ */
 export async function verifyCredential(email: string, password: string): Promise<LoginResult> {
   try {
-    const { data } = await postJson("/api/auth/login", { email, password });
-    if (!data.ok) return { ok: false, error: (data.error as LoginError) ?? "not-found" };
+    const { status, data } = await postJson("/api/auth/login", { email, password });
+    if (!data.ok) {
+      if (typeof data.error === "string") return { ok: false, error: data.error as LoginError };
+      return { ok: false, error: status === 401 ? "not-found" : "server-error" };
+    }
     if (data.needsMfa) return { ok: true, needsMfa: true };
     const session = data.session as AuthSession;
     globalMutate(SESSION_KEY, { session }, false);
