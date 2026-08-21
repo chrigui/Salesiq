@@ -7,12 +7,16 @@ import type { DisplayPackSummary, DisplayWidgetContext } from "./types";
 import type { DisplayProfileDTO } from "@/lib/serializers/displayProfile";
 import type { IndustryPack, InventoryItem } from "@/core/types";
 import { resolveMotionConfig } from "@/core/display/motionPresets";
+import { nearestComparables } from "@/lib/comparables";
 
 export interface DisplayProfileRendererProps {
   profile: DisplayProfileDTO;
   pack: IndustryPack;
   item: InventoryItem;
   mode: DisplayWidgetContext["mode"];
+  /** Forwarded from DisplayStage's own claimed-device state — absent in the editor preview, where there's no real kiosk to attribute a lead submission to. */
+  deviceId?: string;
+  deviceToken?: string;
 }
 
 /**
@@ -23,7 +27,7 @@ export interface DisplayProfileRendererProps {
  * src/components/brochure/BrochureView.tsx's scoped --brand/--brand-soft
  * pattern so a profile's brand overrides don't touch the app-wide theme.
  */
-export function DisplayProfileRenderer({ profile, pack, item, mode }: DisplayProfileRendererProps) {
+export function DisplayProfileRenderer({ profile, pack, item, mode, deviceId, deviceToken }: DisplayProfileRendererProps) {
   const brand = profile.brandOverrides?.brand || profile.resolvedBrandProfile?.brand || pack.branding.brand;
   const brandSoft = profile.brandOverrides?.brandSoft || profile.resolvedBrandProfile?.brandSoft || pack.branding.brandSoft;
   const brandVars = { "--brand": brand, "--brand-soft": brandSoft } as CSSProperties;
@@ -54,6 +58,7 @@ export function DisplayProfileRenderer({ profile, pack, item, mode }: DisplayPro
 
   const assetsBaseUrl = `/api/public/display-profiles/${profile.id}/assets`;
   const motionConfig = resolveMotionConfig(profile.motion);
+  const comparables = nearestComparables(pack.inventory, item);
 
   return (
     <div style={brandVars} className="min-h-screen bg-zinc-950">
@@ -69,6 +74,9 @@ export function DisplayProfileRenderer({ profile, pack, item, mode }: DisplayPro
             assets={profile.assets}
             assetsBaseUrl={assetsBaseUrl}
             motion={motionConfig}
+            comparables={comparables}
+            deviceId={deviceId}
+            deviceToken={deviceToken}
           />
         );
         if (motionConfig.reduceMotion) {

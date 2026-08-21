@@ -48,4 +48,9 @@ export interface DisplayWidgetContext {
   assetsBaseUrl: string;
   /** Resolved motion config for this profile — widgets use it for their own internal animation (e.g. Hero's Ken Burns zoom), never re-derive it from raw Json. */
   motion: MotionConfig;
+  /** Up to 3 nearest other items in the same pack, by price/type proximity — real inventory data, no invented market comps. Same computation as the Brochure module's. */
+  comparables: InventoryItem[];
+  /** This physical Display's identity, when rendered live on a real paired kiosk (presentation/idle modes). Undefined in the editor's "preview" mode — widgets that need a real device (e.g. leadCapture) render an honest disabled state instead of submitting anywhere. */
+  deviceId?: string;
+  deviceToken?: string;
 }

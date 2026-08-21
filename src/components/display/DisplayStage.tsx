@@ -212,6 +212,8 @@ export function DisplayStage({
                   pack={pack}
                   item={focusedItem}
                   mode="presentation"
+                  deviceId={deviceId ?? undefined}
+                  deviceToken={deviceToken ?? undefined}
                 />
               </motion.div>
             )}
@@ -251,7 +253,14 @@ export function DisplayStage({
             aria-label="Tap to begin"
             className="fixed inset-0 z-[80] cursor-pointer overflow-y-auto bg-zinc-950"
           >
-            <DisplayProfileRenderer profile={idleProfile} pack={idlePack} item={idleItem} mode="idle" />
+            <DisplayProfileRenderer
+              profile={idleProfile}
+              pack={idlePack}
+              item={idleItem}
+              mode="idle"
+              deviceId={deviceId ?? undefined}
+              deviceToken={deviceToken ?? undefined}
+            />
           </motion.div>
         ) : isIdle ? (
           <IdleScreen pack={pack} onWake={wake} />

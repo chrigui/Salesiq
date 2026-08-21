@@ -364,6 +364,10 @@ model Lead {
   // relation) to the brochure microsite this lead was captured from, if any.
   brochureId String?
 
+  // Plain string ref to the Display Studio kiosk this lead was captured
+  // from, if any — same convention as brochureId.
+  displayId String?
+
   dealRooms DealRoom[]
 
   createdAt DateTime @default(now())

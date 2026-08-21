@@ -60,7 +60,7 @@ export async function POST(request: Request) {
         itemId,
         name: name?.trim() || `${item.name} display`,
         template,
-        sections: defaultDisplaySections() as unknown as Prisma.InputJsonValue,
+        sections: defaultDisplaySections(template) as unknown as Prisma.InputJsonValue,
         status: "Draft",
         createdById: ctx.userId,
       },
