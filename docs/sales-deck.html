@@ -258,9 +258,9 @@
   <p class="sub" style="font-size:13.5px">Every module runs on the same decision engine and the same data.</p>
   <div class="suite">
     <div class="prod">Explainable Decision Engine<span>live — the wedge</span></div>
-    <div class="prod">AI Sales Twin<span>live session coaching</span></div>
+    <div class="prod">Buyer Intelligence<span>persistent buyer profile</span></div>
+    <div class="prod">Display Studio<span>kiosk control room</span></div>
     <div class="prod">Buying Committee Intelligence<span>multi-stakeholder</span></div>
-    <div class="prod">Sales Copilot<span>objection &amp; negotiation</span></div>
     <div class="prod">AI Meeting Replay<span>jump to the moment</span></div>
     <div class="prod">Business Impact Dashboard<span>real KPIs</span></div>
     <div class="prod">Visual Builder<span>no-code config</span></div>
@@ -296,7 +296,7 @@
   <span class="kick">AI</span>
   <h2>AI embedded throughout — <span style="background:linear-gradient(180deg,transparent 62%,rgba(216,167,42,.4) 62%);border-radius:2px;padding:0 2px">grounded, never bolted on</span></h2>
   <div class="cols c3" style="margin-top:16px">
-    <div class="kcard"><h4><svg class="ic"><use href="#i-brain"/></svg>AI Sales Twin</h4><p>Coaches the rep from real live session signals — pace, budget posture, confidence.</p></div>
+    <div class="kcard"><h4><svg class="ic"><use href="#i-brain"/></svg>Buyer Intelligence Panel</h4><p>Coaches the rep from live session signals plus the buyer's persisted, evidence-backed intent and readiness.</p></div>
     <div class="kcard"><h4><svg class="ic"><use href="#i-users"/></svg>Buying Committee Intelligence</h4><p>Tracks every stakeholder and influence level across a multi-signoff deal.</p></div>
     <div class="kcard"><h4><svg class="ic"><use href="#i-replay"/></svg>AI Meeting Replay</h4><p>A deterministic recap with "jump to this moment," not a generic transcript.</p></div>
     <div class="kcard"><h4><svg class="ic"><use href="#i-doc"/></svg>AI Proposal Writer</h4><p>Deterministic draft first; Claude-authored upgrade layered on top of verified facts only.</p></div>
@@ -304,6 +304,30 @@
     <div class="kcard"><h4><svg class="ic"><use href="#i-chart"/></svg>Business Impact Dashboard</h4><p>Every KPI computed from real captured leads — nothing estimated that isn't measured.</p></div>
   </div>
   <span class="brand">SalesIQ</span><span class="num">11</span>
+</div>
+
+<!-- BUYER INTELLIGENCE + DISPLAY STUDIO -->
+<div class="slide">
+  <span class="kick">Newest modules · Shipped</span>
+  <h2>The platform learns the buyer, and controls the room.</h2>
+  <div class="cols c2" style="margin-top:16px">
+    <div class="shot">
+      <div class="tb"><span class="t">Buyer Intelligence · 6 PRs shipped</span><span class="dots"><i></i><i></i><i></i></span></div>
+      <div class="rowl"><div><b>One profile per buyer</b> <span class="meta">auto-matched, every session</span></div><span class="mchip ok">Live</span></div>
+      <div class="rowl"><div><b>Priorities weight the real engine</b> <span class="meta">not a parallel score</span></div><span class="mchip ok">Live</span></div>
+      <div class="rowl"><div><b>Evidence-based intent &amp; readiness</b></div><span class="mchip ok">Live</span></div>
+      <div class="rowl"><div><b>Branch-scoped access</b> <span class="meta">verified privacy boundary</span></div><span class="mchip ok">Live</span></div>
+    </div>
+    <div class="shot">
+      <div class="tb"><span class="t">Display Studio · 9 PRs shipped</span><span class="dots"><i></i><i></i><i></i></span></div>
+      <div class="rowl"><div><b>Kiosk registry &amp; pairing</b> <span class="meta">persists across restarts</span></div><span class="mchip ok">Live</span></div>
+      <div class="rowl"><div><b>No-code idle profile builder</b> <span class="meta">12 real widgets</span></div><span class="mchip ok">Live</span></div>
+      <div class="rowl"><div><b>Versioning &amp; rollback</b></div><span class="mchip ok">Live</span></div>
+      <div class="rowl"><div><b>Continue on your phone</b> <span class="meta">Shared Experience</span></div><span class="mchip ok">Live</span></div>
+    </div>
+  </div>
+  <p class="big-line" style="margin-top:16px;font-size:18px">Every buyer fact carries its provenance. Every screen stays configured, not just paired.</p>
+  <span class="brand">SalesIQ</span><span class="num">12</span>
 </div>
 
 <!-- BROCHURE + DEAL ROOM -->
@@ -321,10 +345,10 @@
       <div class="tb"><span class="t">Deal Room &amp; Template Engine · In progress</span><span class="dots"><i></i><i></i><i></i></span></div>
       <div class="rowl"><div><b>Versioned templates</b> <span class="meta">frozen room instances</span></div><span class="mchip tri">PR 1 done</span></div>
       <div class="rowl"><div><b>Tasks, chat, approvals, signature</b></div><span class="mchip tri">Schema real</span></div>
-      <div class="rowl"><div><b>9 PRs remaining</b> <span class="meta">on an approved plan</span></div><span class="mchip mig">Roadmap</span></div>
+      <div class="rowl"><div><b>9 PRs remaining</b> <span class="meta">on an approved plan, currently paused</span></div><span class="mchip mig">Roadmap</span></div>
     </div>
   </div>
-  <span class="brand">SalesIQ</span><span class="num">12</span>
+  <span class="brand">SalesIQ</span><span class="num">13</span>
 </div>
 
 <!-- ASK -->
@@ -332,9 +356,9 @@
   <span class="kick">Next steps</span>
   <h2>Let's turn illustrative into proven.</h2>
   <p class="sub">1 · Pilot customers to convert illustrative outcomes into published case studies.<br>
-  2 · A short production-deploy checklist — API key, Postgres, confirmed auto-deploy.<br>
-  3 · Continue the Deal Room build — nine remaining PRs on an already-approved plan.</p>
-  <span class="brand">SalesIQ</span><span class="num">13</span>
+  2 · A short production-deploy checklist — set <code style="color:#e9eee9">AUTH_SECRET</code> (found missing this pass) and a production Claude API key; the deploy pipeline itself is already confirmed working.<br>
+  3 · Continue the Deal Room build — nine remaining PRs on an already-approved plan, paused in favor of Buyer Intelligence and Display Studio.</p>
+  <span class="brand">SalesIQ</span><span class="num">14</span>
 </div>
 
 </div>

@@ -320,7 +320,7 @@
       <div><dt>Status</dt><dd>Shipped to GitHub</dd></div>
       <div><dt>Surfaces</dt><dd>5 live</dd></div>
       <div><dt>Industry packs</dt><dd>4 shipped</dd></div>
-      <div><dt>Updated</dt><dd>30 Jul 2026</dd></div>
+      <div><dt>Updated</dt><dd>21 Aug 2026</dd></div>
     </dl>
   </div>
 </header>
@@ -447,13 +447,43 @@
         <span class="chip">AI proposal writer</span>
         <span class="chip">AI email generator</span>
         <span class="chip">AI objection handler</span>
-        <span class="chip accent">Sales Copilot (proactive signals)</span>
-        <span class="chip accent">AI Sales Twin</span>
         <span class="chip accent">Buying Committee Intelligence</span>
         <span class="chip accent">AI Meeting Replay</span>
         <span class="chip accent">Demo Experience Mode</span>
         <span class="chip">Tenant Knowledge Base</span>
         <span class="chip">Public recommendation API</span>
+      </div>
+    </div>
+
+    <div class="cap-group">
+      <h3>Buyer Intelligence</h3>
+      <div class="cap-list">
+        <span class="chip accent">Persistent, auto-matched buyer profile</span>
+        <span class="chip">Explicit / inferred / observed data model</span>
+        <span class="chip accent">Priorities feed the real recommendation engine</span>
+        <span class="chip">Natural-language capture (confirm / edit / reject)</span>
+        <span class="chip">Requirement change history</span>
+        <span class="chip">Behavioral &amp; item-relationship tracking</span>
+        <span class="chip">Rejected options</span>
+        <span class="chip accent">Evidence-based Intent &amp; Purchase Readiness</span>
+        <span class="chip">Objection tracking</span>
+        <span class="chip">Next Best Action hint</span>
+        <span class="chip accent">Branch-scoped access</span>
+        <span class="chip">Replaces the former Sales Copilot / AI Sales Twin modals</span>
+      </div>
+    </div>
+
+    <div class="cap-group">
+      <h3>Display Studio</h3>
+      <div class="cap-list">
+        <span class="chip accent">Kiosk registry &amp; one-time pairing</span>
+        <span class="chip">No-code idle profile builder</span>
+        <span class="chip">12-widget library</span>
+        <span class="chip">Versioning &amp; rollback</span>
+        <span class="chip">Brand profiles</span>
+        <span class="chip">Motion presets</span>
+        <span class="chip">AI-assisted profile generation</span>
+        <span class="chip accent">Shared Experience &mdash; continue on your phone</span>
       </div>
     </div>
 
@@ -555,6 +585,11 @@
       <li class="tl-item done"><span class="tl-node">20</span><h3>Sales Copilot, AI Sales Twin &amp; Buying Committee Intelligence</h3><p>Three proposed features that all described the same underlying capability &mdash; proactive, real-time coaching &mdash; shipped as one Sales Copilot instead of three overlapping panels, per a second enterprise audit&rsquo;s own consolidation finding. A new AI Sales Twin reads the live session &mdash; pace, budget posture, confidence, decision drivers &mdash; from the same real data, not a fabricated persona. The customer panel now tracks every stakeholder in a deal, not just the primary contact.</p></li>
       <li class="tl-item done"><span class="tl-node">21</span><h3>AI Meeting Replay &amp; Demo Experience Mode</h3><p>The Session Timeline gained a deterministic recap and a &ldquo;jump to this moment&rdquo; that drives the live customer display back to any point in the session. A new 7-beat Guided Demo orchestrates a full walkthrough &mdash; recommendation, compare, what-if, objection handling, proposal &mdash; across the companion and display together, with presenter narration at every step.</p></li>
       <li class="tl-item done"><span class="tl-node">22</span><h3>A real persistent backend, at last</h3><p>The single biggest item on this roadmap&rsquo;s own &ldquo;Next up&rdquo; list is done: Postgres via Prisma, a genuinely multi-tenant schema, and real authentication &mdash; bcrypt-hashed passwords, a signed session cookie verified server-side on every request, a real Session table so a suspension actually revokes access. Users, Permissions and Leads are fully migrated end to end; every mutation is scoped by tenant so one workspace can never see another&rsquo;s data &mdash; proven by a dedicated cross-tenant isolation test, not just asserted. The other browser-storage-backed modules (industry pack drafts, audit logs, settings) keep their exact seam, ready to move the same way in the next pass. CI now runs the full suite against a real, isolated Postgres database on every push.</p></li>
+      <li class="tl-item done"><span class="tl-node">23</span><h3>Digital Property Brochure &amp; Microsite</h3><p>Any inventory item becomes a public, shareable microsite in one step &mdash; a real widget editor (Hero, Gallery, Specs, Highlights, Documents, Investment, Map, Lead form), deterministic-by-default copy that Claude only ever polishes, unauthenticated lead capture matched into the buyer record, and real per-brochure analytics.</p></li>
+      <li class="tl-item done"><span class="tl-node">24</span><h3>Deal Room &amp; Template Engine &mdash; data model shipped, builder paused</h3><p>The reusable-template/frozen-instance schema for a full multi-widget negotiation room landed (PR 1 of a 10-PR plan) &mdash; new models only, one additive role enum value, a dedicated Designer role and capability set. The remaining builder UI, widget library, rendering engine and rest of the plan are specified in the PRD but paused in favor of Display Studio and Buyer Intelligence.</p></li>
+      <li class="tl-item done"><span class="tl-node">25</span><h3>Display Studio &mdash; the kiosk control room (9 PRs)</h3><p>A physical screen is now a first-class, persistently-configured device: register it, get a one-time pairing code + QR, and it stays claimed across restarts. A no-code Idle Profile Builder composes the attract-loop screen from 12 real widgets, with full publish/rollback versioning, reusable brand profiles, motion presets, and deterministic-first/Claude-optional AI drafting. A new Shared Experience module hands the live session to a customer&rsquo;s own phone via QR, tracked with real analytics &mdash; separate from, and never confused with, the kiosk&rsquo;s own persistent device identity (the two pairing systems are deliberately orthogonal; see the codebase notes).</p></li>
+      <li class="tl-item done"><span class="tl-node">26</span><h3>Buyer Intelligence &mdash; a persistent Buyer Brain (Wave 1, 6 PRs)</h3><p>Where the platform previously had no persistent customer identity at all &mdash; every Companion session, brochure capture and kiosk lead created a fully disconnected row &mdash; a buyer is now auto-matched by normalized email/phone into one profile that survives across every session and surface. Requirements and financial facts carry real provenance (explicit/inferred/observed) and directly weight the existing recommendation engine&rsquo;s own scoring, verified to measurably shift the ranking. Natural-language &ldquo;describe the customer&rdquo; capture always requires an explicit confirm/edit/reject &mdash; unlike the pre-existing AI Search box it deliberately doesn&rsquo;t touch. Behavioral tracking, rejected-item exclusion, evidence-based Intent &amp; Purchase Readiness, objection tracking and a rule-based Next Best Action hint round out the buyer&rsquo;s live picture, replacing the old standalone Sales Copilot and AI Sales Twin modals with one unified panel. Row-level branch/assignee access scoping is the platform&rsquo;s first access boundary narrower than tenant-wide, and the privacy boundary against the Customer Display, Brochure and Shared Experience was verified against real public routes, not just by code inspection.</p></li>
+      <li class="tl-item done"><span class="tl-node">27</span><h3>A demo login that actually works, and honest server errors</h3><p>A hardcoded, self-provisioning demo account (its own dedicated tenant, decoupled from <code>DEFAULT_TENANT_SLUG</code>) signs in even against a freshly-migrated, never-seeded database. Along the way, a real client-side bug was found and fixed: any unrecognized server failure was silently mislabeled as &ldquo;No account found with that email&rdquo; instead of surfacing what actually broke &mdash; reproduced locally, fixed, and verified with the database stopped and restarted.</p></li>
     </ol>
   </section>
 
@@ -569,9 +604,8 @@
         <header><span class="tag pending">To activate</span></header>
         <p class="hint">Ready in code &mdash; needs a config or deploy action.</p>
         <ul class="task">
+          <li><span><b>Set <code>AUTH_SECRET</code> on Vercel</b> &mdash; found missing during this pass: every login (including the guaranteed demo account) was throwing at the JWT-signing step with no secret configured. Production deploy confirmed working from the <code>claude/decision-intelligence-platform-0miwwv</code> branch; this is the one env var left to flip.</span></li>
           <li><span><b>Set the Claude API key</b> on Vercel to switch the AI from deterministic fallback to live generation.</span></li>
-          <li><span><b>Confirm the Vercel deploy</b> &mdash; verify the GitHub connection and production branch so pushes ship automatically.</span></li>
-          <li><span><b>Provision production Postgres</b> (Vercel Postgres/Neon/Supabase) and set <code>DATABASE_URL</code> &mdash; the backend itself is built and tested (see milestone below); this is the one deploy step left to go live.</span></li>
         </ul>
       </div>
       <div class="status-col n">
@@ -582,6 +616,8 @@
           <li><span><b>Real payment processing</b> &mdash; the Billing Center UI (plans, invoices, coupons) is real; wiring a live processor (e.g. Stripe) is next.</span></li>
           <li><span><b>SSO wired to a real identity provider</b> &mdash; the settings UI, enforcement toggle and audit trail are real; federated sign-in itself isn&rsquo;t yet.</span></li>
           <li><span><b>More industry packs</b> &mdash; medical, solar, insurance, education, hospitality (four ship today).</span></li>
+          <li><span><b>Buyer Intelligence Wave 2</b> &mdash; buyer segmentation &amp; similarity, a full configurable Next Best Action rule engine, and a dedicated cross-category Buyer Timeline UI.</span></li>
+          <li><span><b>Deal Room &amp; Template Engine, PRs 2&ndash;10</b> &mdash; the visual template builder, widget library and rendering engine, currently paused after the PR 1 data model.</span></li>
         </ul>
       </div>
       <div class="status-col b">

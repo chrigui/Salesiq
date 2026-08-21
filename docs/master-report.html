@@ -168,6 +168,8 @@
     <a href="#architecture">Architecture</a>
     <a href="#packs">Industry packs</a>
     <a href="#intelligence">AI intelligence</a>
+    <a href="#buyer-intelligence">Buyer Intelligence</a>
+    <a href="#display-studio">Display Studio</a>
     <a href="#brochure">Brochures</a>
     <a href="#dealroom">Deal Rooms</a>
     <a href="#builder">Visual Builder</a>
@@ -197,7 +199,7 @@
     <div class="stat"><div class="n">5</div><div class="l">industry packs shipped from one engine — real estate ×2, automotive, private aviation, yacht charter</div></div>
     <div class="stat"><div class="n">5</div><div class="l">live product surfaces — Display, Companion, Dashboard, Admin, and a public Decision Engine API</div></div>
     <div class="stat"><div class="n">0</div><div class="l">fabricated recommendations — every score traces to a real, inspectable rule</div></div>
-    <div class="stat"><div class="n">2</div><div class="l">shipped modules built this phase — Brochure &amp; Microsite, and Deal Room &amp; Template Engine (in progress)</div></div>
+    <div class="stat"><div class="n">2</div><div class="l">new modules shipped this phase — Buyer Intelligence and Display Studio, 15 PRs combined, both verified end-to-end</div></div>
   </div>
   <div class="good"><b>North Star:</b> every recommendation a customer sees on screen must be explainable in plain language from real facts — no invented statistics, no "AI vibes." That discipline is enforced in code (the scoring engine and the narrator are deterministic; Claude is an optional writing upgrade layered on top of facts it doesn't get to invent) — not just claimed in a deck.</div>
   <p>SalesIQ is built on Next.js 15 / React 19, backed by a real multi-tenant Postgres schema (Prisma), with genuine role-based permissions and audit logging rather than a demo-only login screen. Everything described in this report as "live" is running code in this repository today; everything described as roadmap is explicitly labeled as such, using the same shipped/roadmap vocabulary the product's own internal documentation already uses (<code>live-dot</code> / <code>To activate</code> / <code>Next up</code> / <code>Blueprint</code>).</p>
@@ -256,8 +258,8 @@
   <h2>Five surfaces, one decision engine</h2>
   <div class="grid g3">
     <div class="feature"><h4><span class="live-dot"></span>Customer Experience Display</h4><p>The big-screen surface a customer actually looks at — Interactive Lifestyle Map (MapLibre 3D terrain, day/night, animated walking routes), ranked recommendations, live proposal presentation.</p></div>
-    <div class="feature"><h4><span class="live-dot"></span>Sales Companion</h4><p>The rep's phone/tablet — question flow, AI Sales Twin, Buying Committee Intelligence, Sales Copilot, proposal generation, natural-language customer search.</p></div>
-    <div class="feature"><h4><span class="live-dot"></span>Company Dashboard</h4><p>Leads/CRM, Business Impact Dashboard, Deal Probability Radar, ROI Calculator, Brochures &amp; Deal Rooms, Visual Builder, Knowledge Base, AI settings.</p></div>
+    <div class="feature"><h4><span class="live-dot"></span>Sales Companion</h4><p>The rep's phone/tablet — question flow, the Buyer Intelligence live panel, Buying Committee Intelligence, proposal generation, natural-language customer search.</p></div>
+    <div class="feature"><h4><span class="live-dot"></span>Company Dashboard</h4><p>Leads/CRM, Buyer Intelligence, Display Studio, Business Impact Dashboard, Deal Probability Radar, ROI Calculator, Brochures &amp; Deal Rooms, Visual Builder, Knowledge Base, AI settings.</p></div>
     <div class="feature"><h4><span class="live-dot"></span>Platform Administration</h4><p>Multi-tenant org management, users &amp; branches, real role-based permissions, audit trail, security &amp; compliance, subscription/billing UI.</p></div>
     <div class="feature"><h4><span class="live-dot"></span>AI Decision Engine &amp; Public API</h4><p>The scoring/explanation engine itself, exposed as a public REST API (<code>/api/public/v1</code>) — the same engine every surface above calls internally.</p></div>
   </div>
@@ -286,9 +288,8 @@
   <h2>The intelligence suite reps and executives actually use</h2>
   <div class="grid g3">
     <div class="feature"><h4><span class="live-dot"></span>Explainable Why-This / Why-Not</h4><p>Every recommendation's reasoning comes straight from the scoring engine's own breakdown — reasons only ever cite verified facts, never invented ones.</p></div>
-    <div class="feature"><h4><span class="live-dot"></span>AI Sales Twin</h4><p>Reads live session data — pace, budget posture, confidence, real rule contributions — to coach the rep mid-conversation, not a scripted persona.</p></div>
+    <div class="feature"><h4><span class="live-dot"></span>Buyer Intelligence Panel</h4><p>Replaces the former standalone AI Sales Twin and Sales Copilot modals: this session's live signals alongside the buyer's persisted, evidence-backed intent and readiness, in one view — see below.</p></div>
     <div class="feature"><h4><span class="live-dot"></span>Buying Committee Intelligence</h4><p>Tracks every stakeholder, role, and influence level in a deal — built for the multi-signoff reality of enterprise purchases.</p></div>
-    <div class="feature"><h4><span class="live-dot"></span>Sales Copilot</h4><p>Proactive objection handling, negotiation, and coaching signals, consolidated from three overlapping proposed features into one coherent surface.</p></div>
     <div class="feature"><h4><span class="live-dot"></span>AI Meeting Replay</h4><p>A deterministic session recap with "jump to this moment," driving the live display — not a generic transcript summary.</p></div>
     <div class="feature"><h4><span class="live-dot"></span>Demo Experience Mode</h4><p>A 7-beat guided walkthrough — recommendation, compare, what-if, objection handling, proposal — with presenter narration built in.</p></div>
     <div class="feature"><h4><span class="live-dot"></span>Decision Simulator</h4><p>A local what-if scratchpad — drag budget or answers and see the recommendation recompute instantly, without ever touching the real customer session.</p></div>
@@ -305,6 +306,41 @@
     </div>
   </div>
   <p style="margin-top:14px;font-size:12.5px;color:var(--ink-muted)">Every number above is computed live from real session/lead data captured in the product — metrics the app has no underlying data for (e.g. "average decision time" without a persisted session history) are honestly omitted rather than estimated.</p>
+</section>
+
+<!-- ============ BUYER INTELLIGENCE ============ -->
+<section id="buyer-intelligence">
+  <div class="kick"><span class="pill live" style="margin-right:6px">Shipped</span>Module</div>
+  <h2>Buyer Intelligence — a persistent Buyer Brain</h2>
+  <p class="lede">Until this phase the platform had no persistent customer identity at all: every Companion session, brochure capture, and kiosk lead created a fully disconnected row, and nothing survived a session reset beyond a final Lead snapshot. Buyer Intelligence closes that gap with a private, per-buyer profile — auto-matched by normalized email/phone, feeding the one real recommendation engine, and strictly walled off from every customer-facing surface.</p>
+  <div class="grid g3">
+    <div class="feature"><h4>Explicit / inferred / observed</h4><p>Every requirement and financial fact carries its own provenance, confidence, and evidence — never a bare, unsourced fact.</p></div>
+    <div class="feature"><h4>Feeds the real engine, not a parallel one</h4><p>A buyer's stated priorities weight the existing scoring engine's own rules directly — verified with a real ranking-flip test, not just noted on a card.</p></div>
+    <div class="feature"><h4>Confirm / edit / reject, always</h4><p>Natural-language "describe the customer" capture never auto-applies — every extracted field requires an explicit human decision before it's trusted as fact.</p></div>
+    <div class="feature"><h4>Behavioral &amp; relationship tracking</h4><p>Views, saves, and proposals log automatically once a buyer is identified; an append-only per-item state log means a listing's story over time is never overwritten.</p></div>
+    <div class="feature"><h4>Rejected options exclude in real time</h4><p>Rule out an item with a reason and it stops recommending for that buyer immediately — a live re-scoring test, not a static flag.</p></div>
+    <div class="feature"><h4>Evidence-based Intent &amp; Readiness</h4><p>Low/Medium/High/Very High intent and an 8-stage purchase-readiness journey with a real confidence percentage — always with the reasons attached, never a bare score.</p></div>
+    <div class="feature"><h4>Objection tracking, repeat-aware</h4><p>Every objection raised through the existing Objection Handler persists, with confidence rising when the same objection repeats.</p></div>
+    <div class="feature"><h4>Row-level access scoping</h4><p>The platform's first access boundary narrower than tenant-wide: a Salesperson sees only their own branch or assigned buyers; Manager and above see the full tenant.</p></div>
+    <div class="feature"><h4>Verified privacy boundary</h4><p>Confirmed against real public routes — a buyer profile carrying rich objection/intent data never appears on the Customer Display, Brochure, or Shared Experience.</p></div>
+  </div>
+  <div class="note" style="margin-top:16px"><b>Scope:</b> this is Wave 1 (6 PRs, complete). Buyer segmentation, similarity, and a full configurable Next Best Action rule engine are scoped as Wave 2, not started.</div>
+</section>
+
+<!-- ============ DISPLAY STUDIO ============ -->
+<section id="display-studio">
+  <div class="kick"><span class="pill live" style="margin-right:6px">Shipped</span>Module</div>
+  <h2>Display Studio — the kiosk control room</h2>
+  <p class="lede">A physical screen is now a first-class, persistently-configured device — distinct from, and orthogonal to, the ephemeral MQTT room code that pairs a Companion to it for one live session. An admin registers a Display from Display Studio's Displays tab, gets a one-time pairing code and QR, and the kiosk claims it once, staying configured across reloads and restarts.</p>
+  <div class="grid g3">
+    <div class="feature"><h4>No-code idle profile builder</h4><p>Composes the attract-loop screen a customer sees before a live session begins, from real, theme-aware widgets.</p></div>
+    <div class="feature"><h4>12-widget library</h4><p>Hero, Gallery, Specs, Highlights, Neighborhood, Masterplan, Documents, Trust Badges, Comparables, Lead Capture, AI Prompt Ticker, Continue-on-Phone QR.</p></div>
+    <div class="feature"><h4>Versioning &amp; rollback</h4><p>Every publish is a new immutable version; rolling back restores a prior one as a fresh version — history is never rewritten in place.</p></div>
+    <div class="feature"><h4>Brand profiles</h4><p>Reusable logo/color/font presets, assignable to any display profile across the fleet.</p></div>
+    <div class="feature"><h4>Motion presets &amp; AI-assisted drafting</h4><p>Real, configurable transitions; deterministic-first idle-profile generation with the same Claude-optional upgrade pattern used everywhere else.</p></div>
+    <div class="feature"><h4>Shared Experience</h4><p>"Continue on your phone" hands the live session to the customer's own device via QR — a public, ephemeral link tracked with real view/click/proposal analytics.</p></div>
+  </div>
+  <p style="margin-top:14px;font-size:12.5px;color:var(--ink-muted)">All 9 planned PRs shipped and verified against a running server — device registry, profile builder, versioning, brand profiles, kiosk lead capture, motion presets, AI drafting, and Shared Experience.</p>
 </section>
 
 <!-- ============ BROCHURE ============ -->
@@ -387,8 +423,8 @@
   <h2>What's next, honestly labeled</h2>
   <p class="lede">SalesIQ's own internal documentation already distinguishes three tiers of "not yet" — reused verbatim here rather than inventing a new vocabulary.</p>
   <div class="grid g3">
-    <div class="card"><span class="pill live">To activate</span><p style="margin-top:10px;font-size:13.5px">Code already exists — a config/deploy step is what's left. Setting a production Claude API key; confirming the Vercel auto-deploy pipeline; provisioning production Postgres.</p></div>
-    <div class="card"><span class="pill next">Next up</span><p style="margin-top:10px;font-size:13.5px">Real build work remaining. Migrating the last localStorage-backed settings stores to Postgres; live payment processing behind the real Billing Center UI; federated SSO sign-in; five more industry verticals (medical, solar, insurance, education, hospitality).</p></div>
+    <div class="card"><span class="pill live">To activate</span><p style="margin-top:10px;font-size:13.5px">Code already exists — a config/deploy step is what's left. Setting <code>AUTH_SECRET</code> on Vercel (found missing during this pass — every login, including the guaranteed demo account, was throwing at the JWT-signing step with no secret configured; production deploy from <code>claude/decision-intelligence-platform-0miwwv</code> otherwise confirmed working); setting a production Claude API key.</p></div>
+    <div class="card"><span class="pill next">Next up</span><p style="margin-top:10px;font-size:13.5px">Real build work remaining. Migrating the last localStorage-backed settings stores to Postgres; live payment processing behind the real Billing Center UI; federated SSO sign-in; five more industry verticals (medical, solar, insurance, education, hospitality); Buyer Intelligence Wave 2 (segmentation, similarity, full Next Best Action engine); Deal Room PRs 2–10, currently paused.</p></div>
     <div class="card"><span class="pill blue">Blueprint</span><p style="margin-top:10px;font-size:13.5px">Designed, not wired. Native iOS/Android apps (the installable PWA ships today); AR/VR/IoT/digital-twin; custom scoring math beyond the built-in rule types; drag-on-map POI placement.</p></div>
   </div>
 </section>
@@ -402,7 +438,7 @@
     <tr><td><b>No published case studies yet</b></td><td>Marketing stats (e.g. faster time-to-recommendation, more deals reaching proposal) are explicitly labeled illustrative/pilot-representative on the website — not measured outcomes to date.</td></tr>
     <tr><td><b>Deal Room is schema-only today</b></td><td>Only PR 1 of a planned 10-PR build is complete — no user-facing Deal Room feature exists yet; treat it as roadmap, not shipped, until the Rendering Engine milestone lands.</td></tr>
     <tr><td><b>Billing has no live processor</b></td><td>The Subscription/Billing Center UI is real; no payment processor (e.g. Stripe) is wired to it yet — commercial self-serve signup isn't live.</td></tr>
-    <tr><td><b>Two canonical docs are stale</b></td><td><code>docs/overview.html</code> and <code>docs/product-bible.html</code> predate the Bahrain pack, the marketing website, the Brochure module, and Deal Room PR 1 — this report and its siblings are the current source of truth going forward.</td></tr>
+    <tr><td><b>Buyer Intelligence Wave 1 only</b></td><td>Segmentation, similarity, and the full configurable Next Best Action engine are scoped as Wave 2, not started.</td></tr>
   </table>
 </section>
 

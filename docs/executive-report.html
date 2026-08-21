@@ -128,16 +128,18 @@
     <div>Product today: five surfaces <span>6</span></div>
     <div>Industry-agnostic packs <span>7</span></div>
     <div>AI intelligence suite <span>8</span></div>
-    <div>Business impact &amp; analytics <span>9</span></div>
-    <div>Brochure &amp; Microsite module <span>10</span></div>
-    <div>Deal Room &amp; Template Engine <span>11</span></div>
-    <div>Visual Builder &amp; no-code <span>12</span></div>
-    <div>Security &amp; backend <span>13</span></div>
-    <div>Category &amp; positioning <span>14</span></div>
-    <div>Platform roadmap <span>15</span></div>
-    <div>Risks &amp; honest caveats <span>16</span></div>
-    <div>The ask <span>17</span></div>
-    <div>Appendix: full feature list <span>18</span></div>
+    <div>Buyer Intelligence <span>9</span></div>
+    <div>Display Studio <span>10</span></div>
+    <div>Business impact &amp; analytics <span>11</span></div>
+    <div>Brochure &amp; Microsite module <span>12</span></div>
+    <div>Deal Room &amp; Template Engine <span>13</span></div>
+    <div>Visual Builder &amp; no-code <span>14</span></div>
+    <div>Security &amp; backend <span>15</span></div>
+    <div>Category &amp; positioning <span>16</span></div>
+    <div>Platform roadmap <span>17</span></div>
+    <div>Risks &amp; honest caveats <span>18</span></div>
+    <div>The ask <span>19</span></div>
+    <div>Appendix: full feature list <span>20</span></div>
   </div>
 </div>
 
@@ -151,7 +153,7 @@
     <div class="stat"><div class="n">5</div><div class="l">industry packs shipped from one engine</div></div>
     <div class="stat"><div class="n">5</div><div class="l">live product surfaces, one shared decision engine</div></div>
     <div class="stat"><div class="n">real</div><div class="l">multi-tenant Postgres backend with role-based auth</div></div>
-    <div class="stat"><div class="n">2</div><div class="l">new modules this phase — Brochure/Microsite (shipped), Deal Room (in progress)</div></div>
+    <div class="stat"><div class="n">2</div><div class="l">new modules this phase — Buyer Intelligence and Display Studio, both fully shipped (15 PRs combined)</div></div>
   </div>
   <div class="good"><b>North Star:</b> every recommendation shown to a customer must be explainable from real, inspectable facts — enforced by a deterministic scoring/narration engine, with Claude layered on top only as an optional writing upgrade that never gets to invent a reason.</div>
 </div>
@@ -196,7 +198,7 @@
   <table>
     <tr><th>Surface</th><th>What it does</th><th>Status</th></tr>
     <tr><td><b>Customer Experience Display</b></td><td>Interactive Lifestyle Map, ranked recommendations, live proposal presentation</td><td><span class="pill live">LIVE</span></td></tr>
-    <tr><td><b>Sales Companion</b></td><td>Question flow, AI Sales Twin, Buying Committee Intelligence, Sales Copilot</td><td><span class="pill live">LIVE</span></td></tr>
+    <tr><td><b>Sales Companion</b></td><td>Question flow, Buyer Intelligence live panel, Buying Committee Intelligence</td><td><span class="pill live">LIVE</span></td></tr>
     <tr><td><b>Company Dashboard</b></td><td>Leads/CRM, Business Impact Dashboard, Deal Probability Radar, Visual Builder</td><td><span class="pill live">LIVE</span></td></tr>
     <tr><td><b>Platform Administration</b></td><td>Multi-tenant org, users, real permissions, audit trail, security &amp; compliance</td><td><span class="pill live">LIVE</span></td></tr>
     <tr><td><b>AI Decision Engine &amp; Public API</b></td><td>The scoring/explanation engine, exposed as a public REST API</td><td><span class="pill live">LIVE</span></td></tr>
@@ -226,10 +228,43 @@
   <h2>The AI intelligence suite</h2>
   <div class="grid g2">
     <div class="card"><h3 style="margin-top:0">Why-This / Why-Not</h3><p style="font-size:13.5px">Explanations sourced directly from the scoring engine's own breakdown — never invented, always traceable.</p></div>
-    <div class="card"><h3 style="margin-top:0">AI Sales Twin</h3><p style="font-size:13.5px">Reads live session signals — pace, budget posture, confidence — to coach the rep mid-conversation.</p></div>
+    <div class="card"><h3 style="margin-top:0">Buyer Intelligence Panel</h3><p style="font-size:13.5px">Replaces the former standalone AI Sales Twin and Sales Copilot modals: this session's live signals plus the buyer's persisted, evidence-backed intent and readiness, in one view.</p></div>
     <div class="card"><h3 style="margin-top:0">Buying Committee Intelligence</h3><p style="font-size:13.5px">Tracks every stakeholder, role, and influence level across a multi-signoff enterprise deal.</p></div>
-    <div class="card"><h3 style="margin-top:0">Sales Copilot &amp; Meeting Replay</h3><p style="font-size:13.5px">Proactive coaching plus a deterministic session recap with "jump to this moment."</p></div>
+    <div class="card"><h3 style="margin-top:0">AI Meeting Replay</h3><p style="font-size:13.5px">A deterministic session recap with "jump to this moment," driving the live customer display back to any point.</p></div>
   </div>
+</div>
+
+<!-- BUYER INTELLIGENCE -->
+<div class="page">
+  <span class="kick">Module · Shipped</span>
+  <h2>Buyer Intelligence — a persistent Buyer Brain</h2>
+  <p>Until this phase, the platform had no persistent customer identity at all — every Companion session, brochure capture, and kiosk lead created a fully disconnected row. Buyer Intelligence closes that gap: a buyer is auto-matched by normalized email/phone into one profile that survives across every session and capture surface, private to the sales team and never reachable from the customer-facing Display, Brochure, or Shared Experience.</p>
+  <table>
+    <tr><th>Capability</th><th>Real detail</th></tr>
+    <tr><td>Data provenance</td><td>Every requirement/financial fact is tagged explicit, inferred, or observed — never presented as a bare, unsourced fact</td></tr>
+    <tr><td>Feeds the real engine</td><td>A buyer's priorities weight the existing scoring engine's own rules directly — verified to measurably shift the ranking, not a parallel scoring system</td></tr>
+    <tr><td>Natural-language capture</td><td>Free-text "describe the customer," with a mandatory Confirm/Edit/Reject before anything is trusted as fact</td></tr>
+    <tr><td>Behavioral tracking</td><td>Views, saves, and proposals log automatically once a buyer is identified — never retroactively</td></tr>
+    <tr><td>Intent &amp; readiness</td><td>A deterministic, evidence-backed classification — Low/Medium/High/Very High intent, an 8-stage purchase-readiness journey with a real confidence percentage</td></tr>
+    <tr><td>Access control</td><td>The platform's first row-level boundary: a Salesperson sees only their own branch/assigned buyers</td></tr>
+  </table>
+  <div class="note"><b>Status:</b> Wave 1 (6 PRs) is complete and verified end-to-end, including a dedicated privacy-boundary check against every public route. Wave 2 — buyer segmentation, similarity, and a full configurable Next Best Action engine — is scoped but not started.</div>
+</div>
+
+<!-- DISPLAY STUDIO -->
+<div class="page">
+  <span class="kick">Module · Shipped</span>
+  <h2>Display Studio — the kiosk control room</h2>
+  <p>A physical screen is now a first-class, persistently-configured device, independent of the ephemeral pairing that connects a Companion to it for one live session. An admin registers a Display, gets a one-time pairing code and QR, and the kiosk stays claimed across restarts.</p>
+  <table>
+    <tr><th>Capability</th><th>Real detail</th></tr>
+    <tr><td>Idle Profile Builder</td><td>A no-code composer for the attract-loop screen a customer sees before a session begins</td></tr>
+    <tr><td>Widget library</td><td>12 real, configurable, theme-aware widgets — Hero, Gallery, Specs, Highlights, Neighborhood, Masterplan, Documents, Trust Badges, Comparables, Lead Capture, AI Prompt Ticker, Continue-on-Phone QR</td></tr>
+    <tr><td>Versioning</td><td>Every publish is a new immutable version; rollback restores a prior one without rewriting history</td></tr>
+    <tr><td>Brand profiles</td><td>Reusable logo/color/font presets, assignable to any display profile</td></tr>
+    <tr><td>Shared Experience</td><td>"Continue on your phone" hands the live session to the customer's own device via QR, with real view/click/proposal analytics</td></tr>
+  </table>
+  <div class="note"><b>Status:</b> All 9 planned PRs shipped and verified against a running server.</div>
 </div>
 
 <!-- BUSINESS IMPACT -->
@@ -311,8 +346,8 @@
   <span class="kick">Roadmap</span>
   <h2>What's next, honestly labeled</h2>
   <div class="timeline">
-    <div class="tl"><h4>To activate</h4><p>Production Claude API key, confirmed Vercel auto-deploy, production Postgres provisioning — code already exists.</p></div>
-    <div class="tl"><h4>Next up</h4><p>Remaining localStorage stores migrated to Postgres, live payment processing, federated SSO, five more industry verticals.</p></div>
+    <div class="tl"><h4>To activate</h4><p>Set <code>AUTH_SECRET</code> on Vercel — found missing during this pass, the one remaining env var blocking every login on the confirmed-live production deploy. Production Claude API key next.</p></div>
+    <div class="tl"><h4>Next up</h4><p>Remaining localStorage stores migrated to Postgres, live payment processing, federated SSO, five more industry verticals, Buyer Intelligence Wave 2 (segmentation, similarity, full Next Best Action engine), Deal Room PRs 2–10.</p></div>
     <div class="tl"><h4>Blueprint</h4><p>Native mobile apps, AR/VR/IoT/digital-twin, custom scoring math, drag-on-map POI placement.</p></div>
   </div>
 </div>
@@ -326,7 +361,7 @@
     <tr><td><b>No published case studies</b></td><td>Website stats are explicitly labeled illustrative/pilot-representative, not measured outcomes</td></tr>
     <tr><td><b>Deal Room is schema-only</b></td><td>Only PR 1 of 10 is complete — no user-facing feature yet</td></tr>
     <tr><td><b>No live billing processor</b></td><td>UI is real; self-serve commercial signup isn't live</td></tr>
-    <tr><td><b>Two docs are stale</b></td><td><code>docs/overview.html</code> / <code>docs/product-bible.html</code> predate this report's newest facts</td></tr>
+    <tr><td><b>Buyer Intelligence Wave 1 only</b></td><td>Segmentation, similarity, and the full configurable Next Best Action engine are scoped as Wave 2, not started</td></tr>
   </table>
 </div>
 
@@ -348,9 +383,9 @@
   <h2>The SalesIQ product surface, in full</h2>
   <div class="suite">
     <div class="prod">Explainable Decision Engine</div>
-    <div class="prod">AI Sales Twin</div>
+    <div class="prod">Buyer Intelligence</div>
+    <div class="prod">Display Studio</div>
     <div class="prod">Buying Committee Intelligence</div>
-    <div class="prod">Sales Copilot</div>
     <div class="prod">AI Meeting Replay</div>
     <div class="prod">Demo Experience Mode</div>
     <div class="prod">Decision Simulator</div>
@@ -361,6 +396,7 @@
     <div class="prod">Industry Builder</div>
     <div class="prod">Brochure &amp; Microsite</div>
     <div class="prod next">Deal Room &amp; Template Engine</div>
+    <div class="prod next">Buyer Intelligence Wave 2</div>
     <div class="prod next">Live payments</div>
     <div class="prod next">Federated SSO</div>
     <div class="prod blue">Native mobile apps</div>
