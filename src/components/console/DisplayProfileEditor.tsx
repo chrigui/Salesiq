@@ -253,7 +253,9 @@ function WidgetsTab({ id, profile }: { id: string; profile: DisplayProfile }) {
     commit(sections.map((s, i) => (i === idx ? { ...s, enabled: !s.enabled } : s)));
 
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
+    <div className="space-y-4">
+      <AiDesignPanel id={id} />
+      <div className="grid gap-4 lg:grid-cols-2">
       <Panel title="Widgets">
         <div className="space-y-2">
           {sections.map((s, i) => (
@@ -312,7 +314,103 @@ function WidgetsTab({ id, profile }: { id: string; profile: DisplayProfile }) {
       </Panel>
 
       <DocumentsPanel profileId={id} />
+      </div>
     </div>
+  );
+}
+
+function AiDesignPanel({ id }: { id: string }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [proposal, setProposal] = useState<{
+    sections: DisplayProfile["sections"];
+    motion: DisplayProfile["motion"];
+    rationale: string;
+    engine: string;
+  } | null>(null);
+  const [applied, setApplied] = useState(false);
+
+  const generate = async () => {
+    setLoading(true);
+    setError(null);
+    setApplied(false);
+    try {
+      const res = await fetch("/api/ai/display-profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ profileId: id }),
+      });
+      if (!res.ok) {
+        setError("Couldn't generate a suggestion — try again.");
+        return;
+      }
+      const data = await res.json();
+      setProposal(data);
+    } catch {
+      setError("Couldn't reach the server — check your connection.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const apply = () => {
+    if (!proposal) return;
+    updateDisplayProfile(id, { sections: proposal.sections, motion: proposal.motion });
+    setApplied(true);
+  };
+
+  return (
+    <Panel title="AI Design Assistant">
+      <p className="text-xs text-zinc-400">
+        Proposes a widget composition and motion style from this listing&rsquo;s real data — never invents facts,
+        only decides structure. Nothing is saved until you apply it.
+      </p>
+      <button
+        onClick={() => void generate()}
+        disabled={loading}
+        className="mt-3 inline-flex items-center gap-1.5 rounded-xl border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 disabled:opacity-50"
+      >
+        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+        {loading ? "Thinking…" : proposal ? "Regenerate suggestion" : "Suggest a composition"}
+      </button>
+      {error && <p className="mt-2 text-xs text-red-500">{error}</p>}
+
+      {proposal && (
+        <div className="mt-4 rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded-full bg-zinc-900 px-2.5 py-1 text-[10px] font-medium text-white">
+              {proposal.motion.preset} motion
+            </span>
+            {Boolean(proposal.motion.reduceMotion) && (
+              <span className="rounded-full bg-zinc-200 px-2.5 py-1 text-[10px] font-medium text-zinc-600">
+                Reduce motion
+              </span>
+            )}
+            <span className="ml-auto text-[10px] text-zinc-400">
+              {proposal.engine === "claude+writer" ? "Authored by Claude" : "Deterministic writer — set ANTHROPIC_API_KEY for Claude-authored suggestions"}
+            </span>
+          </div>
+          <p className="mt-2 text-xs text-zinc-600">{proposal.rationale}</p>
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {proposal.sections
+              .filter((s) => s.enabled)
+              .map((s) => (
+                <span key={s.id} className="rounded-full border border-zinc-300 bg-white px-2 py-1 text-[11px] text-zinc-600">
+                  {WIDGET_LABELS[s.type] ?? s.type}
+                </span>
+              ))}
+          </div>
+          <button
+            onClick={apply}
+            disabled={applied}
+            className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-zinc-900 px-3 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-60"
+          >
+            {applied ? <Check className="h-4 w-4" /> : null}
+            {applied ? "Applied to draft" : "Apply to draft"}
+          </button>
+        </div>
+      )}
+    </Panel>
   );
 }
 
