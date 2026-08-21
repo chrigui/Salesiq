@@ -18,9 +18,16 @@ import {
 import { WIDGET_LABELS } from "@/components/display/registry";
 import { useBrandProfiles } from "@/core/store/brandProfiles";
 import { DisplayProfileRenderer } from "@/components/display/DisplayProfileRenderer";
+import {
+  MOTION_PRESET_IDS,
+  MOTION_PRESET_LABELS,
+  MOTION_PRESET_BLURBS,
+  resolveMotionConfig,
+  type MotionPresetId,
+} from "@/core/display/motionPresets";
 import type { IndustryPack, InventoryItem } from "@/core/types";
 
-const TABS = ["Widgets", "Brand", "History", "Preview"] as const;
+const TABS = ["Widgets", "Brand", "Motion", "History", "Preview"] as const;
 type Tab = (typeof TABS)[number];
 
 const TEMPLATES: DisplayTemplate[] = [
@@ -109,6 +116,7 @@ export function DisplayProfileEditor({ id, onBack }: { id: string; onBack: () =>
 
       {tab === "Widgets" && <WidgetsTab id={id} profile={profile} />}
       {tab === "Brand" && <BrandTab id={id} profile={profile} />}
+      {tab === "Motion" && <MotionTab id={id} profile={profile} />}
       {tab === "History" && <HistoryTab id={id} />}
       {tab === "Preview" && pack && item && <PreviewTab profile={profile} pack={pack} item={item} />}
 
@@ -526,6 +534,142 @@ function BrandTab({ id, profile }: { id: string; profile: DisplayProfile }) {
   );
 }
 
+function MotionTab({ id, profile }: { id: string; profile: DisplayProfile }) {
+  const config = resolveMotionConfig(profile.motion);
+  const [reduceMotion, setReduceMotion] = useState(config.reduceMotion);
+  useEffect(() => setReduceMotion(resolveMotionConfig(profile.motion).reduceMotion), [profile.id, profile.motion]);
+
+  const applyPreset = (preset: MotionPresetId) => {
+    updateDisplayProfile(id, { motion: { preset, reduceMotion } as DisplayProfile["motion"] });
+  };
+
+  const toggleReduceMotion = () => {
+    const next = !reduceMotion;
+    setReduceMotion(next);
+    updateDisplayProfile(id, { motion: { ...config, reduceMotion: next } as DisplayProfile["motion"] });
+  };
+
+  const setCustomField = (patch: Partial<typeof config>) => {
+    const next = { ...config, ...patch, preset: "Custom" as const };
+    updateDisplayProfile(id, { motion: next as DisplayProfile["motion"] });
+  };
+
+  return (
+    <div className="grid gap-4 lg:grid-cols-2">
+      <Panel title="Motion preset">
+        <div className="grid gap-2 sm:grid-cols-2">
+          {MOTION_PRESET_IDS.map((p) => (
+            <button
+              key={p}
+              onClick={() => applyPreset(p)}
+              className={cx(
+                "rounded-xl border px-3 py-2.5 text-left transition",
+                config.preset === p
+                  ? "border-zinc-900 bg-zinc-900 text-white"
+                  : "border-zinc-200 text-zinc-600 hover:bg-zinc-50",
+              )}
+            >
+              <div className="text-sm font-semibold">{MOTION_PRESET_LABELS[p]}</div>
+              <div className={cx("mt-0.5 text-[11px]", config.preset === p ? "text-white/70" : "text-zinc-400")}>
+                {MOTION_PRESET_BLURBS[p]}
+              </div>
+            </button>
+          ))}
+        </div>
+
+        <label className="mt-4 flex items-center gap-2 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5">
+          <input
+            type="checkbox"
+            checked={reduceMotion}
+            onChange={toggleReduceMotion}
+            className="h-4 w-4 rounded border-zinc-300"
+          />
+          <span className="text-sm font-medium text-zinc-700">Reduce motion</span>
+          <span className="ml-auto text-[11px] text-zinc-400">Collapses transitions to instant on the real Display</span>
+        </label>
+      </Panel>
+
+      {config.preset === "Custom" && (
+        <Panel title="Custom values">
+          <div className="space-y-3">
+            <Field label={`Transition duration — ${config.transition.durationMs}ms`}>
+              <input
+                type="range"
+                min={100}
+                max={1500}
+                step={50}
+                value={config.transition.durationMs}
+                onChange={(e) =>
+                  setCustomField({ transition: { ...config.transition, durationMs: Number(e.target.value) } })
+                }
+                className="w-full"
+              />
+            </Field>
+            <Field label="Transition ease">
+              <select
+                value={config.transition.ease}
+                onChange={(e) =>
+                  setCustomField({
+                    transition: { ...config.transition, ease: e.target.value as typeof config.transition.ease },
+                  })
+                }
+                className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900"
+              >
+                <option value="linear">Linear</option>
+                <option value="easeOut">Ease out</option>
+                <option value="easeInOut">Ease in-out</option>
+                <option value="circOut">Circ out</option>
+                <option value="backOut">Back out</option>
+              </select>
+            </Field>
+            <Field label={`Widget reveal stagger — ${config.reveal.staggerMs}ms`}>
+              <input
+                type="range"
+                min={0}
+                max={300}
+                step={10}
+                value={config.reveal.staggerMs}
+                onChange={(e) => setCustomField({ reveal: { ...config.reveal, staggerMs: Number(e.target.value) } })}
+                className="w-full"
+              />
+            </Field>
+            <Field label={`Widget reveal distance — ${config.reveal.distancePx}px`}>
+              <input
+                type="range"
+                min={0}
+                max={80}
+                step={4}
+                value={config.reveal.distancePx}
+                onChange={(e) => setCustomField({ reveal: { ...config.reveal, distancePx: Number(e.target.value) } })}
+                className="w-full"
+              />
+            </Field>
+            <Field label={`Hero image zoom — ${config.imageZoom.toFixed(2)}x`}>
+              <input
+                type="range"
+                min={100}
+                max={130}
+                step={1}
+                value={Math.round(config.imageZoom * 100)}
+                onChange={(e) => setCustomField({ imageZoom: Number(e.target.value) / 100 })}
+                className="w-full"
+              />
+            </Field>
+          </div>
+        </Panel>
+      )}
+    </div>
+  );
+}
+
+const PREVIEW_FRAMES = [
+  { id: "tv", label: "TV", widthClass: "max-w-4xl", aspectClass: "aspect-video" },
+  { id: "desktop", label: "Desktop", widthClass: "max-w-3xl", aspectClass: "aspect-[16/10]" },
+  { id: "tablet", label: "Tablet", widthClass: "max-w-sm", aspectClass: "aspect-[3/4]" },
+  { id: "mobile", label: "Mobile", widthClass: "max-w-[280px]", aspectClass: "aspect-[9/19.5]" },
+] as const;
+type PreviewFrameId = (typeof PREVIEW_FRAMES)[number]["id"];
+
 function PreviewTab({
   profile,
   pack,
@@ -535,16 +679,40 @@ function PreviewTab({
   pack: IndustryPack;
   item: InventoryItem;
 }) {
+  const [frameId, setFrameId] = useState<PreviewFrameId>("tv");
+  const frame = PREVIEW_FRAMES.find((f) => f.id === frameId) ?? PREVIEW_FRAMES[0];
+
   return (
     <Panel title="Live preview" bodyClassName="p-0">
-      <div className="overflow-hidden rounded-b-2xl">
-        <div className="mx-auto max-w-3xl overflow-hidden rounded-2xl border border-zinc-800 shadow-2xl">
+      <div className="flex justify-center gap-1 border-b border-zinc-100 p-3">
+        {PREVIEW_FRAMES.map((f) => (
+          <button
+            key={f.id}
+            onClick={() => setFrameId(f.id)}
+            className={cx(
+              "rounded-lg px-3 py-1.5 text-xs font-medium transition",
+              frameId === f.id ? "bg-zinc-900 text-white" : "text-zinc-500 hover:bg-zinc-100",
+            )}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
+      <div className="overflow-hidden bg-zinc-100 p-6">
+        <div
+          className={cx(
+            "mx-auto overflow-y-auto rounded-2xl border border-zinc-800 shadow-2xl",
+            frame.widthClass,
+            frame.aspectClass,
+          )}
+        >
           <DisplayProfileRenderer profile={profile} pack={pack} item={item} mode="preview" />
         </div>
       </div>
       <p className="p-4 text-center text-[11px] text-zinc-400">
         This is the exact widget composition the real Customer Display renders once this profile is Published —
-        real listing data, no fabricated preview content.
+        real listing data, no fabricated preview content. Frame sizes are a layout guide, not a pixel-exact device
+        emulation.
       </p>
     </Panel>
   );

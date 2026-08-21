@@ -1,10 +1,12 @@
 "use client";
 
 import type { CSSProperties } from "react";
+import { motion } from "framer-motion";
 import { WIDGET_REGISTRY } from "./registry";
 import type { DisplayPackSummary, DisplayWidgetContext } from "./types";
 import type { DisplayProfileDTO } from "@/lib/serializers/displayProfile";
 import type { IndustryPack, InventoryItem } from "@/core/types";
+import { resolveMotionConfig } from "@/core/display/motionPresets";
 
 export interface DisplayProfileRendererProps {
   profile: DisplayProfileDTO;
@@ -51,22 +53,41 @@ export function DisplayProfileRenderer({ profile, pack, item, mode }: DisplayPro
   }
 
   const assetsBaseUrl = `/api/public/display-profiles/${profile.id}/assets`;
+  const motionConfig = resolveMotionConfig(profile.motion);
 
   return (
     <div style={brandVars} className="min-h-screen bg-zinc-950">
-      {enabled.map((s) => {
+      {enabled.map((s, i) => {
         const Widget = WIDGET_REGISTRY[s.type];
         if (!Widget) return null;
-        return (
+        const widget = (
           <Widget
-            key={s.id}
             item={item}
             pack={packSummary}
             template={profile.template}
             mode={mode}
             assets={profile.assets}
             assetsBaseUrl={assetsBaseUrl}
+            motion={motionConfig}
           />
+        );
+        if (motionConfig.reduceMotion) {
+          return <div key={s.id}>{widget}</div>;
+        }
+        return (
+          <motion.div
+            key={s.id}
+            initial={{ opacity: 0, y: motionConfig.reveal.distancePx }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-10%" }}
+            transition={{
+              duration: motionConfig.reveal.durationMs / 1000,
+              delay: (i * motionConfig.reveal.staggerMs) / 1000,
+              ease: motionConfig.transition.ease,
+            }}
+          >
+            {widget}
+          </motion.div>
         );
       })}
     </div>

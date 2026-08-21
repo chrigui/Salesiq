@@ -6,6 +6,7 @@ import { Sparkles, MapPin, TrendingUp, Check, Star, Smartphone } from "lucide-re
 import { useSession } from "@/core/store/session";
 import { useLivePack } from "@/core/store/packs";
 import { useResolvedDisplayProfile } from "@/core/store/displayProfiles";
+import { resolveMotionConfig } from "@/core/display/motionPresets";
 import { useDeviceIdleProfile } from "@/core/store/displayDevice";
 import { DisplayProfileRenderer } from "./DisplayProfileRenderer";
 import { scoreInventory, isVisible } from "@/core/engine/scoring";
@@ -90,6 +91,22 @@ export function DisplayStage({
   const idleProfile = useDeviceIdleProfile(deviceId, deviceToken);
   const idlePack = useLivePack(idleProfile?.packId ?? packId);
   const idleItem = idleProfile ? idlePack.inventory.find((i) => i.id === idleProfile.itemId) : undefined;
+
+  // Display Studio's own transition, in place of the hardcoded spring, for
+  // the two profile-driven wrappers below only — every other stage transition
+  // in this file is the unrelated Companion-driven experience and keeps `spring`.
+  const displayProfileTransition = displayProfile
+    ? (() => {
+        const cfg = resolveMotionConfig(displayProfile.motion);
+        return { duration: cfg.transition.durationMs / 1000, ease: cfg.transition.ease };
+      })()
+    : spring;
+  const idleProfileTransition = idleProfile
+    ? (() => {
+        const cfg = resolveMotionConfig(idleProfile.motion);
+        return { duration: cfg.transition.durationMs / 1000, ease: cfg.transition.ease };
+      })()
+    : spring;
 
   // The Interactive Lifestyle Map is the hero for browsing/recommendation views
   // whenever the active pack carries lifestyle-map data (e.g. real estate) —
@@ -187,7 +204,7 @@ export function DisplayStage({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={spring}
+                transition={displayProfileTransition}
                 className="absolute inset-0 overflow-y-auto"
               >
                 <DisplayProfileRenderer
@@ -227,7 +244,7 @@ export function DisplayStage({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={spring}
+            transition={idleProfileTransition}
             onClick={wake}
             role="button"
             tabIndex={0}

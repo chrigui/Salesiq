@@ -1,5 +1,6 @@
 import type { InventoryItem } from "@/core/types";
 import type { DisplayProfileAssetMeta } from "@/lib/serializers/displayProfile";
+import type { MotionConfig } from "@/core/display/motionPresets";
 
 export interface DisplayBranding {
   name: string;
@@ -45,4 +46,6 @@ export interface DisplayWidgetContext {
   assets: DisplayProfileAssetMeta[];
   /** Base path a widget builds its own asset download URLs against, e.g. `${assetsBaseUrl}/${asset.id}`. */
   assetsBaseUrl: string;
+  /** Resolved motion config for this profile — widgets use it for their own internal animation (e.g. Hero's Ken Burns zoom), never re-derive it from raw Json. */
+  motion: MotionConfig;
 }

@@ -87,7 +87,7 @@ export async function createDisplayProfile(input: {
 
 export async function updateDisplayProfile(
   id: string,
-  patch: Partial<Pick<DisplayProfile, "name" | "template" | "sections" | "brandProfileId" | "brandOverrides" | "status">> & {
+  patch: Partial<Pick<DisplayProfile, "name" | "template" | "sections" | "brandProfileId" | "brandOverrides" | "motion" | "status">> & {
     changeReason?: string;
   },
 ): Promise<DisplayProfile | null> {

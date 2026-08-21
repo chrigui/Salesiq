@@ -42,6 +42,15 @@ const patchSchema = z.object({
   sections: z.array(sectionSchema).optional(),
   brandProfileId: z.string().min(1).max(100).nullable().optional(),
   brandOverrides: z.object({ brand: z.string().optional(), brandSoft: z.string().optional() }).nullable().optional(),
+  motion: z
+    .object({
+      preset: z.enum(["Cinematic", "Elegant", "Luxury", "Modern", "Dynamic", "Minimal", "Presentation", "Custom"]),
+      reduceMotion: z.boolean().optional(),
+      transition: z.object({ durationMs: z.number(), ease: z.string() }).optional(),
+      reveal: z.object({ staggerMs: z.number(), distancePx: z.number(), durationMs: z.number() }).optional(),
+      imageZoom: z.number().optional(),
+    })
+    .optional(),
   status: z.enum(["Draft", "Published", "Archived"]).optional(),
   changeReason: z.string().max(500).optional(),
 });

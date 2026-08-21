@@ -3,10 +3,16 @@ import { formatMoney } from "@/core/engine/explain";
 import { cx } from "@/components/ui/primitives";
 import type { DisplayWidgetContext } from "../types";
 
-export function DisplayHero({ item, pack, template }: DisplayWidgetContext) {
+export function DisplayHero({ item, pack, template, motion }: DisplayWidgetContext) {
   return (
     <section className="relative">
-      <ItemImage image={item.image} photo={item.photo} className="h-[52vh] min-h-[320px] w-full">
+      <ItemImage
+        image={item.image}
+        photo={item.photo}
+        className="h-[52vh] min-h-[320px] w-full"
+        zoom={motion.reduceMotion ? undefined : motion.imageZoom}
+        zoomDurationMs={motion.transition.durationMs * 6}
+      >
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/10" />
         <div className="absolute inset-x-0 bottom-0 p-6 sm:p-10">
           <div className="mb-3 flex items-center gap-2 text-white/90">
