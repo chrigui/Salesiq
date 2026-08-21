@@ -11,6 +11,7 @@ import {
   verifyMfaCode,
   type LoginError,
 } from "@/core/data/auth";
+import { HARDCODED_DEMO_EMAIL, HARDCODED_DEMO_PASSWORD } from "@/core/data/demoLogin";
 import { SSO_PROVIDERS, useSsoSettings } from "@/core/data/ssoSettings";
 import { Field, TextInput } from "@/components/console/builder/fields";
 
@@ -62,13 +63,12 @@ export function LoginScreen({
   );
   const quickAccounts = demoAccounts?.users ?? [];
 
-  const submitCredentials = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const attemptLogin = async (loginEmail: string, loginPassword: string) => {
     if (busy) return;
     setError(null);
     setBusy(true);
     try {
-      const result = await verifyCredential(email, password);
+      const result = await verifyCredential(loginEmail, loginPassword);
       if (!result.ok) {
         setError(ERROR_COPY[result.error] ?? "Something went wrong.");
         return;
@@ -81,6 +81,11 @@ export function LoginScreen({
     } finally {
       setBusy(false);
     }
+  };
+
+  const submitCredentials = (e: React.FormEvent) => {
+    e.preventDefault();
+    void attemptLogin(email, password);
   };
 
   const submitMfa = async (e: React.FormEvent) => {
@@ -210,6 +215,31 @@ export function LoginScreen({
             </form>
           )}
         </div>
+
+        {!pendingMfa && (
+          <div className="mt-4 rounded-2xl border border-dashed border-zinc-300 bg-white/60 p-4 text-xs text-zinc-500">
+            <div className="mb-2 flex items-center gap-1.5 font-medium text-zinc-600">
+              <KeyRound className="h-3.5 w-3.5" /> Just want to look around?
+            </div>
+            <p className="mb-2">
+              This one always works, even on a brand-new deployment — it sets up its own demo
+              workspace on first use.
+            </p>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => {
+                setEmail(HARDCODED_DEMO_EMAIL);
+                setPassword(HARDCODED_DEMO_PASSWORD);
+                void attemptLogin(HARDCODED_DEMO_EMAIL, HARDCODED_DEMO_PASSWORD);
+              }}
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-zinc-300 bg-white py-2 text-xs font-semibold text-zinc-700 transition hover:bg-zinc-50 disabled:opacity-40"
+            >
+              {busy && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+              Sign in with the guaranteed demo account
+            </button>
+          </div>
+        )}
 
         {!pendingMfa && quickAccounts.length > 0 && (
           <div className="mt-4 rounded-2xl border border-dashed border-zinc-300 bg-white/60 p-4 text-xs text-zinc-500">
