@@ -55,6 +55,19 @@ export interface ScoredItem {
   breakdown: { ruleId: string; contribution: number; reason?: string }[];
 }
 
+export interface ScoreInventoryOptions {
+  /**
+   * Buyer Intelligence input, not a second scoring system: a multiplier per
+   * questionId (1 = unaffected) derived from a linked BuyerProfile's stated
+   * priorities (see src/core/buyerIntelligence/priorityWeights.ts). Applied
+   * to that rule's weight before normalisation, so a buyer's "must have"
+   * genuinely shifts the ranking rather than just being noted somewhere.
+   * Optional and additive — omitting it (every existing caller) leaves
+   * scoring byte-for-byte unchanged.
+   */
+  priorityWeights?: Record<string, number>;
+}
+
 /**
  * Score every inventory item against the current answers.
  *
@@ -66,12 +79,17 @@ export interface ScoredItem {
 export function scoreInventory(
   pack: IndustryPack,
   answers: Answers,
+  opts?: ScoreInventoryOptions,
 ): ScoredItem[] {
+  const priorityWeights = opts?.priorityWeights;
+  const effectiveWeight = (questionId: string, weight: number) =>
+    weight * (priorityWeights?.[questionId] ?? 1);
+
   const activeRules = pack.rules.filter(
     (r) => answers[r.questionId] !== undefined,
   );
   const maxWeight =
-    activeRules.reduce((sum, r) => sum + r.weight, 0) || 1;
+    activeRules.reduce((sum, r) => sum + effectiveWeight(r.questionId, r.weight), 0) || 1;
 
   const scored = pack.inventory.map((item) => {
     let raw = 0;
@@ -81,7 +99,7 @@ export function scoreInventory(
     for (const rule of activeRules) {
       const result = rule.evaluate(answers[rule.questionId], item);
       if (!result) continue;
-      const contribution = result.match * rule.weight;
+      const contribution = result.match * effectiveWeight(rule.questionId, rule.weight);
       raw += contribution;
       breakdown.push({
         ruleId: rule.id,

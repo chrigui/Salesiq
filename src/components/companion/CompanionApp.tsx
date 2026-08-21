@@ -26,7 +26,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useSession, type Stakeholder, type TimelineEvent } from "@/core/store/session";
-import { linkBuyerProfile } from "@/core/store/buyerProfiles";
+import { linkBuyerProfile, useBuyerProfile } from "@/core/store/buyerProfiles";
+import { toPriorityWeights } from "@/core/buyerIntelligence/priorityWeights";
 import { useLivePack, useAllPacks, getEffectivePack } from "@/core/store/packs";
 import { scoreInventory, isVisible } from "@/core/engine/scoring";
 import { formatMoney } from "@/core/engine/explain";
@@ -137,9 +138,18 @@ export function CompanionApp() {
     [pack, session.answers, activeSection],
   );
 
+  // Buyer Intelligence input, not a second scoring system: a linked buyer's
+  // stated priorities bias the real recommendation engine's rule weights —
+  // see src/core/buyerIntelligence/priorityWeights.ts. No linked profile
+  // (or no priorities set yet) leaves scoring exactly as it was.
+  const { buyerProfile } = useBuyerProfile(session.buyerProfileId);
+  const priorityWeights = useMemo(
+    () => toPriorityWeights(buyerProfile?.priorities ?? null),
+    [buyerProfile?.priorities],
+  );
   const scored = useMemo(
-    () => scoreInventory(pack, session.answers),
-    [pack, session.answers],
+    () => scoreInventory(pack, session.answers, { priorityWeights }),
+    [pack, session.answers, priorityWeights],
   );
   const copilotSignals = useMemo(
     () => detectSignals(pack, session.answers, session.timeline, session.bookmarks, scored),

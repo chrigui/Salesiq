@@ -1,5 +1,6 @@
 import type { BuyerProfile as PrismaBuyerProfile } from "@/generated/prisma/client";
 import type { BuyerField } from "@/core/buyerIntelligence/types";
+import type { BuyerPriority } from "@/core/buyerIntelligence/priorityWeights";
 
 /** Client-facing shape — mirrors src/core/store/buyerProfiles.ts's BuyerProfile. */
 export interface BuyerProfileDTO {
@@ -18,7 +19,7 @@ export interface BuyerProfileDTO {
   financial: Record<string, BuyerField<unknown>> | null;
   purposes: string[];
   motivations: { id: string; label: string; tier: "primary" | "secondary"; evidence: string[] }[] | null;
-  priorities: { requirement: string; importance: "must" | "important" | "preferred" | "nice" | "not_important" }[] | null;
+  priorities: BuyerPriority[] | null;
   preferences: Record<string, unknown> | null;
 
   intentLevel: string | null;
@@ -55,10 +56,7 @@ export function toBuyerProfileDTO(row: BuyerProfileRow): BuyerProfileDTO {
     motivations:
       (row.motivations as { id: string; label: string; tier: "primary" | "secondary"; evidence: string[] }[] | null) ??
       null,
-    priorities:
-      (row.priorities as
-        | { requirement: string; importance: "must" | "important" | "preferred" | "nice" | "not_important" }[]
-        | null) ?? null,
+    priorities: (row.priorities as BuyerPriority[] | null) ?? null,
     preferences: (row.preferences as Record<string, unknown> | null) ?? null,
 
     intentLevel: row.intentLevel,

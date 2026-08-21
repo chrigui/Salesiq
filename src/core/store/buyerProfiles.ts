@@ -1,7 +1,8 @@
 "use client";
 
-import useSWR from "swr";
+import useSWR, { mutate as globalMutate } from "swr";
 import type { BuyerField } from "@/core/buyerIntelligence/types";
+import type { BuyerPriority } from "@/core/buyerIntelligence/priorityWeights";
 import { useSession } from "@/core/store/session";
 
 export interface BuyerProfile {
@@ -20,7 +21,7 @@ export interface BuyerProfile {
   financial: Record<string, BuyerField<unknown>> | null;
   purposes: string[];
   motivations: { id: string; label: string; tier: "primary" | "secondary"; evidence: string[] }[] | null;
-  priorities: { requirement: string; importance: "must" | "important" | "preferred" | "nice" | "not_important" }[] | null;
+  priorities: BuyerPriority[] | null;
   preferences: Record<string, unknown> | null;
 
   intentLevel: string | null;
@@ -74,4 +75,40 @@ export async function linkBuyerProfile(input: {
   const { buyerProfile } = await res.json();
   useSession.getState().linkBuyerProfile(buyerProfile.id);
   return buyerProfile as BuyerProfile;
+}
+
+export type BuyerProfilePatch = Partial<
+  Pick<BuyerProfile, "requirements" | "financial" | "purposes" | "motivations" | "priorities">
+>;
+
+/** Edits a buyer's explicit-tagged fields — requirements/financial changes that overwrite a previous value are recorded as history server-side, never silently lost. */
+export async function updateBuyerProfile(id: string, patch: BuyerProfilePatch): Promise<BuyerProfile | null> {
+  const res = await fetch(`${BUYER_PROFILES_KEY}/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(patch),
+  });
+  globalMutate(`${BUYER_PROFILES_KEY}/${id}`);
+  globalMutate(BUYER_PROFILES_KEY);
+  globalMutate(`${BUYER_PROFILES_KEY}/${id}/requirement-changes`);
+  if (!res.ok) return null;
+  const { buyerProfile } = await res.json();
+  return buyerProfile as BuyerProfile;
+}
+
+export interface BuyerRequirementChange {
+  id: string;
+  field: string;
+  previousValue: unknown;
+  newValue: unknown;
+  source: string;
+  createdAt: number;
+}
+
+export function useBuyerRequirementChanges(id: string | null): { changes: BuyerRequirementChange[]; isLoading: boolean } {
+  const { data, isLoading } = useSWR<{ changes: BuyerRequirementChange[] }>(
+    id ? `${BUYER_PROFILES_KEY}/${id}/requirement-changes` : null,
+    fetcher,
+  );
+  return { changes: data?.changes ?? [], isLoading: isLoading && data === undefined };
 }

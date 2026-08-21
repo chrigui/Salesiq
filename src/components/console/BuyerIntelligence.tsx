@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { BrainCircuit, Loader2, Mail, Phone } from "lucide-react";
 import { Panel } from "@/components/console/light-ui";
 import { useBuyerProfiles } from "@/core/store/buyerProfiles";
+import { BuyerIntelligenceProfile } from "@/components/console/BuyerIntelligenceProfile";
 
 function timeAgo(ms: number | null): string {
   if (!ms) return "—";
@@ -27,6 +29,11 @@ function timeAgo(ms: number | null): string {
  */
 export function BuyerIntelligence() {
   const { buyerProfiles, isLoading } = useBuyerProfiles();
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  if (selectedId) {
+    return <BuyerIntelligenceProfile id={selectedId} onBack={() => setSelectedId(null)} />;
+  }
 
   return (
     <div className="space-y-4">
@@ -54,9 +61,10 @@ export function BuyerIntelligence() {
         ) : (
           <div className="space-y-2">
             {buyerProfiles.map((b) => (
-              <div
+              <button
                 key={b.id}
-                className="flex items-center gap-3 rounded-2xl border border-zinc-200 bg-white px-4 py-3"
+                onClick={() => setSelectedId(b.id)}
+                className="flex w-full items-center gap-3 rounded-2xl border border-zinc-200 bg-white px-4 py-3 text-left transition hover:border-zinc-300 hover:bg-zinc-50"
               >
                 <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-zinc-100 text-sm font-semibold text-zinc-500">
                   {b.name.slice(0, 1).toUpperCase() || "?"}
@@ -80,7 +88,7 @@ export function BuyerIntelligence() {
                   <div>{b.assignedToName ?? "Unassigned"}</div>
                   <div>{timeAgo(b.lastInteractionAt)}</div>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         )}
