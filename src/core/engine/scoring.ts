@@ -66,6 +66,14 @@ export interface ScoreInventoryOptions {
    * scoring byte-for-byte unchanged.
    */
   priorityWeights?: Record<string, number>;
+  /**
+   * Buyer Intelligence input: item ids a linked buyer has actively rejected
+   * (BuyerRejectedItem, minus any the salesperson has since overridden).
+   * Excluded from scoring entirely — an actively-rejected item never
+   * resurfaces as a recommendation for that buyer. Optional and additive,
+   * same as priorityWeights.
+   */
+  excludeItemIds?: string[];
 }
 
 /**
@@ -84,6 +92,10 @@ export function scoreInventory(
   const priorityWeights = opts?.priorityWeights;
   const effectiveWeight = (questionId: string, weight: number) =>
     weight * (priorityWeights?.[questionId] ?? 1);
+  const excludeItemIds = opts?.excludeItemIds;
+  const inventory = excludeItemIds?.length
+    ? pack.inventory.filter((item) => !excludeItemIds.includes(item.id))
+    : pack.inventory;
 
   const activeRules = pack.rules.filter(
     (r) => answers[r.questionId] !== undefined,
@@ -91,7 +103,7 @@ export function scoreInventory(
   const maxWeight =
     activeRules.reduce((sum, r) => sum + effectiveWeight(r.questionId, r.weight), 0) || 1;
 
-  const scored = pack.inventory.map((item) => {
+  const scored = inventory.map((item) => {
     let raw = 0;
     const reasons: string[] = [];
     const breakdown: ScoredItem["breakdown"] = [];

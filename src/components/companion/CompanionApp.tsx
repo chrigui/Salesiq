@@ -23,6 +23,7 @@ import {
   Fingerprint,
   Users,
   Presentation,
+  Ban,
 } from "lucide-react";
 import Link from "next/link";
 import { useSession, type Stakeholder, type TimelineEvent } from "@/core/store/session";
@@ -31,6 +32,9 @@ import {
   useBuyerProfile,
   extractBuyerText,
   submitConversationNote,
+  logBuyerActivity,
+  useBuyerRejectedItems,
+  rejectBuyerItem,
   type BuyerExtractionFields,
 } from "@/core/store/buyerProfiles";
 import { toPriorityWeights } from "@/core/buyerIntelligence/priorityWeights";
@@ -62,6 +66,8 @@ export function CompanionApp() {
   const [copilotOpen, setCopilotOpen] = useState(false);
   const [twinOpen, setTwinOpen] = useState(false);
   const [demoScriptOpen, setDemoScriptOpen] = useState(false);
+  const [rejectingItem, setRejectingItem] = useState<{ id: string; name: string } | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
 
   const closeAllPanels = () => {
     setProposalOpen(false);
@@ -153,9 +159,20 @@ export function CompanionApp() {
     () => toPriorityWeights(buyerProfile?.priorities ?? null),
     [buyerProfile?.priorities],
   );
+  // Buyer Intelligence input: an actively-rejected item never resurfaces as
+  // a recommendation for this buyer (an overridden rejection stops excluding
+  // it). Same additive-options pattern as priorityWeights.
+  const { rejectedItems } = useBuyerRejectedItems(session.buyerProfileId);
+  const excludeItemIds = useMemo(
+    () =>
+      rejectedItems
+        .filter((r) => r.packId === pack.id && !r.overriddenAt)
+        .map((r) => r.itemId),
+    [rejectedItems, pack.id],
+  );
   const scored = useMemo(
-    () => scoreInventory(pack, session.answers, { priorityWeights }),
-    [pack, session.answers, priorityWeights],
+    () => scoreInventory(pack, session.answers, { priorityWeights, excludeItemIds }),
+    [pack, session.answers, priorityWeights, excludeItemIds],
   );
   const copilotSignals = useMemo(
     () => detectSignals(pack, session.answers, session.timeline, session.bookmarks, scored),
@@ -357,7 +374,12 @@ export function CompanionApp() {
           <ActionButton
             icon={FileText}
             label="Proposal"
-            onClick={() => setProposalOpen(true)}
+            onClick={() => {
+              setProposalOpen(true);
+              if (session.buyerProfileId) {
+                void logBuyerActivity(session.buyerProfileId, { kind: "proposal_generated", packId: pack.id });
+              }
+            }}
           />
           <ActionButton
             icon={RotateCcw}
@@ -378,7 +400,16 @@ export function CompanionApp() {
               return (
                 <button
                   key={s.item.id}
-                  onClick={() => session.focusItem(s.item.id)}
+                  onClick={() => {
+                    session.focusItem(s.item.id);
+                    if (session.buyerProfileId) {
+                      void logBuyerActivity(session.buyerProfileId, {
+                        kind: "property_viewed",
+                        packId: pack.id,
+                        itemId: s.item.id,
+                      });
+                    }
+                  }}
                   className="group flex items-center gap-1.5 rounded-full bg-white/5 px-3 py-1.5 text-xs text-ink-muted transition hover:bg-white/10"
                 >
                   <span
@@ -386,7 +417,15 @@ export function CompanionApp() {
                     tabIndex={0}
                     onClick={(e) => {
                       e.stopPropagation();
+                      const adding = !marked;
                       session.toggleBookmark(s.item.id);
+                      if (adding && session.buyerProfileId) {
+                        void logBuyerActivity(session.buyerProfileId, {
+                          kind: "item_saved",
+                          packId: pack.id,
+                          itemId: s.item.id,
+                        });
+                      }
                     }}
                   >
                     {marked ? (
@@ -397,10 +436,59 @@ export function CompanionApp() {
                   </span>
                   {s.item.name}
                   <span className="text-ink-faint">{s.score}</span>
+                  {session.buyerProfileId && (
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      title="Not a fit for this buyer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setRejectingItem({ id: s.item.id, name: s.item.name });
+                        setRejectReason("");
+                      }}
+                    >
+                      <Ban className="h-3.5 w-3.5 opacity-30 hover:text-red-400 hover:opacity-100" />
+                    </span>
+                  )}
                 </button>
               );
             })}
           </div>
+          {rejectingItem && (
+            <div className="mt-2 flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 p-2">
+              <span className="shrink-0 text-[11px] text-ink-muted">
+                Reject &ldquo;{rejectingItem.name}&rdquo;:
+              </span>
+              <input
+                autoFocus
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                placeholder="Reason…"
+                className="min-w-0 flex-1 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs outline-none placeholder:text-ink-faint focus:border-brand/50"
+              />
+              <button
+                disabled={!rejectReason.trim()}
+                onClick={async () => {
+                  if (!session.buyerProfileId || !rejectingItem) return;
+                  await rejectBuyerItem(session.buyerProfileId, {
+                    packId: pack.id,
+                    itemId: rejectingItem.id,
+                    reason: rejectReason.trim(),
+                  });
+                  setRejectingItem(null);
+                }}
+                className="shrink-0 rounded-lg bg-red-500/20 px-2 py-1 text-[11px] font-medium text-red-300 transition hover:bg-red-500/30 disabled:opacity-40"
+              >
+                Reject
+              </button>
+              <button
+                onClick={() => setRejectingItem(null)}
+                className="shrink-0 rounded-lg px-2 py-1 text-[11px] text-ink-faint transition hover:text-ink"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -520,6 +608,7 @@ function CustomerBlock() {
     <div className="border-b border-white/5 px-5 py-3">
       <button
         onClick={() => setOpen((o) => !o)}
+        aria-label="Customer details"
         className="flex w-full items-center justify-between"
       >
         <div className="flex items-center gap-2">

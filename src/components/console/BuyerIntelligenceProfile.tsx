@@ -1,7 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, Loader2, Mail, Phone, Plus, Trash2, History, MessageSquareText } from "lucide-react";
+import {
+  ArrowLeft,
+  Loader2,
+  Mail,
+  Phone,
+  Plus,
+  Trash2,
+  History,
+  MessageSquareText,
+  Activity,
+  Ban,
+  Undo2,
+} from "lucide-react";
 import { Panel } from "@/components/console/light-ui";
 import { cx } from "@/components/ui/primitives";
 import { PACKS } from "@/core/industries";
@@ -9,6 +21,9 @@ import {
   useBuyerProfile,
   useBuyerRequirementChanges,
   useBuyerConversationNotes,
+  useBuyerActivity,
+  useBuyerRejectedItems,
+  overrideRejectedItem,
   updateBuyerProfile,
   type BuyerProfile,
 } from "@/core/store/buyerProfiles";
@@ -140,6 +155,8 @@ export function BuyerIntelligenceProfile({ id, onBack }: { id: string; onBack: (
         <MotivationsPanel buyerProfile={buyerProfile} />
         <PrioritiesPanel buyerProfile={buyerProfile} />
         <HistoryPanel buyerProfileId={id} />
+        <ActivityPanel buyerProfileId={id} />
+        <RejectedItemsPanel buyerProfileId={id} />
         <ConversationMemoryPanel buyerProfileId={id} />
       </div>
     </div>
@@ -422,6 +439,91 @@ function HistoryPanel({ buyerProfileId }: { buyerProfileId: string }) {
                   {new Date(c.createdAt).toLocaleString()} · {c.source}
                 </div>
               </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </Panel>
+  );
+}
+
+function itemLabel(packId: string | null, itemId: string | null): string {
+  if (!packId || !itemId) return "";
+  const item = PACKS.find((p) => p.id === packId)?.inventory.find((i) => i.id === itemId);
+  return item?.name ?? itemId;
+}
+
+const ACTIVITY_KIND_LABEL: Record<string, string> = {
+  property_viewed: "Viewed",
+  item_saved: "Saved",
+  comparison_made: "Compared shortlist",
+  proposal_generated: "Proposal generated",
+};
+
+/** Behavioral intelligence (spec §3) — a real, timestamped log of what this buyer's linked session actually did, not a summary. Tracking begins at identification: nothing here predates the session being linked to this profile. */
+function ActivityPanel({ buyerProfileId }: { buyerProfileId: string }) {
+  const { events, isLoading } = useBuyerActivity(buyerProfileId);
+  return (
+    <Panel title="Buyer activity">
+      {isLoading ? (
+        <div className="flex items-center gap-2 py-4 text-sm text-zinc-400">
+          <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+        </div>
+      ) : events.length === 0 ? (
+        <p className="text-sm text-zinc-400">
+          No activity yet — behavioral tracking starts once a live session is linked to this buyer.
+        </p>
+      ) : (
+        <div className="space-y-2">
+          {events.map((e) => (
+            <div key={e.id} className="flex items-start gap-2 rounded-xl border border-zinc-200 px-3 py-2 text-sm">
+              <Activity className="mt-0.5 h-3.5 w-3.5 shrink-0 text-zinc-400" />
+              <div>
+                <span className="font-medium text-zinc-900">{ACTIVITY_KIND_LABEL[e.kind] ?? e.kind}</span>
+                {e.itemId && <span className="text-zinc-600"> · {itemLabel(e.packId, e.itemId)}</span>}
+                <div className="text-[11px] text-zinc-400">{new Date(e.createdAt).toLocaleString()}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </Panel>
+  );
+}
+
+/** Rejected options (spec §7) — an item this buyer has actively ruled out never resurfaces as a recommendation for them (see excludeItemIds in scoreInventory) unless a salesperson explicitly overrides it here. */
+function RejectedItemsPanel({ buyerProfileId }: { buyerProfileId: string }) {
+  const { rejectedItems, isLoading } = useBuyerRejectedItems(buyerProfileId);
+  return (
+    <Panel title="Rejected options">
+      {isLoading ? (
+        <div className="flex items-center gap-2 py-4 text-sm text-zinc-400">
+          <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+        </div>
+      ) : rejectedItems.length === 0 ? (
+        <p className="text-sm text-zinc-400">Nothing rejected yet.</p>
+      ) : (
+        <div className="space-y-2">
+          {rejectedItems.map((r) => (
+            <div key={r.id} className="flex items-start gap-2 rounded-xl border border-zinc-200 px-3 py-2 text-sm">
+              <Ban className="mt-0.5 h-3.5 w-3.5 shrink-0 text-zinc-400" />
+              <div className="min-w-0 flex-1">
+                <div className="font-medium text-zinc-900">{itemLabel(r.packId, r.itemId)}</div>
+                <div className="text-zinc-600">{r.reason}</div>
+                <div className="text-[11px] text-zinc-400">
+                  {new Date(r.createdAt).toLocaleString()}
+                  {r.overriddenAt && ` · overridden ${new Date(r.overriddenAt).toLocaleString()}`}
+                </div>
+              </div>
+              {!r.overriddenAt && (
+                <button
+                  onClick={() => void overrideRejectedItem(buyerProfileId, r.id)}
+                  title="Let this item resurface in recommendations again"
+                  className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-zinc-200 px-2 py-1 text-[11px] text-zinc-500 hover:bg-zinc-50"
+                >
+                  <Undo2 className="h-3 w-3" /> Override
+                </button>
+              )}
             </div>
           ))}
         </div>

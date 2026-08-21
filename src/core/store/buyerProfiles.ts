@@ -176,3 +176,97 @@ export function useBuyerConversationNotes(id: string | null): { notes: BuyerConv
   );
   return { notes: data?.notes ?? [], isLoading: isLoading && data === undefined };
 }
+
+export type BuyerActivityKind = "property_viewed" | "item_saved" | "comparison_made" | "proposal_generated";
+
+export interface BuyerActivityEvent {
+  id: string;
+  kind: string;
+  packId: string | null;
+  itemId: string | null;
+  meta: Record<string, unknown> | null;
+  createdAt: number;
+}
+
+export interface BuyerItemRelationship {
+  id: string;
+  packId: string;
+  itemId: string;
+  state: string;
+  context: Record<string, unknown> | null;
+  createdAt: number;
+}
+
+/**
+ * Logs a passive behavioral signal from the buyer's own linked live session
+ * (item viewed, bookmarked, a proposal generated) — only ever called from
+ * Companion-specific interaction points, never from the shared session store
+ * itself, so customer-facing surfaces can never trigger a write. Best-effort:
+ * a failed log never blocks the salesperson's UI action it rides along with.
+ */
+export async function logBuyerActivity(
+  buyerProfileId: string,
+  input: { kind: BuyerActivityKind; packId?: string; itemId?: string; meta?: Record<string, unknown> },
+): Promise<void> {
+  try {
+    await fetch(`${BUYER_PROFILES_KEY}/${buyerProfileId}/activity`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+  } catch {
+    // best-effort — never blocks the UI action it rides along with
+  }
+  globalMutate(`${BUYER_PROFILES_KEY}/${buyerProfileId}/activity`);
+}
+
+export function useBuyerActivity(
+  id: string | null,
+): { events: BuyerActivityEvent[]; relationships: BuyerItemRelationship[]; isLoading: boolean } {
+  const { data, isLoading } = useSWR<{ events: BuyerActivityEvent[]; relationships: BuyerItemRelationship[] }>(
+    id ? `${BUYER_PROFILES_KEY}/${id}/activity` : null,
+    fetcher,
+  );
+  return { events: data?.events ?? [], relationships: data?.relationships ?? [], isLoading: isLoading && data === undefined };
+}
+
+export interface BuyerRejectedItem {
+  id: string;
+  packId: string;
+  itemId: string;
+  reason: string;
+  source: string;
+  overriddenAt: number | null;
+  createdAt: number;
+}
+
+export function useBuyerRejectedItems(id: string | null): { rejectedItems: BuyerRejectedItem[]; isLoading: boolean } {
+  const { data, isLoading } = useSWR<{ rejectedItems: BuyerRejectedItem[] }>(
+    id ? `${BUYER_PROFILES_KEY}/${id}/rejected-items` : null,
+    fetcher,
+  );
+  return { rejectedItems: data?.rejectedItems ?? [], isLoading: isLoading && data === undefined };
+}
+
+/** Deliberate reject action, distinct from logBuyerActivity's passive tracking — always requires a reason. */
+export async function rejectBuyerItem(
+  buyerProfileId: string,
+  input: { packId: string; itemId: string; reason: string },
+): Promise<boolean> {
+  const res = await fetch(`${BUYER_PROFILES_KEY}/${buyerProfileId}/rejected-items`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  globalMutate(`${BUYER_PROFILES_KEY}/${buyerProfileId}/rejected-items`);
+  globalMutate(`${BUYER_PROFILES_KEY}/${buyerProfileId}/activity`);
+  return res.ok;
+}
+
+export async function overrideRejectedItem(buyerProfileId: string, rejectedItemId: string): Promise<boolean> {
+  const res = await fetch(`${BUYER_PROFILES_KEY}/${buyerProfileId}/rejected-items/${rejectedItemId}`, {
+    method: "PATCH",
+  });
+  globalMutate(`${BUYER_PROFILES_KEY}/${buyerProfileId}/rejected-items`);
+  return res.ok;
+}
