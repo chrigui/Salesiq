@@ -18,6 +18,13 @@ import { DisplayNearbyPlaces } from "./widgets/DisplayNearbyPlaces";
 import { DisplayInvestmentSnapshot } from "./widgets/DisplayInvestmentSnapshot";
 import { DisplayGalleryCard } from "./widgets/DisplayGalleryCard";
 import { DisplayLocationMap } from "./widgets/DisplayLocationMap";
+import { DisplayPriceSummary } from "./widgets/DisplayPriceSummary";
+import { DisplayAvailability } from "./widgets/DisplayAvailability";
+import { DisplayComparisonMini } from "./widgets/DisplayComparisonMini";
+import { DisplayComparisonTable } from "./widgets/DisplayComparisonTable";
+import { DisplayDocumentsCard } from "./widgets/DisplayDocumentsCard";
+import { DisplaySaveShare } from "./widgets/DisplaySaveShare";
+import { DisplayLeadCaptureCard } from "./widgets/DisplayLeadCaptureCard";
 import type { DisplayWidgetContext } from "./types";
 
 /** Display Studio's widget registry — the "no hardcoded templates" part: a profile is just an ordered list of these, toggled/reordered in the editor, rendered identically in the editor preview and on the real Customer Display. Covers all six catalog categories: Property, Location, Project, Investment, Experience, Conversion. */
@@ -41,6 +48,13 @@ export const WIDGET_REGISTRY: Record<string, ComponentType<DisplayWidgetContext>
   investmentSnapshot: DisplayInvestmentSnapshot,
   galleryCard: DisplayGalleryCard,
   locationMap: DisplayLocationMap,
+  priceSummary: DisplayPriceSummary,
+  availability: DisplayAvailability,
+  comparisonMini: DisplayComparisonMini,
+  comparisonTable: DisplayComparisonTable,
+  documentsCard: DisplayDocumentsCard,
+  saveShare: DisplaySaveShare,
+  leadCaptureCard: DisplayLeadCaptureCard,
 };
 
 export const WIDGET_LABELS: Record<string, string> = {
@@ -63,4 +77,11 @@ export const WIDGET_LABELS: Record<string, string> = {
   investmentSnapshot: "Investment snapshot (card)",
   galleryCard: "Gallery (card)",
   locationMap: "Location map",
+  priceSummary: "Price summary",
+  availability: "Availability",
+  comparisonMini: "Also consider (mini)",
+  comparisonTable: "Comparison table",
+  documentsCard: "Documents (card)",
+  saveShare: "Save & share",
+  leadCaptureCard: "Lead capture (card)",
 };

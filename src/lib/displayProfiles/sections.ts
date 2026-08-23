@@ -24,6 +24,13 @@ export const WIDGET_TYPES = [
   "investmentSnapshot",
   "galleryCard",
   "locationMap",
+  "priceSummary",
+  "availability",
+  "comparisonMini",
+  "comparisonTable",
+  "documentsCard",
+  "saveShare",
+  "leadCaptureCard",
 ] as const;
 export type WidgetType = (typeof WIDGET_TYPES)[number];
 
@@ -46,6 +53,13 @@ const DEFAULT_SPAN: Partial<Record<WidgetType, "sm" | "md" | "lg">> = {
   investmentSnapshot: "md",
   galleryCard: "md",
   locationMap: "md",
+  priceSummary: "sm",
+  availability: "sm",
+  comparisonMini: "sm",
+  comparisonTable: "md",
+  documentsCard: "md",
+  saveShare: "sm",
+  leadCaptureCard: "md",
 };
 
 /**
@@ -56,16 +70,57 @@ const DEFAULT_SPAN: Partial<Record<WidgetType, "sm" | "md" | "lg">> = {
  * locked designs — every widget stays reachable afterward regardless of
  * template.
  */
+// Every non-Dashboard template's Tier 2 tail is the same order: these are
+// new, off-by-default additions to an existing template, not a curated
+// per-template composition — a genuinely tailored order can follow if a
+// template's authors want one.
+const TIER2_TAIL: WidgetType[] = [
+  "priceSummary",
+  "availability",
+  "comparisonMini",
+  "comparisonTable",
+  "documentsCard",
+  "saveShare",
+  "leadCaptureCard",
+];
+
 const TEMPLATE_ORDER: Record<DisplayTemplateId, WidgetType[]> = {
-  Minimal: ["hero", "highlights", "specs", "gallery", "neighborhood", "masterplan", "documents", "investment", "comparables", "aiPromptTicker", "trustBadges", "continueQr", "leadCapture"],
-  NewDevelopment: ["hero", "gallery", "masterplan", "documents", "highlights", "neighborhood", "leadCapture", "specs", "investment", "comparables", "aiPromptTicker", "trustBadges", "continueQr"],
-  Detailed: ["hero", "gallery", "highlights", "specs", "neighborhood", "documents", "trustBadges", "masterplan", "investment", "comparables", "aiPromptTicker", "continueQr", "leadCapture"],
-  Lifestyle: ["hero", "gallery", "neighborhood", "highlights", "aiPromptTicker", "continueQr", "specs", "masterplan", "documents", "investment", "comparables", "trustBadges", "leadCapture"],
-  Investment: ["hero", "investment", "comparables", "specs", "highlights", "trustBadges", "gallery", "neighborhood", "masterplan", "documents", "aiPromptTicker", "continueQr", "leadCapture"],
-  LuxuryCinematic: ["hero", "gallery", "highlights", "trustBadges", "continueQr", "specs", "neighborhood", "masterplan", "documents", "investment", "comparables", "aiPromptTicker", "leadCapture"],
-  Masterplan: ["hero", "masterplan", "documents", "neighborhood", "gallery", "highlights", "specs", "investment", "comparables", "aiPromptTicker", "trustBadges", "continueQr", "leadCapture"],
-  Custom: ["hero", "gallery", "highlights", "specs", "neighborhood", "masterplan", "documents", "investment", "comparables", "aiPromptTicker", "trustBadges", "continueQr", "leadCapture"],
-  Dashboard: ["heroCard", "matchScore", "nearbyPlaces", "investmentSnapshot", "galleryCard", "locationMap", "hero", "gallery", "highlights", "specs", "neighborhood", "masterplan", "documents", "investment", "comparables", "aiPromptTicker", "trustBadges", "continueQr", "leadCapture"],
+  Minimal: ["hero", "highlights", "specs", "gallery", "neighborhood", "masterplan", "documents", "investment", "comparables", "aiPromptTicker", "trustBadges", "continueQr", "leadCapture", ...TIER2_TAIL],
+  NewDevelopment: ["hero", "gallery", "masterplan", "documents", "highlights", "neighborhood", "leadCapture", "specs", "investment", "comparables", "aiPromptTicker", "trustBadges", "continueQr", ...TIER2_TAIL],
+  Detailed: ["hero", "gallery", "highlights", "specs", "neighborhood", "documents", "trustBadges", "masterplan", "investment", "comparables", "aiPromptTicker", "continueQr", "leadCapture", ...TIER2_TAIL],
+  Lifestyle: ["hero", "gallery", "neighborhood", "highlights", "aiPromptTicker", "continueQr", "specs", "masterplan", "documents", "investment", "comparables", "trustBadges", "leadCapture", ...TIER2_TAIL],
+  Investment: ["hero", "investment", "comparables", "specs", "highlights", "trustBadges", "gallery", "neighborhood", "masterplan", "documents", "aiPromptTicker", "continueQr", "leadCapture", ...TIER2_TAIL],
+  LuxuryCinematic: ["hero", "gallery", "highlights", "trustBadges", "continueQr", "specs", "neighborhood", "masterplan", "documents", "investment", "comparables", "aiPromptTicker", "leadCapture", ...TIER2_TAIL],
+  Masterplan: ["hero", "masterplan", "documents", "neighborhood", "gallery", "highlights", "specs", "investment", "comparables", "aiPromptTicker", "trustBadges", "continueQr", "leadCapture", ...TIER2_TAIL],
+  Custom: ["hero", "gallery", "highlights", "specs", "neighborhood", "masterplan", "documents", "investment", "comparables", "aiPromptTicker", "trustBadges", "continueQr", "leadCapture", ...TIER2_TAIL],
+  Dashboard: [
+    "heroCard",
+    "matchScore",
+    "nearbyPlaces",
+    "investmentSnapshot",
+    "galleryCard",
+    "locationMap",
+    "priceSummary",
+    "availability",
+    "comparisonMini",
+    "comparisonTable",
+    "documentsCard",
+    "saveShare",
+    "leadCaptureCard",
+    "hero",
+    "gallery",
+    "highlights",
+    "specs",
+    "neighborhood",
+    "masterplan",
+    "documents",
+    "investment",
+    "comparables",
+    "aiPromptTicker",
+    "trustBadges",
+    "continueQr",
+    "leadCapture",
+  ],
 };
 
 /** How many of each template's ordering starts enabled — the rest are present but off, still one toggle away. */

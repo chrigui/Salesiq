@@ -78,6 +78,9 @@ export interface InventoryItem {
    * position for a real place, or a real distance for an illustrated one.
    */
   nearbyAmenities?: NearbyAmenity[];
+  /** Admin-entered availability — never inferred/fabricated. Both optional and independent: a project can report units left without a known total. */
+  unitsLeft?: number;
+  totalUnits?: number;
 }
 
 /** A real nearby amenity found via OpenStreetMap, shown as a plain informational list. */

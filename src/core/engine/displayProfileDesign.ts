@@ -111,6 +111,7 @@ export function deterministicDisplayDesign(
   const hasNearbyAmenities = (item.nearbyAmenities?.length ?? 0) > 0;
   const hasLocation = Boolean(item.location);
   const hasScoring = pack.rules.length > 0;
+  const hasAvailability = item.unitsLeft != null;
 
   const enabled: Record<WidgetType, boolean> = {
     hero: true,
@@ -132,6 +133,13 @@ export function deterministicDisplayDesign(
     investmentSnapshot: hasAppreciation,
     galleryCard: hasPhotos,
     locationMap: hasLocation,
+    priceSummary: true,
+    availability: hasAvailability,
+    comparisonMini: hasComparables,
+    comparisonTable: hasComparables,
+    documentsCard: hasDocs,
+    saveShare: true,
+    leadCaptureCard: true,
   };
 
   const preset: Exclude<MotionPresetId, "Custom"> = /jet|yacht|luxury/i.test(pack.vertical)

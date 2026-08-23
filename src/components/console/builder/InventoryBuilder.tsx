@@ -238,6 +238,23 @@ function ItemRow({
             </Field>
           </div>
 
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field label="Units left" hint="Optional — leave blank unless you track live availability">
+              <NumberInput
+                value={item.unitsLeft}
+                min={0}
+                onValue={(unitsLeft) => onChange({ unitsLeft })}
+              />
+            </Field>
+            <Field label="Total units" hint="Optional">
+              <NumberInput
+                value={item.totalUnits}
+                min={0}
+                onValue={(totalUnits) => onChange({ totalUnits })}
+              />
+            </Field>
+          </div>
+
           <Field label="Photo URL" hint="Falls back to the gradient if it fails to load">
             <TextInput
               value={item.photo ?? ""}
