@@ -40,6 +40,7 @@ const TEMPLATES: { id: DisplayTemplate; label: string; blurb: string }[] = [
   { id: "LuxuryCinematic", label: "Luxury / Cinematic", blurb: "Immersive, image-led, elegant reveals" },
   { id: "Masterplan", label: "Masterplan / Community", blurb: "Districts, buildings, amenities, infrastructure" },
   { id: "Custom", label: "Custom", blurb: "Start blank and build with the widget library" },
+  { id: "Dashboard", label: "Dashboard", blurb: "A grid of live widget cards, always visible at once" },
 ];
 
 export function DisplayStudio() {

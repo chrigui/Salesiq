@@ -12,6 +12,12 @@ import { DisplayAiPromptTicker } from "./widgets/DisplayAiPromptTicker";
 import { DisplayTrustBadges } from "./widgets/DisplayTrustBadges";
 import { DisplayContinueQr } from "./widgets/DisplayContinueQr";
 import { DisplayLeadCapture } from "./widgets/DisplayLeadCapture";
+import { DisplayHeroCard } from "./widgets/DisplayHeroCard";
+import { DisplayMatchScore } from "./widgets/DisplayMatchScore";
+import { DisplayNearbyPlaces } from "./widgets/DisplayNearbyPlaces";
+import { DisplayInvestmentSnapshot } from "./widgets/DisplayInvestmentSnapshot";
+import { DisplayGalleryCard } from "./widgets/DisplayGalleryCard";
+import { DisplayLocationMap } from "./widgets/DisplayLocationMap";
 import type { DisplayWidgetContext } from "./types";
 
 /** Display Studio's widget registry — the "no hardcoded templates" part: a profile is just an ordered list of these, toggled/reordered in the editor, rendered identically in the editor preview and on the real Customer Display. Covers all six catalog categories: Property, Location, Project, Investment, Experience, Conversion. */
@@ -29,6 +35,12 @@ export const WIDGET_REGISTRY: Record<string, ComponentType<DisplayWidgetContext>
   trustBadges: DisplayTrustBadges,
   continueQr: DisplayContinueQr,
   leadCapture: DisplayLeadCapture,
+  heroCard: DisplayHeroCard,
+  matchScore: DisplayMatchScore,
+  nearbyPlaces: DisplayNearbyPlaces,
+  investmentSnapshot: DisplayInvestmentSnapshot,
+  galleryCard: DisplayGalleryCard,
+  locationMap: DisplayLocationMap,
 };
 
 export const WIDGET_LABELS: Record<string, string> = {
@@ -45,4 +57,10 @@ export const WIDGET_LABELS: Record<string, string> = {
   trustBadges: "Trust badges",
   continueQr: "Continue on phone (QR)",
   leadCapture: "Lead capture form",
+  heroCard: "Property hero (card)",
+  matchScore: "Why we recommend this (match score)",
+  nearbyPlaces: "Nearby places",
+  investmentSnapshot: "Investment snapshot (card)",
+  galleryCard: "Gallery (card)",
+  locationMap: "Location map",
 };

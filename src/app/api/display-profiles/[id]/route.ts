@@ -37,8 +37,19 @@ const sectionSchema = z.object({
 const patchSchema = z.object({
   name: z.string().min(1).max(200).optional(),
   template: z
-    .enum(["Minimal", "NewDevelopment", "Detailed", "Lifestyle", "Investment", "LuxuryCinematic", "Masterplan", "Custom"])
+    .enum([
+      "Minimal",
+      "NewDevelopment",
+      "Detailed",
+      "Lifestyle",
+      "Investment",
+      "LuxuryCinematic",
+      "Masterplan",
+      "Custom",
+      "Dashboard",
+    ])
     .optional(),
+  layout: z.enum(["Stack", "Grid"]).optional(),
   sections: z.array(sectionSchema).optional(),
   brandProfileId: z.string().min(1).max(100).nullable().optional(),
   brandOverrides: z.object({ brand: z.string().optional(), brandSoft: z.string().optional() }).nullable().optional(),

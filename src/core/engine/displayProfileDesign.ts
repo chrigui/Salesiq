@@ -108,6 +108,9 @@ export function deterministicDisplayDesign(
   const hasDocs = assets.length > 0;
   const hasAppreciation = item.appreciation != null;
   const hasComparables = pack.inventory.length > 1;
+  const hasNearbyAmenities = (item.nearbyAmenities?.length ?? 0) > 0;
+  const hasLocation = Boolean(item.location);
+  const hasScoring = pack.rules.length > 0;
 
   const enabled: Record<WidgetType, boolean> = {
     hero: true,
@@ -123,6 +126,12 @@ export function deterministicDisplayDesign(
     trustBadges: hasPhotos || hasDocs || hasLifestyle || hasSpecs,
     continueQr: true,
     leadCapture: true,
+    heroCard: true,
+    matchScore: hasScoring,
+    nearbyPlaces: hasNearbyAmenities,
+    investmentSnapshot: hasAppreciation,
+    galleryCard: hasPhotos,
+    locationMap: hasLocation,
   };
 
   const preset: Exclude<MotionPresetId, "Custom"> = /jet|yacht|luxury/i.test(pack.vertical)

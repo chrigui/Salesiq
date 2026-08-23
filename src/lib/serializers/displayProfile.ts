@@ -34,6 +34,7 @@ export interface DisplayProfileDTO {
   packId: string;
   itemId: string;
   template: PrismaDisplayProfile["template"];
+  layout: PrismaDisplayProfile["layout"];
   status: PrismaDisplayProfile["status"];
   sections: DisplaySection[];
   brandProfileId: string | null;
@@ -63,6 +64,7 @@ export function toDisplayProfileDTO(
     packId: row.packId,
     itemId: row.itemId,
     template: row.template,
+    layout: row.layout,
     status: row.status,
     sections: (row.sections as unknown as DisplaySection[]) ?? [],
     brandProfileId: row.brandProfileId,

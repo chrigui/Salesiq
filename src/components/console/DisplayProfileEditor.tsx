@@ -17,7 +17,7 @@ import {
 } from "@/core/store/displayProfiles";
 import { WIDGET_LABELS } from "@/components/display/registry";
 import { useBrandProfiles } from "@/core/store/brandProfiles";
-import { DisplayProfileRenderer } from "@/components/display/DisplayProfileRenderer";
+import { DisplayProfileRenderer, type WidgetSpan } from "@/components/display/DisplayProfileRenderer";
 import {
   MOTION_PRESET_IDS,
   MOTION_PRESET_LABELS,
@@ -39,6 +39,7 @@ const TEMPLATES: DisplayTemplate[] = [
   "LuxuryCinematic",
   "Masterplan",
   "Custom",
+  "Dashboard",
 ];
 
 export function DisplayProfileEditor({ id, onBack }: { id: string; onBack: () => void }) {
@@ -252,9 +253,36 @@ function WidgetsTab({ id, profile }: { id: string; profile: DisplayProfile }) {
   const toggle = (idx: number) =>
     commit(sections.map((s, i) => (i === idx ? { ...s, enabled: !s.enabled } : s)));
 
+  const setSpan = (idx: number, span: WidgetSpan) =>
+    commit(sections.map((s, i) => (i === idx ? { ...s, config: { ...s.config, span } } : s)));
+
+  const isGrid = profile.layout === "Grid";
+
   return (
     <div className="space-y-4">
       <AiDesignPanel id={id} />
+      <Panel title="Layout">
+        <div className="flex gap-2">
+          {(["Stack", "Grid"] as const).map((l) => (
+            <button
+              key={l}
+              onClick={() => updateDisplayProfile(id, { layout: l })}
+              className={cx(
+                "rounded-xl border px-3 py-2 text-sm font-medium transition",
+                profile.layout === l
+                  ? "border-zinc-900 bg-zinc-900 text-white"
+                  : "border-zinc-200 text-zinc-600 hover:bg-zinc-50",
+              )}
+            >
+              {l === "Stack" ? "Stack (scroll)" : "Grid (dashboard)"}
+            </button>
+          ))}
+        </div>
+        <p className="mt-3 text-[11px] text-zinc-400">
+          Stack shows one full-width widget at a time as the customer scrolls. Grid shows every enabled
+          widget at once as a dashboard of cards — set each widget&apos;s size below.
+        </p>
+      </Panel>
       <div className="grid gap-4 lg:grid-cols-2">
       <Panel title="Widgets">
         <div className="space-y-2">
@@ -277,6 +305,18 @@ function WidgetsTab({ id, profile }: { id: string; profile: DisplayProfile }) {
                   {WIDGET_LABELS[s.type] ?? s.type}
                 </span>
               </label>
+              {isGrid && (
+                <select
+                  value={(s.config?.span as WidgetSpan | undefined) ?? "lg"}
+                  onChange={(e) => setSpan(i, e.target.value as WidgetSpan)}
+                  className="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs text-zinc-600"
+                  aria-label={`${WIDGET_LABELS[s.type] ?? s.type} card size`}
+                >
+                  <option value="sm">Small</option>
+                  <option value="md">Medium</option>
+                  <option value="lg">Full width</option>
+                </select>
+              )}
               <div className="flex items-center gap-0.5">
                 <IconBtn label="Move up" disabled={i === 0} onClick={() => move(i, -1)}>
                   <ArrowUp className="h-3.5 w-3.5" />

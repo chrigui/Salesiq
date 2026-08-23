@@ -32,7 +32,17 @@ const createSchema = z.object({
   itemId: z.string().min(1).max(100),
   name: z.string().min(1).max(200).optional(),
   template: z
-    .enum(["Minimal", "NewDevelopment", "Detailed", "Lifestyle", "Investment", "LuxuryCinematic", "Masterplan", "Custom"])
+    .enum([
+      "Minimal",
+      "NewDevelopment",
+      "Detailed",
+      "Lifestyle",
+      "Investment",
+      "LuxuryCinematic",
+      "Masterplan",
+      "Custom",
+      "Dashboard",
+    ])
     .default("Minimal"),
 });
 
@@ -60,6 +70,9 @@ export async function POST(request: Request) {
         itemId,
         name: name?.trim() || `${item.name} display`,
         template,
+        // The Dashboard template is the one preset that implies the grid
+        // layout by default — every other template keeps today's stack.
+        layout: template === "Dashboard" ? "Grid" : "Stack",
         sections: defaultDisplaySections(template) as unknown as Prisma.InputJsonValue,
         status: "Draft",
         createdById: ctx.userId,

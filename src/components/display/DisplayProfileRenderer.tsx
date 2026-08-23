@@ -1,6 +1,6 @@
 "use client";
 
-import type { CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { motion } from "framer-motion";
 import { WIDGET_REGISTRY } from "./registry";
 import type { DisplayPackSummary, DisplayWidgetContext } from "./types";
@@ -17,6 +17,8 @@ export interface DisplayProfileRendererProps {
   /** Forwarded from DisplayStage's own claimed-device state — absent in the editor preview, where there's no real kiosk to attribute a lead submission to. */
   deviceId?: string;
   deviceToken?: string;
+  /** Forwarded from DisplayStage's own live scoreInventory() run — absent (idle mode, editor preview) when there's no active customer session to score against. */
+  matchScore?: DisplayWidgetContext["matchScore"];
 }
 
 /**
@@ -27,7 +29,7 @@ export interface DisplayProfileRendererProps {
  * src/components/brochure/BrochureView.tsx's scoped --brand/--brand-soft
  * pattern so a profile's brand overrides don't touch the app-wide theme.
  */
-export function DisplayProfileRenderer({ profile, pack, item, mode, deviceId, deviceToken }: DisplayProfileRendererProps) {
+export function DisplayProfileRenderer({ profile, pack, item, mode, deviceId, deviceToken, matchScore }: DisplayProfileRendererProps) {
   const brand = profile.brandOverrides?.brand || profile.resolvedBrandProfile?.brand || pack.branding.brand;
   const brandSoft = profile.brandOverrides?.brandSoft || profile.resolvedBrandProfile?.brandSoft || pack.branding.brandSoft;
   const brandVars = { "--brand": brand, "--brand-soft": brandSoft } as CSSProperties;
@@ -60,44 +62,113 @@ export function DisplayProfileRenderer({ profile, pack, item, mode, deviceId, de
   const motionConfig = resolveMotionConfig(profile.motion);
   const comparables = nearestComparables(pack.inventory, item);
 
+  const widgets = enabled.map((s, i) => {
+    const Widget = WIDGET_REGISTRY[s.type];
+    if (!Widget) return null;
+    const widget = (
+      <Widget
+        item={item}
+        pack={packSummary}
+        template={profile.template}
+        mode={mode}
+        assets={profile.assets}
+        assetsBaseUrl={assetsBaseUrl}
+        motion={motionConfig}
+        comparables={comparables}
+        deviceId={deviceId}
+        deviceToken={deviceToken}
+        matchScore={matchScore ?? null}
+      />
+    );
+    if (motionConfig.reduceMotion) {
+      return { id: s.id, span: sectionSpan(s), node: <div key={s.id}>{widget}</div> };
+    }
+    return {
+      id: s.id,
+      span: sectionSpan(s),
+      node: (
+        <motion.div
+          key={s.id}
+          initial={{ opacity: 0, y: motionConfig.reveal.distancePx }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-10%" }}
+          transition={{
+            duration: motionConfig.reveal.durationMs / 1000,
+            delay: (i * motionConfig.reveal.staggerMs) / 1000,
+            ease: motionConfig.transition.ease,
+          }}
+        >
+          {widget}
+        </motion.div>
+      ),
+    };
+  });
+
+  if (profile.layout === "Grid") {
+    return (
+      <div style={brandVars} className="min-h-screen bg-zinc-950 p-6">
+        <div className="grid grid-cols-4 gap-4">
+          {widgets.map((w) =>
+            w ? (
+              <GridCell key={w.id} span={w.span}>
+                {w.node}
+              </GridCell>
+            ) : null,
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={brandVars} className="min-h-screen bg-zinc-950">
-      {enabled.map((s, i) => {
-        const Widget = WIDGET_REGISTRY[s.type];
-        if (!Widget) return null;
-        const widget = (
-          <Widget
-            item={item}
-            pack={packSummary}
-            template={profile.template}
-            mode={mode}
-            assets={profile.assets}
-            assetsBaseUrl={assetsBaseUrl}
-            motion={motionConfig}
-            comparables={comparables}
-            deviceId={deviceId}
-            deviceToken={deviceToken}
-          />
-        );
-        if (motionConfig.reduceMotion) {
-          return <div key={s.id}>{widget}</div>;
-        }
-        return (
-          <motion.div
-            key={s.id}
-            initial={{ opacity: 0, y: motionConfig.reveal.distancePx }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-10%" }}
-            transition={{
-              duration: motionConfig.reveal.durationMs / 1000,
-              delay: (i * motionConfig.reveal.staggerMs) / 1000,
-              ease: motionConfig.transition.ease,
-            }}
-          >
-            {widget}
-          </motion.div>
-        );
-      })}
+      {widgets.map((w) => (w ? w.node : null))}
     </div>
   );
+}
+
+/**
+ * A widget with no supporting data renders null (honest, never fabricated —
+ * see every widget's empty-state handling) rather than a placeholder, but a
+ * plain grid-span div around `null` still reserves its column span, leaving
+ * a visible gap and pushing every later widget out of alignment. Measuring
+ * after mount and collapsing to nothing (not just visually hidden — removed
+ * from grid flow) is the general fix that works for any widget, current or
+ * future, without the renderer needing to know per-type why something is empty.
+ */
+function GridCell({ span, children }: { span: WidgetSpan; children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [empty, setEmpty] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    // Widgets always render inside a reveal-animation wrapper div, so even a
+    // widget returning null leaves at least one (empty) DOM node here —
+    // childElementCount alone can't tell "empty" from "has content". Check
+    // the whole subtree for anything actually visible instead.
+    const hasContent = (el.textContent?.trim().length ?? 0) > 0 || el.querySelector("img, svg, canvas, video") !== null;
+    setEmpty(!hasContent);
+  }, [children]);
+
+  if (empty) return null;
+  return (
+    <div ref={ref} className={SPAN_CLASS[span]}>
+      {children}
+    </div>
+  );
+}
+
+export type WidgetSpan = "sm" | "md" | "lg";
+
+const SPAN_CLASS: Record<WidgetSpan, string> = {
+  sm: "col-span-4 sm:col-span-2 lg:col-span-1",
+  md: "col-span-4 lg:col-span-2",
+  lg: "col-span-4",
+};
+
+/** A section with no explicit span (every legacy stack-only widget) defaults to full-width in a grid — it was built as a full section, not a small card. */
+function sectionSpan(section: DisplayProfileDTO["sections"][number]): WidgetSpan {
+  const span = (section.config as { span?: unknown } | undefined)?.span;
+  return span === "sm" || span === "md" || span === "lg" ? span : "lg";
 }

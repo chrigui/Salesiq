@@ -87,12 +87,20 @@ enum DisplayTemplate {
   LuxuryCinematic
   Masterplan
   Custom
+  Dashboard
 }
 
 enum DisplayProfileStatus {
   Draft
   Published
   Archived
+}
+
+// Stack = today's vertical scroll of full-width sections (unchanged default).
+// Grid = a dense dashboard of simultaneously-visible widget cards.
+enum DisplayProfileLayout {
+  Stack
+  Grid
 }
 
 enum DealRoomTemplateStatus {
@@ -762,6 +770,10 @@ model DisplayProfile {
   itemId String
 
   template DisplayTemplate @default(Minimal)
+
+  // Rendering shape for `sections` below — see DisplayProfileLayout doc
+  // comment. Additive: existing profiles keep rendering as a stack.
+  layout DisplayProfileLayout @default(Stack)
 
   // Reusable brand kit (see BrandProfile below), optional. Per-profile
   // brandOverrides layers on top of it when set. Resolution order the

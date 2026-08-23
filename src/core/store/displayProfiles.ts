@@ -11,8 +11,10 @@ export type DisplayTemplate =
   | "Investment"
   | "LuxuryCinematic"
   | "Masterplan"
-  | "Custom";
+  | "Custom"
+  | "Dashboard";
 export type DisplayProfileStatus = "Draft" | "Published" | "Archived";
+export type DisplayProfileLayout = "Stack" | "Grid";
 
 export interface DisplayProfile {
   id: string;
@@ -22,6 +24,7 @@ export interface DisplayProfile {
   packId: string;
   itemId: string;
   template: DisplayTemplate;
+  layout: DisplayProfileLayout;
   status: DisplayProfileStatus;
   sections: DisplaySection[];
   brandProfileId: string | null;
@@ -87,7 +90,7 @@ export async function createDisplayProfile(input: {
 
 export async function updateDisplayProfile(
   id: string,
-  patch: Partial<Pick<DisplayProfile, "name" | "template" | "sections" | "brandProfileId" | "brandOverrides" | "motion" | "status">> & {
+  patch: Partial<Pick<DisplayProfile, "name" | "template" | "layout" | "sections" | "brandProfileId" | "brandOverrides" | "motion" | "status">> & {
     changeReason?: string;
   },
 ): Promise<DisplayProfile | null> {
