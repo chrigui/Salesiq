@@ -17,10 +17,18 @@ import {
   FileSpreadsheet,
   Image as ImageIcon,
   File as FileIcon,
+  MapPin,
+  Navigation,
+  School,
+  ShoppingCart,
+  Trees,
+  Bus,
+  UtensilsCrossed,
+  HeartPulse,
 } from "lucide-react";
 import { cx, GRADIENTS } from "@/components/ui/primitives";
 import { getEffectivePack, saveInventory } from "@/core/store/packs";
-import type { InventoryItem } from "@/core/types";
+import type { InventoryItem, NearbyAmenity } from "@/core/types";
 import { Field, NumberInput, TextInput } from "./fields";
 import { LifestyleEditor } from "./LifestyleEditor";
 
@@ -274,6 +282,8 @@ function ItemRow({
             onChange={(attributes) => onChange({ attributes })}
           />
 
+          <LocationEditor item={item} onChange={onChange} />
+
           <LifestyleEditor
             lifestyle={item.lifestyle}
             onChange={(lifestyle) => onChange({ lifestyle })}
@@ -463,6 +473,154 @@ function ProjectLinks({
           />
         </div>
       </Field>
+    </div>
+  );
+}
+
+const AMENITY_ICONS: Record<NearbyAmenity["kind"], typeof MapPin> = {
+  school: School,
+  hospital: HeartPulse,
+  supermarket: ShoppingCart,
+  park: Trees,
+  transport: Bus,
+  restaurant: UtensilsCrossed,
+  other: MapPin,
+};
+
+function formatDistance(m: number): string {
+  return m < 1000 ? `${m} m` : `${(m / 1000).toFixed(1)} km`;
+}
+
+/**
+ * Real geographic location + real nearby amenities, both fetched from
+ * OpenStreetMap (Nominatim for geocoding, Overpass for amenities) —
+ * deliberately kept separate from `lifestyle.pois`, which are hand-placed
+ * illustrative positions on an artistic map stage with no real coordinates.
+ * Mixing the two would mean fabricating either a stage position for a real
+ * place or a real distance for an illustrated one, so this list stays a
+ * plain, factual read-out instead of being plotted onto that map.
+ */
+function LocationEditor({
+  item,
+  onChange,
+}: {
+  item: InventoryItem;
+  onChange: (patch: Partial<InventoryItem>) => void;
+}) {
+  const [query, setQuery] = useState(item.location?.label ?? "");
+  const [locating, setLocating] = useState(false);
+  const [findingAmenities, setFindingAmenities] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const locate = async () => {
+    const q = query.trim();
+    if (!q) return;
+    setLocating(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/inventory/geocode", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: q }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.message ?? "Couldn't find that location.");
+        return;
+      }
+      const { label, lat, lng } = data as { label: string; lat: number; lng: number };
+      onChange({ location: { label, lat, lng }, nearbyAmenities: undefined });
+    } catch {
+      setError("Couldn't reach the location service.");
+    } finally {
+      setLocating(false);
+    }
+  };
+
+  const findAmenities = async () => {
+    if (!item.location) return;
+    setFindingAmenities(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/inventory/nearby-amenities", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lat: item.location.lat, lng: item.location.lng }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.message ?? "Couldn't find nearby amenities.");
+        return;
+      }
+      onChange({ nearbyAmenities: (data as { amenities: NearbyAmenity[] }).amenities });
+    } catch {
+      setError("Couldn't reach the amenities service.");
+    } finally {
+      setFindingAmenities(false);
+    }
+  };
+
+  return (
+    <div className="space-y-3">
+      <Field label="Location" hint={error ?? "Geocodes a real address to an exact lat/lng via OpenStreetMap"}>
+        <div className="flex gap-2">
+          <TextInput
+            value={query}
+            placeholder="Address or project name…"
+            onChange={(e) => setQuery(e.target.value)}
+            className="flex-1"
+          />
+          <button
+            onClick={locate}
+            disabled={!query.trim() || locating}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-white/10 px-3 py-2 text-xs text-ink-muted transition hover:bg-white/5 disabled:opacity-40"
+          >
+            {locating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Navigation className="h-3.5 w-3.5" />}
+            Locate
+          </button>
+        </div>
+      </Field>
+
+      {item.location && (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+          <div className="flex items-center gap-2 text-xs text-ink-muted">
+            <MapPin className="h-3.5 w-3.5 shrink-0 text-ink-faint" />
+            <span className="truncate">{item.location.label}</span>
+            <span className="shrink-0 text-ink-faint">
+              {item.location.lat.toFixed(5)}, {item.location.lng.toFixed(5)}
+            </span>
+          </div>
+          <button
+            onClick={findAmenities}
+            disabled={findingAmenities}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-white/10 px-2.5 py-1.5 text-xs text-ink-muted transition hover:bg-white/5 disabled:opacity-40"
+          >
+            {findingAmenities ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <School className="h-3.5 w-3.5" />}
+            Find nearby amenities
+          </button>
+        </div>
+      )}
+
+      {item.nearbyAmenities && item.nearbyAmenities.length > 0 && (
+        <div className="grid gap-1.5 sm:grid-cols-2">
+          {item.nearbyAmenities.map((a, i) => {
+            const Icon = AMENITY_ICONS[a.kind];
+            return (
+              <div
+                key={`${a.name}-${i}`}
+                className="flex items-center gap-2 rounded-lg border border-white/5 bg-white/[0.02] px-2.5 py-1.5 text-xs text-ink-muted"
+              >
+                <Icon className="h-3.5 w-3.5 shrink-0 text-ink-faint" />
+                <span className="flex-1 truncate">{a.name}</span>
+                <span className="shrink-0 text-ink-faint">{formatDistance(a.distanceMeters)}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {item.nearbyAmenities && item.nearbyAmenities.length === 0 && (
+        <p className="text-xs text-ink-faint">No named amenities found within 2km on OpenStreetMap.</p>
+      )}
     </div>
   );
 }

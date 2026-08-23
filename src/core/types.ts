@@ -70,6 +70,23 @@ export interface InventoryItem {
   websiteUrl?: string;
   /** Reference link only — Instagram has no public API to bulk-import a profile's photos, so this is never auto-scraped. */
   instagramUrl?: string;
+  /**
+   * Real-world points of interest near `location`, fetched from OpenStreetMap
+   * (Overpass) by distance — separate from `lifestyle.pois`, which are
+   * hand-illustrated positions on an artistic map stage with no real
+   * coordinates. Never merge these two: doing so would fabricate a stage
+   * position for a real place, or a real distance for an illustrated one.
+   */
+  nearbyAmenities?: NearbyAmenity[];
+}
+
+/** A real nearby amenity found via OpenStreetMap, shown as a plain informational list. */
+export interface NearbyAmenity {
+  name: string;
+  kind: "school" | "hospital" | "supermarket" | "park" | "transport" | "restaurant" | "other";
+  lat: number;
+  lng: number;
+  distanceMeters: number;
 }
 
 /** A point of interest floating on the lifestyle map. x/y are 0..100 (% of stage). */
