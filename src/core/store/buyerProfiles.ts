@@ -309,3 +309,21 @@ export async function resolveBuyerObjection(buyerProfileId: string, objectionId:
   globalMutate(`${BUYER_PROFILES_KEY}/${buyerProfileId}`);
   return res.ok;
 }
+
+export interface TimelineEntry {
+  id: string;
+  ts: number;
+  kind: "activity" | "relationship" | "requirement-change" | "conversation" | "objection";
+  title: string;
+  detail?: string;
+  meta?: string;
+}
+
+/** Wave 2 — one merged, chronological feed across every category Buyer Intelligence tracks (see the /timeline route for exactly which sources and why some are deliberately deduplicated). */
+export function useBuyerTimeline(id: string | null): { entries: TimelineEntry[]; isLoading: boolean } {
+  const { data, isLoading } = useSWR<{ entries: TimelineEntry[] }>(
+    id ? `${BUYER_PROFILES_KEY}/${id}/timeline` : null,
+    fetcher,
+  );
+  return { entries: data?.entries ?? [], isLoading: isLoading && data === undefined };
+}
