@@ -127,11 +127,6 @@ for r in rows:
         {{ icon: "Ruler", label: "Floor area", detail: {esc(f"{area_sqm} m²")} }},
       ],
       pois: [],
-      headline: [
-        {{ icon: "Ruler", label: {esc(f"{area_sqm} m²")}, detail: "Floor area" }},
-        {{ icon: "BedDouble", label: {esc(str(bedrooms))}, detail: "Bedrooms" }},
-        {{ icon: "Bath", label: {esc(str(bathrooms))}, detail: "Bathrooms" }},
-      ],
     }}"""
 
     item_ts = f"""  {{
@@ -164,7 +159,7 @@ header = '''import type { InventoryItem } from "@/core/types";
  * src/core/industries/real-estate-bahrain.ts for the pack this powers.
  *
  * Each item also carries a minimal `lifestyle` object (district/tags/
- * summary/metrics/headline) so the Interactive Lifestyle Map renders for
+ * summary/metrics) so the Interactive Lifestyle Map renders for
  * this pack — every field is derived from the property's own real specs
  * (type, beds, baths, area, city); `pois` is intentionally empty since the
  * source data has no amenity/walk-time detail to draw on.

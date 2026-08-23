@@ -124,8 +124,6 @@ export interface Lifestyle {
   at: { x: number; y: number };
   metrics: LifestyleMetric[];
   pois: Poi[];
-  /** Three headline stats for the "Why we recommend" card. */
-  headline: LifestyleMetric[];
 }
 
 export type RuleKind =

@@ -173,11 +173,6 @@ export const realEstatePack: IndustryPack = {
           { icon: "HeartPulse", label: "Hospitals", detail: "2 within 10 min" },
           { icon: "Waves", label: "Beach", detail: "12 min drive" },
         ],
-        headline: [
-          { icon: "GraduationCap", label: "School", detail: "5 min walk" },
-          { icon: "Trees", label: "Park", detail: "4 min walk" },
-          { icon: "Car", label: "Commute", detail: "20 min to centre" },
-        ],
         pois: pois({
           school: ["International School", "5 min walk"],
           park: ["Green Valley Park", "4 min walk"],
@@ -232,11 +227,6 @@ export const realEstatePack: IndustryPack = {
           { icon: "ShoppingCart", label: "Groceries", detail: "3 within 5 min" },
           { icon: "GraduationCap", label: "Schools", detail: "1 within 14 min" },
           { icon: "TrendingUp", label: "Rental yield", detail: "Strong demand" },
-        ],
-        headline: [
-          { icon: "Waves", label: "Marina", detail: "2 min walk" },
-          { icon: "UtensilsCrossed", label: "Dining", detail: "1 min walk" },
-          { icon: "Car", label: "Commute", detail: "10 min to centre" },
         ],
         pois: pois({
           school: ["Coastal School", "14 min"],
@@ -293,11 +283,6 @@ export const realEstatePack: IndustryPack = {
           { icon: "HeartPulse", label: "Clinic", detail: "9 min drive" },
           { icon: "Waves", label: "Beach", detail: "15 min drive" },
         ],
-        headline: [
-          { icon: "GraduationCap", label: "School", detail: "9 min drive" },
-          { icon: "Trees", label: "Green space", detail: "On your plot" },
-          { icon: "Car", label: "Coast", detail: "15 min drive" },
-        ],
         pois: pois({
           school: ["Village School", "9 min"],
           park: ["Olive Groves", "On your plot"],
@@ -352,11 +337,6 @@ export const realEstatePack: IndustryPack = {
           { icon: "GraduationCap", label: "Schools", detail: "2 within 8 min" },
           { icon: "HeartPulse", label: "Hospital", detail: "6 min" },
           { icon: "Sparkles", label: "Concierge", detail: "24/7" },
-        ],
-        headline: [
-          { icon: "Waves", label: "Seafront", detail: "Direct access" },
-          { icon: "UtensilsCrossed", label: "Dining", detail: "2 min walk" },
-          { icon: "Car", label: "Commute", detail: "8 min to centre" },
         ],
         pois: pois({
           school: ["British School", "8 min"],

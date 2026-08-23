@@ -20,14 +20,14 @@ const POI_KINDS: Poi["kind"][] = [
  */
 const WALK_METERS_PER_MIN = 80;
 
-const AMENITY_KIND_META: Record<NearbyAmenity["kind"], { label: string; singular: string; icon: string }> = {
-  school: { label: "Schools", singular: "School", icon: "GraduationCap" },
-  hospital: { label: "Hospitals", singular: "Hospital", icon: "HeartPulse" },
-  supermarket: { label: "Groceries", singular: "Grocery", icon: "ShoppingCart" },
-  park: { label: "Parks", singular: "Park", icon: "Trees" },
-  transport: { label: "Transport", singular: "Transport", icon: "TrainFront" },
-  restaurant: { label: "Restaurants", singular: "Restaurant", icon: "Utensils" },
-  other: { label: "Nearby", singular: "Nearby", icon: "MapPin" },
+const AMENITY_KIND_META: Record<NearbyAmenity["kind"], { label: string; icon: string }> = {
+  school: { label: "Schools", icon: "GraduationCap" },
+  hospital: { label: "Hospitals", icon: "HeartPulse" },
+  supermarket: { label: "Groceries", icon: "ShoppingCart" },
+  park: { label: "Parks", icon: "Trees" },
+  transport: { label: "Transport", icon: "TrainFront" },
+  restaurant: { label: "Restaurants", icon: "Utensils" },
+  other: { label: "Nearby", icon: "MapPin" },
 };
 
 function walkMinutes(distanceMeters: number): number {
@@ -35,13 +35,12 @@ function walkMinutes(distanceMeters: number): number {
 }
 
 /**
- * Turns real Overpass-fetched amenities into the same "Amenity metrics" /
- * "Headline stats" shape the display renders — so the top-left Lifestyle
- * panel and the "Why we recommend" panel end up quoting the same real
- * numbers instead of two independently hand-typed guesses. Never touches
- * `pois`/`at`, which stay hand-placed on the illustrative map stage.
+ * Turns real Overpass-fetched amenities into the same "Amenity metrics"
+ * shape the display renders — so the metrics are always the real numbers,
+ * not a hand-typed guess. Never touches `pois`/`at`, which stay hand-placed
+ * on the illustrative map stage.
  */
-function buildAmenitySummary(amenities: NearbyAmenity[]): { metrics: LifestyleMetric[]; headline: LifestyleMetric[] } {
+function buildAmenitySummary(amenities: NearbyAmenity[]): { metrics: LifestyleMetric[] } {
   const byKind = new Map<NearbyAmenity["kind"], NearbyAmenity[]>();
   for (const a of amenities) {
     const list = byKind.get(a.kind) ?? [];
@@ -50,7 +49,6 @@ function buildAmenitySummary(amenities: NearbyAmenity[]): { metrics: LifestyleMe
   }
 
   const metrics: LifestyleMetric[] = [];
-  const nearestPerKind: { kind: NearbyAmenity["kind"]; nearest: NearbyAmenity }[] = [];
   for (const [kind, list] of byKind) {
     const meta = AMENITY_KIND_META[kind];
     const nearest = list.reduce((a, b) => (a.distanceMeters < b.distanceMeters ? a : b));
@@ -59,17 +57,9 @@ function buildAmenitySummary(amenities: NearbyAmenity[]): { metrics: LifestyleMe
       label: meta.label,
       detail: `${list.length} within ${walkMinutes(nearest.distanceMeters)} min`,
     });
-    nearestPerKind.push({ kind, nearest });
   }
 
-  nearestPerKind.sort((a, b) => a.nearest.distanceMeters - b.nearest.distanceMeters);
-  const headline: LifestyleMetric[] = nearestPerKind.slice(0, 3).map(({ kind, nearest }) => ({
-    icon: AMENITY_KIND_META[kind].icon,
-    label: AMENITY_KIND_META[kind].singular,
-    detail: `${walkMinutes(nearest.distanceMeters)} min walk`,
-  }));
-
-  return { metrics, headline };
+  return { metrics };
 }
 
 function defaultLifestyle(district: string): Lifestyle {
@@ -83,11 +73,6 @@ function defaultLifestyle(district: string): Lifestyle {
     metrics: [
       { icon: "GraduationCap", label: "Schools", detail: "3 within 5 min" },
       { icon: "Trees", label: "Parks", detail: "4 within 10 min" },
-    ],
-    headline: [
-      { icon: "GraduationCap", label: "School", detail: "5 min walk" },
-      { icon: "Trees", label: "Park", detail: "4 min walk" },
-      { icon: "Car", label: "Commute", detail: "20 min to centre" },
     ],
     pois: [
       {
@@ -219,15 +204,10 @@ export function LifestyleEditor({
           className="inline-flex items-center gap-1.5 rounded-lg border border-brand/25 bg-brand/10 px-2.5 py-1.5 text-xs font-medium text-brand transition hover:bg-brand/20"
         >
           <Sparkles className="h-3.5 w-3.5" />
-          Sync headline stats & amenity metrics from nearby amenities
+          Sync amenity metrics from nearby amenities
         </button>
       )}
 
-      <MetricList
-        label="Headline stats (3)"
-        metrics={lifestyle.headline}
-        onChange={(headline) => patch({ headline })}
-      />
       <MetricList
         label="Amenity metrics"
         metrics={lifestyle.metrics}

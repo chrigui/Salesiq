@@ -12,7 +12,7 @@ import type { InventoryItem } from "@/core/types";
  * src/core/industries/real-estate-bahrain.ts for the pack this powers.
  *
  * Each item also carries a minimal `lifestyle` object (district/tags/
- * summary/metrics/headline) so the Interactive Lifestyle Map renders for
+ * summary/metrics) so the Interactive Lifestyle Map renders for
  * this pack — every field is derived from the property's own real specs
  * (type, beds, baths, area, city); `pois` is intentionally empty since the
  * source data has no amenity/walk-time detail to draw on.
@@ -43,11 +43,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "407 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "407 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -75,11 +70,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "101 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "101 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -107,11 +97,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "529 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "529 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -139,11 +124,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "530 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "530 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -171,11 +151,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "409 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "409 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -203,11 +178,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "60 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "60 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -235,11 +205,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "436 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "436 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -267,11 +232,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "353 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "353 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -299,11 +259,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "352 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "352 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -331,11 +286,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "508 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "508 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -363,11 +313,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "189 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "189 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -395,11 +340,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "37 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "37 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -427,11 +367,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "441 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "441 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -459,11 +394,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "313 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "313 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -491,11 +421,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "323 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "323 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -523,11 +448,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "459 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "459 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -555,11 +475,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "41 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "41 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -587,11 +502,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "399 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "399 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -619,11 +529,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "61 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "61 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -651,11 +556,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "389 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "389 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -683,11 +583,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "99 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "99 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -715,11 +610,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "61 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "61 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -747,11 +637,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "70 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "70 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -779,11 +664,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "47 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "47 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -811,11 +691,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "395 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "395 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -843,11 +718,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "222 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "222 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -875,11 +745,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "341 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "341 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -907,11 +772,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "357 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "357 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -939,11 +799,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "69 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "69 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -971,11 +826,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "478 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "478 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -1003,11 +853,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "322 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "322 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -1035,11 +880,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "107 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "107 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -1067,11 +907,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "46 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "46 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -1099,11 +934,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "259 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "259 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -1131,11 +961,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "249 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "249 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -1163,11 +988,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "442 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "442 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -1195,11 +1015,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "74 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "74 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -1227,11 +1042,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "268 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "268 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -1259,11 +1069,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "316 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "316 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -1291,11 +1096,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "341 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "341 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -1323,11 +1123,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "421 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "421 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -1355,11 +1150,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "337 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "337 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -1387,11 +1177,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "54 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "54 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -1419,11 +1204,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "59 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "59 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -1451,11 +1231,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "183 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "183 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -1483,11 +1258,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "388 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "388 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -1515,11 +1285,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "469 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "469 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -1547,11 +1312,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "465 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "465 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -1579,11 +1339,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "362 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "362 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -1611,11 +1366,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "35 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "35 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -1643,11 +1393,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "337 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "337 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -1675,11 +1420,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "141 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "141 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -1707,11 +1447,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "54 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "54 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -1739,11 +1474,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "476 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "476 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -1771,11 +1501,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "49 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "49 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -1803,11 +1528,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "340 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "340 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -1835,11 +1555,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "485 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "485 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -1867,11 +1582,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "550 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "550 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -1899,11 +1609,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "58 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "58 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -1931,11 +1636,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "377 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "377 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -1963,11 +1663,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "340 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "340 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -1995,11 +1690,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "61 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "61 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -2027,11 +1717,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "130 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "130 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -2059,11 +1744,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "36 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "36 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -2091,11 +1771,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "314 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "314 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -2123,11 +1798,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "239 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "239 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -2155,11 +1825,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "342 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "342 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -2187,11 +1852,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "121 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "121 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -2219,11 +1879,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "316 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "316 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -2251,11 +1906,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "519 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "519 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -2283,11 +1933,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "87 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "87 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -2315,11 +1960,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "342 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "342 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -2347,11 +1987,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "62 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "62 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -2379,11 +2014,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "57 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "57 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -2411,11 +2041,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "347 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "347 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -2443,11 +2068,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "50 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "50 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -2475,11 +2095,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "465 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "465 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -2507,11 +2122,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "211 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "211 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -2539,11 +2149,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "132 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "132 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -2571,11 +2176,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "140 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "140 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -2603,11 +2203,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "187 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "187 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -2635,11 +2230,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "49 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "49 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -2667,11 +2257,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "257 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "257 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -2699,11 +2284,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "309 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "309 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -2731,11 +2311,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "123 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "123 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -2763,11 +2338,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "355 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "355 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -2795,11 +2365,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "70 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "70 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -2827,11 +2392,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "227 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "227 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -2859,11 +2419,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "210 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "210 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -2891,11 +2446,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "376 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "376 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -2923,11 +2473,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "219 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "219 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -2955,11 +2500,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "66 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "66 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -2987,11 +2527,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "402 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "402 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -3019,11 +2554,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "159 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "159 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -3051,11 +2581,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "506 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "506 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -3083,11 +2608,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "71 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "71 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -3115,11 +2635,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "67 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "67 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -3147,11 +2662,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "261 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "261 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -3179,11 +2689,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "49 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "49 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -3211,11 +2716,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "90 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "90 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -3243,11 +2743,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "186 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "186 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -3275,11 +2770,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "96 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "96 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -3307,11 +2797,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "194 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "194 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -3339,11 +2824,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "468 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "468 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -3371,11 +2851,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "314 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "314 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -3403,11 +2878,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "247 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "247 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -3435,11 +2905,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "89 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "89 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -3467,11 +2932,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "36 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "36 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -3499,11 +2959,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "270 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "270 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -3531,11 +2986,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "44 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "44 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -3563,11 +3013,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "546 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "546 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -3595,11 +3040,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "167 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "167 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -3627,11 +3067,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "325 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "325 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -3659,11 +3094,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "152 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "152 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -3691,11 +3121,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "448 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "448 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -3723,11 +3148,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "415 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "415 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -3755,11 +3175,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "125 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "125 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -3787,11 +3202,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "488 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "488 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -3819,11 +3229,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "279 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "279 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -3851,11 +3256,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "330 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "330 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -3883,11 +3283,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "317 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "317 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -3915,11 +3310,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "184 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "184 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -3947,11 +3337,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "56 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "56 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -3979,11 +3364,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "256 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "256 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -4011,11 +3391,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "376 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "376 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -4043,11 +3418,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "127 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "127 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -4075,11 +3445,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "322 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "322 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -4107,11 +3472,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "541 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "541 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -4139,11 +3499,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "102 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "102 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -4171,11 +3526,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "486 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "486 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -4203,11 +3553,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "66 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "66 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -4235,11 +3580,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "179 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "179 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -4267,11 +3607,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "57 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "57 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -4299,11 +3634,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "460 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "460 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -4331,11 +3661,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "464 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "464 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -4363,11 +3688,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "185 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "185 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -4395,11 +3715,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "470 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "470 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -4427,11 +3742,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "226 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "226 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -4459,11 +3769,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "326 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "326 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -4491,11 +3796,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "141 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "141 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -4523,11 +3823,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "202 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "202 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -4555,11 +3850,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "541 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "541 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -4587,11 +3877,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "423 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "423 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -4619,11 +3904,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "92 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "92 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -4651,11 +3931,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "496 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "496 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -4683,11 +3958,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "392 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "392 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -4715,11 +3985,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "157 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "157 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -4747,11 +4012,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "396 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "396 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -4779,11 +4039,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "438 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "438 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -4811,11 +4066,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "330 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "330 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -4843,11 +4093,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "412 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "412 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -4875,11 +4120,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "62 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "62 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -4907,11 +4147,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "483 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "483 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -4939,11 +4174,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "268 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "268 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -4971,11 +4201,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "461 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "461 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -5003,11 +4228,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "215 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "215 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -5035,11 +4255,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "91 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "91 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -5067,11 +4282,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "489 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "489 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -5099,11 +4309,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "258 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "258 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -5131,11 +4336,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "270 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "270 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -5163,11 +4363,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "466 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "466 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -5195,11 +4390,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "289 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "289 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -5227,11 +4417,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "546 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "546 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -5259,11 +4444,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "256 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "256 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -5291,11 +4471,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "210 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "210 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -5323,11 +4498,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "456 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "456 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -5355,11 +4525,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "65 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "65 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -5387,11 +4552,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "484 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "484 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -5419,11 +4579,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "263 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "263 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -5451,11 +4606,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "238 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "238 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -5483,11 +4633,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "546 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "546 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -5515,11 +4660,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "145 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "145 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -5547,11 +4687,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "135 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "135 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -5579,11 +4714,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "431 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "431 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -5611,11 +4741,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "346 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "346 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -5643,11 +4768,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "145 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "145 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -5675,11 +4795,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "543 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "543 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -5707,11 +4822,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "124 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "124 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -5739,11 +4849,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "181 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "181 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -5771,11 +4876,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "46 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "46 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -5803,11 +4903,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "548 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "548 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -5835,11 +4930,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "68 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "68 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -5867,11 +4957,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "421 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "421 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -5899,11 +4984,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "60 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "60 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -5931,11 +5011,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "343 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "343 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -5963,11 +5038,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "545 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "545 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -5995,11 +5065,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "364 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "364 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -6027,11 +5092,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "461 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "461 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -6059,11 +5119,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "462 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "462 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -6091,11 +5146,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "429 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "429 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -6123,11 +5173,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "52 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "52 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -6155,11 +5200,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "167 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "167 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -6187,11 +5227,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "91 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "91 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -6219,11 +5254,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "509 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "509 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -6251,11 +5281,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "278 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "278 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -6283,11 +5308,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "150 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "150 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -6315,11 +5335,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "133 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "133 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -6347,11 +5362,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "58 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "58 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -6379,11 +5389,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "283 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "283 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -6411,11 +5416,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "62 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "62 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -6443,11 +5443,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "354 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "354 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -6475,11 +5470,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "168 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "168 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -6507,11 +5497,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "37 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "37 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -6539,11 +5524,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "247 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "247 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -6571,11 +5551,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "456 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "456 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -6603,11 +5578,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "440 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "440 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -6635,11 +5605,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "186 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "186 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -6667,11 +5632,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "440 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "440 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -6699,11 +5659,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "58 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "58 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -6731,11 +5686,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "342 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "342 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -6763,11 +5713,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "187 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "187 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -6795,11 +5740,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "439 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "439 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -6827,11 +5767,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "266 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "266 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -6859,11 +5794,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "246 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "246 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -6891,11 +5821,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "544 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "544 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -6923,11 +5848,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "137 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "137 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -6955,11 +5875,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "456 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "456 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -6987,11 +5902,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "45 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "45 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -7019,11 +5929,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "331 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "331 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -7051,11 +5956,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "221 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "221 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -7083,11 +5983,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "384 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "384 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -7115,11 +6010,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "253 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "253 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -7147,11 +6037,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "264 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "264 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -7179,11 +6064,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "313 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "313 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -7211,11 +6091,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "246 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "246 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -7243,11 +6118,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "46 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "46 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -7275,11 +6145,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "45 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "45 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -7307,11 +6172,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "95 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "95 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -7339,11 +6199,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "134 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "134 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -7371,11 +6226,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "221 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "221 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -7403,11 +6253,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "246 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "246 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -7435,11 +6280,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "96 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "96 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -7467,11 +6307,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "146 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "146 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -7499,11 +6334,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "343 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "343 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -7531,11 +6361,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "67 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "67 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -7563,11 +6388,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "58 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "58 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -7595,11 +6415,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "538 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "538 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -7627,11 +6442,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "42 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "42 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -7659,11 +6469,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "58 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "58 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -7691,11 +6496,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "405 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "405 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -7723,11 +6523,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "270 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "270 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -7755,11 +6550,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "46 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "46 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -7787,11 +6577,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "66 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "66 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -7819,11 +6604,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "78 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "78 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -7851,11 +6631,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "152 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "152 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -7883,11 +6658,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "438 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "438 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -7915,11 +6685,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "505 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "505 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -7947,11 +6712,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "375 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "375 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -7979,11 +6739,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "62 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "62 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -8011,11 +6766,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "67 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "67 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -8043,11 +6793,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "364 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "364 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -8075,11 +6820,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "160 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "160 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -8107,11 +6847,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "94 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "94 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -8139,11 +6874,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "165 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "165 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -8171,11 +6901,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "168 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "168 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -8203,11 +6928,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "500 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "500 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -8235,11 +6955,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "94 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "94 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -8267,11 +6982,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "155 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "155 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -8299,11 +7009,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "224 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "224 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -8331,11 +7036,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "262 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "262 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -8363,11 +7063,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "284 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "284 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -8395,11 +7090,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "257 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "257 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -8427,11 +7117,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "54 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "54 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -8459,11 +7144,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "118 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "118 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -8491,11 +7171,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "278 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "278 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -8523,11 +7198,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "459 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "459 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -8555,11 +7225,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "515 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "515 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -8587,11 +7252,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "136 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "136 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -8619,11 +7279,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "353 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "353 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -8651,11 +7306,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "91 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "91 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -8683,11 +7333,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "265 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "265 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -8715,11 +7360,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "181 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "181 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -8747,11 +7387,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "170 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "170 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -8779,11 +7414,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "520 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "520 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -8811,11 +7441,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "441 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "441 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -8843,11 +7468,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "371 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "371 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -8875,11 +7495,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "100 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "100 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -8907,11 +7522,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "359 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "359 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -8939,11 +7549,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "214 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "214 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -8971,11 +7576,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "189 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "189 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -9003,11 +7603,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "387 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "387 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -9035,11 +7630,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "272 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "272 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -9067,11 +7657,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "128 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "128 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -9099,11 +7684,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "135 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "135 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -9131,11 +7711,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "424 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "424 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -9163,11 +7738,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "101 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "101 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -9195,11 +7765,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "56 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "56 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -9227,11 +7792,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "265 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "265 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -9259,11 +7819,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "334 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "334 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -9291,11 +7846,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "424 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "424 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -9323,11 +7873,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "101 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "101 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -9355,11 +7900,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "292 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "292 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -9387,11 +7927,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "259 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "259 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -9419,11 +7954,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "354 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "354 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -9451,11 +7981,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "330 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "330 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -9483,11 +8008,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "67 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "67 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -9515,11 +8035,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "341 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "341 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -9547,11 +8062,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "195 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "195 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -9579,11 +8089,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "452 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "452 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -9611,11 +8116,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "69 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "69 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -9643,11 +8143,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "394 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "394 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -9675,11 +8170,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "488 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "488 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -9707,11 +8197,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "213 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "213 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -9739,11 +8224,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "526 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "526 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -9771,11 +8251,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "423 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "423 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -9803,11 +8278,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "418 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "418 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -9835,11 +8305,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "213 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "213 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -9867,11 +8332,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "101 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "101 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -9899,11 +8359,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "322 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "322 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -9931,11 +8386,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "460 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "460 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -9963,11 +8413,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "254 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "254 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -9995,11 +8440,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "482 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "482 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -10027,11 +8467,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "526 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "526 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -10059,11 +8494,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "479 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "479 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -10091,11 +8521,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "473 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "473 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -10123,11 +8548,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "124 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "124 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -10155,11 +8575,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "298 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "298 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -10187,11 +8602,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "533 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "533 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -10219,11 +8629,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "56 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "56 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -10251,11 +8656,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "475 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "475 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -10283,11 +8683,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "46 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "46 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -10315,11 +8710,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "444 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "444 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -10347,11 +8737,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "471 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "471 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -10379,11 +8764,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "475 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "475 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -10411,11 +8791,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "215 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "215 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -10443,11 +8818,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "456 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "456 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -10475,11 +8845,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "331 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "331 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -10507,11 +8872,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "166 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "166 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -10539,11 +8899,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "453 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "453 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -10571,11 +8926,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "226 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "226 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -10603,11 +8953,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "55 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "55 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -10635,11 +8980,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "219 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "219 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -10667,11 +9007,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "99 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "99 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -10699,11 +9034,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "186 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "186 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -10731,11 +9061,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "36 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "36 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -10763,11 +9088,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "351 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "351 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -10795,11 +9115,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "94 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "94 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -10827,11 +9142,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "63 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "63 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -10859,11 +9169,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "266 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "266 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -10891,11 +9196,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "476 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "476 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -10923,11 +9223,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "68 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "68 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -10955,11 +9250,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "282 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "282 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -10987,11 +9277,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "285 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "285 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -11019,11 +9304,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "499 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "499 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -11051,11 +9331,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "38 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "38 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -11083,11 +9358,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "385 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "385 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -11115,11 +9385,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "393 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "393 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -11147,11 +9412,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "68 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "68 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -11179,11 +9439,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "308 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "308 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -11211,11 +9466,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "63 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "63 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -11243,11 +9493,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "198 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "198 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -11275,11 +9520,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "282 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "282 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -11307,11 +9547,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "277 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "277 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -11339,11 +9574,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "392 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "392 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -11371,11 +9601,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "374 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "374 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -11403,11 +9628,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "357 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "357 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -11435,11 +9655,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "37 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "37 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -11467,11 +9682,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "70 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "70 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -11499,11 +9709,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "383 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "383 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -11531,11 +9736,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "35 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "35 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -11563,11 +9763,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "116 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "116 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -11595,11 +9790,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "136 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "136 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -11627,11 +9817,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "97 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "97 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -11659,11 +9844,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "470 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "470 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -11691,11 +9871,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "337 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "337 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -11723,11 +9898,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "238 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "238 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -11755,11 +9925,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "182 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "182 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -11787,11 +9952,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "195 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "195 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -11819,11 +9979,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "190 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "190 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -11851,11 +10006,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "169 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "169 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -11883,11 +10033,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "182 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "182 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -11915,11 +10060,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "48 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "48 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -11947,11 +10087,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "205 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "205 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -11979,11 +10114,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "254 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "254 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -12011,11 +10141,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "309 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "309 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -12043,11 +10168,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "348 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "348 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -12075,11 +10195,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "519 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "519 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -12107,11 +10222,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "198 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "198 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -12139,11 +10249,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "307 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "307 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -12171,11 +10276,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "458 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "458 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -12203,11 +10303,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "162 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "162 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -12235,11 +10330,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "529 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "529 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -12267,11 +10357,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "80 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "80 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -12299,11 +10384,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "50 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "50 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -12331,11 +10411,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "303 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "303 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -12363,11 +10438,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "235 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "235 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -12395,11 +10465,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "337 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "337 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -12427,11 +10492,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "461 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "461 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -12459,11 +10519,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "439 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "439 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -12491,11 +10546,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "105 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "105 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -12523,11 +10573,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "342 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "342 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -12555,11 +10600,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "247 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "247 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -12587,11 +10627,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "290 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "290 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -12619,11 +10654,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "98 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "98 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -12651,11 +10681,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "67 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "67 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -12683,11 +10708,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "68 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "68 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -12715,11 +10735,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "130 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "130 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -12747,11 +10762,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "406 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "406 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -12779,11 +10789,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "80 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "80 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -12811,11 +10816,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "314 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "314 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -12843,11 +10843,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "201 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "201 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -12875,11 +10870,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "102 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "102 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -12907,11 +10897,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "404 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "404 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -12939,11 +10924,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "428 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "428 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -12971,11 +10951,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "85 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "85 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -13003,11 +10978,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "294 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "294 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -13035,11 +11005,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "361 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "361 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -13067,11 +11032,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "166 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "166 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -13099,11 +11059,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "260 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "260 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -13131,11 +11086,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "404 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "404 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -13163,11 +11113,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "50 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "50 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -13195,11 +11140,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "156 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "156 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -13227,11 +11167,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "62 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "62 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -13259,11 +11194,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "266 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "266 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -13291,11 +11221,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "223 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "223 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -13323,11 +11248,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "149 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "149 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -13355,11 +11275,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "134 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "134 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -13387,11 +11302,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "329 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "329 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -13419,11 +11329,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "51 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "51 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -13451,11 +11356,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "224 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "224 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -13483,11 +11383,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "393 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "393 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -13515,11 +11410,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "42 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "42 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -13547,11 +11437,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "401 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "401 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -13579,11 +11464,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "291 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "291 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -13611,11 +11491,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "360 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "360 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -13643,11 +11518,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "407 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "407 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -13675,11 +11545,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "41 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "41 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -13707,11 +11572,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "98 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "98 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -13739,11 +11599,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "58 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "58 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -13771,11 +11626,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "406 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "406 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -13803,11 +11653,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "184 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "184 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -13835,11 +11680,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "441 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "441 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -13867,11 +11707,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "43 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "43 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -13899,11 +11734,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "81 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "81 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -13931,11 +11761,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "267 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "267 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -13963,11 +11788,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "254 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "254 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -13995,11 +11815,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "157 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "157 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -14027,11 +11842,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "394 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "394 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -14059,11 +11869,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "57 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "57 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -14091,11 +11896,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "130 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "130 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -14123,11 +11923,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "498 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "498 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -14155,11 +11950,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "70 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "70 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -14187,11 +11977,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "424 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "424 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -14219,11 +12004,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "207 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "207 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -14251,11 +12031,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "67 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "67 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -14283,11 +12058,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "413 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "413 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -14315,11 +12085,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "427 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "427 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -14347,11 +12112,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "365 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "365 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -14379,11 +12139,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "341 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "341 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -14411,11 +12166,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "374 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "374 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -14443,11 +12193,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "522 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "522 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -14475,11 +12220,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "346 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "346 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -14507,11 +12247,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "376 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "376 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -14539,11 +12274,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "60 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "60 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -14571,11 +12301,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "130 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "130 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -14603,11 +12328,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "410 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "410 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -14635,11 +12355,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "199 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "199 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -14667,11 +12382,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "332 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "332 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -14699,11 +12409,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "544 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "544 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -14731,11 +12436,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "499 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "499 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -14763,11 +12463,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "62 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "62 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -14795,11 +12490,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "440 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "440 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -14827,11 +12517,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "471 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "471 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -14859,11 +12544,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "280 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "280 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -14891,11 +12571,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "511 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "511 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -14923,11 +12598,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "39 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "39 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -14955,11 +12625,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "505 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "505 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -14987,11 +12652,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "383 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "383 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -15019,11 +12679,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "385 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "385 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -15051,11 +12706,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "377 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "377 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -15083,11 +12733,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "349 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "349 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -15115,11 +12760,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "366 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "366 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -15147,11 +12787,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "36 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "36 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -15179,11 +12814,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "100 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "100 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -15211,11 +12841,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "119 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "119 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -15243,11 +12868,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "46 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "46 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -15275,11 +12895,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "511 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "511 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -15307,11 +12922,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "521 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "521 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -15339,11 +12949,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "379 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "379 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -15371,11 +12976,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "449 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "449 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -15403,11 +13003,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "51 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "51 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -15435,11 +13030,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "162 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "162 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -15467,11 +13057,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "143 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "143 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "6", detail: "Bedrooms" },
-        { icon: "Bath", label: "7", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -15499,11 +13084,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "288 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "288 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -15531,11 +13111,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "351 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "351 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "5", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -15563,11 +13138,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "43 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "43 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -15595,11 +13165,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "224 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "224 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -15627,11 +13192,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "458 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "458 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -15659,11 +13219,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "532 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "532 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "3", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -15691,11 +13246,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "42 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "42 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -15723,11 +13273,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "488 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "488 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "1", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -15755,11 +13300,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "425 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "425 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -15787,11 +13327,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "233 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "233 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -15819,11 +13354,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "228 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "228 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "5", detail: "Bedrooms" },
-        { icon: "Bath", label: "6", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -15851,11 +13381,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "63 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "63 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -15883,11 +13408,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "482 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "482 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -15915,11 +13435,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "51 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "51 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "0", detail: "Bedrooms" },
-        { icon: "Bath", label: "1", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -15947,11 +13462,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "323 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "323 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "4", detail: "Bedrooms" },
-        { icon: "Bath", label: "4", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -15979,11 +13489,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "548 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "548 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "2", detail: "Bathrooms" },
-      ],
     },
   },
   {
@@ -16011,11 +13516,6 @@ export const bahrainListings: InventoryItem[] = [
         { icon: "Ruler", label: "Floor area", detail: "350 m²" },
       ],
       pois: [],
-      headline: [
-        { icon: "Ruler", label: "350 m²", detail: "Floor area" },
-        { icon: "BedDouble", label: "2", detail: "Bedrooms" },
-        { icon: "Bath", label: "3", detail: "Bathrooms" },
-      ],
     },
   }
 ];

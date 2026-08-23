@@ -384,51 +384,20 @@ export function LifestyleMap({
           glass,
         )}
       >
-        <div className="flex items-start gap-4">
-          <div className="min-w-0 flex-1">
-            <div className="mb-1 flex items-center gap-1.5 text-sm font-semibold text-brand">
-              <Sparkles className="h-4 w-4" /> Why we recommend this area
-            </div>
-            <p
-              className={cx(
-                "text-sm leading-relaxed",
-                night ? "text-white/80" : "text-zinc-700",
-              )}
-            >
-              {shorten(narrative)}
-            </p>
-            <button className="mt-2 flex items-center gap-1.5 text-sm font-medium text-brand">
-              Tell me more <ArrowRight className="h-4 w-4" />
-            </button>
-          </div>
-          <div className="flex shrink-0 gap-2">
-            {life.headline.map((h) => (
-              <div
-                key={h.label}
-                className={cx(
-                  "w-24 rounded-2xl px-3 py-2.5 text-center",
-                  night ? "bg-white/8" : "bg-black/5",
-                )}
-              >
-                <Icon
-                  name={h.icon}
-                  className="mx-auto mb-1 h-5 w-5 text-brand"
-                />
-                <div className="text-[13px] font-semibold leading-tight">
-                  {h.label}
-                </div>
-                <div
-                  className={cx(
-                    "text-[11px]",
-                    night ? "text-white/50" : "text-zinc-500",
-                  )}
-                >
-                  {h.detail}
-                </div>
-              </div>
-            ))}
-          </div>
+        <div className="mb-1 flex items-center gap-1.5 text-sm font-semibold text-brand">
+          <Sparkles className="h-4 w-4" /> Why we recommend this area
         </div>
+        <p
+          className={cx(
+            "text-sm leading-relaxed",
+            night ? "text-white/80" : "text-zinc-700",
+          )}
+        >
+          {shorten(narrative)}
+        </p>
+        <button className="mt-2 flex items-center gap-1.5 text-sm font-medium text-brand">
+          Tell me more <ArrowRight className="h-4 w-4" />
+        </button>
       </motion.div>
 
       {/* Bottom-left — AI Guide */}
