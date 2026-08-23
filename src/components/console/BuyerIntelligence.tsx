@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { BrainCircuit, Loader2, Mail, Phone } from "lucide-react";
 import { Panel } from "@/components/console/light-ui";
+import { cx } from "@/components/ui/primitives";
 import { useBuyerProfiles } from "@/core/store/buyerProfiles";
 import { BuyerIntelligenceProfile } from "@/components/console/BuyerIntelligenceProfile";
+import { BuyerSegments } from "@/components/console/BuyerSegments";
 
 function timeAgo(ms: number | null): string {
   if (!ms) return "—";
@@ -27,9 +29,15 @@ function timeAgo(ms: number | null): string {
  * objections land in the following PRs — this list is real, not a mockup,
  * but intentionally thin until then.
  */
+const TABS = [
+  { id: "buyers", label: "Buyers" },
+  { id: "segments", label: "Segments" },
+] as const;
+
 export function BuyerIntelligence() {
   const { buyerProfiles, isLoading } = useBuyerProfiles();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [tab, setTab] = useState<(typeof TABS)[number]["id"]>("buyers");
 
   if (selectedId) {
     return <BuyerIntelligenceProfile id={selectedId} onBack={() => setSelectedId(null)} />;
@@ -48,6 +56,24 @@ export function BuyerIntelligence() {
         </div>
       </div>
 
+      <div className="flex gap-1 border-b border-zinc-200">
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setTab(t.id)}
+            className={cx(
+              "border-b-2 px-3 py-2 text-sm font-medium transition",
+              tab === t.id ? "border-zinc-900 text-zinc-900" : "border-transparent text-zinc-400 hover:text-zinc-600",
+            )}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {tab === "segments" ? (
+        <BuyerSegments onOpenBuyer={setSelectedId} />
+      ) : (
       <Panel title="Buyers">
         {isLoading ? (
           <div className="flex items-center justify-center gap-2 py-10 text-sm text-zinc-400">
@@ -93,6 +119,7 @@ export function BuyerIntelligence() {
           </div>
         )}
       </Panel>
+      )}
     </div>
   );
 }

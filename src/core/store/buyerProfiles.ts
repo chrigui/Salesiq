@@ -3,6 +3,7 @@
 import useSWR, { mutate as globalMutate } from "swr";
 import type { BuyerField } from "@/core/buyerIntelligence/types";
 import type { BuyerPriority } from "@/core/buyerIntelligence/priorityWeights";
+import type { BuyerSegmentCriterion } from "@/core/buyerIntelligence/segments";
 import { useSession } from "@/core/store/session";
 
 export interface BuyerProfile {
@@ -326,4 +327,62 @@ export function useBuyerTimeline(id: string | null): { entries: TimelineEntry[];
     fetcher,
   );
   return { entries: data?.entries ?? [], isLoading: isLoading && data === undefined };
+}
+
+export interface BuyerSegment {
+  id: string;
+  name: string;
+  criteria: BuyerSegmentCriterion[];
+  createdById: string | null;
+  createdByName: string | null;
+  createdAt: number;
+  updatedAt: number;
+  buyerCount: number;
+}
+
+const BUYER_SEGMENTS_KEY = "/api/buyer-segments";
+
+/** Wave 2 — every buyer segment for this tenant, each with a live buyer count computed fresh on every read (see compileSegmentWhere — a segment is a saved filter, never a stored membership list). */
+export function useBuyerSegments(): { segments: BuyerSegment[]; isLoading: boolean } {
+  const { data, isLoading } = useSWR<{ segments: BuyerSegment[] }>(BUYER_SEGMENTS_KEY, fetcher);
+  return { segments: data?.segments ?? [], isLoading: isLoading && data === undefined };
+}
+
+/** The drill-in list behind a segment's live count — same scope + criteria, actual buyer rows. */
+export function useSegmentBuyers(segmentId: string | null): { buyerProfiles: BuyerProfile[]; isLoading: boolean } {
+  const { data, isLoading } = useSWR<{ buyerProfiles: BuyerProfile[] }>(
+    segmentId ? `${BUYER_SEGMENTS_KEY}/${segmentId}/buyers` : null,
+    fetcher,
+  );
+  return { buyerProfiles: data?.buyerProfiles ?? [], isLoading: isLoading && data === undefined };
+}
+
+export async function createBuyerSegment(name: string, criteria: BuyerSegmentCriterion[]): Promise<boolean> {
+  const res = await fetch(BUYER_SEGMENTS_KEY, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, criteria }),
+  });
+  globalMutate(BUYER_SEGMENTS_KEY);
+  return res.ok;
+}
+
+export async function updateBuyerSegment(
+  id: string,
+  patch: { name?: string; criteria?: BuyerSegmentCriterion[] },
+): Promise<boolean> {
+  const res = await fetch(`${BUYER_SEGMENTS_KEY}/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(patch),
+  });
+  globalMutate(BUYER_SEGMENTS_KEY);
+  globalMutate(`${BUYER_SEGMENTS_KEY}/${id}/buyers`);
+  return res.ok;
+}
+
+export async function deleteBuyerSegment(id: string): Promise<boolean> {
+  const res = await fetch(`${BUYER_SEGMENTS_KEY}/${id}`, { method: "DELETE" });
+  globalMutate(BUYER_SEGMENTS_KEY);
+  return res.ok;
 }

@@ -202,6 +202,7 @@ model Tenant {
   buyerItemRelationships  BuyerItemRelationship[]
   buyerConversationNotes  BuyerConversationNote[]
   buyerActivityEvents     BuyerActivityEvent[]
+  buyerSegments           BuyerSegment[]
 
   dealRoomTemplates         DealRoomTemplate[]
   dealRoomTemplateVersions  DealRoomTemplateVersion[]
@@ -297,8 +298,9 @@ model User {
   createdBrandProfiles           BrandProfile[]
   createdSharedExperiences       SharedExperience[]
 
-  assignedBuyerProfiles       BuyerProfile[]
+  assignedBuyerProfiles         BuyerProfile[]
   createdBuyerConversationNotes BuyerConversationNote[]
+  createdBuyerSegments          BuyerSegment[]
 
   createdDealRoomTemplates DealRoomTemplate[]
   authoredDealRoomVersions DealRoomTemplateVersion[]
@@ -445,21 +447,21 @@ model BuyerProfile {
   requirements Json?
   financial    Json?
   purposes     String[] // endUser | investment | secondHome | holidayHome | rental | business | other — multiple allowed
-  motivations  Json?    // [{ id, label, tier: "primary"|"secondary", evidence: string[] }]
-  priorities   Json?    // [{ requirement, importance: "must"|"important"|"preferred"|"nice"|"not_important" }]
-  preferences  Json?    // { property, location, financial, lifestyle, investment } — project-specific attribute keys
+  motivations  Json? // [{ id, label, tier: "primary"|"secondary", evidence: string[] }]
+  priorities   Json? // [{ requirement, importance: "must"|"important"|"preferred"|"nice"|"not_important" }]
+  preferences  Json? // { property, location, financial, lifestyle, investment } — project-specific attribute keys
 
-  intentLevel     String?   // low | medium | high | very_high
-  intentReasons   Json?     // string[] — the explainability requirement: never a bare score
+  intentLevel     String? // low | medium | high | very_high
+  intentReasons   Json? // string[] — the explainability requirement: never a bare score
   intentUpdatedAt DateTime?
 
-  purchaseReadiness           String?   // Exploring|Researching|Shortlisting|Evaluating|Negotiating|DecisionReady|ReservationReady|Purchased
-  purchaseReadinessConfidence Int?      // 0-100
-  purchaseReadinessSignals    Json?     // string[]
+  purchaseReadiness           String? // Exploring|Researching|Shortlisting|Evaluating|Negotiating|DecisionReady|ReservationReady|Purchased
+  purchaseReadinessConfidence Int? // 0-100
+  purchaseReadinessSignals    Json? // string[]
 
   lastInteractionAt DateTime?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   leads              Lead[]
   requirementChanges BuyerRequirementChange[]
@@ -503,7 +505,7 @@ model BuyerObjection {
 
   kind       String // price | payment-plan | location | size | completion-date | financing | view | floor | amenities | investment-risk | legal | competitor | other
   confidence String // high | medium | low
-  evidence   Json   // string[]
+  evidence   Json // string[]
   resolvedAt DateTime?
 
   createdAt DateTime @default(now())
@@ -518,10 +520,10 @@ model BuyerRejectedItem {
   tenantId       String
   tenant         Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  packId String
-  itemId String
-  reason String
-  source String // "sales-conversation" | "manual"
+  packId       String
+  itemId       String
+  reason       String
+  source       String // "sales-conversation" | "manual"
   // Salesperson override — a rejected item stays excluded from that buyer's
   // recommendations until this is set (spec §14).
   overriddenAt DateTime?
@@ -563,12 +565,12 @@ model BuyerConversationNote {
   tenant         Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   rawText         String
-  extracted       Json   // structured candidate fields as returned by the extraction route
+  extracted       Json // structured candidate fields as returned by the extraction route
   status          String // pending | confirmed | edited | rejected
-  confirmedFields Json?  // final fields actually written, after any edit
+  confirmedFields Json? // final fields actually written, after any edit
 
   createdById String?
-  createdBy   User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdBy   User?    @relation(fields: [createdById], references: [id], onDelete: SetNull)
   createdAt   DateTime @default(now())
 
   @@index([buyerProfileId, createdAt(sort: Desc)])
@@ -593,6 +595,26 @@ model BuyerActivityEvent {
 
   @@index([buyerProfileId, createdAt(sort: Desc)])
   @@index([buyerProfileId, kind])
+}
+
+// Wave 2 — a segment is a saved, declarative filter (criteria), never a
+// stored membership snapshot: compileSegmentWhere(criteria) turns it into a
+// live Prisma `where` at read time, so membership is always current and
+// never goes stale as buyer state changes.
+model BuyerSegment {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  name     String
+  criteria Json // BuyerSegmentCriterion[] — see src/core/buyerIntelligence/segments.ts
+
+  createdById String?
+  createdBy   User?    @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([tenantId])
 }
 
 // A property listing's shareable microsite. Listings themselves have no DB
@@ -898,8 +920,8 @@ model SharedExperience {
   customerName   String?
 
   createdById String?
-  createdBy   User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
-  createdAt   DateTime @default(now())
+  createdBy   User?     @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime  @default(now())
   expiresAt   DateTime?
 
   events SharedExperienceEvent[]
