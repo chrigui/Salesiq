@@ -3,12 +3,8 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireCapability, AuthError } from "@/lib/auth/server";
 import { buildBuyerProfileScope } from "@/lib/buyerProfiles/scope";
-import {
-  compileSegmentWhere,
-  matchesJsOnlyCriteria,
-  type BuyerSegmentCriterion,
-} from "@/core/buyerIntelligence/segments";
-import type { BuyerPriority } from "@/core/buyerIntelligence/priorityWeights";
+import { countSegmentMembers } from "@/lib/buyerProfiles/segmentCounts";
+import type { BuyerSegmentCriterion } from "@/core/buyerIntelligence/segments";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -17,25 +13,6 @@ const criterionSchema = z.object({
   field: z.enum(["intentLevel", "purchaseReadiness", "purpose", "priorityRequirement", "assignedToId", "branchId"]),
   value: z.string().min(1).max(200),
 });
-
-/**
- * A segment's buyer count is computed live on every read, never cached —
- * the whole point of a declarative segment is that it's always accurate.
- * `priorities` is selected alongside `id` only so `matchesJsOnlyCriteria`
- * can apply the one criterion type Postgres/Prisma can't express as a
- * `where` clause (see compileSegmentWhere) without a second round trip.
- */
-async function countSegmentMembers(
-  scope: ReturnType<typeof buildBuyerProfileScope>,
-  criteria: BuyerSegmentCriterion[],
-): Promise<number> {
-  const rows = await prisma.buyerProfile.findMany({
-    where: { AND: [scope, compileSegmentWhere(criteria)] },
-    select: { id: true, priorities: true },
-  });
-  return rows.filter((r) => matchesJsOnlyCriteria({ priorities: r.priorities as BuyerPriority[] | null }, criteria))
-    .length;
-}
 
 export async function GET() {
   try {

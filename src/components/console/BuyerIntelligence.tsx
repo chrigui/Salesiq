@@ -8,6 +8,7 @@ import { useBuyerProfiles } from "@/core/store/buyerProfiles";
 import { BuyerIntelligenceProfile } from "@/components/console/BuyerIntelligenceProfile";
 import { BuyerSegments } from "@/components/console/BuyerSegments";
 import { BuyerNbaRules } from "@/components/console/BuyerNbaRules";
+import { BuyerOverview } from "@/components/console/BuyerOverview";
 
 function timeAgo(ms: number | null): string {
   if (!ms) return "—";
@@ -31,6 +32,7 @@ function timeAgo(ms: number | null): string {
  * but intentionally thin until then.
  */
 const TABS = [
+  { id: "overview", label: "Overview" },
   { id: "buyers", label: "Buyers" },
   { id: "segments", label: "Segments" },
   { id: "nba-rules", label: "NBA Rules" },
@@ -39,7 +41,7 @@ const TABS = [
 export function BuyerIntelligence() {
   const { buyerProfiles, isLoading } = useBuyerProfiles();
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [tab, setTab] = useState<(typeof TABS)[number]["id"]>("buyers");
+  const [tab, setTab] = useState<(typeof TABS)[number]["id"]>("overview");
 
   if (selectedId) {
     return <BuyerIntelligenceProfile id={selectedId} onBack={() => setSelectedId(null)} onOpenBuyer={setSelectedId} />;
@@ -73,6 +75,7 @@ export function BuyerIntelligence() {
         ))}
       </div>
 
+      {tab === "overview" && <BuyerOverview onOpenBuyer={setSelectedId} />}
       {tab === "segments" && <BuyerSegments onOpenBuyer={setSelectedId} />}
       {tab === "nba-rules" && <BuyerNbaRules />}
       {tab === "buyers" && (

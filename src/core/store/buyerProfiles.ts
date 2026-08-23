@@ -454,3 +454,20 @@ export async function deleteBuyerNbaRule(id: string): Promise<boolean> {
   globalMutate(BUYER_NBA_RULES_KEY);
   return res.ok;
 }
+
+export interface BuyerAggregate {
+  totalBuyers: number;
+  intentCounts: { level: string; count: number }[];
+  readinessCounts: { stage: string; count: number }[];
+  topObjectionKinds: { kind: string; count: number }[];
+  segments: { id: string; name: string; buyerCount: number }[];
+  attention: { id: string; name: string; objectionKind: string; confidence: string }[];
+}
+
+const BUYER_AGGREGATE_KEY = "/api/buyer-profiles/aggregate";
+
+/** Wave 2 — the management rollup: real server-side groupBy/count, scoped the same as every other Buyer Intelligence route (branch/assigned-only for a Salesperson, tenant-wide for Manager+). */
+export function useBuyerAggregate(): { aggregate: BuyerAggregate | null; isLoading: boolean } {
+  const { data, isLoading } = useSWR<BuyerAggregate>(BUYER_AGGREGATE_KEY, fetcher);
+  return { aggregate: data ?? null, isLoading: isLoading && data === undefined };
+}
