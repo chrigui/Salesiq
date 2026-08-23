@@ -80,3 +80,38 @@ export function matchesJsOnlyCriteria(
   const priorities = profile.priorities ?? [];
   return priorityCriteria.every((c) => priorities.some((p) => p.requirement === c.value));
 }
+
+export interface SegmentMatchableProfile {
+  intentLevel: string | null;
+  purchaseReadiness: string | null;
+  purposes: string[];
+  priorities: BuyerPriority[] | null;
+  assignedToId: string | null;
+  branchId: string | null;
+}
+
+/**
+ * Every criterion evaluated in plain JS against one already-fetched buyer
+ * profile — the complement to compileSegmentWhere+matchesJsOnlyCriteria
+ * (which exist to filter/count across *all* buyers efficiently at the DB
+ * level). For "which segments does this one buyer belong to" a DB round
+ * trip per segment would be wasteful; this is a pure, in-memory check.
+ */
+export function matchesAllCriteria(profile: SegmentMatchableProfile, criteria: BuyerSegmentCriterion[]): boolean {
+  return criteria.every((c) => {
+    switch (c.field) {
+      case "intentLevel":
+        return profile.intentLevel === c.value;
+      case "purchaseReadiness":
+        return profile.purchaseReadiness === c.value;
+      case "purpose":
+        return profile.purposes.includes(c.value);
+      case "assignedToId":
+        return profile.assignedToId === c.value;
+      case "branchId":
+        return profile.branchId === c.value;
+      case "priorityRequirement":
+        return (profile.priorities ?? []).some((p) => p.requirement === c.value);
+    }
+  });
+}

@@ -203,6 +203,7 @@ model Tenant {
   buyerConversationNotes  BuyerConversationNote[]
   buyerActivityEvents     BuyerActivityEvent[]
   buyerSegments           BuyerSegment[]
+  buyerNbaRules           BuyerNbaRule[]
 
   dealRoomTemplates         DealRoomTemplate[]
   dealRoomTemplateVersions  DealRoomTemplateVersion[]
@@ -615,6 +616,29 @@ model BuyerSegment {
   updatedAt   DateTime @updatedAt
 
   @@index([tenantId])
+}
+
+// Wave 2 — tenant-configurable Next Best Action rules. The Wave 1 hardcoded
+// suggestNextBestAction() becomes the built-in fallback, checked only when
+// no enabled rule matches, so a tenant that never touches this stays on
+// byte-identical Wave 1 behavior. `conditions` reuses the existing
+// Condition shape (src/core/types.ts), evaluated against a flat buyer-state
+// record rather than question Answers — see src/core/buyerIntelligence/nbaRules.ts.
+model BuyerNbaRule {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  label      String
+  priority   Int // lower evaluates first
+  conditions Json // Condition[]
+  suggestion String // template string, e.g. "Unresolved {topObjectionKind} objection — address it directly."
+  enabled    Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId, priority])
 }
 
 // A property listing's shareable microsite. Listings themselves have no DB

@@ -5,6 +5,7 @@ import type { BuyerField } from "@/core/buyerIntelligence/types";
 import type { BuyerPriority } from "@/core/buyerIntelligence/priorityWeights";
 import type { BuyerSegmentCriterion } from "@/core/buyerIntelligence/segments";
 import type { SimilarBuyerMatch } from "@/core/buyerIntelligence/similarity";
+import type { Condition } from "@/core/types";
 import { useSession } from "@/core/store/session";
 
 export interface BuyerProfile {
@@ -394,5 +395,62 @@ export async function updateBuyerSegment(
 export async function deleteBuyerSegment(id: string): Promise<boolean> {
   const res = await fetch(`${BUYER_SEGMENTS_KEY}/${id}`, { method: "DELETE" });
   globalMutate(BUYER_SEGMENTS_KEY);
+  return res.ok;
+}
+
+export interface NextBestActionResult {
+  suggestion: string | null;
+  source: "rule" | "fallback";
+}
+
+/** Wave 2 — tenant rules first, the Wave 1 hardcoded hint as fallback (see resolveNextBestAction). */
+export function useNextBestAction(id: string | null): { result: NextBestActionResult | null; isLoading: boolean } {
+  const { data, isLoading } = useSWR<NextBestActionResult>(
+    id ? `${BUYER_PROFILES_KEY}/${id}/next-best-action` : null,
+    fetcher,
+  );
+  return { result: data ?? null, isLoading: isLoading && data === undefined };
+}
+
+export interface BuyerNbaRule {
+  id: string;
+  label: string;
+  priority: number;
+  conditions: Condition[];
+  suggestion: string;
+  enabled: boolean;
+}
+
+const BUYER_NBA_RULES_KEY = "/api/buyer-nba-rules";
+
+/** Wave 2 — every tenant-configured NBA rule, lowest priority number evaluated first. */
+export function useBuyerNbaRules(): { rules: BuyerNbaRule[]; isLoading: boolean } {
+  const { data, isLoading } = useSWR<{ rules: BuyerNbaRule[] }>(BUYER_NBA_RULES_KEY, fetcher);
+  return { rules: data?.rules ?? [], isLoading: isLoading && data === undefined };
+}
+
+export async function createBuyerNbaRule(rule: Omit<BuyerNbaRule, "id">): Promise<boolean> {
+  const res = await fetch(BUYER_NBA_RULES_KEY, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(rule),
+  });
+  globalMutate(BUYER_NBA_RULES_KEY);
+  return res.ok;
+}
+
+export async function updateBuyerNbaRule(id: string, patch: Partial<Omit<BuyerNbaRule, "id">>): Promise<boolean> {
+  const res = await fetch(`${BUYER_NBA_RULES_KEY}/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(patch),
+  });
+  globalMutate(BUYER_NBA_RULES_KEY);
+  return res.ok;
+}
+
+export async function deleteBuyerNbaRule(id: string): Promise<boolean> {
+  const res = await fetch(`${BUYER_NBA_RULES_KEY}/${id}`, { method: "DELETE" });
+  globalMutate(BUYER_NBA_RULES_KEY);
   return res.ok;
 }

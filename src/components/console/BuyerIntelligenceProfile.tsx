@@ -22,16 +22,15 @@ import { cx } from "@/components/ui/primitives";
 import { PACKS } from "@/core/industries";
 import {
   useBuyerProfile,
-  useBuyerActivity,
   useBuyerRejectedItems,
   useBuyerObjections,
   useSimilarBuyers,
+  useNextBestAction,
   overrideRejectedItem,
   resolveBuyerObjection,
   updateBuyerProfile,
   type BuyerProfile,
 } from "@/core/store/buyerProfiles";
-import { suggestNextBestAction } from "@/core/buyerIntelligence/nextBestAction";
 import type { BuyerField } from "@/core/buyerIntelligence/types";
 import type { BuyerPriority, PriorityImportance } from "@/core/buyerIntelligence/priorityWeights";
 import { BuyerTimeline } from "@/components/console/BuyerTimeline";
@@ -337,27 +336,17 @@ function IntentReadinessPanel({ buyerProfile }: { buyerProfile: BuyerProfile }) 
 }
 
 /** Next Best Action (spec, Wave 1 scope) — a lightweight, real, rule-based hint read off this buyer's own objections/activity/readiness record, never a fabricated "reach out!" filler. The full configurable NBA rule engine is Wave 2. */
+/** Wave 2 — tenant-configured rules first, the Wave 1 hardcoded hint as fallback (see resolveNextBestAction / the NBA Rules tab). */
 function NextBestActionPanel({ buyerProfile }: { buyerProfile: BuyerProfile }) {
-  const { objections } = useBuyerObjections(buyerProfile.id);
-  const { events, relationships } = useBuyerActivity(buyerProfile.id);
-  const unresolvedObjections = objections.filter((o) => !o.resolvedAt).map((o) => ({ kind: o.kind, confidence: o.confidence }));
-  const hasProposal = events.some((e) => e.kind === "proposal_generated");
-  const savedCount = relationships.filter((r) => r.state === "saved").length;
-  const hasFinancialInfo = Boolean(buyerProfile.financial && Object.keys(buyerProfile.financial).length > 0);
-
-  const suggestion = suggestNextBestAction({
-    purchaseReadinessStage: buyerProfile.purchaseReadiness,
-    unresolvedObjections,
-    hasProposal,
-    savedCount,
-    hasFinancialInfo,
-  });
+  const { result, isLoading } = useNextBestAction(buyerProfile.id);
 
   return (
     <Panel title="Next best action">
       <div className="flex items-start gap-2 text-sm">
         <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
-        <p className="text-zinc-700">{suggestion ?? "Nothing urgent right now — keep the conversation going."}</p>
+        <p className="text-zinc-700">
+          {isLoading ? "…" : (result?.suggestion ?? "Nothing urgent right now — keep the conversation going.")}
+        </p>
       </div>
     </Panel>
   );
