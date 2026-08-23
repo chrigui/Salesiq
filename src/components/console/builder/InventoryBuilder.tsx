@@ -511,6 +511,9 @@ function LocationEditor({
   const [locating, setLocating] = useState(false);
   const [findingAmenities, setFindingAmenities] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showManual, setShowManual] = useState(false);
+  const [manualLat, setManualLat] = useState<number | undefined>(item.location?.lat);
+  const [manualLng, setManualLng] = useState<number | undefined>(item.location?.lng);
 
   const locate = async () => {
     const q = query.trim();
@@ -525,7 +528,12 @@ function LocationEditor({
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.message ?? "Couldn't find that location.");
+        setError(
+          data.error === "not-found"
+            ? "OpenStreetMap doesn't have that name/address indexed — private developments and some businesses often aren't. Enter coordinates manually below (copy them from Google Maps: right-click the spot → the lat, lng at the top of the menu)."
+            : (data.message ?? "Couldn't find that location."),
+        );
+        setShowManual(true);
         return;
       }
       const { label, lat, lng } = data as { label: string; lat: number; lng: number };
@@ -535,6 +543,16 @@ function LocationEditor({
     } finally {
       setLocating(false);
     }
+  };
+
+  const setManual = () => {
+    if (manualLat == null || manualLng == null) return;
+    onChange({
+      location: { label: query.trim() || "Custom location", lat: manualLat, lng: manualLng },
+      nearbyAmenities: undefined,
+    });
+    setError(null);
+    setShowManual(false);
   };
 
   const findAmenities = async () => {
@@ -580,6 +598,34 @@ function LocationEditor({
           </button>
         </div>
       </Field>
+
+      {!showManual && (
+        <button
+          onClick={() => setShowManual(true)}
+          className="text-[11px] text-ink-faint underline decoration-dotted hover:text-ink-muted"
+        >
+          Can&apos;t find it? Enter coordinates manually
+        </button>
+      )}
+
+      {showManual && (
+        <div className="grid gap-2 rounded-xl border border-white/10 bg-white/5 p-3 sm:grid-cols-[1fr_1fr_auto]">
+          <Field label="Latitude">
+            <NumberInput value={manualLat} onValue={setManualLat} step="any" />
+          </Field>
+          <Field label="Longitude">
+            <NumberInput value={manualLng} onValue={setManualLng} step="any" />
+          </Field>
+          <button
+            onClick={setManual}
+            disabled={manualLat == null || manualLng == null}
+            className="self-end inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-white/10 px-3 py-2 text-xs text-ink-muted transition hover:bg-white/5 disabled:opacity-40"
+          >
+            <MapPin className="h-3.5 w-3.5" />
+            Set location
+          </button>
+        </div>
+      )}
 
       {item.location && (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2">
