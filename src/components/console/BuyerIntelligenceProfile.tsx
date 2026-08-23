@@ -15,6 +15,7 @@ import {
   ShieldQuestion,
   CheckCircle2,
   Lightbulb,
+  Users,
 } from "lucide-react";
 import { Panel } from "@/components/console/light-ui";
 import { cx } from "@/components/ui/primitives";
@@ -24,6 +25,7 @@ import {
   useBuyerActivity,
   useBuyerRejectedItems,
   useBuyerObjections,
+  useSimilarBuyers,
   overrideRejectedItem,
   resolveBuyerObjection,
   updateBuyerProfile,
@@ -102,7 +104,15 @@ function inputClass() {
   return "rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-zinc-400";
 }
 
-export function BuyerIntelligenceProfile({ id, onBack }: { id: string; onBack: () => void }) {
+export function BuyerIntelligenceProfile({
+  id,
+  onBack,
+  onOpenBuyer,
+}: {
+  id: string;
+  onBack: () => void;
+  onOpenBuyer?: (id: string) => void;
+}) {
   const { buyerProfile, isLoading } = useBuyerProfile(id);
 
   if (isLoading || !buyerProfile) {
@@ -163,6 +173,7 @@ export function BuyerIntelligenceProfile({ id, onBack }: { id: string; onBack: (
         <PrioritiesPanel buyerProfile={buyerProfile} />
         <RejectedItemsPanel buyerProfileId={id} />
         <ObjectionsPanel buyerProfileId={id} />
+        <SimilarBuyersPanel buyerProfileId={id} onOpenBuyer={onOpenBuyer} />
         <BuyerTimeline buyerProfileId={id} />
       </div>
     </div>
@@ -620,6 +631,61 @@ function ObjectionsPanel({ buyerProfileId }: { buyerProfileId: string }) {
               )}
             </div>
           ))}
+        </div>
+      )}
+    </Panel>
+  );
+}
+
+/** Buyer similarity (Wave 2) — real, explainable matches (see findSimilarBuyers); a match with no shared reasons is never shown, and the score itself is never displayed bare. */
+function SimilarBuyersPanel({
+  buyerProfileId,
+  onOpenBuyer,
+}: {
+  buyerProfileId: string;
+  onOpenBuyer?: (id: string) => void;
+}) {
+  const { matches, isLoading } = useSimilarBuyers(buyerProfileId);
+  return (
+    <Panel title="Similar buyers">
+      {isLoading ? (
+        <div className="flex items-center gap-2 py-4 text-sm text-zinc-400">
+          <Loader2 className="h-4 w-4 animate-spin" /> Loading…
+        </div>
+      ) : matches.length === 0 ? (
+        <p className="text-sm text-zinc-400">
+          No similar buyers found yet — this buyer doesn&apos;t share enough with anyone else you can see.
+        </p>
+      ) : (
+        <div className="space-y-2">
+          {matches.map((m) => {
+            const content = (
+              <>
+                <Users className="mt-0.5 h-3.5 w-3.5 shrink-0 text-zinc-400" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-zinc-900">{m.name || "Unnamed buyer"}</p>
+                  <ul className="mt-0.5 space-y-0.5 text-xs text-zinc-500">
+                    {m.sharedReasons.map((r, i) => (
+                      <li key={i}>{r}</li>
+                    ))}
+                  </ul>
+                </div>
+              </>
+            );
+            return onOpenBuyer ? (
+              <button
+                key={m.id}
+                onClick={() => onOpenBuyer(m.id)}
+                className="flex w-full items-start gap-2 rounded-xl border border-zinc-200 px-3 py-2 text-left transition hover:border-zinc-300 hover:bg-zinc-50"
+              >
+                {content}
+              </button>
+            ) : (
+              <div key={m.id} className="flex items-start gap-2 rounded-xl border border-zinc-200 px-3 py-2">
+                {content}
+              </div>
+            );
+          })}
         </div>
       )}
     </Panel>

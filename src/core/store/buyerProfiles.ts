@@ -4,6 +4,7 @@ import useSWR, { mutate as globalMutate } from "swr";
 import type { BuyerField } from "@/core/buyerIntelligence/types";
 import type { BuyerPriority } from "@/core/buyerIntelligence/priorityWeights";
 import type { BuyerSegmentCriterion } from "@/core/buyerIntelligence/segments";
+import type { SimilarBuyerMatch } from "@/core/buyerIntelligence/similarity";
 import { useSession } from "@/core/store/session";
 
 export interface BuyerProfile {
@@ -327,6 +328,15 @@ export function useBuyerTimeline(id: string | null): { entries: TimelineEntry[];
     fetcher,
   );
   return { entries: data?.entries ?? [], isLoading: isLoading && data === undefined };
+}
+
+/** Wave 2 — real, explainable similarity matches for this buyer, computed on demand (see findSimilarBuyers for the scoring and why every match carries its actual shared reasons instead of a bare score). */
+export function useSimilarBuyers(id: string | null): { matches: SimilarBuyerMatch[]; isLoading: boolean } {
+  const { data, isLoading } = useSWR<{ matches: SimilarBuyerMatch[] }>(
+    id ? `${BUYER_PROFILES_KEY}/${id}/similar` : null,
+    fetcher,
+  );
+  return { matches: data?.matches ?? [], isLoading: isLoading && data === undefined };
 }
 
 export interface BuyerSegment {

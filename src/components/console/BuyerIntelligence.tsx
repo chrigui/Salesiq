@@ -40,7 +40,7 @@ export function BuyerIntelligence() {
   const [tab, setTab] = useState<(typeof TABS)[number]["id"]>("buyers");
 
   if (selectedId) {
-    return <BuyerIntelligenceProfile id={selectedId} onBack={() => setSelectedId(null)} />;
+    return <BuyerIntelligenceProfile id={selectedId} onBack={() => setSelectedId(null)} onOpenBuyer={setSelectedId} />;
   }
 
   return (
