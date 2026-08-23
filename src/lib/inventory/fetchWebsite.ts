@@ -6,6 +6,9 @@ import * as cheerio from "cheerio";
 const FETCH_TIMEOUT_MS = 10_000;
 const MAX_RESPONSE_BYTES = 3 * 1024 * 1024; // 3MB — plenty for a marketing page's HTML
 const MAX_IMAGES = 40;
+const MAX_HIGHLIGHTS = 8;
+const HIGHLIGHT_MIN_LEN = 10;
+const HIGHLIGHT_MAX_LEN = 150;
 const MAX_REDIRECTS = 3;
 
 // Real-estate marketing sites almost never serve their slideshow/gallery
@@ -36,6 +39,18 @@ export interface FetchedWebsiteContent {
   title: string;
   description: string;
   images: string[];
+  /**
+   * Real bullet-point feature text found on the page — schema.org
+   * amenityFeature names first, then plain <li> text outside any
+   * nav/header/footer landmark. Deliberately the only *new* text field
+   * this pulls in: price, currency, and the scoring `attributes` are
+   * structured/numeric inputs the recommendation engine matches against,
+   * and guessing them from free-form marketing copy risks silently
+   * writing a wrong number into a field the engine trusts — a bad
+   * highlight is just a bullet the admin edits, a bad price or bedroom
+   * count is a wrong recommendation nobody notices.
+   */
+  highlights: string[];
 }
 
 export class WebsiteFetchError extends Error {
@@ -190,15 +205,63 @@ function jsonLdImageUrls(json: unknown, depth = 0): string[] {
   return urls;
 }
 
+/** Best-effort walk of a JSON-LD block for schema.org "amenityFeature" names (LocationFeatureSpecification[] or plain strings) — a curated, structured amenities list when the site bothers to publish one, worth preferring over scraped <li> text. */
+function jsonLdAmenityNames(json: unknown, depth = 0): string[] {
+  if (depth > 6 || json === null || typeof json !== "object") return [];
+  const names: string[] = [];
+  const record = json as Record<string, unknown>;
+  for (const [key, value] of Object.entries(record)) {
+    if (key === "amenityFeature") {
+      const candidates = Array.isArray(value) ? value : [value];
+      for (const c of candidates) {
+        if (typeof c === "string") names.push(c);
+        else if (c && typeof c === "object" && typeof (c as Record<string, unknown>).name === "string") {
+          names.push((c as Record<string, unknown>).name as string);
+        }
+      }
+    } else if (Array.isArray(value)) {
+      for (const v of value) names.push(...jsonLdAmenityNames(v, depth + 1));
+    } else if (value && typeof value === "object") {
+      names.push(...jsonLdAmenityNames(value, depth + 1));
+    }
+  }
+  return names;
+}
+
+/**
+ * Real bullet-point feature text from the page body — <li> items outside
+ * any nav/header/footer landmark (the reliable structural signal that
+ * separates "site navigation" from "content"), filtered to a plausible
+ * highlight length so menu items, breadcrumbs, and boilerplate don't
+ * sneak in as noise.
+ */
+function extractListHighlights($: cheerio.CheerioAPI): string[] {
+  const out: string[] = [];
+  $("li").each((_, el) => {
+    const node = $(el);
+    if (node.closest("nav, header, footer, [role='navigation'], [role='menu'], [role='menubar']").length > 0) return;
+    const text = node.text().replace(/\s+/g, " ").trim();
+    if (text.length >= HIGHLIGHT_MIN_LEN && text.length <= HIGHLIGHT_MAX_LEN) out.push(text);
+  });
+  return out;
+}
+
 /**
  * Fetches a project's marketing website and extracts what the Inventory
- * Builder's "Fetch & fill" action uses: a title, a short description, and
- * real image URLs found on the page — og:image and JSON-LD first, then
- * every <img>/<source>'s largest srcset candidate, lazy-load data-*
- * attributes, and CSS background-image on any element, since a real
- * marketing site's slideshow/gallery photos are rarely a plain <img src>.
- * Deduped, capped at MAX_IMAGES — never fabricated, only what the page
- * itself actually contains.
+ * Builder's "Fetch & fill" action uses: a title, a short description, real
+ * image URLs, and feature highlights — never fabricated, only what the
+ * page itself actually contains.
+ *
+ * Images: og:image and JSON-LD first, then every <img>/<source>'s largest
+ * srcset candidate, lazy-load data-* attributes, and CSS background-image
+ * on any element, since a real marketing site's slideshow/gallery photos
+ * are rarely a plain <img src>. Deduped, capped at MAX_IMAGES.
+ *
+ * Highlights: schema.org amenityFeature names first (structured, when
+ * present), then plain <li> text outside any nav/header/footer landmark,
+ * filtered to a plausible length. Deliberately the only other text field
+ * this fills — see the `highlights` field comment on FetchedWebsiteContent
+ * for why price/currency/attributes are never auto-filled.
  */
 export async function fetchWebsiteContent(rawUrl: string, redirectsLeft = MAX_REDIRECTS): Promise<FetchedWebsiteContent> {
   let url: URL;
@@ -288,5 +351,19 @@ export async function fetchWebsiteContent(rawUrl: string, redirectsLeft = MAX_RE
     $(`[${attr}]`).each((_, el) => pushImage($(el).attr(attr)));
   }
 
-  return { title, description, images };
+  const highlights: string[] = [];
+  const seenHighlights = new Set<string>();
+  const pushHighlight = (text: string | undefined | null) => {
+    if (highlights.length >= MAX_HIGHLIGHTS) return;
+    const trimmed = text?.replace(/\s+/g, " ").trim();
+    if (!trimmed || seenHighlights.has(trimmed.toLowerCase())) return;
+    seenHighlights.add(trimmed.toLowerCase());
+    highlights.push(trimmed);
+  };
+  for (const jsonLdBlock of readJsonLd($)) {
+    for (const name of jsonLdAmenityNames(jsonLdBlock)) pushHighlight(name);
+  }
+  for (const text of extractListHighlights($)) pushHighlight(text);
+
+  return { title, description, images, highlights };
 }

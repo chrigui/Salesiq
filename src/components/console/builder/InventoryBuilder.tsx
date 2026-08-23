@@ -408,14 +408,22 @@ function ProjectLinks({
         setError(data.message ?? "Couldn't import that site.");
         return;
       }
-      const { title, description, images } = data as { title: string; description: string; images: string[] };
+      const { title, description, images, highlights } = data as {
+        title: string;
+        description: string;
+        images: string[];
+        highlights: string[];
+      };
       const existingGallery = item.gallery ?? [];
       const newImages = images.filter((img) => !existingGallery.includes(img));
+      const existingHighlights = item.highlights;
+      const newHighlights = highlights.filter((h) => !existingHighlights.includes(h));
       onChange({
         name: !item.name || item.name === "New item" ? title || item.name : item.name,
         subtitle: description || item.subtitle,
         photo: item.photo ?? images[0],
         gallery: [...existingGallery, ...newImages],
+        highlights: [...existingHighlights, ...newHighlights],
       });
     } catch {
       setError("Couldn't reach that site.");
@@ -426,7 +434,7 @@ function ProjectLinks({
 
   return (
     <div className="grid gap-3 sm:grid-cols-2">
-      <Field label="Website URL" hint={error ?? "Fetches the title, description and photos to fill this item"}>
+      <Field label="Website URL" hint={error ?? "Fetches the title, description, photos and feature highlights to fill this item"}>
         <div className="flex gap-2">
           <TextInput
             value={item.websiteUrl ?? ""}
