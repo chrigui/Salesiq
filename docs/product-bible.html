@@ -126,13 +126,13 @@
     <div class="brandline"><span class="mark">◈</span><span class="n">SALESIQ&nbsp;/&nbsp;DECISION INTELLIGENCE PLATFORM</span></div>
     <p class="eyebrow">Enterprise Product Bible</p>
     <h1 class="title">Master Features Catalog</h1>
-    <p class="subtitle">Version 1.4 &mdash; Pilot Edition</p>
+    <p class="subtitle">Version 1.5 &mdash; Pilot Edition</p>
     <p class="lede">The complete functional scope of SalesIQ: every module and feature planned for the platform, each with its priority and current build status. This catalog is the single source of truth for development.</p>
     <dl class="meta">
       <div><dt>Modules</dt><dd>15</dd></div>
-      <div><dt>Catalogued features</dt><dd>115+</dd></div>
+      <div><dt>Catalogued features</dt><dd>119+</dd></div>
       <div><dt>Estimated scope</dt><dd>450&ndash;600</dd></div>
-      <div><dt>Updated</dt><dd>21 Aug 2026</dd></div>
+      <div><dt>Updated</dt><dd>23 Aug 2026</dd></div>
     </dl>
     <div class="legend">
       <span><span class="dot"></span>Live in the current pilot build</span>
@@ -158,7 +158,7 @@
       <a href="#m10"><span class="num">10</span><span class="lbl">Enterprise</span><span class="cnt">10</span></a>
       <a href="#m11"><span class="num">11</span><span class="lbl">Client Success</span><span class="cnt">8</span></a>
       <a href="#m12"><span class="num">12</span><span class="lbl">Future Platform</span><span class="cnt">9</span></a>
-      <a href="#m13"><span class="num">13</span><span class="lbl">Buyer Intelligence</span><span class="cnt">12</span></a>
+      <a href="#m13"><span class="num">13</span><span class="lbl">Buyer Intelligence</span><span class="cnt">16</span></a>
       <a href="#m14"><span class="num">14</span><span class="lbl">Display Studio</span><span class="cnt">9</span></a>
       <a href="#m15"><span class="num">15</span><span class="lbl">Digital Brochure</span><span class="cnt">8</span></a>
     </div>
@@ -368,8 +368,12 @@
       <article class="feat live"><header><h3>Rejected Options<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★</span><span class="off">★</span></span></header><p class="desc">Rule out an item with a reason; it stops recommending for that buyer immediately, until a salesperson explicitly overrides it.</p></article>
       <article class="feat live"><header><h3>Buyer Intent &amp; Purchase Readiness<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★</span><span class="off">★</span></span></header><p class="desc">A deterministic, evidence-backed read &mdash; Low/Medium/High/Very High intent and an 8-stage readiness journey with a real confidence percentage, never a guess.</p></article>
       <article class="feat live"><header><h3>Objection Tracking<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★</span><span class="off">★</span></span></header><p class="desc">Every objection raised through the Objection Handler persists to the buyer's record, with confidence rising when the same objection repeats.</p></article>
-      <article class="feat live"><header><h3>Next Best Action<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★</span><span class="off">★★</span></span></header><p class="desc">A lightweight, rule-based suggestion grounded in the buyer's real objections/activity &mdash; e.g. an unresolved price objection with no financing info on file. The full configurable NBA engine is a later phase.</p></article>
+      <article class="feat live"><header><h3>Configurable Next Best Action<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★</span><span class="off">★</span></span></header><p class="desc">A tenant authors its own rules &mdash; conditions over the buyer's real state, evaluated in priority order; the original rule-based hint (e.g. an unresolved price objection with no financing info on file) is the guaranteed fallback, so a tenant that never touches the builder sees zero behavior change.</p></article>
       <article class="feat live"><header><h3>Branch-Scoped Access<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★</span><span class="off">★</span></span></header><p class="desc">The platform's first row-level access boundary &mdash; a Salesperson sees only buyers in their own branch or assigned to them; Manager and above see the full tenant.</p></article>
+      <article class="feat live"><header><h3>Unified Buyer Timeline<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★</span><span class="off">★</span></span></header><p class="desc">Every requirement change, activity event, conversation capture and objection, merged into one real chronological feed &mdash; including item-relationship state transitions (viewed, saved, rejected, proposal-created) that had never been rendered anywhere before.</p></article>
+      <article class="feat live"><header><h3>Buyer Segmentation<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★</span><span class="off">★</span></span></header><p class="desc">A segment is a saved, declarative filter &mdash; intent, readiness stage, purpose, priorities, ownership &mdash; compiled into a live query on every read, so its buyer count is never a stale snapshot.</p></article>
+      <article class="feat live"><header><h3>Buyer Similarity<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★</span><span class="off">★★</span></span></header><p class="desc">A deterministic, weighted shared-attribute match &mdash; every result names the real attributes it shares (a priority, a purpose, a readiness stage), never a bare similarity percentage.</p></article>
+      <article class="feat live"><header><h3>Management Aggregate View<span class="live-dot"></span></h3><span class="stars"><span class="on">★★★★</span><span class="off">★</span></span></header><p class="desc">Intent and readiness distribution, top open objections, segment summaries and a real needs-attention list &mdash; the platform's first genuine server-side rollup, scoped exactly like the buyer list itself.</p></article>
     </div>
   </section>
 
@@ -422,20 +426,20 @@
         <tr><td>Enterprise Features</td><td>30+</td></tr>
         <tr><td>Client Success</td><td>20+</td></tr>
         <tr><td>Future Platform</td><td>Unlimited</td></tr>
-        <tr><td>Buyer Intelligence</td><td>25+</td></tr>
+        <tr><td>Buyer Intelligence</td><td>29+</td></tr>
         <tr><td>Display Studio</td><td>20+</td></tr>
         <tr><td>Digital Brochure</td><td>15+</td></tr>
         <tr class="total"><td>Estimated total</td><td>450&ndash;600</td></tr>
       </tbody>
     </table>
-    <p class="closing">This catalog represents the complete functional scope of the SalesIQ Enterprise Pilot (v1.0) and serves as the foundation for expanding into a full enterprise-grade Decision Intelligence Platform. Features marked <span style="color:var(--accent-ink);font-weight:600;">● live</span> are shipped in the current build; all others are planned scope. Modules 13&ndash;15 were added in this update: Buyer Intelligence and Display Studio (Wave 1, all PRs shipped and verified end-to-end) are entirely new; Digital Property Brochure &amp; Microsite was already live and is catalogued here for the first time.</p>
+    <p class="closing">This catalog represents the complete functional scope of the SalesIQ Enterprise Pilot (v1.0) and serves as the foundation for expanding into a full enterprise-grade Decision Intelligence Platform. Features marked <span style="color:var(--accent-ink);font-weight:600;">● live</span> are shipped in the current build; all others are planned scope. Modules 13&ndash;15 were added in a previous update: Buyer Intelligence and Display Studio (Wave 1) and Digital Property Brochure &amp; Microsite. This update adds Buyer Intelligence Wave 2 (all 5 PRs shipped and verified end-to-end): the unified Buyer Timeline, Buyer Segmentation, Buyer Similarity, a configurable Next Best Action rule engine, and the management aggregate view.</p>
   </section>
 
 </main>
 
 <footer class="wrap">
   <div class="foot">
-    <span>SalesIQ &middot; Enterprise Product Bible &middot; v1.4 Pilot Edition</span>
+    <span>SalesIQ &middot; Enterprise Product Bible &middot; v1.5 Pilot Edition</span>
     <span>Single source of truth for development</span>
   </div>
 </footer>

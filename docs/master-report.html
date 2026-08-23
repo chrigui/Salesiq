@@ -199,7 +199,7 @@
     <div class="stat"><div class="n">5</div><div class="l">industry packs shipped from one engine — real estate ×2, automotive, private aviation, yacht charter</div></div>
     <div class="stat"><div class="n">5</div><div class="l">live product surfaces — Display, Companion, Dashboard, Admin, and a public Decision Engine API</div></div>
     <div class="stat"><div class="n">0</div><div class="l">fabricated recommendations — every score traces to a real, inspectable rule</div></div>
-    <div class="stat"><div class="n">2</div><div class="l">new modules shipped this phase — Buyer Intelligence and Display Studio, 15 PRs combined, both verified end-to-end</div></div>
+    <div class="stat"><div class="n">2</div><div class="l">new modules shipped this phase — Buyer Intelligence (both waves) and Display Studio, 20 PRs combined, both verified end-to-end</div></div>
   </div>
   <div class="good"><b>North Star:</b> every recommendation a customer sees on screen must be explainable in plain language from real facts — no invented statistics, no "AI vibes." That discipline is enforced in code (the scoring engine and the narrator are deterministic; Claude is an optional writing upgrade layered on top of facts it doesn't get to invent) — not just claimed in a deck.</div>
   <p>SalesIQ is built on Next.js 15 / React 19, backed by a real multi-tenant Postgres schema (Prisma), with genuine role-based permissions and audit logging rather than a demo-only login screen. Everything described in this report as "live" is running code in this repository today; everything described as roadmap is explicitly labeled as such, using the same shipped/roadmap vocabulary the product's own internal documentation already uses (<code>live-dot</code> / <code>To activate</code> / <code>Next up</code> / <code>Blueprint</code>).</p>
@@ -323,8 +323,13 @@
     <div class="feature"><h4>Objection tracking, repeat-aware</h4><p>Every objection raised through the existing Objection Handler persists, with confidence rising when the same objection repeats.</p></div>
     <div class="feature"><h4>Row-level access scoping</h4><p>The platform's first access boundary narrower than tenant-wide: a Salesperson sees only their own branch or assigned buyers; Manager and above see the full tenant.</p></div>
     <div class="feature"><h4>Verified privacy boundary</h4><p>Confirmed against real public routes — a buyer profile carrying rich objection/intent data never appears on the Customer Display, Brochure, or Shared Experience.</p></div>
+    <div class="feature"><h4>Unified Buyer Timeline</h4><p>Every requirement change, activity event, conversation capture, and objection merged into one chronological feed — including item-relationship states never rendered anywhere before.</p></div>
+    <div class="feature"><h4>Buyer Segmentation</h4><p>A segment is a saved, declarative filter compiled into a live query on every read — its buyer count is never a stale snapshot.</p></div>
+    <div class="feature"><h4>Buyer Similarity</h4><p>A deterministic, weighted shared-attribute match — every result names the real attributes it shares, never a bare score.</p></div>
+    <div class="feature"><h4>Configurable Next Best Action</h4><p>Tenant-authored rules evaluate first; the original Wave 1 hint is the guaranteed fallback, verified byte-identical for an untouched tenant.</p></div>
+    <div class="feature"><h4>Management aggregate view</h4><p>The platform's first genuine server-side <code>groupBy</code>/<code>count</code> rollup — intent/readiness distribution, top objections, a needs-attention list — scoped exactly like the buyer list itself.</p></div>
   </div>
-  <div class="note" style="margin-top:16px"><b>Scope:</b> this is Wave 1 (6 PRs, complete). Buyer segmentation, similarity, and a full configurable Next Best Action rule engine are scoped as Wave 2, not started.</div>
+  <div class="note" style="margin-top:16px"><b>Scope:</b> both Wave 1 (6 PRs) and Wave 2 (5 PRs) are complete and verified end-to-end, including a privacy-boundary re-check against the newly-added segmentation/aggregate routes.</div>
 </section>
 
 <!-- ============ DISPLAY STUDIO ============ -->
@@ -424,7 +429,7 @@
   <p class="lede">SalesIQ's own internal documentation already distinguishes three tiers of "not yet" — reused verbatim here rather than inventing a new vocabulary.</p>
   <div class="grid g3">
     <div class="card"><span class="pill live">To activate</span><p style="margin-top:10px;font-size:13.5px">Code already exists — a config/deploy step is what's left. Setting <code>AUTH_SECRET</code> on Vercel (found missing during this pass — every login, including the guaranteed demo account, was throwing at the JWT-signing step with no secret configured; production deploy from <code>claude/decision-intelligence-platform-0miwwv</code> otherwise confirmed working); setting a production Claude API key.</p></div>
-    <div class="card"><span class="pill next">Next up</span><p style="margin-top:10px;font-size:13.5px">Real build work remaining. Migrating the last localStorage-backed settings stores to Postgres; live payment processing behind the real Billing Center UI; federated SSO sign-in; five more industry verticals (medical, solar, insurance, education, hospitality); Buyer Intelligence Wave 2 (segmentation, similarity, full Next Best Action engine); Deal Room PRs 2–10, currently paused.</p></div>
+    <div class="card"><span class="pill next">Next up</span><p style="margin-top:10px;font-size:13.5px">Real build work remaining. Migrating the last localStorage-backed settings stores to Postgres; live payment processing behind the real Billing Center UI; federated SSO sign-in; five more industry verticals (medical, solar, insurance, education, hospitality); Deal Room PRs 2–10, currently paused.</p></div>
     <div class="card"><span class="pill blue">Blueprint</span><p style="margin-top:10px;font-size:13.5px">Designed, not wired. Native iOS/Android apps (the installable PWA ships today); AR/VR/IoT/digital-twin; custom scoring math beyond the built-in rule types; drag-on-map POI placement.</p></div>
   </div>
 </section>
@@ -438,7 +443,7 @@
     <tr><td><b>No published case studies yet</b></td><td>Marketing stats (e.g. faster time-to-recommendation, more deals reaching proposal) are explicitly labeled illustrative/pilot-representative on the website — not measured outcomes to date.</td></tr>
     <tr><td><b>Deal Room is schema-only today</b></td><td>Only PR 1 of a planned 10-PR build is complete — no user-facing Deal Room feature exists yet; treat it as roadmap, not shipped, until the Rendering Engine milestone lands.</td></tr>
     <tr><td><b>Billing has no live processor</b></td><td>The Subscription/Billing Center UI is real; no payment processor (e.g. Stripe) is wired to it yet — commercial self-serve signup isn't live.</td></tr>
-    <tr><td><b>Buyer Intelligence Wave 1 only</b></td><td>Segmentation, similarity, and the full configurable Next Best Action engine are scoped as Wave 2, not started.</td></tr>
+    <tr><td><b>Buyer Similarity skips financial fields</b></td><td>Deliberate: <code>financial</code> is a freeform field with no stable key convention across buyers, so a numeric budget-overlap check would risk a fabricated-feeling match.</td></tr>
   </table>
 </section>
 
