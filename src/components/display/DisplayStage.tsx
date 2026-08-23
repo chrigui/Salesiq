@@ -216,8 +216,10 @@ export function DisplayStage({
                   deviceToken={deviceToken ?? undefined}
                   matchScore={(() => {
                     const entry = scored.find((s) => s.item.id === focusedItem.id);
-                    return entry ? { score: entry.score, reasons: entry.reasons } : null;
+                    return entry ? { score: entry.score, reasons: entry.reasons, narrative: narrate(entry, pack) } : null;
                   })()}
+                  sessionView={view}
+                  hasProposal={Boolean(proposalText)}
                 />
               </motion.div>
             )}

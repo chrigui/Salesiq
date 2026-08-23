@@ -25,6 +25,8 @@ import { DisplayComparisonTable } from "./widgets/DisplayComparisonTable";
 import { DisplayDocumentsCard } from "./widgets/DisplayDocumentsCard";
 import { DisplaySaveShare } from "./widgets/DisplaySaveShare";
 import { DisplayLeadCaptureCard } from "./widgets/DisplayLeadCaptureCard";
+import { DisplayProgressSteps } from "./widgets/DisplayProgressSteps";
+import { DisplayAiInsight } from "./widgets/DisplayAiInsight";
 import type { DisplayWidgetContext } from "./types";
 
 /** Display Studio's widget registry — the "no hardcoded templates" part: a profile is just an ordered list of these, toggled/reordered in the editor, rendered identically in the editor preview and on the real Customer Display. Covers all six catalog categories: Property, Location, Project, Investment, Experience, Conversion. */
@@ -55,6 +57,8 @@ export const WIDGET_REGISTRY: Record<string, ComponentType<DisplayWidgetContext>
   documentsCard: DisplayDocumentsCard,
   saveShare: DisplaySaveShare,
   leadCaptureCard: DisplayLeadCaptureCard,
+  progressSteps: DisplayProgressSteps,
+  aiInsight: DisplayAiInsight,
 };
 
 export const WIDGET_LABELS: Record<string, string> = {
@@ -84,4 +88,6 @@ export const WIDGET_LABELS: Record<string, string> = {
   documentsCard: "Documents (card)",
   saveShare: "Save & share",
   leadCaptureCard: "Lead capture (card)",
+  progressSteps: "Progress steps",
+  aiInsight: "AI insight",
 };

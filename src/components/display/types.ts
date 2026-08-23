@@ -54,6 +54,10 @@ export interface DisplayWidgetContext {
   /** This physical Display's identity, when rendered live on a real paired kiosk (presentation/idle modes). Undefined in the editor's "preview" mode — widgets that need a real device (e.g. leadCapture) render an honest disabled state instead of submitting anywhere. */
   deviceId?: string;
   deviceToken?: string;
-  /** This item's real score/reasons against the current live customer's answers (scoreInventory/narrate) — null when there's no active session to score against (idle mode, editor preview). Never fabricated: absent rather than guessed. */
-  matchScore?: { score: number; reasons: string[] } | null;
+  /** This item's real score/reasons/narrative against the current live customer's answers (scoreInventory/narrate) — null when there's no active session to score against (idle mode, editor preview). Never fabricated: absent rather than guessed. */
+  matchScore?: { score: number; reasons: string[]; narrative: string } | null;
+  /** The shared session's actual current view (welcome/question/recommendation/compare/item/proposal) — undefined outside a live session (idle mode, editor preview). */
+  sessionView?: "welcome" | "question" | "recommendation" | "compare" | "item" | "proposal";
+  /** Whether a proposal has actually been generated for this session — real signal, never inferred. */
+  hasProposal?: boolean;
 }

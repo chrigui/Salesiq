@@ -31,6 +31,8 @@ export const WIDGET_TYPES = [
   "documentsCard",
   "saveShare",
   "leadCaptureCard",
+  "progressSteps",
+  "aiInsight",
 ] as const;
 export type WidgetType = (typeof WIDGET_TYPES)[number];
 
@@ -60,6 +62,8 @@ const DEFAULT_SPAN: Partial<Record<WidgetType, "sm" | "md" | "lg">> = {
   documentsCard: "md",
   saveShare: "sm",
   leadCaptureCard: "md",
+  progressSteps: "md",
+  aiInsight: "md",
 };
 
 /**
@@ -82,6 +86,8 @@ const TIER2_TAIL: WidgetType[] = [
   "documentsCard",
   "saveShare",
   "leadCaptureCard",
+  "progressSteps",
+  "aiInsight",
 ];
 
 const TEMPLATE_ORDER: Record<DisplayTemplateId, WidgetType[]> = {
@@ -96,6 +102,8 @@ const TEMPLATE_ORDER: Record<DisplayTemplateId, WidgetType[]> = {
   Dashboard: [
     "heroCard",
     "matchScore",
+    "aiInsight",
+    "progressSteps",
     "nearbyPlaces",
     "investmentSnapshot",
     "galleryCard",
@@ -133,7 +141,7 @@ const TEMPLATE_ENABLED_COUNT: Record<DisplayTemplateId, number> = {
   LuxuryCinematic: 5,
   Masterplan: 5,
   Custom: 1,
-  Dashboard: 6,
+  Dashboard: 8,
 };
 
 /** Sensible default composition for a newly created profile, varying by template — editable afterward in the editor (toggle/reorder-only convention, same as the Brochure module). */

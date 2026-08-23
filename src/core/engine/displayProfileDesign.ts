@@ -140,6 +140,8 @@ export function deterministicDisplayDesign(
     documentsCard: hasDocs,
     saveShare: true,
     leadCaptureCard: true,
+    progressSteps: true,
+    aiInsight: hasScoring,
   };
 
   const preset: Exclude<MotionPresetId, "Custom"> = /jet|yacht|luxury/i.test(pack.vertical)

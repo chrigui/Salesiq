@@ -17,8 +17,11 @@ export interface DisplayProfileRendererProps {
   /** Forwarded from DisplayStage's own claimed-device state — absent in the editor preview, where there's no real kiosk to attribute a lead submission to. */
   deviceId?: string;
   deviceToken?: string;
-  /** Forwarded from DisplayStage's own live scoreInventory() run — absent (idle mode, editor preview) when there's no active customer session to score against. */
+  /** Forwarded from DisplayStage's own live scoreInventory()/narrate() run — absent (idle mode, editor preview) when there's no active customer session to score against. */
   matchScore?: DisplayWidgetContext["matchScore"];
+  /** Forwarded from DisplayStage's own shared session state — absent (idle mode, editor preview) outside a live session. */
+  sessionView?: DisplayWidgetContext["sessionView"];
+  hasProposal?: boolean;
 }
 
 /**
@@ -29,7 +32,7 @@ export interface DisplayProfileRendererProps {
  * src/components/brochure/BrochureView.tsx's scoped --brand/--brand-soft
  * pattern so a profile's brand overrides don't touch the app-wide theme.
  */
-export function DisplayProfileRenderer({ profile, pack, item, mode, deviceId, deviceToken, matchScore }: DisplayProfileRendererProps) {
+export function DisplayProfileRenderer({ profile, pack, item, mode, deviceId, deviceToken, matchScore, sessionView, hasProposal }: DisplayProfileRendererProps) {
   const brand = profile.brandOverrides?.brand || profile.resolvedBrandProfile?.brand || pack.branding.brand;
   const brandSoft = profile.brandOverrides?.brandSoft || profile.resolvedBrandProfile?.brandSoft || pack.branding.brandSoft;
   const brandVars = { "--brand": brand, "--brand-soft": brandSoft } as CSSProperties;
@@ -78,6 +81,8 @@ export function DisplayProfileRenderer({ profile, pack, item, mode, deviceId, de
         deviceId={deviceId}
         deviceToken={deviceToken}
         matchScore={matchScore ?? null}
+        sessionView={sessionView}
+        hasProposal={hasProposal}
       />
     );
     if (motionConfig.reduceMotion) {
