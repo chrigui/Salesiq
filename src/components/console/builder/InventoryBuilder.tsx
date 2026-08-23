@@ -1,7 +1,23 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ChevronDown, Plus, Trash2, ArrowUp, ArrowDown, X, Globe } from "lucide-react";
+import {
+  ChevronDown,
+  Plus,
+  Trash2,
+  ArrowUp,
+  ArrowDown,
+  X,
+  Globe,
+  Instagram,
+  Download,
+  Loader2,
+  Upload,
+  FileText,
+  FileSpreadsheet,
+  Image as ImageIcon,
+  File as FileIcon,
+} from "lucide-react";
 import { cx, GRADIENTS } from "@/components/ui/primitives";
 import { getEffectivePack, saveInventory } from "@/core/store/packs";
 import type { InventoryItem } from "@/core/types";
@@ -83,6 +99,7 @@ export function InventoryBuilder({
         {items.map((it, i) => (
           <ItemRow
             key={it.id}
+            packId={packId}
             item={it}
             index={i}
             total={items.length}
@@ -105,6 +122,7 @@ export function InventoryBuilder({
 }
 
 function ItemRow({
+  packId,
   item,
   index,
   total,
@@ -115,6 +133,7 @@ function ItemRow({
   onMove,
   onGenerateBrochure,
 }: {
+  packId: string;
   item: InventoryItem;
   index: number;
   total: number;
@@ -219,6 +238,8 @@ function ItemRow({
             />
           </Field>
 
+          <ProjectLinks item={item} onChange={onChange} />
+
           <Field label="Accent gradient">
             <div className="flex flex-wrap gap-2">
               {GRADIENT_TOKENS.map((token) => (
@@ -243,6 +264,11 @@ function ItemRow({
             onChange={(highlights) => onChange({ highlights })}
           />
 
+          <GalleryEditor
+            gallery={item.gallery ?? []}
+            onChange={(gallery) => onChange({ gallery })}
+          />
+
           <AttributesEditor
             attributes={item.attributes}
             onChange={(attributes) => onChange({ attributes })}
@@ -251,6 +277,12 @@ function ItemRow({
           <LifestyleEditor
             lifestyle={item.lifestyle}
             onChange={(lifestyle) => onChange({ lifestyle })}
+          />
+
+          <ItemAssetsPanel
+            packId={packId}
+            itemId={item.id}
+            onImageUploaded={(url) => onChange({ gallery: [...(item.gallery ?? []), url] })}
           />
         </div>
       )}
@@ -294,6 +326,288 @@ function HighlightsEditor({
         >
           <Plus className="h-3.5 w-3.5" /> Add highlight
         </button>
+      </div>
+    </Field>
+  );
+}
+
+function GalleryEditor({
+  gallery,
+  onChange,
+}: {
+  gallery: string[];
+  onChange: (next: string[]) => void;
+}) {
+  const set = (i: number, v: string) => onChange(gallery.map((g, idx) => (idx === i ? v : g)));
+  const remove = (i: number) => onChange(gallery.filter((_, idx) => idx !== i));
+  const add = () => onChange([...gallery, ""]);
+  return (
+    <Field label="Gallery" hint="Extra photo URLs shown on the Brochure and Customer Display gallery widgets">
+      <div className="space-y-2">
+        {gallery.map((url, i) => (
+          <div key={i} className="flex items-center gap-2">
+            {url && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={url} alt="" className="h-8 w-8 shrink-0 rounded-lg object-cover" />
+            )}
+            <TextInput
+              value={url}
+              placeholder="https://…"
+              onChange={(e) => set(i, e.target.value)}
+              className="flex-1"
+            />
+            <button
+              onClick={() => remove(i)}
+              className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-ink-faint hover:bg-white/5 hover:text-rose-300"
+              aria-label="Remove image"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        ))}
+        <button
+          onClick={add}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 px-2.5 py-1.5 text-xs text-ink-muted transition hover:bg-white/5"
+        >
+          <Plus className="h-3.5 w-3.5" /> Add image URL
+        </button>
+      </div>
+    </Field>
+  );
+}
+
+/**
+ * The project's own website and Instagram — the website can be fetched to
+ * auto-fill this item (see fetchAndFill below); Instagram has no public API
+ * to bulk-import a profile's photos, so it's stored as a reference link
+ * only — any photos worth reusing get added via the file upload panel below.
+ */
+function ProjectLinks({
+  item,
+  onChange,
+}: {
+  item: InventoryItem;
+  onChange: (patch: Partial<InventoryItem>) => void;
+}) {
+  const [fetching, setFetching] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchAndFill = async () => {
+    const url = item.websiteUrl?.trim();
+    if (!url) return;
+    setFetching(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/inventory/fetch-website", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.message ?? "Couldn't import that site.");
+        return;
+      }
+      const { title, description, images } = data as { title: string; description: string; images: string[] };
+      const existingGallery = item.gallery ?? [];
+      const newImages = images.filter((img) => !existingGallery.includes(img));
+      onChange({
+        name: !item.name || item.name === "New item" ? title || item.name : item.name,
+        subtitle: description || item.subtitle,
+        photo: item.photo ?? images[0],
+        gallery: [...existingGallery, ...newImages],
+      });
+    } catch {
+      setError("Couldn't reach that site.");
+    } finally {
+      setFetching(false);
+    }
+  };
+
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      <Field label="Website URL" hint={error ?? "Fetches the title, description and photos to fill this item"}>
+        <div className="flex gap-2">
+          <TextInput
+            value={item.websiteUrl ?? ""}
+            placeholder="https://…"
+            onChange={(e) => onChange({ websiteUrl: e.target.value || undefined })}
+            className="flex-1"
+          />
+          <button
+            onClick={fetchAndFill}
+            disabled={!item.websiteUrl?.trim() || fetching}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-white/10 px-3 py-2 text-xs text-ink-muted transition hover:bg-white/5 disabled:opacity-40"
+          >
+            {fetching ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Globe className="h-3.5 w-3.5" />}
+            Fetch & fill
+          </button>
+        </div>
+      </Field>
+      <Field label="Instagram URL" hint="Reference link only — upload any photos you want to reuse below">
+        <div className="flex items-center gap-2">
+          <Instagram className="h-4 w-4 shrink-0 text-ink-faint" />
+          <TextInput
+            value={item.instagramUrl ?? ""}
+            placeholder="https://instagram.com/…"
+            onChange={(e) => onChange({ instagramUrl: e.target.value || undefined })}
+            className="flex-1"
+          />
+        </div>
+      </Field>
+    </div>
+  );
+}
+
+interface ItemAsset {
+  id: string;
+  name: string;
+  mimeType: string;
+  sizeBytes: number;
+  createdAt: number;
+}
+
+function formatBytes(n: number): string {
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function assetIcon(mimeType: string) {
+  if (mimeType.startsWith("image/")) return ImageIcon;
+  if (mimeType === "application/pdf") return FileText;
+  if (mimeType.includes("spreadsheet") || mimeType.includes("excel")) return FileSpreadsheet;
+  return FileIcon;
+}
+
+/**
+ * Extra project materials — floor plans, payment plans, extra photos —
+ * stored server-side (unlike the rest of this item's fields, which are
+ * still localStorage-only; see saveInventory). Uploading an image adds it
+ * straight to the Gallery above, so it shows up on the Brochure/Display
+ * gallery widgets with no extra step; PDFs and spreadsheets stay in this
+ * reference list only.
+ */
+function ItemAssetsPanel({
+  packId,
+  itemId,
+  onImageUploaded,
+}: {
+  packId: string;
+  itemId: string;
+  onImageUploaded: (url: string) => void;
+}) {
+  const [assets, setAssets] = useState<ItemAsset[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const basePath = `/api/inventory-items/${packId}/${itemId}/assets`;
+
+  const load = () => {
+    setLoading(true);
+    fetch(basePath)
+      .then((res) => res.json())
+      .then((data) => setAssets(data.assets ?? []))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [packId, itemId]);
+
+  const upload = async (file: File) => {
+    setUploading(true);
+    setError(null);
+    try {
+      const dataBase64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve((reader.result as string).split(",")[1] ?? "");
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      const res = await fetch(basePath, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: file.name, mimeType: file.type, dataBase64 }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(
+          data.error === "unsupported-file-type"
+            ? "That file type isn't supported (images, PDF, .xlsx/.xls only)."
+            : data.error === "file-too-large"
+              ? "That file is too large (8MB max)."
+              : "Upload failed.",
+        );
+        return;
+      }
+      setAssets((prev) => [data.asset, ...prev]);
+      if (file.type.startsWith("image/")) {
+        onImageUploaded(`/api/public/inventory-items/${packId}/${itemId}/assets/${data.asset.id}`);
+      }
+    } catch {
+      setError("Upload failed.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const remove = async (assetId: string) => {
+    setAssets((prev) => prev.filter((a) => a.id !== assetId));
+    await fetch(`${basePath}/${assetId}`, { method: "DELETE" });
+  };
+
+  return (
+    <Field label="Project files" hint={error ?? "Floor plans, payment plans, extra photos — up to 8MB each"}>
+      <div className="space-y-2">
+        {loading ? (
+          <div className="flex items-center gap-2 py-2 text-xs text-ink-faint">
+            <Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading…
+          </div>
+        ) : (
+          assets.map((a) => {
+            const Icon = assetIcon(a.mimeType);
+            return (
+              <div key={a.id} className="flex items-center gap-2 rounded-lg border border-white/10 px-2.5 py-1.5">
+                <Icon className="h-4 w-4 shrink-0 text-ink-faint" />
+                <span className="flex-1 truncate text-xs">{a.name}</span>
+                <span className="shrink-0 text-[10px] text-ink-faint">{formatBytes(a.sizeBytes)}</span>
+                <a
+                  href={`${basePath}/${a.id}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-ink-faint hover:bg-white/5"
+                  aria-label="Download"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                </a>
+                <button
+                  onClick={() => remove(a.id)}
+                  className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-ink-faint hover:bg-white/5 hover:text-rose-300"
+                  aria-label="Delete"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            );
+          })
+        )}
+        <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-white/10 px-2.5 py-1.5 text-xs text-ink-muted transition hover:bg-white/5">
+          {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+          Upload file
+          <input
+            type="file"
+            className="hidden"
+            accept="image/png,image/jpeg,image/webp,application/pdf,.xlsx,.xls"
+            disabled={uploading}
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) void upload(file);
+              e.target.value = "";
+            }}
+          />
+        </label>
       </div>
     </Field>
   );

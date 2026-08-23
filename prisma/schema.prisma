@@ -177,14 +177,15 @@ model Tenant {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  branches        Branch[]
-  users           User[]
-  sessions        Session[]
-  rolePermissions RolePermission[]
-  leads           Lead[]
-  brochures       Brochure[]
-  brochureEvents  BrochureEvent[]
-  brochureAssets  BrochureAsset[]
+  branches            Branch[]
+  users               User[]
+  sessions            Session[]
+  rolePermissions     RolePermission[]
+  leads               Lead[]
+  brochures           Brochure[]
+  brochureEvents      BrochureEvent[]
+  brochureAssets      BrochureAsset[]
+  inventoryItemAssets InventoryItemAsset[]
 
   displayProfiles        DisplayProfile[]
   displayProfileVersions DisplayProfileVersion[]
@@ -699,6 +700,29 @@ model BrochureAsset {
   createdAt DateTime @default(now())
 
   @@index([brochureId])
+}
+
+// Extra files an admin attaches to a real-estate "project" — floor plans,
+// payment plans, extra photos. Same no-object-storage-configured tradeoff as
+// BrochureAsset (bytes live in Postgres). Keyed by (tenantId, packId, itemId)
+// rather than a real foreign key: InventoryItem has no DB row of its own yet
+// (the Inventory Builder still persists item fields to localStorage only —
+// see src/lib/brochures/resolve.ts) — the same packId/itemId string-pair
+// keying Brochure and DisplayProfile already use to reference an item.
+model InventoryItemAsset {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  packId   String
+  itemId   String
+
+  name      String
+  mimeType  String
+  sizeBytes Int
+  data      Bytes
+  createdAt DateTime @default(now())
+
+  @@index([tenantId, packId, itemId])
 }
 
 // Real analytics events (view/scan/click/lead) — no fabricated counts.

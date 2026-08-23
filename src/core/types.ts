@@ -66,6 +66,10 @@ export interface InventoryItem {
   appreciation?: number; // % — used by investment scoring
   /** Lifestyle-map data — powers the Interactive Lifestyle Map hero. */
   lifestyle?: Lifestyle;
+  /** The project's own website — source for "Fetch & fill" (subtitle/gallery/photo). */
+  websiteUrl?: string;
+  /** Reference link only — Instagram has no public API to bulk-import a profile's photos, so this is never auto-scraped. */
+  instagramUrl?: string;
 }
 
 /** A point of interest floating on the lifestyle map. x/y are 0..100 (% of stage). */

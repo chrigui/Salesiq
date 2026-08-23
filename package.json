@@ -23,6 +23,7 @@
     "@prisma/adapter-pg": "^7.9.1",
     "@prisma/client": "^7.9.1",
     "bcryptjs": "^3.0.3",
+    "cheerio": "^1.2.0",
     "framer-motion": "^11.3.19",
     "jose": "^6.2.5",
     "lucide-react": "^0.417.0",
