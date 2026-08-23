@@ -399,12 +399,18 @@ function Standing({
   );
 }
 
-// Reserved bottom-left corner where the "AI Guide" pill lives (LifestyleMap's
-// `bottom-6 left-6` panel) — this badge's screen position comes from
-// map.project() and moves with pan/zoom/pitch, so at some camera angles it
-// would otherwise land underneath that fixed panel and read as truncated text.
-const SAFE_LEFT_PX = 280;
-const SAFE_BOTTOM_PX = 100;
+// Reserved bottom-left corner where fixed UI chrome stacks up: LifestyleMap's
+// "AI Guide" pill (`bottom-6 left-6`, z-30) AND, when the kiosk hasn't been
+// claimed yet, DevicePairingPrompt's "Display Studio" card (`bottom-4 left-4
+// w-72`, z-[70] — a page-level z-index that always wins over RealMap's own
+// internal z-500 layer, since that's only scoped within RealMap's own
+// stacking context). This badge's screen position comes from map.project()
+// and moves with pan/zoom/pitch, so at some camera angles it would otherwise
+// land underneath one of these and read as truncated text. Sized to clear
+// the larger of the two (DevicePairingPrompt, ~304px wide, ~180px tall
+// including its margin) rather than the smaller AI Guide pill.
+const SAFE_LEFT_PX = 340;
+const SAFE_BOTTOM_PX = 200;
 
 function FutureInfra({
   center,
