@@ -300,7 +300,12 @@ export function RealMap({
             )}
 
             {investmentMode && (
-              <FutureInfra center={center} project={project} night={night} />
+              <FutureInfra
+                center={center}
+                project={project}
+                night={night}
+                container={containerRef.current}
+              />
             )}
 
             {life.pois.map((poi, i) => {
@@ -394,17 +399,29 @@ function Standing({
   );
 }
 
+// Reserved bottom-left corner where the "AI Guide" pill lives (LifestyleMap's
+// `bottom-6 left-6` panel) — this badge's screen position comes from
+// map.project() and moves with pan/zoom/pitch, so at some camera angles it
+// would otherwise land underneath that fixed panel and read as truncated text.
+const SAFE_LEFT_PX = 280;
+const SAFE_BOTTOM_PX = 100;
+
 function FutureInfra({
   center,
   project,
   night,
+  container,
 }: {
   center: LL;
   project: (ll: LL) => Pt | null;
   night: boolean;
+  container: HTMLDivElement | null;
 }) {
-  const p = project(offsetLL(center[0], center[1], -650, -850));
-  if (!p) return null;
+  const raw = project(offsetLL(center[0], center[1], -650, -850));
+  if (!raw) return null;
+  const h = container?.clientHeight ?? 0;
+  const inReservedCorner = h > 0 && raw.x < SAFE_LEFT_PX && raw.y > h - SAFE_BOTTOM_PX;
+  const p = inReservedCorner ? { x: raw.x, y: h - SAFE_BOTTOM_PX } : raw;
   return (
     <motion.div
       className="absolute"

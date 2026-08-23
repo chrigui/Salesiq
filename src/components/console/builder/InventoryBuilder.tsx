@@ -286,6 +286,8 @@ function ItemRow({
 
           <LifestyleEditor
             lifestyle={item.lifestyle}
+            itemName={item.name}
+            nearbyAmenities={item.nearbyAmenities}
             onChange={(lifestyle) => onChange({ lifestyle })}
           />
 

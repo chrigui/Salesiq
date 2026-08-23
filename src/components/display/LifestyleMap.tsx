@@ -287,15 +287,21 @@ export function LifestyleMap({
         </motion.div>
       </AnimatePresence>
 
-      {/* Right — investment outlook (only when investment/rental is signalled) */}
-      <AnimatePresence>
-        {investmentMode && (
-          <InvestmentOutlook item={item} glass={glass} night={night} />
-        )}
-      </AnimatePresence>
+      {/*
+        Right column — the investment outlook card and the layer rail used to
+        be two independently absolute-positioned elements (outlook pinned to
+        top-24, rail vertically centered) that could land on the same z-30
+        layer and clip each other on shorter viewports. Stacking them in one
+        flex column lets normal document flow keep them apart regardless of
+        the outlook card's height or the viewport size.
+      */}
+      <div className="absolute right-6 top-24 z-30 flex flex-col items-end gap-4">
+        <AnimatePresence>
+          {investmentMode && (
+            <InvestmentOutlook item={item} glass={glass} night={night} />
+          )}
+        </AnimatePresence>
 
-      {/* Right — layer rail */}
-      <div className="absolute right-6 top-1/2 z-30 -translate-y-1/2">
         <div
           className={cx(
             "flex flex-col gap-1 rounded-3xl border p-1.5 backdrop-blur-xl",
@@ -485,7 +491,7 @@ function InvestmentOutlook({
       exit={{ opacity: 0, x: 24 }}
       transition={{ duration: 0.5, ease }}
       className={cx(
-        "absolute right-6 top-24 z-30 w-64 rounded-3xl border p-5 backdrop-blur-xl",
+        "w-64 rounded-3xl border p-5 backdrop-blur-xl",
         glass,
       )}
     >

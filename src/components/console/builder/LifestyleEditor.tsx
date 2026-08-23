@@ -1,7 +1,7 @@
 "use client";
 
-import { MapPin, Plus, X } from "lucide-react";
-import type { Lifestyle, LifestyleMetric, Poi } from "@/core/types";
+import { MapPin, Plus, Sparkles, X } from "lucide-react";
+import type { Lifestyle, LifestyleMetric, NearbyAmenity, Poi } from "@/core/types";
 import { Field, NumberInput, Select, TextArea, TextInput } from "./fields";
 
 const POI_KINDS: Poi["kind"][] = [
@@ -14,9 +14,67 @@ const POI_KINDS: Poi["kind"][] = [
   "water",
 ];
 
-function defaultLifestyle(): Lifestyle {
+/**
+ * ~4.8 km/h — the standard real-estate "X min walk" assumption. Applied to a
+ * real OpenStreetMap distance, never to a fabricated one.
+ */
+const WALK_METERS_PER_MIN = 80;
+
+const AMENITY_KIND_META: Record<NearbyAmenity["kind"], { label: string; singular: string; icon: string }> = {
+  school: { label: "Schools", singular: "School", icon: "GraduationCap" },
+  hospital: { label: "Hospitals", singular: "Hospital", icon: "HeartPulse" },
+  supermarket: { label: "Groceries", singular: "Grocery", icon: "ShoppingCart" },
+  park: { label: "Parks", singular: "Park", icon: "Trees" },
+  transport: { label: "Transport", singular: "Transport", icon: "TrainFront" },
+  restaurant: { label: "Restaurants", singular: "Restaurant", icon: "Utensils" },
+  other: { label: "Nearby", singular: "Nearby", icon: "MapPin" },
+};
+
+function walkMinutes(distanceMeters: number): number {
+  return Math.max(1, Math.round(distanceMeters / WALK_METERS_PER_MIN));
+}
+
+/**
+ * Turns real Overpass-fetched amenities into the same "Amenity metrics" /
+ * "Headline stats" shape the display renders — so the top-left Lifestyle
+ * panel and the "Why we recommend" panel end up quoting the same real
+ * numbers instead of two independently hand-typed guesses. Never touches
+ * `pois`/`at`, which stay hand-placed on the illustrative map stage.
+ */
+function buildAmenitySummary(amenities: NearbyAmenity[]): { metrics: LifestyleMetric[]; headline: LifestyleMetric[] } {
+  const byKind = new Map<NearbyAmenity["kind"], NearbyAmenity[]>();
+  for (const a of amenities) {
+    const list = byKind.get(a.kind) ?? [];
+    list.push(a);
+    byKind.set(a.kind, list);
+  }
+
+  const metrics: LifestyleMetric[] = [];
+  const nearestPerKind: { kind: NearbyAmenity["kind"]; nearest: NearbyAmenity }[] = [];
+  for (const [kind, list] of byKind) {
+    const meta = AMENITY_KIND_META[kind];
+    const nearest = list.reduce((a, b) => (a.distanceMeters < b.distanceMeters ? a : b));
+    metrics.push({
+      icon: meta.icon,
+      label: meta.label,
+      detail: `${list.length} within ${walkMinutes(nearest.distanceMeters)} min`,
+    });
+    nearestPerKind.push({ kind, nearest });
+  }
+
+  nearestPerKind.sort((a, b) => a.nearest.distanceMeters - b.nearest.distanceMeters);
+  const headline: LifestyleMetric[] = nearestPerKind.slice(0, 3).map(({ kind, nearest }) => ({
+    icon: AMENITY_KIND_META[kind].icon,
+    label: AMENITY_KIND_META[kind].singular,
+    detail: `${walkMinutes(nearest.distanceMeters)} min walk`,
+  }));
+
+  return { metrics, headline };
+}
+
+function defaultLifestyle(district: string): Lifestyle {
   return {
-    district: "New district",
+    district,
     tags: ["Family"],
     summary: "Describe the neighbourhood and what life is like here.",
     beds: 3,
@@ -47,9 +105,13 @@ function defaultLifestyle(): Lifestyle {
 
 export function LifestyleEditor({
   lifestyle,
+  itemName,
+  nearbyAmenities,
   onChange,
 }: {
   lifestyle: Lifestyle | undefined;
+  itemName: string;
+  nearbyAmenities?: NearbyAmenity[];
   onChange: (next: Lifestyle | undefined) => void;
 }) {
   if (!lifestyle) {
@@ -60,7 +122,7 @@ export function LifestyleEditor({
           Lifestyle Map with amenities and walking routes.
         </p>
         <button
-          onClick={() => onChange(defaultLifestyle())}
+          onClick={() => onChange(defaultLifestyle(itemName || "New district"))}
           className="inline-flex items-center gap-1.5 rounded-lg bg-brand/15 px-3 py-1.5 text-xs font-medium text-brand ring-1 ring-brand/25 transition hover:bg-brand/25"
         >
           <MapPin className="h-3.5 w-3.5" /> Add map scene
@@ -70,6 +132,7 @@ export function LifestyleEditor({
   }
 
   const patch = (p: Partial<Lifestyle>) => onChange({ ...lifestyle, ...p });
+  const districtMismatch = itemName.trim() !== "" && lifestyle.district.trim() !== itemName.trim();
 
   return (
     <div className="space-y-3 rounded-xl border border-white/10 bg-white/[0.02] p-4">
@@ -86,11 +149,29 @@ export function LifestyleEditor({
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="District">
-          <TextInput
-            value={lifestyle.district}
-            onChange={(e) => patch({ district: e.target.value })}
-          />
+        <Field
+          label="District"
+          hint={
+            districtMismatch
+              ? `Shown on the customer display — doesn't match the item name "${itemName}"`
+              : undefined
+          }
+        >
+          <div className="flex gap-2">
+            <TextInput
+              value={lifestyle.district}
+              onChange={(e) => patch({ district: e.target.value })}
+              className="flex-1"
+            />
+            {districtMismatch && (
+              <button
+                onClick={() => patch({ district: itemName })}
+                className="shrink-0 whitespace-nowrap rounded-xl border border-amber-400/30 bg-amber-400/10 px-2.5 py-2 text-[11px] text-amber-300 transition hover:bg-amber-400/20"
+              >
+                Use item name
+              </button>
+            )}
+          </div>
         </Field>
         <StringList
           label="Tags"
@@ -131,6 +212,16 @@ export function LifestyleEditor({
           />
         </Field>
       </div>
+
+      {nearbyAmenities && nearbyAmenities.length > 0 && (
+        <button
+          onClick={() => patch(buildAmenitySummary(nearbyAmenities))}
+          className="inline-flex items-center gap-1.5 rounded-lg border border-brand/25 bg-brand/10 px-2.5 py-1.5 text-xs font-medium text-brand transition hover:bg-brand/20"
+        >
+          <Sparkles className="h-3.5 w-3.5" />
+          Sync headline stats & amenity metrics from nearby amenities
+        </button>
+      )}
 
       <MetricList
         label="Headline stats (3)"
