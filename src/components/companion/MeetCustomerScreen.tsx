@@ -46,11 +46,13 @@ export function MeetCustomerScreen() {
           </button>
         )}
 
+        <p className="mt-8 text-sm text-ink-muted">Let&apos;s get to know what matters to them.</p>
+
         <button
           onClick={() => flow.goTo("discover")}
-          className="mt-8 w-full rounded-2xl bg-brand py-3.5 text-sm font-semibold text-white transition hover:brightness-110"
+          className="mt-3 w-full rounded-2xl bg-brand py-3.5 text-sm font-semibold text-white transition hover:brightness-110"
         >
-          Continue
+          Start Discovery
         </button>
 
         <button

@@ -39,6 +39,7 @@ import {
   type BuyerExtractionFields,
 } from "@/core/store/buyerProfiles";
 import { toPriorityWeights } from "@/core/buyerIntelligence/priorityWeights";
+import { deriveCommuteOption, deriveLocationPreferencesOption } from "./discoveryScoring";
 import { useLivePack, useAllPacks, getEffectivePack } from "@/core/store/packs";
 import { scoreInventory, isVisible } from "@/core/engine/scoring";
 import { formatMoney } from "@/core/engine/explain";
@@ -186,9 +187,26 @@ export function CompanionApp() {
         .map((r) => r.itemId),
     [rejectedItems, pack.id],
   );
+  // Same real commute/location-preference derivation the Discovery Wizard
+  // uses (see discoveryScoring.ts), so the workspace's recommendation stays
+  // consistent with what discovery already showed the salesperson.
+  const commuteOption = useMemo(
+    () => deriveCommuteOption(session.answers, session.workLocationLat, session.workLocationLng),
+    [session.answers, session.workLocationLat, session.workLocationLng],
+  );
+  const locationPreferencesOption = useMemo(
+    () => deriveLocationPreferencesOption(session.answers),
+    [session.answers],
+  );
   const scored = useMemo(
-    () => scoreInventory(pack, session.answers, { priorityWeights, excludeItemIds }),
-    [pack, session.answers, priorityWeights, excludeItemIds],
+    () =>
+      scoreInventory(pack, session.answers, {
+        priorityWeights,
+        excludeItemIds,
+        commute: commuteOption,
+        locationPreferences: locationPreferencesOption,
+      }),
+    [pack, session.answers, priorityWeights, excludeItemIds, commuteOption, locationPreferencesOption],
   );
   const copilotSignals = useMemo(
     () => detectSignals(pack, session.answers, session.timeline, session.bookmarks, scored),

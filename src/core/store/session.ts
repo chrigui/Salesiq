@@ -99,6 +99,15 @@ export interface SessionState {
    * so anonymous browsing is never retroactively attributed to a buyer.
    */
   buyerProfileId: string | null;
+  /**
+   * Real geocoded coordinates for the "where do they work?" Discovery
+   * question — not stored in `answers` because AnswerValue has no point
+   * type. Set once via setWorkLocationGeo() after a successful geocode
+   * (src/app/api/companion/geocode/route.ts); null until then, and
+   * scoreInventory's commute option is only ever built when both are set.
+   */
+  workLocationLat: number | null;
+  workLocationLng: number | null;
   stakeholders: Stakeholder[];
   timeline: TimelineEvent[];
   /**
@@ -123,6 +132,7 @@ interface SessionActions {
   toggleBookmark: (itemId: string) => void;
   updateCustomer: (patch: Partial<CustomerInfo>) => void;
   linkBuyerProfile: (buyerProfileId: string | null) => void;
+  setWorkLocationGeo: (lat: number | null, lng: number | null) => void;
   addStakeholder: (stakeholder: Omit<Stakeholder, "id">) => void;
   updateStakeholder: (id: string, patch: Partial<Stakeholder>) => void;
   removeStakeholder: (id: string) => void;
@@ -168,6 +178,8 @@ function initialState(): SessionState {
     bookmarks: [],
     customer: { name: "", phone: "", email: "", notes: "" },
     buyerProfileId: null,
+    workLocationLat: null,
+    workLocationLng: null,
     stakeholders: [],
     timeline: [],
     proposalText: null,
@@ -187,6 +199,8 @@ function snapshot(s: SessionState & SessionActions): SessionState {
     bookmarks: s.bookmarks,
     customer: s.customer,
     buyerProfileId: s.buyerProfileId,
+    workLocationLat: s.workLocationLat,
+    workLocationLng: s.workLocationLng,
     stakeholders: s.stakeholders,
     timeline: s.timeline,
     proposalText: s.proposalText,
@@ -286,6 +300,13 @@ export const useSession = create<SessionState & SessionActions>((set, get) => {
       // Not logged to the timeline — an implementation detail of resolving
       // identity, not a customer-facing interaction worth surfacing there.
       set({ buyerProfileId });
+      publish();
+    },
+
+    setWorkLocationGeo: (lat, lng) => {
+      // Not logged to the timeline — a derived detail of the workLocation
+      // answer, not its own customer-facing interaction.
+      set({ workLocationLat: lat, workLocationLng: lng });
       publish();
     },
 
@@ -397,6 +418,8 @@ export const useSession = create<SessionState & SessionActions>((set, get) => {
         proposalText: state.proposalText ?? null,
         proposalEngine: state.proposalEngine ?? null,
         buyerProfileId: state.buyerProfileId ?? null,
+        workLocationLat: state.workLocationLat ?? null,
+        workLocationLng: state.workLocationLng ?? null,
       }),
 
     _hydrate: () => {
@@ -409,6 +432,8 @@ export const useSession = create<SessionState & SessionActions>((set, get) => {
           proposalText: env.state.proposalText ?? null,
           proposalEngine: env.state.proposalEngine ?? null,
           buyerProfileId: env.state.buyerProfileId ?? null,
+          workLocationLat: env.state.workLocationLat ?? null,
+          workLocationLng: env.state.workLocationLng ?? null,
         });
       }
     },

@@ -14,10 +14,13 @@ export interface DiscoveryGroup {
 
 export const DISCOVERY_GROUPS: Record<string, DiscoveryGroup[]> = {
   "real-estate": [
-    { title: "About them", questionIds: ["household", "familySize"] },
-    { title: "Where they need to be", questionIds: ["workLocation", "quiet", "schools", "seaView"] },
-    { title: "The home", questionIds: ["bedrooms", "garden"] },
-    { title: "Budget", questionIds: ["budget"] },
-    { title: "Why they're buying", questionIds: ["intent"] },
+    { title: "About them", questionIds: ["household", "familySize", "intent"] },
+    { title: "Location & commute", questionIds: ["destinationType", "workLocation", "commuteImportance", "maxCommute"] },
+    { title: "Location preferences", questionIds: ["nearbyPreferences", "locationImportance"] },
+    { title: "Property type", questionIds: ["propertyType", "bedrooms"] },
+    { title: "Lifestyle", questionIds: ["lifestyleStyle"] },
+    { title: "Home features", questionIds: ["homeFeatures"] },
+    { title: "Financial profile", questionIds: ["budget", "purchaseMethod", "monthlyPayment"] },
+    { title: "Timing", questionIds: ["timing"] },
   ],
 };

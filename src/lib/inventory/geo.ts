@@ -1,5 +1,8 @@
 import "server-only";
 import type { NearbyAmenity } from "@/core/types";
+import { haversineMeters } from "@/lib/geoMath";
+
+export { haversineMeters };
 
 /**
  * Free OpenStreetMap data sources — no API key, no signup (the user's chosen
@@ -75,16 +78,6 @@ const OVERPASS_TAGS: { tag: string; kind: NearbyAmenity["kind"] }[] = [
   { tag: 'highway="bus_stop"', kind: "transport" },
   { tag: 'railway="station"', kind: "transport" },
 ];
-
-export function haversineMeters(lat1: number, lng1: number, lat2: number, lng2: number): number {
-  const R = 6_371_000;
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLng = ((lng2 - lng1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
-  return 2 * R * Math.asin(Math.sqrt(a));
-}
 
 interface OverpassElement {
   type: string;

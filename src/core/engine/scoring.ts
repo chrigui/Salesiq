@@ -4,9 +4,11 @@ import type {
   Condition,
   IndustryPack,
   InventoryItem,
+  NearbyAmenity,
   Question,
   Recommendation,
 } from "@/core/types";
+import { haversineMeters } from "@/lib/geoMath";
 
 /** Type guard for the budget range answer shape. */
 export function isBudget(v: unknown): v is BudgetValue {
@@ -74,6 +76,27 @@ export interface ScoreInventoryOptions {
    * same as priorityWeights.
    */
   excludeItemIds?: string[];
+  /**
+   * Real commute fit — a geocoded workplace/destination, how far the buyer
+   * will actually go (maxKm, derived from a "maximum commute" answer), and
+   * how much that should matter (weight, derived from a "how important is
+   * the commute" answer). Computed from each item's real `location`
+   * lat/lng via the same haversine distance used everywhere else in this
+   * app — never a guessed or invented distance. Optional and additive,
+   * same contract as priorityWeights/excludeItemIds: omitting it leaves
+   * every existing caller's scoring unchanged.
+   */
+  commute?: { lat: number; lng: number; maxKm: number; weight: number };
+  /**
+   * Real "what should be close by" fit — scored only for amenity kinds that
+   * have a genuine counterpart in an item's real, OpenStreetMap-fetched
+   * `nearbyAmenities` (never a fabricated one). An item with none of the
+   * requested kinds nearby scores 0 on this factor rather than being
+   * excluded, so a pack whose inventory hasn't had amenities fetched yet
+   * just contributes nothing here, not a wrong penalty. Optional and
+   * additive, same contract as the options above.
+   */
+  locationPreferences?: { kinds: NearbyAmenity["kind"][]; weight: number };
 }
 
 /**
@@ -100,8 +123,11 @@ export function scoreInventory(
   const activeRules = pack.rules.filter(
     (r) => answers[r.questionId] !== undefined,
   );
+  const { commute, locationPreferences } = opts ?? {};
   const maxWeight =
-    activeRules.reduce((sum, r) => sum + effectiveWeight(r.questionId, r.weight), 0) || 1;
+    activeRules.reduce((sum, r) => sum + effectiveWeight(r.questionId, r.weight), 0) +
+      (commute?.weight ?? 0) +
+      (locationPreferences?.weight ?? 0) || 1;
 
   const scored = inventory.map((item) => {
     let raw = 0;
@@ -120,6 +146,33 @@ export function scoreInventory(
       });
       // Only surface strongly-matching reasons on the card.
       if (result.reason && result.match >= 0.6) reasons.push(result.reason);
+    }
+
+    if (commute && item.location) {
+      const distanceKm =
+        haversineMeters(commute.lat, commute.lng, item.location.lat, item.location.lng) / 1000;
+      const match = Math.max(0, Math.min(1, 1 - distanceKm / commute.maxKm));
+      const contribution = match * commute.weight;
+      raw += contribution;
+      const reason = `it's about ${Math.round(distanceKm)} km from the commute you need`;
+      breakdown.push({ ruleId: "commute", contribution, reason });
+      if (match >= 0.6) reasons.push(reason);
+    }
+
+    if (locationPreferences && locationPreferences.kinds.length > 0) {
+      const matchedKinds = locationPreferences.kinds.filter((kind) =>
+        item.nearbyAmenities?.some((a) => a.kind === kind),
+      );
+      const match = matchedKinds.length / locationPreferences.kinds.length;
+      const contribution = match * locationPreferences.weight;
+      raw += contribution;
+      if (matchedKinds.length > 0) {
+        const reason = `it's near the ${matchedKinds.join(", ")} you asked for`;
+        breakdown.push({ ruleId: "locationPreferences", contribution, reason });
+        if (match >= 0.6) reasons.push(reason);
+      } else {
+        breakdown.push({ ruleId: "locationPreferences", contribution: 0 });
+      }
     }
 
     return {
