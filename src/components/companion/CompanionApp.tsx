@@ -54,6 +54,7 @@ import { detectSignals } from "@/core/engine/copilot";
 import { DemoScript, type DemoStep } from "./DemoScript";
 import { buildGoldenDemoSteps, resetToGoldenStart } from "./goldenDemoSteps";
 import { DemoHealthCheck } from "./DemoHealthCheck";
+import { CompanionInstallPrompt } from "./CompanionInstallPrompt";
 import { CompanionSyncBar } from "@/components/sync/Pairing";
 
 export function CompanionApp() {
@@ -198,6 +199,8 @@ export function CompanionApp() {
   return (
     <div className="bg-aurora flex min-h-screen justify-center px-4 py-6">
       <div className="glass-strong flex w-full max-w-md flex-col overflow-hidden rounded-[2.2rem] ring-1 ring-white/10">
+        <CompanionInstallPrompt />
+
         {/* Header */}
         <div className="flex items-center justify-between border-b border-white/5 px-5 py-4">
           <div className="flex items-center gap-2.5">
