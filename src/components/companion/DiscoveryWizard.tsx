@@ -5,6 +5,7 @@ import { ChevronLeft, MapPinned, Loader2 } from "lucide-react";
 import { useSession } from "@/core/store/session";
 import { useLivePack } from "@/core/store/packs";
 import { scoreInventory } from "@/core/engine/scoring";
+import { narrativeForMatchCount } from "@/core/engine/explain";
 import { submitConversationNote, updateBuyerProfile } from "@/core/store/buyerProfiles";
 import type { BuyerExtractionFields } from "@/core/store/buyerProfiles";
 import { toPriorityWeights } from "@/core/buyerIntelligence/priorityWeights";
@@ -13,6 +14,7 @@ import { cx } from "@/components/ui/primitives";
 import { QuestionControl } from "./CompanionApp";
 import { useMeetingFlow } from "./meetingFlow";
 import { DISCOVERY_GROUPS } from "./discoveryGroups";
+import { BuyerProfileSummary } from "./BuyerProfileSummary";
 import {
   deriveCommuteOption,
   deriveLocationPreferencesOption,
@@ -43,16 +45,6 @@ const PRIORITY_QUESTION_MAP: Record<string, string> = {
   investment: "intent",
 };
 const RANK_IMPORTANCE: BuyerPriority["importance"][] = ["must", "important", "preferred"];
-
-function narrativeForMatch(matchCount: number, totalCount: number): string {
-  if (totalCount === 0) return "";
-  const ratio = matchCount / totalCount;
-  if (matchCount === 0) return "Finding your best matches…";
-  if (ratio > 0.5) return "Finding your best matches…";
-  if (ratio > 0.15) return "Refining your options…";
-  if (matchCount > 15) return "We're getting closer…";
-  return `${matchCount} propert${matchCount === 1 ? "y" : "ies"} fit${matchCount === 1 ? "s" : ""} your requirements.`;
-}
 
 /** Maps whatever the customer just told us into the existing BuyerExtractionFields
  * shape, reusing the real conversation-note commit path instead of a new one. */
@@ -213,7 +205,7 @@ export function DiscoveryWizard() {
       }
     }
     setFinishing(false);
-    flow.goTo("workspace");
+    flow.goTo("confirm");
   };
 
   const back = () => {
@@ -222,6 +214,7 @@ export function DiscoveryWizard() {
 
   return (
     <div className="bg-aurora flex min-h-screen flex-col items-center justify-center px-6 py-10">
+      <BuyerProfileSummary />
       <div className="glass-strong w-full max-w-sm rounded-[2.2rem] p-8 ring-1 ring-white/10">
         <div className="mb-1 flex items-center justify-between">
           <button
@@ -239,7 +232,7 @@ export function DiscoveryWizard() {
         </div>
 
         <h1 className="mb-1 text-xl font-semibold text-ink">{group.title}</h1>
-        <p className="mb-4 text-xs text-ink-faint">{narrativeForMatch(matchCount, totalCount)}</p>
+        <p className="mb-4 text-xs text-ink-faint">{narrativeForMatchCount(matchCount, totalCount)}</p>
 
         <div className="space-y-3">
           {questions.map((q) => {

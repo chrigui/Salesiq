@@ -8,6 +8,7 @@ import { CompanionApp } from "./CompanionApp";
 import { StartMeetingScreen } from "./StartMeetingScreen";
 import { MeetCustomerScreen } from "./MeetCustomerScreen";
 import { DiscoveryWizard } from "./DiscoveryWizard";
+import { RequirementConfirmation } from "./RequirementConfirmation";
 import { useMeetingFlow } from "./meetingFlow";
 
 /**
@@ -51,6 +52,8 @@ export function CompanionRoot() {
       return <MeetCustomerScreen />;
     case "discover":
       return <DiscoveryWizard />;
+    case "confirm":
+      return <RequirementConfirmation />;
     case "workspace":
     default:
       return <CompanionApp />;

@@ -10,7 +10,8 @@ import { resolveMotionConfig } from "@/core/display/motionPresets";
 import { useDeviceIdleProfile } from "@/core/store/displayDevice";
 import { DisplayProfileRenderer } from "./DisplayProfileRenderer";
 import { scoreInventory, isVisible } from "@/core/engine/scoring";
-import { narrate, formatMoney } from "@/core/engine/explain";
+import type { ScoredItem } from "@/core/engine/scoring";
+import { narrate, formatMoney, narrativeForMatchCount } from "@/core/engine/explain";
 import { whyNotReasons } from "@/core/engine/whyNot";
 import { cx } from "@/components/ui/primitives";
 import { ItemImage } from "@/components/ui/ItemImage";
@@ -158,6 +159,10 @@ export function DisplayStage({
             Object.keys(answers).length > 0 ? () => setQrOpen(true) : undefined
           }
         />
+
+        {view === "question" && (
+          <DiscoveryChecklist pack={pack} answers={answers} scored={scored} />
+        )}
 
         <div className="absolute inset-0 grid place-items-center px-10 pb-14 pt-24">
           <AnimatePresence mode="wait">
@@ -348,6 +353,68 @@ function Welcome({ pack }: { pack: IndustryPack }) {
         {pack.branding.tagline}
       </p>
     </motion.div>
+  );
+}
+
+/**
+ * Discovery-time narrowing feedback for the customer, mirroring the same
+ * checklist/match-count feel the salesperson's Discovery Wizard already
+ * shows — sourced only from pack.sections/answers/scored, never
+ * customer.phone/email/notes. Not a Display Studio widget: that pipeline
+ * only ever renders in view === "item", so this is plain JSX in the
+ * question view instead.
+ */
+function DiscoveryChecklist({
+  pack,
+  answers,
+  scored,
+}: {
+  pack: IndustryPack;
+  answers: Record<string, AnswerValue>;
+  scored: ScoredItem[];
+}) {
+  const sections = pack.sections
+    .map((section) => {
+      const visible = pack.questions.filter((q) => q.section === section.id && isVisible(q, answers));
+      if (visible.length === 0) return null;
+      const done = visible.every((q) => answers[q.id] !== undefined);
+      return { id: section.id, label: section.label, done };
+    })
+    .filter((s): s is { id: string; label: string; done: boolean } => s !== null);
+
+  if (sections.length === 0) return null;
+
+  const matchCount = scored.filter((s) => s.score > 0).length;
+  const narrative = narrativeForMatchCount(matchCount, pack.inventory.length);
+
+  return (
+    <div className="absolute left-0 right-0 top-24 z-10 flex flex-col items-center gap-3 px-10">
+      <div className="flex flex-wrap items-center justify-center gap-2">
+        {sections.map((s) => (
+          <motion.div
+            key={s.id}
+            layout
+            className={cx(
+              "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors duration-300",
+              s.done ? "glass-strong text-brand" : "glass text-ink-faint",
+            )}
+          >
+            {s.done && <Check className="h-3 w-3" />}
+            {s.label}
+          </motion.div>
+        ))}
+      </div>
+      {narrative && (
+        <motion.div
+          key={narrative}
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-xs text-ink-faint"
+        >
+          {narrative}
+        </motion.div>
+      )}
+    </div>
   );
 }
 

@@ -18,6 +18,20 @@ import { toneDirective, type AiSettingsShape } from "@/core/data/aiSettingsShare
 // connectors read naturally once that leading subject is stripped.
 const CONNECTORS = ["it also", "plus it", "and it"];
 
+/** Narrative narrowing phrasing shared by the Discovery Wizard and the
+ * Customer Display's question view — a live "getting closer" feel instead
+ * of a bare "X of Y" counter, from the real match count both already
+ * compute via scoreInventory. */
+export function narrativeForMatchCount(matchCount: number, totalCount: number): string {
+  if (totalCount === 0) return "";
+  const ratio = matchCount / totalCount;
+  if (matchCount === 0) return "Finding your best matches…";
+  if (ratio > 0.5) return "Finding your best matches…";
+  if (ratio > 0.15) return "Refining your options…";
+  if (matchCount > 15) return "We're getting closer…";
+  return `${matchCount} propert${matchCount === 1 ? "y" : "ies"} fit${matchCount === 1 ? "s" : ""} your requirements.`;
+}
+
 /** Deterministic, offline narrative — reads like a human sales advisor. */
 export function narrate(scored: ScoredItem, _pack: IndustryPack): string {
   const { item, reasons, score } = scored;

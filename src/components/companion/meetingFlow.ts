@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
  * clean. Same read/write/broadcast pattern as core/store/packs.ts and
  * core/data/customPacks.ts.
  */
-export type MeetingStage = "start" | "meet" | "discover" | "workspace";
+export type MeetingStage = "start" | "meet" | "discover" | "confirm" | "workspace";
 
 export interface MeetingFlowState {
   stage: MeetingStage;
