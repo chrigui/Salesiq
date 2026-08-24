@@ -16,6 +16,27 @@ import type { InventoryItem } from "@/core/types";
  * this pack — every field is derived from the property's own real specs
  * (type, beds, baths, area, city); `pois` is intentionally empty since the
  * source data has no amenity/walk-time detail to draw on.
+ *
+ * Golden Demo Experience curated set (see
+ * src/components/companion/goldenDemoSteps.ts): bh-9, bh-18, bh-84, bh-90,
+ * bh-148, bh-149, bh-166, bh-168, bh-175, bh-208 additionally carry
+ * `unitsLeft`/`totalUnits`/`appreciation` — hand-authored admin-style
+ * availability figures, the same synthetic category as this file's other
+ * specs (price, area, etc.), not derived from any real source. bh-9
+ * ("Premium Villa in Budaiya") is the flagship used by the Experience
+ * stage; all ten are real top scorers against the demo's curated answers
+ * (see GOLDEN_DEMO_ANSWERS), not a forced pick.
+ *
+ * Two things are deliberately left for a one-time REAL data-setup pass
+ * before presenting, rather than fabricated here:
+ *  - `nearbyAmenities` — populate via the Inventory Builder's real
+ *    Locate + "Find nearby amenities" buttons (a genuine Nominatim/Overpass
+ *    fetch). Never hand-author this field — see its own doc comment.
+ *  - Floor-plan/brochure documents — attach via the real Admin upload UI
+ *    (creates an `InventoryItemAsset`, surfaced by the `documentsCard`
+ *    widget). There's no real floor-plan file to attach in this dataset, so
+ *    none is fabricated here; the Demo Health Check flags this as missing
+ *    rather than pretending it's present.
  */
 export const bahrainListings: InventoryItem[] = [
   {
@@ -240,6 +261,9 @@ export const bahrainListings: InventoryItem[] = [
     subtitle: "6 beds · Villa · Budaiya",
     price: 315753,
     currency: "BHD",
+    unitsLeft: 2,
+    totalUnits: 6,
+    appreciation: 7.5,
     image: "rose",
     photo: "https://picsum.photos/seed/property9_1/1200/800",
     gallery: ["https://picsum.photos/seed/property9_2/1200/800", "https://picsum.photos/seed/property9_3/1200/800"],
@@ -483,6 +507,9 @@ export const bahrainListings: InventoryItem[] = [
     subtitle: "6 beds · Villa · Hamad Town",
     price: 346878,
     currency: "BHD",
+    unitsLeft: 3,
+    totalUnits: 8,
+    appreciation: 6.8,
     image: "violet",
     photo: "https://picsum.photos/seed/property18_1/1200/800",
     gallery: ["https://picsum.photos/seed/property18_2/1200/800", "https://picsum.photos/seed/property18_3/1200/800"],
@@ -2265,6 +2292,9 @@ export const bahrainListings: InventoryItem[] = [
     subtitle: "6 beds · Villa · Amwaj",
     price: 277383,
     currency: "BHD",
+    unitsLeft: 1,
+    totalUnits: 5,
+    appreciation: 8.2,
     image: "rose",
     photo: "https://picsum.photos/seed/property84_1/1200/800",
     gallery: ["https://picsum.photos/seed/property84_2/1200/800", "https://picsum.photos/seed/property84_3/1200/800"],
@@ -2427,6 +2457,9 @@ export const bahrainListings: InventoryItem[] = [
     subtitle: "6 beds · Villa · Budaiya",
     price: 330034,
     currency: "BHD",
+    unitsLeft: 4,
+    totalUnits: 9,
+    appreciation: 7.1,
     image: "emerald",
     photo: "https://picsum.photos/seed/property90_1/1200/800",
     gallery: ["https://picsum.photos/seed/property90_2/1200/800", "https://picsum.photos/seed/property90_3/1200/800"],
@@ -3993,6 +4026,9 @@ export const bahrainListings: InventoryItem[] = [
     subtitle: "6 beds · Villa · Budaiya",
     price: 348338,
     currency: "BHD",
+    unitsLeft: 2,
+    totalUnits: 7,
+    appreciation: 6.5,
     image: "violet",
     photo: "https://picsum.photos/seed/property148_1/1200/800",
     gallery: ["https://picsum.photos/seed/property148_2/1200/800", "https://picsum.photos/seed/property148_3/1200/800"],
@@ -4020,6 +4056,9 @@ export const bahrainListings: InventoryItem[] = [
     subtitle: "6 beds · Villa · Budaiya",
     price: 373393,
     currency: "BHD",
+    unitsLeft: 5,
+    totalUnits: 10,
+    appreciation: 6.9,
     image: "rose",
     photo: "https://picsum.photos/seed/property149_1/1200/800",
     gallery: ["https://picsum.photos/seed/property149_2/1200/800", "https://picsum.photos/seed/property149_3/1200/800"],
@@ -4479,6 +4518,9 @@ export const bahrainListings: InventoryItem[] = [
     subtitle: "6 beds · Villa · Muharraq",
     price: 380956,
     currency: "BHD",
+    unitsLeft: 3,
+    totalUnits: 6,
+    appreciation: 7.4,
     image: "sky",
     photo: "https://picsum.photos/seed/property166_1/1200/800",
     gallery: ["https://picsum.photos/seed/property166_2/1200/800", "https://picsum.photos/seed/property166_3/1200/800"],
@@ -4533,6 +4575,9 @@ export const bahrainListings: InventoryItem[] = [
     subtitle: "6 beds · Villa · Amwaj",
     price: 384476,
     currency: "BHD",
+    unitsLeft: 1,
+    totalUnits: 4,
+    appreciation: 8.6,
     image: "violet",
     photo: "https://picsum.photos/seed/property168_1/1200/800",
     gallery: ["https://picsum.photos/seed/property168_2/1200/800", "https://picsum.photos/seed/property168_3/1200/800"],
@@ -4722,6 +4767,9 @@ export const bahrainListings: InventoryItem[] = [
     subtitle: "6 beds · Villa · Budaiya",
     price: 305709,
     currency: "BHD",
+    unitsLeft: 4,
+    totalUnits: 8,
+    appreciation: 7.0,
     image: "emerald",
     photo: "https://picsum.photos/seed/property175_1/1200/800",
     gallery: ["https://picsum.photos/seed/property175_2/1200/800", "https://picsum.photos/seed/property175_3/1200/800"],
@@ -5613,6 +5661,9 @@ export const bahrainListings: InventoryItem[] = [
     subtitle: "6 beds · Villa · Juffair",
     price: 379356,
     currency: "BHD",
+    unitsLeft: 2,
+    totalUnits: 6,
+    appreciation: 7.8,
     image: "violet",
     photo: "https://picsum.photos/seed/property208_1/1200/800",
     gallery: ["https://picsum.photos/seed/property208_2/1200/800", "https://picsum.photos/seed/property208_3/1200/800"],
