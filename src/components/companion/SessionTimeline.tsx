@@ -18,6 +18,8 @@ import {
   Users,
   ArrowUpRight,
   Clock,
+  GitCompareArrows,
+  GitCompare,
 } from "lucide-react";
 import type { IndustryPack } from "@/core/types";
 import type { TimelineEvent } from "@/core/store/session";
@@ -32,6 +34,8 @@ const ICONS: Record<TimelineEvent["kind"], typeof History> = {
   focus: Focus,
   "bookmark-add": Bookmark,
   "bookmark-remove": BookmarkX,
+  "compare-add": GitCompareArrows,
+  "compare-remove": GitCompare,
   customer: UserPlus,
   proposal: FileText,
   lead: UserPlus,
@@ -46,6 +50,7 @@ const VIEW_LABEL: Record<string, string> = {
   question: "a question",
   recommendation: "the recommendation",
   compare: "comparison",
+  compareGroup: "the comparison group",
   item: "an item detail",
 };
 

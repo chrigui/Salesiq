@@ -15,7 +15,8 @@ export type DisplayView =
   | "welcome"
   | "question"
   | "recommendation"
-  | "compare"
+  | "compare" // the existing, unrelated auto-compare of the top-3 scored items
+  | "compareGroup" // a salesperson-curated compareItemIds group (Property Explorer)
   | "item"
   | "proposal";
 
@@ -58,6 +59,8 @@ export type TimelineEventKind =
   | "focus"
   | "bookmark-add"
   | "bookmark-remove"
+  | "compare-add"
+  | "compare-remove"
   | "customer"
   | "proposal"
   | "lead"
@@ -89,6 +92,13 @@ export interface SessionState {
   view: DisplayView;
   focusedItemId: string | null;
   bookmarks: string[];
+  /**
+   * A salesperson-curated comparison group — distinct from `bookmarks`
+   * (an item can be shortlisted without being in the active comparison,
+   * and vice versa). Synced like `bookmarks` because the Comparison
+   * Experience can be pushed to the Customer Display.
+   */
+  compareItemIds: string[];
   customer: CustomerInfo;
   /**
    * The persistent Buyer Intelligence identity this session has resolved to,
@@ -130,6 +140,10 @@ interface SessionActions {
   setView: (view: DisplayView) => void;
   focusItem: (itemId: string | null) => void;
   toggleBookmark: (itemId: string) => void;
+  addToCompare: (itemId: string) => void;
+  removeFromCompare: (itemId: string) => void;
+  clearCompare: () => void;
+  reorderCompare: (itemIds: string[]) => void;
   updateCustomer: (patch: Partial<CustomerInfo>) => void;
   linkBuyerProfile: (buyerProfileId: string | null) => void;
   setWorkLocationGeo: (lat: number | null, lng: number | null) => void;
@@ -184,6 +198,7 @@ function initialState(): SessionState {
     view: "welcome",
     focusedItemId: null,
     bookmarks: [],
+    compareItemIds: [],
     customer: { name: "", phone: "", email: "", notes: "" },
     buyerProfileId: null,
     workLocationLat: null,
@@ -205,6 +220,7 @@ function snapshot(s: SessionState & SessionActions): SessionState {
     view: s.view,
     focusedItemId: s.focusedItemId,
     bookmarks: s.bookmarks,
+    compareItemIds: s.compareItemIds,
     customer: s.customer,
     buyerProfileId: s.buyerProfileId,
     workLocationLat: s.workLocationLat,
@@ -241,6 +257,7 @@ export const useSession = create<SessionState & SessionActions>((set, get) => {
         view: "welcome",
         focusedItemId: null,
         bookmarks: [],
+        compareItemIds: [],
         timeline: pushEvent(get().timeline, { kind: "pack", packId }),
       }),
 
@@ -295,6 +312,42 @@ export const useSession = create<SessionState & SessionActions>((set, get) => {
           revision: s.revision + 1,
         };
       });
+      publish();
+    },
+
+    addToCompare: (itemId) => {
+      set((s) => {
+        if (s.compareItemIds.includes(itemId)) return s;
+        return {
+          compareItemIds: [...s.compareItemIds, itemId],
+          timeline: pushEvent(s.timeline, { kind: "compare-add", itemId }),
+          revision: s.revision + 1,
+        };
+      });
+      publish();
+    },
+
+    removeFromCompare: (itemId) => {
+      set((s) => ({
+        compareItemIds: s.compareItemIds.filter((id) => id !== itemId),
+        timeline: pushEvent(s.timeline, { kind: "compare-remove", itemId }),
+        revision: s.revision + 1,
+      }));
+      publish();
+    },
+
+    clearCompare: () => {
+      set((s) => ({
+        compareItemIds: [],
+        timeline: pushEvent(s.timeline, { kind: "compare-remove", detail: "Cleared comparison" }),
+        revision: s.revision + 1,
+      }));
+      publish();
+    },
+
+    reorderCompare: (itemIds) => {
+      // Not logged to the timeline — a display-order tweak, not a new interaction.
+      set((s) => ({ compareItemIds: itemIds, revision: s.revision + 1 }));
       publish();
     },
 
@@ -402,6 +455,7 @@ export const useSession = create<SessionState & SessionActions>((set, get) => {
         view: "recommendation",
         focusedItemId: null,
         bookmarks: [],
+        compareItemIds: [],
         buyerProfileId: null,
         customer: {
           name: "Sara Haddad",
@@ -437,6 +491,7 @@ export const useSession = create<SessionState & SessionActions>((set, get) => {
         buyerProfileId: state.buyerProfileId ?? null,
         workLocationLat: state.workLocationLat ?? null,
         workLocationLng: state.workLocationLng ?? null,
+        compareItemIds: state.compareItemIds ?? [],
       }),
 
     _hydrate: () => {
@@ -451,6 +506,7 @@ export const useSession = create<SessionState & SessionActions>((set, get) => {
           buyerProfileId: env.state.buyerProfileId ?? null,
           workLocationLat: env.state.workLocationLat ?? null,
           workLocationLng: env.state.workLocationLng ?? null,
+          compareItemIds: env.state.compareItemIds ?? [],
         });
       }
     },

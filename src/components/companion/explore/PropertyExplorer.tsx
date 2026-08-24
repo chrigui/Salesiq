@@ -12,6 +12,7 @@ import { PropertyGrid } from "./PropertyGrid";
 import { FilterSheet } from "./FilterSheet";
 import { PropertyPreview } from "./PropertyPreview";
 import { ShortlistTab } from "./ShortlistTab";
+import { CompareTab } from "./CompareTab";
 import { cx } from "@/components/ui/primitives";
 import type { ScoredItem } from "@/core/engine/scoring";
 import {
@@ -158,6 +159,7 @@ export function PropertyExplorer() {
               onRelaxRequirements={hasActiveFilters(filters) ? relaxRequirements : undefined}
               onViewAll={() => setTab("all")}
               onStartOver={() => flow.goTo("discover")}
+              onOpenCompare={() => setTab("compare")}
             />
           )}
           {tab === "all" && (
@@ -168,14 +170,11 @@ export function PropertyExplorer() {
               onSelect={handleSelect}
               onRelaxRequirements={hasActiveFilters(filters) ? relaxRequirements : undefined}
               onStartOver={() => flow.goTo("discover")}
+              onOpenCompare={() => setTab("compare")}
             />
           )}
           {tab === "shortlist" && <ShortlistTab pack={pack} scored={scored} onSelect={handleSelect} />}
-          {tab === "compare" && (
-            <div className="glass-strong rounded-[1.6rem] p-8 text-center text-sm text-ink-faint ring-1 ring-white/10">
-              Drag two properties together in Matches or All Properties to start a comparison.
-            </div>
-          )}
+          {tab === "compare" && <CompareTab pack={pack} scored={scored} />}
         </div>
       </div>
 
