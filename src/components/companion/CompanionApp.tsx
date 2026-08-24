@@ -23,6 +23,7 @@ import {
   Presentation,
   Ban,
   BrainCircuit,
+  PlayCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { useSession, type Stakeholder, type TimelineEvent } from "@/core/store/session";
@@ -50,6 +51,7 @@ import { DecisionSimulator } from "./DecisionSimulator";
 import { BuyerIntelligencePanel } from "./BuyerIntelligencePanel";
 import { detectSignals } from "@/core/engine/copilot";
 import { DemoScript, type DemoStep } from "./DemoScript";
+import { buildGoldenDemoSteps, resetToGoldenStart } from "./goldenDemoSteps";
 import { CompanionSyncBar } from "@/components/sync/Pairing";
 
 export function CompanionApp() {
@@ -63,6 +65,7 @@ export function CompanionApp() {
   const [simulatorOpen, setSimulatorOpen] = useState(false);
   const [buyerIntelOpen, setBuyerIntelOpen] = useState(false);
   const [demoScriptOpen, setDemoScriptOpen] = useState(false);
+  const [goldenDemoOpen, setGoldenDemoOpen] = useState(false);
   const [rejectingItem, setRejectingItem] = useState<{ id: string; name: string } | null>(null);
   const [rejectReason, setRejectReason] = useState("");
 
@@ -134,6 +137,17 @@ export function CompanionApp() {
         },
       },
     ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+
+  const goldenDemoSteps: DemoStep[] = useMemo(
+    () =>
+      buildGoldenDemoSteps(session, {
+        closeAllPanels,
+        setActiveSection,
+        setProposalOpen,
+      }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
@@ -252,7 +266,17 @@ export function CompanionApp() {
         <div className="border-b border-white/5 px-5 py-3">
           <div className="flex items-center justify-between">
             <Eyebrow>Industry pack</Eyebrow>
-            <div className="flex items-center gap-1.5">
+            <div className="flex flex-wrap items-center justify-end gap-1.5">
+              <button
+                onClick={() => {
+                  closeAllPanels();
+                  setGoldenDemoOpen(true);
+                }}
+                title="Golden Demo Experience — a rehearsed, end-to-end walkthrough for a client presentation"
+                className="flex items-center gap-1 rounded-full bg-brand px-2.5 py-1 text-[11px] font-semibold text-white transition hover:brightness-110"
+              >
+                <PlayCircle className="h-3 w-3" /> Start Demo
+              </button>
               <button
                 onClick={() => setDemoScriptOpen(true)}
                 className="flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-medium text-ink-muted transition hover:bg-white/10"
@@ -536,6 +560,14 @@ export function CompanionApp() {
         open={demoScriptOpen}
         onClose={() => setDemoScriptOpen(false)}
         steps={demoSteps}
+      />
+
+      <DemoScript
+        open={goldenDemoOpen}
+        onClose={() => setGoldenDemoOpen(false)}
+        steps={goldenDemoSteps}
+        label="Golden demo"
+        onReset={() => resetToGoldenStart(session)}
       />
     </div>
   );

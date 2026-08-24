@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { X, ChevronLeft, ChevronRight, Presentation } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Presentation, RotateCcw } from "lucide-react";
+import { cx } from "@/components/ui/primitives";
 
 export interface DemoStep {
   title: string;
@@ -20,15 +21,25 @@ export interface DemoStep {
  * are actually live-synced today (Companion + Display); it doesn't claim to
  * remote-control the Dashboard or Admin console in a separate browser tab,
  * which nothing in this architecture makes possible without a backend.
+ *
+ * Also powers the Golden Demo Experience (a second, longer 9-stage script —
+ * see goldenDemoSteps.ts): the same component, a different `steps` array and
+ * `label`, plus an optional `onReset` for scripts that have a curated
+ * starting point worth restoring on demand.
  */
 export function DemoScript({
   open,
   onClose,
   steps,
+  label = "Guided demo",
+  onReset,
 }: {
   open: boolean;
   onClose: () => void;
   steps: DemoStep[];
+  label?: string;
+  /** When provided, shows a Reset control that restarts the script from its curated beginning. */
+  onReset?: () => void;
 }) {
   const [i, setI] = useState(0);
   const ran = useRef(false);
@@ -49,6 +60,12 @@ export function DemoScript({
     steps[clamped]?.run();
   };
 
+  const handleReset = () => {
+    onReset?.();
+    setI(0);
+    steps[0]?.run();
+  };
+
   const step = steps[i];
 
   return (
@@ -64,16 +81,52 @@ export function DemoScript({
           <div className="glass-strong w-full max-w-md rounded-3xl border border-brand/20 p-4 shadow-2xl">
             <div className="mb-2 flex items-center justify-between">
               <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-brand">
-                <Presentation className="h-3.5 w-3.5" /> Guided demo · {i + 1}/{steps.length}
+                <Presentation className="h-3.5 w-3.5" /> {label} · {i + 1}/{steps.length}
               </div>
-              <button
-                onClick={onClose}
-                aria-label="Exit guided demo"
-                className="grid h-6 w-6 place-items-center rounded-full bg-white/5 text-ink-faint hover:bg-white/10"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
+              <div className="flex items-center gap-1">
+                {onReset && (
+                  <button
+                    onClick={handleReset}
+                    aria-label="Reset demo"
+                    title="Reset demo to the start"
+                    className="grid h-6 w-6 place-items-center rounded-full bg-white/5 text-ink-faint hover:bg-white/10"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5" />
+                  </button>
+                )}
+                <button
+                  onClick={onClose}
+                  aria-label="Exit guided demo"
+                  className="grid h-6 w-6 place-items-center rounded-full bg-white/5 text-ink-faint hover:bg-white/10"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
             </div>
+
+            {/* Jump to any step — a presenter live on stage needs to skip around, not just step forward/back. */}
+            {steps.length > 1 && (
+              <div className="mb-2.5 flex flex-wrap gap-1">
+                {steps.map((s, idx) => (
+                  <button
+                    key={s.title}
+                    onClick={() => go(idx)}
+                    title={s.title}
+                    aria-label={`Jump to step ${idx + 1}: ${s.title}`}
+                    aria-current={idx === i}
+                    className={cx(
+                      "grid h-5 w-5 place-items-center rounded-full text-[9px] font-semibold transition",
+                      idx === i
+                        ? "bg-brand text-white"
+                        : "bg-white/5 text-ink-faint hover:bg-white/10",
+                    )}
+                  >
+                    {idx + 1}
+                  </button>
+                ))}
+              </div>
+            )}
+
             <div className="mb-1 text-sm font-semibold text-ink">{step.title}</div>
             <p className="mb-3 text-sm leading-snug text-ink-muted">{step.script}</p>
             <div className="flex items-center gap-2">
