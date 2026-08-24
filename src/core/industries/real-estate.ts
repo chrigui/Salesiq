@@ -87,6 +87,13 @@ export const realEstatePack: IndustryPack = {
       max: 6,
     },
     {
+      id: "workLocation",
+      label: "Workplace",
+      prompt: "Where do they work?",
+      type: "text",
+      section: "location",
+    },
+    {
       id: "schools",
       label: "Near schools",
       prompt: "Should we prioritise nearby schools?",

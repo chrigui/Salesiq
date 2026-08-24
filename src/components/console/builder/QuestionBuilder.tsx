@@ -22,6 +22,7 @@ const TYPE_LABELS: Record<QuestionType, string> = {
   counter: "Number stepper",
   slider: "Slider",
   budget: "Budget range",
+  text: "Free text",
 };
 
 const hasOptions = (t: QuestionType) => t === "single" || t === "multi";

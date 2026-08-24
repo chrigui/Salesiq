@@ -55,6 +55,7 @@ import { DemoScript, type DemoStep } from "./DemoScript";
 import { buildGoldenDemoSteps, resetToGoldenStart } from "./goldenDemoSteps";
 import { DemoHealthCheck } from "./DemoHealthCheck";
 import { CompanionInstallPrompt } from "./CompanionInstallPrompt";
+import { useMeetingFlow } from "./meetingFlow";
 import { CompanionSyncBar } from "@/components/sync/Pairing";
 
 export function CompanionApp() {
@@ -62,6 +63,7 @@ export function CompanionApp() {
   const pack = useLivePack(session.packId);
   const allPacks = useAllPacks();
   const [activeSection, setActiveSection] = useState(pack.sections[0]?.id);
+  const meetingFlow = useMeetingFlow();
   const [proposalOpen, setProposalOpen] = useState(false);
   const [timelineOpen, setTimelineOpen] = useState(false);
   const [objectionOpen, setObjectionOpen] = useState(false);
@@ -415,6 +417,7 @@ export function CompanionApp() {
             onClick={() => {
               session.reset();
               setActiveSection(pack.sections[0]?.id);
+              meetingFlow.resetFlow();
             }}
           />
         </div>
@@ -1016,7 +1019,7 @@ function AiSearchBox({ onApplied }: { onApplied: () => void }) {
   );
 }
 
-function QuestionControl({ question }: { question: Question }) {
+export function QuestionControl({ question }: { question: Question }) {
   const { answers, answer, setActiveQuestion } = useSession();
   const value = answers[question.id];
 
@@ -1122,6 +1125,15 @@ function QuestionControl({ question }: { question: Question }) {
               : { min: question.min ?? 0, max: question.max ?? 0 }
           }
           onChange={(v) => answer(question.id, v)}
+        />
+      )}
+
+      {question.type === "text" && (
+        <input
+          value={typeof value === "string" ? value : ""}
+          onChange={(e) => answer(question.id, e.target.value)}
+          placeholder={question.prompt}
+          className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-ink outline-none placeholder:text-ink-faint focus:border-brand/50"
         />
       )}
     </div>

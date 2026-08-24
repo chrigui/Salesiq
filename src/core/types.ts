@@ -14,7 +14,8 @@ export type QuestionType =
   | "budget" // currency range slider
   | "slider" // numeric slider
   | "toggle" // yes / no
-  | "counter"; // integer stepper (e.g. family size)
+  | "counter" // integer stepper (e.g. family size)
+  | "text"; // free-form short text (e.g. a workplace name)
 
 export interface QuestionOption {
   id: string;
