@@ -130,16 +130,17 @@
     <div>AI intelligence suite <span>8</span></div>
     <div>Buyer Intelligence <span>9</span></div>
     <div>Display Studio <span>10</span></div>
-    <div>Business impact &amp; analytics <span>11</span></div>
-    <div>Brochure &amp; Microsite module <span>12</span></div>
-    <div>Deal Room &amp; Template Engine <span>13</span></div>
-    <div>Visual Builder &amp; no-code <span>14</span></div>
-    <div>Security &amp; backend <span>15</span></div>
-    <div>Category &amp; positioning <span>16</span></div>
-    <div>Platform roadmap <span>17</span></div>
-    <div>Risks &amp; honest caveats <span>18</span></div>
-    <div>The ask <span>19</span></div>
-    <div>Appendix: full feature list <span>20</span></div>
+    <div>LUMMA &mdash; guided Sales Companion <span>11</span></div>
+    <div>Business impact &amp; analytics <span>12</span></div>
+    <div>Brochure &amp; Microsite module <span>13</span></div>
+    <div>Deal Room &amp; Template Engine <span>14</span></div>
+    <div>Visual Builder &amp; no-code <span>15</span></div>
+    <div>Security &amp; backend <span>16</span></div>
+    <div>Category &amp; positioning <span>17</span></div>
+    <div>Platform roadmap <span>18</span></div>
+    <div>Risks &amp; honest caveats <span>19</span></div>
+    <div>The ask <span>20</span></div>
+    <div>Appendix: full feature list <span>21</span></div>
   </div>
 </div>
 
@@ -153,7 +154,7 @@
     <div class="stat"><div class="n">5</div><div class="l">industry packs shipped from one engine</div></div>
     <div class="stat"><div class="n">5</div><div class="l">live product surfaces, one shared decision engine</div></div>
     <div class="stat"><div class="n">real</div><div class="l">multi-tenant Postgres backend with role-based auth</div></div>
-    <div class="stat"><div class="n">2</div><div class="l">new modules this phase — Buyer Intelligence (both waves) and Display Studio, both fully shipped (20 PRs combined)</div></div>
+    <div class="stat"><div class="n">3</div><div class="l">new modules this phase — Buyer Intelligence (both waves), Display Studio and LUMMA, all fully shipped (24 PRs combined)</div></div>
   </div>
   <div class="good"><b>North Star:</b> every recommendation shown to a customer must be explainable from real, inspectable facts — enforced by a deterministic scoring/narration engine, with Claude layered on top only as an optional writing upgrade that never gets to invent a reason.</div>
 </div>
@@ -198,7 +199,7 @@
   <table>
     <tr><th>Surface</th><th>What it does</th><th>Status</th></tr>
     <tr><td><b>Customer Experience Display</b></td><td>Interactive Lifestyle Map, ranked recommendations, live proposal presentation</td><td><span class="pill live">LIVE</span></td></tr>
-    <tr><td><b>Sales Companion</b></td><td>Question flow, Buyer Intelligence live panel, Buying Committee Intelligence</td><td><span class="pill live">LIVE</span></td></tr>
+    <tr><td><b>Sales Companion</b></td><td>LUMMA guided discovery journey, Buyer Intelligence live panel, Buying Committee Intelligence</td><td><span class="pill live">LIVE</span></td></tr>
     <tr><td><b>Company Dashboard</b></td><td>Leads/CRM, Business Impact Dashboard, Deal Probability Radar, Visual Builder</td><td><span class="pill live">LIVE</span></td></tr>
     <tr><td><b>Platform Administration</b></td><td>Multi-tenant org, users, real permissions, audit trail, security &amp; compliance</td><td><span class="pill live">LIVE</span></td></tr>
     <tr><td><b>AI Decision Engine &amp; Public API</b></td><td>The scoring/explanation engine, exposed as a public REST API</td><td><span class="pill live">LIVE</span></td></tr>
@@ -270,6 +271,27 @@
     <tr><td>Shared Experience</td><td>"Continue on your phone" hands the live session to the customer's own device via QR, with real view/click/proposal analytics</td></tr>
   </table>
   <div class="note"><b>Status:</b> All 9 planned PRs shipped and verified against a running server.</div>
+</div>
+
+<!-- LUMMA -->
+<div class="page">
+  <span class="kick">Module · Shipped</span>
+  <h2>LUMMA — the Sales Companion becomes a guided experience</h2>
+  <p>The Companion stopped being a tool the salesperson operates and became a script the salesperson follows: a real login (dashboard-provisioned accounts only, no self-signup), a privacy-masked "meet the customer" step, then an 8-step discovery journey that narrows toward the real recommendation live as it's answered — before landing, unchanged, in the existing Companion workspace.</p>
+  <table>
+    <tr><th>Capability</th><th>Real detail</th></tr>
+    <tr><td>8-step discovery</td><td>Household, Location &amp; Commute, Location Preferences, Property Type, Lifestyle, Home Features, Financial, Timing — replacing a 5-question minimal wizard</td></tr>
+    <tr><td>Real commute scoring</td><td>A geocoded workplace and a real haversine distance to each listing bias the actual scoring engine, not a second one</td></tr>
+    <tr><td>Real amenity scoring</td><td>Only nearby-preference kinds with a genuine OpenStreetMap counterpart move the score; the rest are still captured, honestly, as data</td></tr>
+    <tr><td>Priority ranking</td><td>A top-3 "what matters most" ranking feeds the same importance-weighting mechanism Buyer Intelligence already had</td></tr>
+    <tr><td>Live buyer profile panel</td><td>Tap-to-edit view of everything captured so far, jumping straight back into the relevant step</td></tr>
+    <tr><td>Confirmation screen</td><td>A "here's what we heard" recap between the wizard and the workspace, with the same real match count the wizard already computed</td></tr>
+    <tr><td>Customer display sync</td><td>Section checkmarks and a narrowing match count on the big screen, sourced only from the pack, answers and scores — never contact details</td></tr>
+    <tr><td>Natural-language pre-fill</td><td>"Describe the customer" free text maps onto real wizard answers to confirm, reusing the existing Confirm/Edit/Reject discipline</td></tr>
+    <tr><td>Use existing profile</td><td>The platform's first BuyerProfile→answers reverse mapping, for a returning buyer</td></tr>
+    <tr><td>Geocode fallback</td><td>Try again, enter manually from the pack's own real districts, or skip — never a dead end, never an invented location</td></tr>
+  </table>
+  <div class="note"><b>Status:</b> Both rounds (4 PRs total) are complete and verified live via Playwright against a running server, including a two-tab pass confirming the customer display stays in sync with discovery.</div>
 </div>
 
 <!-- BUSINESS IMPACT -->

@@ -199,7 +199,7 @@
     <div class="stat"><div class="n">5</div><div class="l">industry packs shipped from one engine — real estate ×2, automotive, private aviation, yacht charter</div></div>
     <div class="stat"><div class="n">5</div><div class="l">live product surfaces — Display, Companion, Dashboard, Admin, and a public Decision Engine API</div></div>
     <div class="stat"><div class="n">0</div><div class="l">fabricated recommendations — every score traces to a real, inspectable rule</div></div>
-    <div class="stat"><div class="n">2</div><div class="l">new modules shipped this phase — Buyer Intelligence (both waves) and Display Studio, 20 PRs combined, both verified end-to-end</div></div>
+    <div class="stat"><div class="n">3</div><div class="l">new modules shipped this phase — Buyer Intelligence (both waves), Display Studio and LUMMA, 24 PRs combined, all verified end-to-end</div></div>
   </div>
   <div class="good"><b>North Star:</b> every recommendation a customer sees on screen must be explainable in plain language from real facts — no invented statistics, no "AI vibes." That discipline is enforced in code (the scoring engine and the narrator are deterministic; Claude is an optional writing upgrade layered on top of facts it doesn't get to invent) — not just claimed in a deck.</div>
   <p>SalesIQ is built on Next.js 15 / React 19, backed by a real multi-tenant Postgres schema (Prisma), with genuine role-based permissions and audit logging rather than a demo-only login screen. Everything described in this report as "live" is running code in this repository today; everything described as roadmap is explicitly labeled as such, using the same shipped/roadmap vocabulary the product's own internal documentation already uses (<code>live-dot</code> / <code>To activate</code> / <code>Next up</code> / <code>Blueprint</code>).</p>
@@ -258,7 +258,7 @@
   <h2>Five surfaces, one decision engine</h2>
   <div class="grid g3">
     <div class="feature"><h4><span class="live-dot"></span>Customer Experience Display</h4><p>The big-screen surface a customer actually looks at — Interactive Lifestyle Map (MapLibre 3D terrain, day/night, animated walking routes), ranked recommendations, live proposal presentation.</p></div>
-    <div class="feature"><h4><span class="live-dot"></span>Sales Companion</h4><p>The rep's phone/tablet — question flow, the Buyer Intelligence live panel, Buying Committee Intelligence, proposal generation, natural-language customer search.</p></div>
+    <div class="feature"><h4><span class="live-dot"></span>Sales Companion</h4><p>The rep's phone/tablet — opens on LUMMA's guided 8-step discovery journey, then the full workspace: the Buyer Intelligence live panel, Buying Committee Intelligence, proposal generation, natural-language customer search.</p></div>
     <div class="feature"><h4><span class="live-dot"></span>Company Dashboard</h4><p>Leads/CRM, Buyer Intelligence, Display Studio, Business Impact Dashboard, Deal Probability Radar, ROI Calculator, Brochures &amp; Deal Rooms, Visual Builder, Knowledge Base, AI settings.</p></div>
     <div class="feature"><h4><span class="live-dot"></span>Platform Administration</h4><p>Multi-tenant org management, users &amp; branches, real role-based permissions, audit trail, security &amp; compliance, subscription/billing UI.</p></div>
     <div class="feature"><h4><span class="live-dot"></span>AI Decision Engine &amp; Public API</h4><p>The scoring/explanation engine itself, exposed as a public REST API (<code>/api/public/v1</code>) — the same engine every surface above calls internally.</p></div>
@@ -346,6 +346,28 @@
     <div class="feature"><h4>Shared Experience</h4><p>"Continue on your phone" hands the live session to the customer's own device via QR — a public, ephemeral link tracked with real view/click/proposal analytics.</p></div>
   </div>
   <p style="margin-top:14px;font-size:12.5px;color:var(--ink-muted)">All 9 planned PRs shipped and verified against a running server — device registry, profile builder, versioning, brand profiles, kiosk lead capture, motion presets, AI drafting, and Shared Experience.</p>
+</section>
+
+<!-- ============ LUMMA ============ -->
+<section id="lumma">
+  <div class="kick"><span class="pill live" style="margin-right:6px">Shipped</span>Module</div>
+  <h2>LUMMA — the Sales Companion becomes a guided experience</h2>
+  <p class="lede">The Companion stopped being a tool the salesperson operates and became a script the salesperson follows: a real login gate (dashboard-provisioned accounts only, no self-signup), a privacy-masked "meet the customer" step, then an 8-step discovery journey that narrows toward the real recommendation live as it's answered — before landing, unchanged, in the existing Companion workspace. Everything reuses what already existed: Buyer Intelligence, the one real scoring engine, and the Customer Display.</p>
+  <div class="grid g3">
+    <div class="feature"><h4>Real login, no self-signup</h4><p>The exact same session-cookie pattern <code>/dashboard</code> already uses — accounts are provisioned from the dashboard, never self-registered.</p></div>
+    <div class="feature"><h4>8-step discovery journey</h4><p>Household, Location &amp; Commute, Location Preferences, Property Type, Lifestyle, Home Features, Financial, Timing — replacing a 5-question minimal wizard.</p></div>
+    <div class="feature"><h4>Real commute-distance scoring</h4><p>A geocoded workplace and the same haversine distance math used everywhere else bias the actual scoring engine's own weights — never a second, parallel system.</p></div>
+    <div class="feature"><h4>Real nearby-amenity scoring</h4><p>Only preference kinds with a genuine OpenStreetMap counterpart on a listing move the score; the rest are still captured, honestly, as structured data.</p></div>
+    <div class="feature"><h4>Top-3 priority ranking</h4><p>Feeds the same importance-weighting mechanism Buyer Intelligence already had, mapped to a real question wherever one exists.</p></div>
+    <div class="feature"><h4>Live, tap-to-edit buyer profile panel</h4><p>Everything captured so far during discovery, in one view, jumping straight back to the relevant step to correct it.</p></div>
+    <div class="feature"><h4>"Here's what we heard" confirmation</h4><p>A compact recap between the wizard's last step and the workspace, with the same real match count the wizard already computed — no second number to reconcile.</p></div>
+    <div class="feature"><h4>Customer display discovery checklist</h4><p>Section checkmarks and a narrative match-count on the big screen as discovery narrows, sourced only from the pack, answers and scores — never contact details.</p></div>
+    <div class="feature"><h4>Natural-language pre-fill</h4><p>"Describe the customer" free text maps onto real wizard answers to confirm, reusing the existing Confirm/Edit/Reject discipline rather than a new capture path.</p></div>
+    <div class="feature"><h4>Use existing profile</h4><p>The platform's first BuyerProfile→answers reverse mapping — a returning buyer's saved requirements pre-fill the wizard instead of re-asking from scratch.</p></div>
+    <div class="feature"><h4>Geocode fallback, never a dead end</h4><p>Try again, enter the location manually from the pack's own real districts, or skip — never an invented place, never a stuck screen.</p></div>
+    <div class="feature"><h4>New-meeting state reset</h4><p>Starting a new meeting now clears the previous customer's discovery answers while keeping the salesperson's chosen industry pack — a real gap found and fixed along the way.</p></div>
+  </div>
+  <p style="margin-top:14px;font-size:12.5px;color:var(--ink-muted)">Two rounds, 4 PRs total, all shipped and verified live via Playwright against a running Postgres-backed server — including a two-tab pass confirming the customer display checklist stays in sync with discovery in real time.</p>
 </section>
 
 <!-- ============ BROCHURE ============ -->
