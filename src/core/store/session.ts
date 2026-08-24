@@ -141,6 +141,14 @@ interface SessionActions {
   /** Record a interaction not covered by another action (proposal, lead saved…). */
   logEvent: (event: Omit<TimelineEvent, "id" | "ts">) => void;
   reset: () => void;
+  /**
+   * Starting a new meeting must not carry over the previous customer's
+   * discovery answers — unlike `reset()` (which returns to the START
+   * screen and also reverts the industry pack), this keeps whatever pack
+   * the salesperson has deliberately selected for their kiosk/showroom and
+   * clears only the per-customer discovery state.
+   */
+  resetForNewMeeting: () => void;
   /** Load a compelling, pre-filled scenario for a clean live demo. */
   loadDemo: () => void;
   /** Apply a full state received from another surface (no re-broadcast). */
@@ -365,6 +373,15 @@ export const useSession = create<SessionState & SessionActions>((set, get) => {
         ...initialState(),
         timeline: [makeEvent({ kind: "reset", detail: "Session reset" })],
       });
+      publish();
+    },
+
+    resetForNewMeeting: () => {
+      set((s) => ({
+        ...initialState(),
+        packId: s.packId,
+        timeline: [makeEvent({ kind: "reset", detail: "New meeting started" })],
+      }));
       publish();
     },
 

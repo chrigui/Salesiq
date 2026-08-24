@@ -46,6 +46,7 @@ export function StartMeetingScreen({ salespersonName }: { salespersonName: strin
     const trimmedName = name.trim();
     if (!trimmedName || starting) return;
     setStarting(true);
+    session.resetForNewMeeting();
     session.updateCustomer({ name: trimmedName, phone: phone.trim(), email: email.trim(), notes: "" });
     if (phone.trim() || email.trim()) {
       await linkBuyerProfile({ name: trimmedName, phone: phone.trim(), email: email.trim() });

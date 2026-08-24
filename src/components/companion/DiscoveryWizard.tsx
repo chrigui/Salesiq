@@ -88,6 +88,7 @@ export function DiscoveryWizard() {
   const [geocoding, setGeocoding] = useState(false);
   const [geocodeError, setGeocodeError] = useState<string | null>(null);
   const [geocodeResult, setGeocodeResult] = useState<GeocodeResult | null>(null);
+  const [manualDistrict, setManualDistrict] = useState(false);
   const [finishing, setFinishing] = useState(false);
   const [rankedPriorities, setRankedPriorities] = useState<string[]>([]);
 
@@ -124,6 +125,17 @@ export function DiscoveryWizard() {
     });
     return scored.filter((s) => s.score > 0).length;
   }, [pack, session.answers, commuteOption, locationPreferencesOption, priorityWeights]);
+
+  // Real districts only — grouped straight from the pack's own located
+  // inventory, the same grouping nearestDistricts (server-only) derives for
+  // an actual geocoded point. Never an invented location.
+  const districtOptions = useMemo(() => {
+    const names = new Set<string>();
+    for (const item of pack.inventory) {
+      if (item.location?.label) names.add(item.location.label);
+    }
+    return Array.from(names).sort();
+  }, [pack.inventory]);
 
   if (!groups) return null;
 
@@ -163,6 +175,17 @@ export function DiscoveryWizard() {
     } finally {
       setGeocoding(false);
     }
+  };
+
+  const chooseDistrictManually = (district: string) => {
+    const items = pack.inventory.filter((i) => i.location?.label === district && i.location);
+    if (items.length === 0) return;
+    const lat = items.reduce((sum, i) => sum + i.location!.lat, 0) / items.length;
+    const lng = items.reduce((sum, i) => sum + i.location!.lng, 0) / items.length;
+    session.setWorkLocationGeo(lat, lng);
+    setGeocodeResult({ label: district, lat, lng, nearestDistricts: [{ district, distanceKm: 0 }] });
+    setGeocodeError(null);
+    setManualDistrict(false);
   };
 
   const togglePriority = (optionId: string) => {
@@ -278,7 +301,60 @@ export function DiscoveryWizard() {
                       {geocoding ? "Finding area…" : "Find best-fit area"}
                     </button>
 
-                    {geocodeError && <p className="mt-2 text-xs text-ink-faint">{geocodeError}</p>}
+                    {geocodeError && !manualDistrict && (
+                      <div className="mt-2 space-y-2">
+                        <p className="text-xs text-ink-faint">{geocodeError}</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          <button
+                            onClick={() => void findArea()}
+                            className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs font-medium text-ink-muted transition hover:bg-white/10"
+                          >
+                            Try again
+                          </button>
+                          {districtOptions.length > 0 && (
+                            <button
+                              onClick={() => setManualDistrict(true)}
+                              className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs font-medium text-ink-muted transition hover:bg-white/10"
+                            >
+                              Enter location manually
+                            </button>
+                          )}
+                          <button
+                            onClick={() => setGeocodeError(null)}
+                            className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-ink-faint transition hover:bg-white/5"
+                          >
+                            Skip
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {manualDistrict && (
+                      <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                        <select
+                          defaultValue=""
+                          onChange={(e) => {
+                            if (e.target.value) chooseDistrictManually(e.target.value);
+                          }}
+                          className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-ink outline-none"
+                        >
+                          <option value="" disabled>
+                            Choose a district…
+                          </option>
+                          {districtOptions.map((d) => (
+                            <option key={d} value={d}>
+                              {d}
+                            </option>
+                          ))}
+                        </select>
+                        <button
+                          onClick={() => setManualDistrict(false)}
+                          className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-ink-faint transition hover:bg-white/5"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    )}
 
                     {geocodeResult && (
                       <div className="mt-2 space-y-1 rounded-xl border border-white/10 bg-white/[0.03] p-3 text-xs">
