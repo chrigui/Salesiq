@@ -14,6 +14,7 @@ import { PropertyPreview } from "./PropertyPreview";
 import { PropertyDetails } from "./PropertyDetails";
 import { ShortlistTab } from "./ShortlistTab";
 import { CompareTab } from "./CompareTab";
+import { ProgressJourney } from "./ProgressJourney";
 import { cx } from "@/components/ui/primitives";
 import type { ScoredItem } from "@/core/engine/scoring";
 import {
@@ -108,6 +109,14 @@ export function PropertyExplorer() {
             <Settings2 className="h-3.5 w-3.5" />
             Full toolset
           </button>
+        </div>
+
+        <div className="mt-3">
+          <ProgressJourney
+            stage={flow.stage}
+            compareCount={session.compareItemIds.length}
+            hasProposal={Boolean(session.proposalText)}
+          />
         </div>
 
         <div className="mt-5 flex items-center gap-2 overflow-x-auto">

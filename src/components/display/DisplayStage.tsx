@@ -20,6 +20,7 @@ import { deriveAvailabilityLabel } from "@/lib/availability";
 import { readPropertyAttributes } from "@/components/companion/explore/attributeDisplay";
 import { computeCompareBadges } from "@/components/companion/explore/compareBadges";
 import { LifestyleMap } from "./LifestyleMap";
+import { DisplayNarration } from "./DisplayNarration";
 import { DEFAULT_IDLE_TIMEOUT_MS, IdleScreen, useIdleGate } from "./IdleMode";
 import { ContinueQrModal } from "./ContinueQr";
 import type {
@@ -264,6 +265,7 @@ export function DisplayStage({
   return (
     <>
       {stage}
+      {!displayProfile && <DisplayNarration view={view} />}
       <AnimatePresence>
         {isIdle && idleProfile && idleItem ? (
           <motion.div
