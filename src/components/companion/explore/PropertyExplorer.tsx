@@ -4,11 +4,14 @@ import { useMemo, useState } from "react";
 import { Search, SlidersHorizontal, Settings2 } from "lucide-react";
 import { useSession } from "@/core/store/session";
 import { useLivePack } from "@/core/store/packs";
+import { logBuyerActivity } from "@/core/store/buyerProfiles";
 import { narrativeForMatchCount } from "@/core/engine/explain";
 import { useScoredInventory } from "../discoveryScoring";
 import { useMeetingFlow } from "../meetingFlow";
 import { PropertyGrid } from "./PropertyGrid";
 import { FilterSheet } from "./FilterSheet";
+import { PropertyPreview } from "./PropertyPreview";
+import { ShortlistTab } from "./ShortlistTab";
 import { cx } from "@/components/ui/primitives";
 import type { ScoredItem } from "@/core/engine/scoring";
 import {
@@ -60,16 +63,17 @@ export function PropertyExplorer() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState<ExploreFilters>(emptyFilters());
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
+  const [selected, setSelected] = useState<ScoredItem | null>(null);
 
   const matches = useMemo(() => scored.filter((s) => s.score > 0), [scored]);
   const activeList = tab === "all" ? scored : matches;
   const filtered = useMemo(() => applyFilters(pack, activeList, filters), [pack, activeList, filters]);
 
   const handleSelect = (s: ScoredItem) => {
-    // Real, existing mechanism: focuses the item and already pushes it onto
-    // the paired Customer Display. The full focused Property Preview lands
-    // in a later stage of this build; this keeps the tap meaningful today.
-    session.focusItem(s.item.id);
+    setSelected(s);
+    if (session.buyerProfileId) {
+      void logBuyerActivity(session.buyerProfileId, { kind: "property_viewed", packId: pack.id, itemId: s.item.id });
+    }
   };
 
   const relaxRequirements = () => {
@@ -166,11 +170,7 @@ export function PropertyExplorer() {
               onStartOver={() => flow.goTo("discover")}
             />
           )}
-          {tab === "shortlist" && (
-            <div className="glass-strong rounded-[1.6rem] p-8 text-center text-sm text-ink-faint ring-1 ring-white/10">
-              Nothing shortlisted yet — tap a property and add it to build your shortlist here.
-            </div>
-          )}
+          {tab === "shortlist" && <ShortlistTab pack={pack} scored={scored} onSelect={handleSelect} />}
           {tab === "compare" && (
             <div className="glass-strong rounded-[1.6rem] p-8 text-center text-sm text-ink-faint ring-1 ring-white/10">
               Drag two properties together in Matches or All Properties to start a comparison.
@@ -182,6 +182,8 @@ export function PropertyExplorer() {
       {filterSheetOpen && (
         <FilterSheet pack={pack} filters={filters} onChange={setFilters} onClose={() => setFilterSheetOpen(false)} />
       )}
+
+      {selected && <PropertyPreview pack={pack} scored={selected} onBack={() => setSelected(null)} />}
     </div>
   );
 }
