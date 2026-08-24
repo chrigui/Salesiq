@@ -1,15 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Trash2, ArrowRight, Boxes, Lock, X } from "lucide-react";
+import { Plus, Trash2, Pencil, ArrowRight, Boxes, Lock, X } from "lucide-react";
 import { Panel } from "@/components/console/light-ui";
 import { cx } from "@/components/ui/primitives";
 import { PACKS } from "@/core/industries";
 import { getEffectivePack, resetPack } from "@/core/store/packs";
 import {
   createCustomPack,
+  updateCustomPack,
   deleteCustomPack,
   useCustomPacks,
+  type CustomPackMeta,
 } from "@/core/data/customPacks";
 import { Field, TextInput } from "@/components/console/builder/fields";
 
@@ -37,6 +39,7 @@ export function IndustryBuilder({
 }) {
   const custom = useCustomPacks();
   const [createOpen, setCreateOpen] = useState(false);
+  const [editing, setEditing] = useState<CustomPackMeta | null>(null);
 
   return (
     <div className="space-y-4">
@@ -83,6 +86,7 @@ export function IndustryBuilder({
                 itemCount={eff.inventory.length}
                 shipped={false}
                 onOpen={() => onOpenBuilder(p.id)}
+                onEdit={() => setEditing(p)}
                 onDelete={() => {
                   if (
                     confirm(
@@ -113,6 +117,14 @@ export function IndustryBuilder({
           }}
         />
       )}
+
+      {editing && (
+        <EditIndustryModal
+          pack={editing}
+          onClose={() => setEditing(null)}
+          onSaved={() => setEditing(null)}
+        />
+      )}
     </div>
   );
 }
@@ -126,6 +138,7 @@ function PackCard({
   itemCount,
   shipped,
   onOpen,
+  onEdit,
   onDelete,
 }: {
   id: string;
@@ -137,6 +150,7 @@ function PackCard({
   itemCount: number;
   shipped: boolean;
   onOpen: () => void;
+  onEdit?: () => void;
   onDelete?: () => void;
 }) {
   return (
@@ -171,6 +185,15 @@ function PackCard({
         >
           Open builder <ArrowRight className="h-3.5 w-3.5" />
         </button>
+        {onEdit && (
+          <button
+            onClick={onEdit}
+            aria-label={`Edit ${label}`}
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-lg text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-700"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </button>
+        )}
         {onDelete && (
           <button
             onClick={onDelete}
@@ -183,6 +206,122 @@ function PackCard({
       </div>
     </div>
   );
+}
+
+/** Shared identity fields for both Create and Edit — name/vertical/glyph/currency/tagline/colour. */
+function IndustryFields({
+  label,
+  setLabel,
+  vertical,
+  setVertical,
+  glyph,
+  setGlyph,
+  currency,
+  setCurrency,
+  tagline,
+  setTagline,
+  paletteIndex,
+  setPaletteIndex,
+}: {
+  label: string;
+  setLabel: (v: string) => void;
+  vertical: string;
+  setVertical: (v: string) => void;
+  glyph: string;
+  setGlyph: (v: string) => void;
+  currency: string;
+  setCurrency: (v: string) => void;
+  tagline: string;
+  setTagline: (v: string) => void;
+  paletteIndex: number;
+  setPaletteIndex: (i: number) => void;
+}) {
+  return (
+    <div className="space-y-3">
+      <Field label="Industry name" hint="e.g. Yacht Charter, Solar Installation">
+        <TextInput value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Yacht Charter" />
+      </Field>
+      <Field label="Vertical description" hint="Shown to the AI engine as context">
+        <TextInput
+          value={vertical}
+          onChange={(e) => setVertical(e.target.value)}
+          placeholder="luxury yacht charter and sales"
+        />
+      </Field>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Logo glyph">
+          <TextInput value={glyph} maxLength={2} onChange={(e) => setGlyph(e.target.value)} />
+        </Field>
+        <Field label="Currency">
+          <TextInput
+            value={currency}
+            maxLength={3}
+            onChange={(e) => setCurrency(e.target.value.toUpperCase())}
+          />
+        </Field>
+      </div>
+      <Field label="Tagline" hint="Optional — you can change this later">
+        <TextInput value={tagline} onChange={(e) => setTagline(e.target.value)} placeholder="Find the right fit, every time." />
+      </Field>
+      <Field label="Brand colour">
+        <div className="flex gap-2">
+          {PALETTE.map((c, i) => (
+            <button
+              key={i}
+              onClick={() => setPaletteIndex(i)}
+              aria-label={`Colour ${i + 1}`}
+              className={cx(
+                "h-8 w-8 rounded-full ring-2 transition",
+                paletteIndex === i ? "ring-zinc-900" : "ring-transparent",
+              )}
+              style={{ background: `rgb(${c.brand})` }}
+            />
+          ))}
+        </div>
+      </Field>
+    </div>
+  );
+}
+
+function ModalShell({
+  icon: Icon,
+  title,
+  onClose,
+  children,
+  footer,
+}: {
+  icon: typeof Boxes;
+  title: string;
+  onClose: () => void;
+  children: React.ReactNode;
+  footer: React.ReactNode;
+}) {
+  return (
+    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/30 p-4" onClick={onClose}>
+      <div
+        className="w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-5 shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Icon className="h-5 w-5 text-zinc-900" />
+            <h3 className="text-base font-semibold text-zinc-900">{title}</h3>
+          </div>
+          <button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-lg text-zinc-400 hover:bg-zinc-100">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        {children}
+        <div className="mt-5 flex justify-end gap-2">{footer}</div>
+      </div>
+    </div>
+  );
+}
+
+/** Find the palette index matching a stored brand colour, defaulting to the first swatch. */
+function paletteIndexFor(brand: string): number {
+  const i = PALETTE.findIndex((c) => c.brand === brand);
+  return i === -1 ? 0 : i;
 }
 
 function CreateIndustryModal({
@@ -224,66 +363,12 @@ function CreateIndustryModal({
   };
 
   return (
-    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/30 p-4" onClick={onClose}>
-      <div
-        className="w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-5 shadow-xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="mb-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Boxes className="h-5 w-5 text-zinc-900" />
-            <h3 className="text-base font-semibold text-zinc-900">Create an industry</h3>
-          </div>
-          <button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-lg text-zinc-400 hover:bg-zinc-100">
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-
-        <div className="space-y-3">
-          <Field label="Industry name" hint="e.g. Yacht Charter, Solar Installation">
-            <TextInput value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Yacht Charter" />
-          </Field>
-          <Field label="Vertical description" hint="Shown to the AI engine as context">
-            <TextInput
-              value={vertical}
-              onChange={(e) => setVertical(e.target.value)}
-              placeholder="luxury yacht charter and sales"
-            />
-          </Field>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Logo glyph">
-              <TextInput value={glyph} maxLength={2} onChange={(e) => setGlyph(e.target.value)} />
-            </Field>
-            <Field label="Currency">
-              <TextInput
-                value={currency}
-                maxLength={3}
-                onChange={(e) => setCurrency(e.target.value.toUpperCase())}
-              />
-            </Field>
-          </div>
-          <Field label="Tagline" hint="Optional — you can change this later">
-            <TextInput value={tagline} onChange={(e) => setTagline(e.target.value)} placeholder="Find the right fit, every time." />
-          </Field>
-          <Field label="Brand colour">
-            <div className="flex gap-2">
-              {PALETTE.map((c, i) => (
-                <button
-                  key={i}
-                  onClick={() => setPaletteIndex(i)}
-                  aria-label={`Colour ${i + 1}`}
-                  className={cx(
-                    "h-8 w-8 rounded-full ring-2 transition",
-                    paletteIndex === i ? "ring-zinc-900" : "ring-transparent",
-                  )}
-                  style={{ background: `rgb(${c.brand})` }}
-                />
-              ))}
-            </div>
-          </Field>
-        </div>
-
-        <div className="mt-5 flex justify-end gap-2">
+    <ModalShell
+      icon={Boxes}
+      title="Create an industry"
+      onClose={onClose}
+      footer={
+        <>
           <button onClick={onClose} className="rounded-xl border border-zinc-200 px-4 py-2 text-sm text-zinc-600 transition hover:bg-zinc-50">
             Cancel
           </button>
@@ -294,8 +379,96 @@ function CreateIndustryModal({
           >
             Create &amp; start building
           </button>
-        </div>
-      </div>
-    </div>
+        </>
+      }
+    >
+      <IndustryFields
+        label={label}
+        setLabel={setLabel}
+        vertical={vertical}
+        setVertical={setVertical}
+        glyph={glyph}
+        setGlyph={setGlyph}
+        currency={currency}
+        setCurrency={setCurrency}
+        tagline={tagline}
+        setTagline={setTagline}
+        paletteIndex={paletteIndex}
+        setPaletteIndex={setPaletteIndex}
+      />
+    </ModalShell>
+  );
+}
+
+function EditIndustryModal({
+  pack,
+  onClose,
+  onSaved,
+}: {
+  pack: CustomPackMeta;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const [label, setLabel] = useState(pack.label);
+  const [vertical, setVertical] = useState(pack.vertical);
+  const [currency, setCurrency] = useState(pack.currency);
+  const [glyph, setGlyph] = useState(pack.branding.logoGlyph);
+  const [tagline, setTagline] = useState(pack.branding.tagline);
+  const [paletteIndex, setPaletteIndex] = useState(() => paletteIndexFor(pack.branding.brand));
+
+  const valid = label.trim().length > 0 && vertical.trim().length > 0;
+
+  const save = () => {
+    if (!valid) return;
+    updateCustomPack(pack.id, {
+      label: label.trim(),
+      vertical: vertical.trim(),
+      currency,
+      branding: {
+        name: label.trim(),
+        tagline: tagline.trim() || `Find the right fit, every time.`,
+        brand: PALETTE[paletteIndex].brand,
+        brandSoft: PALETTE[paletteIndex].soft,
+        logoGlyph: glyph.trim() || "◆",
+      },
+    });
+    onSaved();
+  };
+
+  return (
+    <ModalShell
+      icon={Pencil}
+      title={`Edit "${pack.label}"`}
+      onClose={onClose}
+      footer={
+        <>
+          <button onClick={onClose} className="rounded-xl border border-zinc-200 px-4 py-2 text-sm text-zinc-600 transition hover:bg-zinc-50">
+            Cancel
+          </button>
+          <button
+            disabled={!valid}
+            onClick={save}
+            className="rounded-xl bg-zinc-900 px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-40"
+          >
+            Save changes
+          </button>
+        </>
+      }
+    >
+      <IndustryFields
+        label={label}
+        setLabel={setLabel}
+        vertical={vertical}
+        setVertical={setVertical}
+        glyph={glyph}
+        setGlyph={setGlyph}
+        currency={currency}
+        setCurrency={setCurrency}
+        tagline={tagline}
+        setTagline={setTagline}
+        paletteIndex={paletteIndex}
+        setPaletteIndex={setPaletteIndex}
+      />
+    </ModalShell>
   );
 }

@@ -80,6 +80,33 @@ export function deleteCustomPack(id: string): void {
   saveAll(getCustomPacks().filter((p) => p.id !== id));
 }
 
+export interface UpdatePackInput {
+  label: string;
+  vertical: string;
+  currency: string;
+  branding: Branding;
+}
+
+/** Update a custom pack's own identity fields in place — the id (and therefore
+ * every reference to it: session.packId, drafts, leads, display profiles…)
+ * never changes, only label/vertical/currency/branding does. */
+export function updateCustomPack(id: string, input: UpdatePackInput): CustomPackMeta | undefined {
+  const all = getCustomPacks();
+  const idx = all.findIndex((p) => p.id === id);
+  if (idx === -1) return undefined;
+  const updated: CustomPackMeta = {
+    ...all[idx],
+    label: input.label,
+    vertical: input.vertical,
+    currency: input.currency,
+    branding: input.branding,
+  };
+  const next = [...all];
+  next[idx] = updated;
+  saveAll(next);
+  return updated;
+}
+
 function uniqueId(label: string, existingIds: string[]): string {
   const base = label
     .toLowerCase()
