@@ -6,7 +6,12 @@
  * discovery is the same number they see after finishing — one derivation,
  * two call sites, per the approved LUMMA Round 2 plan.
  */
-import type { Answers, NearbyAmenity } from "@/core/types";
+import { useMemo } from "react";
+import type { Answers, IndustryPack, NearbyAmenity } from "@/core/types";
+import { scoreInventory, type ScoredItem } from "@/core/engine/scoring";
+import { useSession } from "@/core/store/session";
+import { useBuyerProfile, useBuyerRejectedItems } from "@/core/store/buyerProfiles";
+import { toPriorityWeights } from "@/core/buyerIntelligence/priorityWeights";
 
 /** ~35 km/h average — the standard real-estate "X min commute" assumption,
  * same convention as the existing "~4.8 km/h walk" one in LifestyleEditor.tsx.
@@ -73,4 +78,47 @@ export function deriveLocationPreferencesOption(
   const importance = answers.locationImportance;
   const weight = (typeof importance === "string" && LOCATION_WEIGHT[importance]) || 1.5;
   return { kinds, weight };
+}
+
+/**
+ * The exact same scoreInventory options bundle CompanionApp's workspace
+ * already assembles (priority weights from a linked buyer's stated
+ * priorities, rejected-item exclusion, real commute/location-preference
+ * fit) — extracted here so a third call site (the Property Explorer) never
+ * has to re-derive it slightly differently and drift out of sync with what
+ * the salesperson already saw during discovery/confirmation.
+ */
+export function useScoredInventory(pack: IndustryPack): ScoredItem[] {
+  const session = useSession();
+  const { buyerProfile } = useBuyerProfile(session.buyerProfileId);
+  const priorityWeights = useMemo(
+    () => toPriorityWeights(buyerProfile?.priorities ?? null),
+    [buyerProfile?.priorities],
+  );
+  const { rejectedItems } = useBuyerRejectedItems(session.buyerProfileId);
+  const excludeItemIds = useMemo(
+    () =>
+      rejectedItems
+        .filter((r) => r.packId === pack.id && !r.overriddenAt)
+        .map((r) => r.itemId),
+    [rejectedItems, pack.id],
+  );
+  const commuteOption = useMemo(
+    () => deriveCommuteOption(session.answers, session.workLocationLat, session.workLocationLng),
+    [session.answers, session.workLocationLat, session.workLocationLng],
+  );
+  const locationPreferencesOption = useMemo(
+    () => deriveLocationPreferencesOption(session.answers),
+    [session.answers],
+  );
+  return useMemo(
+    () =>
+      scoreInventory(pack, session.answers, {
+        priorityWeights,
+        excludeItemIds,
+        commute: commuteOption,
+        locationPreferences: locationPreferencesOption,
+      }),
+    [pack, session.answers, priorityWeights, excludeItemIds, commuteOption, locationPreferencesOption],
+  );
 }

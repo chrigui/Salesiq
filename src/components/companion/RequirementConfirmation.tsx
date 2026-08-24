@@ -14,10 +14,10 @@ import { useMeetingFlow } from "./meetingFlow";
 
 /**
  * The compact "Here's what we heard" recap between the end of discovery and
- * the workspace — read-only confirmation of the real answers just given,
- * with an honest match count computed by the same scoreInventory call the
- * wizard and workspace already use. Edit sends the salesperson back into
- * the wizard rather than opening a second editing surface.
+ * the Property Explorer — read-only confirmation of the real answers just
+ * given, with an honest match count computed by the same scoreInventory
+ * call the wizard and explorer already use. Edit sends the salesperson back
+ * into the wizard rather than opening a second editing surface.
  */
 export function RequirementConfirmation() {
   const session = useSession();
@@ -108,7 +108,7 @@ export function RequirementConfirmation() {
             Edit
           </button>
           <button
-            onClick={() => flow.goTo("workspace")}
+            onClick={() => flow.goTo("explore")}
             className="flex-1 rounded-2xl bg-brand py-3 text-sm font-semibold text-white transition hover:brightness-110"
           >
             Look at your matches
