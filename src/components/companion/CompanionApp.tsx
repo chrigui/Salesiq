@@ -24,6 +24,7 @@ import {
   Ban,
   BrainCircuit,
   PlayCircle,
+  ShieldCheck,
 } from "lucide-react";
 import Link from "next/link";
 import { useSession, type Stakeholder, type TimelineEvent } from "@/core/store/session";
@@ -52,6 +53,7 @@ import { BuyerIntelligencePanel } from "./BuyerIntelligencePanel";
 import { detectSignals } from "@/core/engine/copilot";
 import { DemoScript, type DemoStep } from "./DemoScript";
 import { buildGoldenDemoSteps, resetToGoldenStart } from "./goldenDemoSteps";
+import { DemoHealthCheck } from "./DemoHealthCheck";
 import { CompanionSyncBar } from "@/components/sync/Pairing";
 
 export function CompanionApp() {
@@ -66,6 +68,7 @@ export function CompanionApp() {
   const [buyerIntelOpen, setBuyerIntelOpen] = useState(false);
   const [demoScriptOpen, setDemoScriptOpen] = useState(false);
   const [goldenDemoOpen, setGoldenDemoOpen] = useState(false);
+  const [healthCheckOpen, setHealthCheckOpen] = useState(false);
   const [rejectingItem, setRejectingItem] = useState<{ id: string; name: string } | null>(null);
   const [rejectReason, setRejectReason] = useState("");
 
@@ -277,6 +280,15 @@ export function CompanionApp() {
               >
                 <PlayCircle className="h-3 w-3" /> Start Demo
               </button>
+              {Boolean(process.env.NEXT_PUBLIC_DEMO_HEALTH_SECRET) && (
+                <button
+                  onClick={() => setHealthCheckOpen(true)}
+                  title="Check that the Golden Demo Experience is ready to present"
+                  className="flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-medium text-ink-muted transition hover:bg-white/10"
+                >
+                  <ShieldCheck className="h-3 w-3" /> Health Check
+                </button>
+              )}
               <button
                 onClick={() => setDemoScriptOpen(true)}
                 className="flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-medium text-ink-muted transition hover:bg-white/10"
@@ -569,6 +581,8 @@ export function CompanionApp() {
         label="Golden demo"
         onReset={() => resetToGoldenStart(session)}
       />
+
+      <DemoHealthCheck open={healthCheckOpen} onClose={() => setHealthCheckOpen(false)} />
     </div>
   );
 }
