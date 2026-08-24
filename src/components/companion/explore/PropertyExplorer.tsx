@@ -4,11 +4,21 @@ import { useMemo, useState } from "react";
 import { Search, SlidersHorizontal, Settings2 } from "lucide-react";
 import { useSession } from "@/core/store/session";
 import { useLivePack } from "@/core/store/packs";
+import { narrativeForMatchCount } from "@/core/engine/explain";
 import { useScoredInventory } from "../discoveryScoring";
 import { useMeetingFlow } from "../meetingFlow";
 import { PropertyGrid } from "./PropertyGrid";
+import { FilterSheet } from "./FilterSheet";
 import { cx } from "@/components/ui/primitives";
 import type { ScoredItem } from "@/core/engine/scoring";
+import {
+  type ExploreFilters,
+  emptyFilters,
+  hasActiveFilters,
+  applyFilters,
+  mostRestrictiveFilter,
+  withoutFilter,
+} from "./filterEngine";
 
 type ExploreTab = "matches" | "all" | "shortlist" | "compare";
 
@@ -19,13 +29,26 @@ const TABS: { id: ExploreTab; label: string }[] = [
   { id: "compare", label: "Compare" },
 ];
 
+function activeFilterCount(f: ExploreFilters): number {
+  return (
+    f.propertyTypes.length +
+    f.bedrooms.length +
+    (f.price ? 1 : 0) +
+    f.locations.length +
+    f.features.length +
+    (f.status ? 1 : 0)
+  );
+}
+
 /**
  * The Property Discovery Experience — the real destination of "Look at your
  * matches." A focused, tabbed results explorer, distinct from the full
  * `CompanionApp` workspace (still reachable via "Full toolset" for a
  * salesperson who deliberately wants it, never something discovery pushes
  * them into). Everything here reads from the same real scoreInventory the
- * wizard/confirmation screens already used — never a second engine.
+ * wizard/confirmation screens already used — never a second engine. Filters
+ * are Companion-local and scoped to this meeting only — never written to
+ * the synced Buyer Profile.
  */
 export function PropertyExplorer() {
   const session = useSession();
@@ -35,8 +58,12 @@ export function PropertyExplorer() {
 
   const [tab, setTab] = useState<ExploreTab>("matches");
   const [searchQuery, setSearchQuery] = useState("");
+  const [filters, setFilters] = useState<ExploreFilters>(emptyFilters());
+  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
 
   const matches = useMemo(() => scored.filter((s) => s.score > 0), [scored]);
+  const activeList = tab === "all" ? scored : matches;
+  const filtered = useMemo(() => applyFilters(pack, activeList, filters), [pack, activeList, filters]);
 
   const handleSelect = (s: ScoredItem) => {
     // Real, existing mechanism: focuses the item and already pushes it onto
@@ -45,16 +72,26 @@ export function PropertyExplorer() {
     session.focusItem(s.item.id);
   };
 
+  const relaxRequirements = () => {
+    const worst = mostRestrictiveFilter(pack, activeList, filters);
+    if (worst) setFilters(withoutFilter(filters, worst));
+  };
+
+  const headerText =
+    hasActiveFilters(filters) || searchQuery.trim()
+      ? narrativeForMatchCount(filtered.length, activeList.length) ||
+        `${filtered.length} propert${filtered.length === 1 ? "y" : "ies"} match.`
+      : `We found ${matches.length} propert${matches.length === 1 ? "y" : "ies"} that fit what matters to ${
+          session.customer.name.split(" ")[0] || "them"
+        }.`;
+
   return (
     <div className="bg-aurora min-h-screen px-4 pb-10 pt-6 sm:px-6">
       <div className="mx-auto max-w-4xl">
         <div className="flex items-center justify-between gap-3">
           <div>
             <h1 className="text-xl font-semibold text-ink">Your matches</h1>
-            <p className="mt-0.5 text-xs text-ink-faint">
-              We found {matches.length} propert{matches.length === 1 ? "y" : "ies"} that fit what matters to{" "}
-              {session.customer.name.split(" ")[0] || "them"}.
-            </p>
+            <p className="mt-0.5 text-xs text-ink-faint">{headerText}</p>
           </div>
           <button
             onClick={() => flow.goTo("workspace")}
@@ -81,11 +118,17 @@ export function PropertyExplorer() {
             ))}
           </div>
           <button
+            onClick={() => setFilterSheetOpen(true)}
             className="ml-auto flex shrink-0 items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-ink-muted transition hover:bg-white/10"
             title="Filters"
           >
             <SlidersHorizontal className="h-3.5 w-3.5" />
             Filter
+            {activeFilterCount(filters) > 0 && (
+              <span className="grid h-4 w-4 place-items-center rounded-full bg-brand text-[10px] font-semibold text-white">
+                {activeFilterCount(filters)}
+              </span>
+            )}
           </button>
         </div>
 
@@ -105,15 +148,23 @@ export function PropertyExplorer() {
           {tab === "matches" && (
             <PropertyGrid
               pack={pack}
-              scored={matches}
+              scored={filtered}
               searchQuery=""
               onSelect={handleSelect}
+              onRelaxRequirements={hasActiveFilters(filters) ? relaxRequirements : undefined}
               onViewAll={() => setTab("all")}
               onStartOver={() => flow.goTo("discover")}
             />
           )}
           {tab === "all" && (
-            <PropertyGrid pack={pack} scored={scored} searchQuery={searchQuery} onSelect={handleSelect} />
+            <PropertyGrid
+              pack={pack}
+              scored={filtered}
+              searchQuery={searchQuery}
+              onSelect={handleSelect}
+              onRelaxRequirements={hasActiveFilters(filters) ? relaxRequirements : undefined}
+              onStartOver={() => flow.goTo("discover")}
+            />
           )}
           {tab === "shortlist" && (
             <div className="glass-strong rounded-[1.6rem] p-8 text-center text-sm text-ink-faint ring-1 ring-white/10">
@@ -127,6 +178,10 @@ export function PropertyExplorer() {
           )}
         </div>
       </div>
+
+      {filterSheetOpen && (
+        <FilterSheet pack={pack} filters={filters} onChange={setFilters} onClose={() => setFilterSheetOpen(false)} />
+      )}
     </div>
   );
 }
