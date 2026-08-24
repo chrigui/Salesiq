@@ -11,6 +11,7 @@ import { useMeetingFlow } from "../meetingFlow";
 import { PropertyGrid } from "./PropertyGrid";
 import { FilterSheet } from "./FilterSheet";
 import { PropertyPreview } from "./PropertyPreview";
+import { PropertyDetails } from "./PropertyDetails";
 import { ShortlistTab } from "./ShortlistTab";
 import { CompareTab } from "./CompareTab";
 import { cx } from "@/components/ui/primitives";
@@ -65,6 +66,7 @@ export function PropertyExplorer() {
   const [filters, setFilters] = useState<ExploreFilters>(emptyFilters());
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
   const [selected, setSelected] = useState<ScoredItem | null>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
 
   const matches = useMemo(() => scored.filter((s) => s.score > 0), [scored]);
   const activeList = tab === "all" ? scored : matches;
@@ -72,6 +74,7 @@ export function PropertyExplorer() {
 
   const handleSelect = (s: ScoredItem) => {
     setSelected(s);
+    setDetailsOpen(false);
     if (session.buyerProfileId) {
       void logBuyerActivity(session.buyerProfileId, { kind: "property_viewed", packId: pack.id, itemId: s.item.id });
     }
@@ -182,7 +185,17 @@ export function PropertyExplorer() {
         <FilterSheet pack={pack} filters={filters} onChange={setFilters} onClose={() => setFilterSheetOpen(false)} />
       )}
 
-      {selected && <PropertyPreview pack={pack} scored={selected} onBack={() => setSelected(null)} />}
+      {selected && !detailsOpen && (
+        <PropertyPreview
+          pack={pack}
+          scored={selected}
+          onBack={() => setSelected(null)}
+          onMoreDetails={() => setDetailsOpen(true)}
+        />
+      )}
+      {selected && detailsOpen && (
+        <PropertyDetails pack={pack} scored={selected} onBack={() => setDetailsOpen(false)} />
+      )}
     </div>
   );
 }

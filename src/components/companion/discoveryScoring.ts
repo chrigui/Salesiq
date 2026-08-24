@@ -39,6 +39,15 @@ export const COMMUTE_IMPORTANCE_LABEL: Record<string, string> = {
   flexible: "Flexible",
 };
 
+/** Converts a real distance (haversineMeters, or a real nearbyAmenities
+ * distanceMeters) into an estimated minutes figure — the same
+ * AVG_COMMUTE_KMH convention deriveCommuteOption uses, reused here rather
+ * than introducing a second speed assumption for amenity distances. */
+export function metersToMinutes(distanceMeters: number): number {
+  const km = distanceMeters / 1000;
+  return Math.round((km / AVG_COMMUTE_KMH) * 60);
+}
+
 /** Real commute fit: only built once we have a geocoded point, a stated
  * importance, and a real (non-"no preference") maximum — never fabricated. */
 export function deriveCommuteOption(
