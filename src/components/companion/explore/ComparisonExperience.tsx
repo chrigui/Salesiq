@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { X, ScreenShare, BarChart3, Tv } from "lucide-react";
+import { X, ScreenShare, BarChart3, Tv, ClipboardPlus, ClipboardCheck } from "lucide-react";
 import type { Answers, IndustryPack } from "@/core/types";
 import type { ScoredItem } from "@/core/engine/scoring";
 import { useSession } from "@/core/store/session";
@@ -69,6 +69,7 @@ export function ComparisonExperience({
   pack,
   scored,
   onDisplayControl,
+  enableRecap,
 }: {
   pack: IndustryPack;
   scored: ScoredItem[];
@@ -76,6 +77,10 @@ export function ComparisonExperience({
    * action sheet for that specific item. Omitted (the plain Explorer's
    * Compare tab) simply hides the per-card "Display" trigger. */
   onDisplayControl?: (item: ScoredItem) => void;
+  /** Decision Room only: shows a per-card "Add to recap" toggle so a
+   * salesperson can build a real, multi-property recap ("everything we
+   * explored together"), not just the single recommend-screen winner. */
+  enableRecap?: boolean;
 }) {
   const session = useSession();
   const { buyerProfile } = useBuyerProfile(session.buyerProfileId);
@@ -101,6 +106,11 @@ export function ComparisonExperience({
   };
 
   const showToCustomer = () => session.setView("compareGroup");
+
+  const toggleRecap = (itemId: string) => {
+    if (session.recapItemIds.includes(itemId)) session.removeFromRecap(itemId);
+    else session.addToRecap(itemId);
+  };
 
   if (group.length < 2) return null;
 
@@ -144,6 +154,8 @@ export function ComparisonExperience({
             onShowBreakdown={() => setBreakdownFor(s)}
             onDisplayControl={onDisplayControl ? () => onDisplayControl(s) : undefined}
             priorities={buyerProfile?.priorities}
+            onToggleRecap={enableRecap ? () => toggleRecap(s.item.id) : undefined}
+            inRecap={session.recapItemIds.includes(s.item.id)}
           />
         ))}
       </div>
@@ -166,6 +178,8 @@ function ComparisonCard({
   onShowBreakdown,
   onDisplayControl,
   priorities,
+  onToggleRecap,
+  inRecap,
 }: {
   pack: IndustryPack;
   scored: ScoredItem;
@@ -177,6 +191,8 @@ function ComparisonCard({
   onShowBreakdown: () => void;
   onDisplayControl?: () => void;
   priorities?: BuyerPriority[] | null;
+  onToggleRecap?: () => void;
+  inRecap?: boolean;
 }) {
   const attrs = readPropertyAttributes(pack, s.item);
   const availability = deriveAvailabilityLabel(s.item);
@@ -309,6 +325,18 @@ function ComparisonCard({
             >
               <Tv className="h-3 w-3" />
               Display
+            </button>
+          )}
+          {onToggleRecap && (
+            <button
+              onClick={onToggleRecap}
+              className={cx(
+                "flex items-center gap-1.5 text-[11px] font-medium transition",
+                inRecap ? "text-brand" : "text-ink-faint hover:text-ink",
+              )}
+            >
+              {inRecap ? <ClipboardCheck className="h-3 w-3" /> : <ClipboardPlus className="h-3 w-3" />}
+              {inRecap ? "In recap" : "Add to recap"}
             </button>
           )}
         </div>

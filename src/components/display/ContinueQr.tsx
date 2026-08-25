@@ -7,6 +7,39 @@ import { Smartphone, X } from "lucide-react";
 import { useSync } from "@/components/providers/SyncProvider";
 
 /**
+ * Shared QR data-URL generation — used by the "Continue on your phone"
+ * modal and by RecapStage's end-of-meeting QR, so there's exactly one place
+ * that turns a continue URL into a scannable image.
+ */
+export function useContinueQrDataUrl(url: string | null): string | null {
+  const [qr, setQr] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!url) {
+      setQr(null);
+      return;
+    }
+    let cancelled = false;
+    QRCode.toDataURL(url, {
+      margin: 1,
+      width: 220,
+      color: { dark: "#0a0f1c", light: "#ffffff" },
+    })
+      .then((dataUrl) => {
+        if (!cancelled) setQr(dataUrl);
+      })
+      .catch(() => {
+        if (!cancelled) setQr(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [url]);
+
+  return qr;
+}
+
+/**
  * QR Continue Experience (Module 2) — the display-side trigger. A customer
  * scans this to pick up the current recommendation, read-only, on their own
  * phone. Reuses the display's existing sync room (see SyncProvider) rather
@@ -20,18 +53,7 @@ export function ContinueQrModal({
   onClose: () => void;
 }) {
   const { room, continueUrl } = useSync();
-  const [qr, setQr] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!continueUrl) return;
-    QRCode.toDataURL(continueUrl, {
-      margin: 1,
-      width: 220,
-      color: { dark: "#0a0f1c", light: "#ffffff" },
-    })
-      .then(setQr)
-      .catch(() => setQr(null));
-  }, [continueUrl]);
+  const qr = useContinueQrDataUrl(continueUrl);
 
   return (
     <AnimatePresence>

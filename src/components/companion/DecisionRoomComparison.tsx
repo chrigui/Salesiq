@@ -72,7 +72,7 @@ export function DecisionRoomComparison({
           </div>
         </div>
 
-        <ComparisonExperience pack={pack} scored={scored} onDisplayControl={setDisplayControlFor} />
+        <ComparisonExperience pack={pack} scored={scored} onDisplayControl={setDisplayControlFor} enableRecap />
 
         {atCap && (
           <p className="mt-4 text-center text-xs text-ink-faint">

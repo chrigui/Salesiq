@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Heart, Share2, Check } from "lucide-react";
 import { useSync } from "@/components/providers/SyncProvider";
 import { cx } from "@/components/ui/primitives";
+import { shareOrCopyLink } from "@/lib/shareLink";
 import type { DisplayWidgetContext } from "../types";
 
 /**
@@ -45,20 +46,10 @@ export function DisplaySaveShare({ item, mode }: DisplayWidgetContext) {
 
   const share = async () => {
     if (!continueUrl) return;
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: item.name, url: continueUrl });
-        return;
-      } catch {
-        // user cancelled or share failed — fall through to clipboard
-      }
-    }
-    try {
-      await navigator.clipboard.writeText(continueUrl);
+    const result = await shareOrCopyLink(continueUrl, item.name);
+    if (result === "copied") {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // clipboard can be blocked too — nothing more we can do here
     }
   };
 

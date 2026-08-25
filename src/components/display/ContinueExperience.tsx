@@ -2,14 +2,20 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Heart, QrCode, Sparkles, Wifi } from "lucide-react";
+import { Heart, QrCode, Sparkles, Wifi, UserRound } from "lucide-react";
 import { useSync } from "@/components/providers/SyncProvider";
 import { useSession } from "@/core/store/session";
 import { useLivePack } from "@/core/store/packs";
-import { scoreInventory } from "@/core/engine/scoring";
+import { useBuyerProfile } from "@/core/store/buyerProfiles";
+import { scoreInventory, type ScoredItem } from "@/core/engine/scoring";
 import { narrate, formatMoney } from "@/core/engine/explain";
 import { ItemImage } from "@/components/ui/ItemImage";
 import { cx } from "@/components/ui/primitives";
+import { useDecisionRoomWidgetContext } from "./useDecisionRoomWidgetContext";
+import { DisplayPriceSummary } from "./widgets/DisplayPriceSummary";
+import { DisplayInvestment } from "./widgets/DisplayInvestment";
+import { DisplayDocuments } from "./widgets/DisplayDocuments";
+import type { IndustryPack } from "@/core/types";
 
 /**
  * QR Continue Experience (Module 2). The customer scans a code on the big
@@ -22,15 +28,25 @@ import { cx } from "@/components/ui/primitives";
  */
 export function ContinueExperience() {
   const { room, status } = useSync();
-  const { packId, answers, customer } = useSession();
+  const { packId, answers, customer, recapItemIds, buyerProfileId } = useSession();
   const pack = useLivePack(packId);
+  const { buyerProfile } = useBuyerProfile(buyerProfileId);
   const [saved, setSaved] = useState<string[]>([]);
   const [waitedLong, setWaitedLong] = useState(false);
 
   const hasAnswers = Object.keys(answers).length > 0;
   const scored = scoreInventory(pack, answers);
-  const top = scored[0];
-  const rest = scored.slice(1, 3);
+
+  // Once a salesperson has curated a real recap, this becomes the actual
+  // "LUMMA Recap" continuation (spec sections 27-28) — the shortlist they
+  // built, not a fresh auto-scored guess. Falls back to today's live
+  // top-3 snapshot when nothing has been added to recap yet.
+  const recapScored = recapItemIds
+    .map((id) => scored.find((s) => s.item.id === id))
+    .filter((s): s is ScoredItem => Boolean(s));
+  const recapMode = recapScored.length > 0;
+  const top = recapMode ? recapScored.reduce((best, s) => (s.score > best.score ? s : best), recapScored[0]) : scored[0];
+  const rest = recapMode ? recapScored.filter((s) => s.item.id !== top.item.id) : scored.slice(1, 3);
 
   useEffect(() => {
     if (hasAnswers) return;
@@ -83,10 +99,14 @@ export function ContinueExperience() {
           animate={{ opacity: 1, y: 0 }}
           className="mb-1 text-2xl font-semibold tracking-tight"
         >
-          {firstName ? `Hi ${firstName}, here's` : "Here's"} what we found for you
+          {recapMode
+            ? `${firstName ? `${firstName}, your` : "Your"} LUMMA recap`
+            : `${firstName ? `Hi ${firstName}, here's` : "Here's"} what we found for you`}
         </motion.h1>
         <p className="mb-6 text-sm text-ink-muted">
-          Pulled live from your session — browse at your own pace.
+          {recapMode
+            ? "Everything we explored together, in one place."
+            : "Pulled live from your session — browse at your own pace."}
         </p>
 
         {top && (
@@ -160,6 +180,24 @@ export function ContinueExperience() {
           </div>
         )}
 
+        {recapMode && top && <RecapPropertyDetails pack={pack} item={top.item} scored={scored} />}
+
+        {recapMode && buyerProfile?.assignedToName && (
+          <div className="mt-4 flex items-center gap-2.5 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm">
+            <UserRound className="h-4 w-4 shrink-0 text-brand" />
+            <span className="text-ink-muted">Your LUMMA advisor: {buyerProfile.assignedToName}</span>
+          </div>
+        )}
+
+        {recapMode && (
+          <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-sm text-ink-muted">
+            <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-ink-faint">
+              Next steps
+            </div>
+            Ready to move forward? Reach out to your advisor to arrange a viewing or start the paperwork.
+          </div>
+        )}
+
         {saved.length > 0 && (
           <p className="mt-4 text-center text-[11px] text-ink-faint">
             {saved.length} saved on this phone
@@ -170,6 +208,33 @@ export function ContinueExperience() {
           {status === "paired" ? "Live · " : ""}Room {room}
         </p>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Real payment/investment summary + uploaded documents for the recap's top
+ * item — reuses the exact same public-route-safe widget context Decision
+ * Room's Investment/Payment stages already use, never a second data path.
+ * A separate component (not inlined above) so useDecisionRoomWidgetContext
+ * — a hook — is only ever called unconditionally at its own top level,
+ * while the parent mounts it conditionally per Rules of Hooks.
+ */
+function RecapPropertyDetails({
+  pack,
+  item,
+  scored,
+}: {
+  pack: IndustryPack;
+  item: ScoredItem["item"];
+  scored: ScoredItem[];
+}) {
+  const context = useDecisionRoomWidgetContext(pack, item, scored);
+  return (
+    <div className="mt-4 space-y-3">
+      <DisplayPriceSummary {...context} />
+      <DisplayInvestment {...context} />
+      <DisplayDocuments {...context} />
     </div>
   );
 }

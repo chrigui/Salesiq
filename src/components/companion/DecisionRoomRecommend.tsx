@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, Trophy, Wallet, LandPlot, TrendingUp, ClipboardPlus, Sparkles } from "lucide-react";
+import { ArrowLeft, Trophy, Wallet, LandPlot, TrendingUp, ClipboardPlus, Sparkles, Share2, Check } from "lucide-react";
 import { useSession } from "@/core/store/session";
+import { useSync } from "@/components/providers/SyncProvider";
 import { formatMoney } from "@/core/engine/explain";
+import { shareOrCopyLink } from "@/lib/shareLink";
 import type { ScoredItem } from "@/core/engine/scoring";
 
 /**
@@ -23,10 +25,21 @@ export function DecisionRoomRecommend({
   onBack: () => void;
 }) {
   const session = useSession();
+  const { continueUrl } = useSync();
   const [presented, setPresented] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
   const winner = group.length > 0 ? group.reduce((best, s) => (s.score > best.score ? s : best), group[0]) : null;
   const hasRecapItems = session.recapItemIds.length > 0;
   const addedToRecap = winner ? session.recapItemIds.includes(winner.item.id) : false;
+
+  const sendLink = async () => {
+    if (!continueUrl) return;
+    const result = await shareOrCopyLink(continueUrl, "Your LUMMA recap");
+    if (result === "copied") {
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
+    }
+  };
 
   if (!winner) {
     return (
@@ -116,14 +129,24 @@ export function DecisionRoomRecommend({
             </button>
           </div>
 
-          <button
-            onClick={() => session.addToRecap(winner.item.id)}
-            disabled={addedToRecap}
-            className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-medium text-ink-muted transition hover:bg-white/10 disabled:opacity-60"
-          >
-            <ClipboardPlus className="h-3.5 w-3.5 text-brand" />
-            {addedToRecap ? "Added to recap" : "Add to recap"}
-          </button>
+          <div className="mt-2 flex gap-2">
+            <button
+              onClick={() => session.addToRecap(winner.item.id)}
+              disabled={addedToRecap}
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-medium text-ink-muted transition hover:bg-white/10 disabled:opacity-60"
+            >
+              <ClipboardPlus className="h-3.5 w-3.5 text-brand" />
+              {addedToRecap ? "Added to recap" : "Add to recap"}
+            </button>
+            <button
+              onClick={sendLink}
+              disabled={!continueUrl}
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-medium text-ink-muted transition hover:bg-white/10 disabled:opacity-40"
+            >
+              {linkCopied ? <Check className="h-3.5 w-3.5 text-brand" /> : <Share2 className="h-3.5 w-3.5 text-brand" />}
+              {linkCopied ? "Link copied" : "Send link"}
+            </button>
+          </div>
 
           <button
             onClick={() => session.setView("recap")}

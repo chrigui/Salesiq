@@ -76,6 +76,7 @@ export function DisplayStage({
     workLocationLat,
     workLocationLng,
     buyerProfileId,
+    recapItemIds,
   } = useSession();
   const pack = useLivePack(packId);
   const { buyerProfile } = useBuyerProfile(buyerProfileId);
@@ -256,7 +257,14 @@ export function DisplayStage({
               />
             )}
 
-            {view === "recap" && <RecapStage key="recap" />}
+            {view === "recap" && (
+              <RecapStage
+                key="recap"
+                recapItems={recapItemIds
+                  .map((id) => scored.find((s) => s.item.id === id))
+                  .filter((s): s is ScoredItem => Boolean(s))}
+              />
+            )}
 
             {view === "whyThis" && focusedItem && (
               <WhyThisStage
