@@ -24,8 +24,9 @@ import {
 import { DisplayProfileEditor } from "@/components/console/DisplayProfileEditor";
 import { Field, TextInput, Select } from "@/components/console/builder/fields";
 import { Palette, Trash2, Upload, X as XIcon } from "lucide-react";
-import { FONT_OPTIONS } from "@/core/display/brandFonts";
+import { FONT_OPTIONS, fontStack } from "@/core/display/brandFonts";
 import { MOTION_PRESET_IDS, MOTION_PRESET_LABELS, MOTION_PRESET_BLURBS, type MotionPresetId } from "@/core/display/motionPresets";
+import { resolveBrandTokens } from "@/core/display/brandTokens";
 
 /**
  * BrandProfile.defaultMotionPreset stores a bare preset id string — unlike
@@ -42,6 +43,43 @@ const STATUS_STYLE: Record<DisplayProfileStatus, string> = {
   Published: "bg-emerald-100 text-emerald-700",
   Archived: "bg-amber-100 text-amber-700",
 };
+
+const CARD_STYLE_OPTIONS: { id: string; label: string }[] = [
+  { id: "Glass", label: "Glass — frosted, translucent" },
+  { id: "Solid", label: "Solid — flat opaque surface" },
+  { id: "Outlined", label: "Outlined — border only, no fill" },
+];
+const BUTTON_STYLE_OPTIONS: { id: string; label: string }[] = [
+  { id: "Filled", label: "Filled" },
+  { id: "Outline", label: "Outline" },
+  { id: "Ghost", label: "Ghost" },
+];
+const BORDER_RADIUS_OPTIONS: { id: string; label: string }[] = [
+  { id: "Sharp", label: "Sharp" },
+  { id: "Soft", label: "Soft" },
+  { id: "Round", label: "Round" },
+];
+const SHADOW_INTENSITY_OPTIONS: { id: string; label: string }[] = [
+  { id: "Flat", label: "Flat" },
+  { id: "Subtle", label: "Subtle" },
+  { id: "Elevated", label: "Elevated" },
+];
+const SPACING_SCALE_OPTIONS: { id: string; label: string }[] = [
+  { id: "Compact", label: "Compact" },
+  { id: "Comfortable", label: "Comfortable" },
+  { id: "Spacious", label: "Spacious" },
+];
+const HEADING_WEIGHT_OPTIONS: { id: string; label: string }[] = [
+  { id: "Regular", label: "Regular" },
+  { id: "Medium", label: "Medium" },
+  { id: "Semibold", label: "Semibold" },
+  { id: "Bold", label: "Bold" },
+];
+const LETTER_SPACING_OPTIONS: { id: string; label: string }[] = [
+  { id: "Tight", label: "Tight" },
+  { id: "Normal", label: "Normal" },
+  { id: "Wide", label: "Wide" },
+];
 
 const TEMPLATES: { id: DisplayTemplate; label: string; blurb: string }[] = [
   { id: "Minimal", label: "Minimal", blurb: "Large imagery, restrained UI — for premium/luxury projects" },
@@ -351,6 +389,38 @@ function hexToTriplet(hex: string): string {
   return `${r} ${g} ${b}`;
 }
 
+/**
+ * WCAG relative-luminance contrast ratio between two "R G B" triplets — the
+ * color-system guardrail the spec asks for ("must not allow accidentally
+ * unreadable combinations"), kept to the one check that actually matters
+ * here (text vs. its background) rather than a full accessibility engine.
+ */
+function relativeLuminance(triplet: string): number {
+  const [r, g, b] = triplet.trim().split(/\s+/).map((n) => (Number(n) || 0) / 255);
+  const lin = (c: number) => (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+  return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+}
+function contrastRatio(a: string, b: string): number {
+  const la = relativeLuminance(a);
+  const lb = relativeLuminance(b);
+  const [lighter, darker] = la > lb ? [la, lb] : [lb, la];
+  return (lighter + 0.05) / (darker + 0.05);
+}
+const LOW_CONTRAST_THRESHOLD = 3;
+
+/** Default fallbacks — must mirror the hardcoded values BrandTokenScope/globals.css/tailwind.config.ts fall back to when a kit leaves a color unset, so the preview and warnings reflect what the Display actually renders. */
+const FALLBACK = {
+  background: "9 9 11",
+  text: "244 244 245",
+  muted: "161 161 170",
+  surface: "24 24 27",
+  success: "52 211 153",
+  warning: "251 191 36",
+  danger: "248 113 113",
+  brand: "16 185 129",
+  brandSoft: "52 211 153",
+};
+
 function BrandProfilesPanel() {
   const { brandProfiles, isLoading } = useBrandProfiles();
   const [creating, setCreating] = useState(false);
@@ -403,6 +473,168 @@ function BrandProfilesPanel() {
 const MAX_LOGO_BYTES = 8 * 1024 * 1024;
 const ALLOWED_LOGO_MIME = new Set(["image/png", "image/jpeg", "image/webp"]);
 
+/** A nullable-color field — clearing the text input reverts to the platform default rather than storing black. */
+function ColorField({
+  label,
+  hint,
+  value,
+  fallback,
+  onChange,
+}: {
+  label: string;
+  hint?: string;
+  value: string | null;
+  fallback: string;
+  onChange: (next: string | null) => void;
+}) {
+  const triplet = value || fallback;
+  return (
+    <Field label={label} hint={hint}>
+      <div className="flex items-center gap-2">
+        <input
+          type="color"
+          value={tripletToHex(triplet)}
+          onChange={(e) => onChange(hexToTriplet(e.target.value))}
+          className="h-9 w-12 shrink-0 cursor-pointer rounded-lg border border-zinc-200 bg-transparent"
+          aria-label={label}
+        />
+        <TextInput
+          value={value ?? ""}
+          placeholder={fallback}
+          onChange={(e) => onChange(e.target.value || null)}
+          className="flex-1"
+        />
+      </div>
+    </Field>
+  );
+}
+
+type BrandDraft = Pick<
+  BrandProfile,
+  | "brand"
+  | "brandSoft"
+  | "backgroundColor"
+  | "textColor"
+  | "mutedTextColor"
+  | "surfaceColor"
+  | "successColor"
+  | "warningColor"
+  | "dangerColor"
+  | "cardStyle"
+  | "buttonStyle"
+  | "borderRadius"
+  | "shadowIntensity"
+  | "spacingScale"
+  | "headingWeight"
+  | "letterSpacing"
+  | "fontHeading"
+  | "fontBody"
+>;
+
+function draftFromBrandProfile(bp: BrandProfile): BrandDraft {
+  return {
+    brand: bp.brand,
+    brandSoft: bp.brandSoft,
+    backgroundColor: bp.backgroundColor,
+    textColor: bp.textColor,
+    mutedTextColor: bp.mutedTextColor,
+    surfaceColor: bp.surfaceColor,
+    successColor: bp.successColor,
+    warningColor: bp.warningColor,
+    dangerColor: bp.dangerColor,
+    cardStyle: bp.cardStyle,
+    buttonStyle: bp.buttonStyle,
+    borderRadius: bp.borderRadius,
+    shadowIntensity: bp.shadowIntensity,
+    spacingScale: bp.spacingScale,
+    headingWeight: bp.headingWeight,
+    letterSpacing: bp.letterSpacing,
+    fontHeading: bp.fontHeading,
+    fontBody: bp.fontBody,
+  };
+}
+
+/**
+ * A small mock composition (button, match-score badge, card, progress dots)
+ * themed with the row's live in-progress draft — not the saved value — so
+ * every color/typography/style edit is visible instantly, no save/refresh.
+ * Hand-styled from the draft's resolved values rather than reusing
+ * BrandTokenScope/.glass/Button: this panel renders inside the light
+ * `.console` admin theme, whose own `.glass`/`.btn-primary` overrides would
+ * otherwise mask exactly the styling differences it exists to demonstrate.
+ */
+function BrandLivePreview({ draft }: { draft: BrandDraft }) {
+  const tokens = resolveBrandTokens(draft);
+  const brand = draft.brand || FALLBACK.brand;
+  const bg = draft.backgroundColor || FALLBACK.background;
+  const text = draft.textColor || FALLBACK.text;
+  const muted = draft.mutedTextColor || FALLBACK.muted;
+  const success = draft.successColor || FALLBACK.success;
+  const surface = draft.surfaceColor || FALLBACK.surface;
+  const cardStyle = draft.cardStyle || "Glass";
+  const buttonStyle = draft.buttonStyle || "Filled";
+
+  const cardBg =
+    cardStyle === "Solid"
+      ? `rgb(${surface})`
+      : cardStyle === "Outlined"
+        ? "transparent"
+        : "linear-gradient(135deg, rgb(255 255 255 / 0.08), rgb(255 255 255 / 0.02))";
+  const cardBorder = cardStyle === "Outlined" ? `1px solid rgb(${brand} / 0.35)` : "1px solid rgb(255 255 255 / 0.09)";
+
+  const buttonBg = buttonStyle === "Filled" ? `rgb(${brand})` : "transparent";
+  const buttonColor = buttonStyle === "Filled" ? "#fff" : `rgb(${brand})`;
+  const buttonBorder = buttonStyle === "Outline" ? `1px solid rgb(${brand} / 0.6)` : "none";
+
+  return (
+    <div className="overflow-hidden rounded-2xl p-5" style={{ background: `rgb(${bg})`, color: `rgb(${text})` }}>
+      <div className="flex flex-wrap items-center gap-2.5">
+        <span
+          className="pointer-events-none inline-block px-4 py-2 text-sm font-medium"
+          style={{ background: buttonBg, color: buttonColor, border: buttonBorder, borderRadius: tokens.radiusSm }}
+        >
+          View details
+        </span>
+        <span
+          className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold"
+          style={{ background: `rgb(${success} / 0.15)`, color: `rgb(${success})` }}
+        >
+          92% match
+        </span>
+      </div>
+
+      <div
+        className="mt-3 p-4"
+        style={{ background: cardBg, border: cardBorder, borderRadius: tokens.radius, boxShadow: tokens.shadow }}
+      >
+        <h3
+          className="text-base"
+          style={{
+            fontWeight: tokens.headingWeight,
+            letterSpacing: tokens.letterSpacingHeading,
+            fontFamily: fontStack(draft.fontHeading) || undefined,
+          }}
+        >
+          Ocean View Residence
+        </h3>
+        <p className="mt-1 text-xs" style={{ color: `rgb(${muted})`, fontFamily: fontStack(draft.fontBody) || undefined }}>
+          3 bed · 2 bath · 1,450 sqft
+        </p>
+      </div>
+
+      <div className="mt-3 flex items-center gap-1.5">
+        {[0, 1, 2, 3, 4].map((i) => (
+          <span
+            key={i}
+            className="h-1.5 rounded-full"
+            style={{ width: i === 1 ? "1.5rem" : "0.4rem", background: i === 1 ? `rgb(${brand})` : `rgb(${muted} / 0.4)` }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function BrandProfileRow({
   brandProfile,
   expanded,
@@ -412,14 +644,21 @@ function BrandProfileRow({
   expanded: boolean;
   onToggle: () => void;
 }) {
-  const [brand, setBrand] = useState(brandProfile.brand ?? "16 185 129");
-  const [brandSoft, setBrandSoft] = useState(brandProfile.brandSoft ?? "52 211 153");
+  const [draft, setDraft] = useState<BrandDraft>(() => draftFromBrandProfile(brandProfile));
   const [logoError, setLogoError] = useState<string | null>(null);
   const [logoUploading, setLogoUploading] = useState(false);
-  useEffect(() => {
-    setBrand(brandProfile.brand ?? "16 185 129");
-    setBrandSoft(brandProfile.brandSoft ?? "52 211 153");
-  }, [brandProfile.id, brandProfile.brand, brandProfile.brandSoft]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- resync only when switching rows; the row's own edits are the source of truth in between, not re-fetched server state.
+  useEffect(() => setDraft(draftFromBrandProfile(brandProfile)), [brandProfile.id]);
+
+  /** Updates the draft (so the live preview reflects it instantly) and pushes the same patch to the server. */
+  function patch(fields: Partial<BrandDraft>) {
+    setDraft((d) => ({ ...d, ...fields }));
+    updateBrandProfile(brandProfile.id, fields);
+  }
+
+  const bgTriplet = draft.backgroundColor || FALLBACK.background;
+  const textContrast = contrastRatio(bgTriplet, draft.textColor || FALLBACK.text);
+  const mutedContrast = contrastRatio(bgTriplet, draft.mutedTextColor || FALLBACK.muted);
 
   const uploadLogo = async (file: File) => {
     setLogoError(null);
@@ -460,53 +699,77 @@ function BrandProfileRow({
       </button>
 
       {expanded && (
-        <div className="space-y-3 border-t border-zinc-100 px-4 py-3">
-          <Field label="Primary color">
-            <div className="flex items-center gap-2">
-              <input
-                type="color"
-                value={tripletToHex(brand)}
-                onChange={(e) => {
-                  const next = hexToTriplet(e.target.value);
-                  setBrand(next);
-                  updateBrandProfile(brandProfile.id, { brand: next });
-                }}
-                className="h-9 w-12 shrink-0 cursor-pointer rounded-lg border border-zinc-200 bg-transparent"
-                aria-label="Primary color"
+        <div className="space-y-4 border-t border-zinc-100 px-4 py-3">
+          <div>
+            <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Colors</span>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <ColorField
+                label="Primary color"
+                value={draft.brand}
+                fallback={FALLBACK.brand}
+                onChange={(next) => patch({ brand: next })}
               />
-              <TextInput
-                value={brand}
-                onChange={(e) => {
-                  setBrand(e.target.value);
-                  updateBrandProfile(brandProfile.id, { brand: e.target.value });
-                }}
-                className="flex-1"
+              <ColorField
+                label="Secondary / accent color"
+                value={draft.brandSoft}
+                fallback={FALLBACK.brandSoft}
+                onChange={(next) => patch({ brandSoft: next })}
+              />
+              <ColorField
+                label="Background"
+                value={draft.backgroundColor}
+                fallback={FALLBACK.background}
+                onChange={(next) => patch({ backgroundColor: next })}
+              />
+              <ColorField
+                label="Text"
+                value={draft.textColor}
+                fallback={FALLBACK.text}
+                onChange={(next) => patch({ textColor: next })}
+              />
+              <ColorField
+                label="Muted text"
+                value={draft.mutedTextColor}
+                fallback={FALLBACK.muted}
+                onChange={(next) => patch({ mutedTextColor: next })}
+              />
+              <ColorField
+                label="Surface"
+                hint="Used for Solid-style cards"
+                value={draft.surfaceColor}
+                fallback={FALLBACK.surface}
+                onChange={(next) => patch({ surfaceColor: next })}
+              />
+              <ColorField
+                label="Success"
+                value={draft.successColor}
+                fallback={FALLBACK.success}
+                onChange={(next) => patch({ successColor: next })}
+              />
+              <ColorField
+                label="Warning"
+                value={draft.warningColor}
+                fallback={FALLBACK.warning}
+                onChange={(next) => patch({ warningColor: next })}
+              />
+              <ColorField
+                label="Danger"
+                value={draft.dangerColor}
+                fallback={FALLBACK.danger}
+                onChange={(next) => patch({ dangerColor: next })}
               />
             </div>
-          </Field>
-          <Field label="Secondary / accent color">
-            <div className="flex items-center gap-2">
-              <input
-                type="color"
-                value={tripletToHex(brandSoft)}
-                onChange={(e) => {
-                  const next = hexToTriplet(e.target.value);
-                  setBrandSoft(next);
-                  updateBrandProfile(brandProfile.id, { brandSoft: next });
-                }}
-                className="h-9 w-12 shrink-0 cursor-pointer rounded-lg border border-zinc-200 bg-transparent"
-                aria-label="Secondary color"
-              />
-              <TextInput
-                value={brandSoft}
-                onChange={(e) => {
-                  setBrandSoft(e.target.value);
-                  updateBrandProfile(brandProfile.id, { brandSoft: e.target.value });
-                }}
-                className="flex-1"
-              />
-            </div>
-          </Field>
+            {textContrast < LOW_CONTRAST_THRESHOLD && (
+              <p className="mt-2 text-[11px] text-amber-600">
+                Low contrast between Background and Text — this may be hard to read on the Display.
+              </p>
+            )}
+            {mutedContrast < LOW_CONTRAST_THRESHOLD && (
+              <p className="mt-1 text-[11px] text-amber-600">
+                Low contrast between Background and Muted text — captions and labels may be hard to read.
+              </p>
+            )}
+          </div>
 
           <Field label="Logo" hint="PNG, JPEG, or WEBP, up to 8MB — replaces the emoji/text glyph wherever this brand renders">
             <div className="flex items-center gap-3">
@@ -549,8 +812,8 @@ function BrandProfileRow({
           <div className="grid grid-cols-2 gap-3">
             <Field label="Heading font">
               <Select
-                value={brandProfile.fontHeading ?? ""}
-                onChange={(e) => updateBrandProfile(brandProfile.id, { fontHeading: e.target.value || null })}
+                value={draft.fontHeading ?? ""}
+                onChange={(e) => patch({ fontHeading: e.target.value || null })}
               >
                 <option value="">Default</option>
                 {FONT_OPTIONS.map((f) => (
@@ -560,8 +823,8 @@ function BrandProfileRow({
             </Field>
             <Field label="Body font">
               <Select
-                value={brandProfile.fontBody ?? ""}
-                onChange={(e) => updateBrandProfile(brandProfile.id, { fontBody: e.target.value || null })}
+                value={draft.fontBody ?? ""}
+                onChange={(e) => patch({ fontBody: e.target.value || null })}
               >
                 <option value="">Default</option>
                 {FONT_OPTIONS.map((f) => (
@@ -569,6 +832,74 @@ function BrandProfileRow({
                 ))}
               </Select>
             </Field>
+            <Field label="Heading weight">
+              <Select
+                value={draft.headingWeight}
+                onChange={(e) => patch({ headingWeight: e.target.value })}
+              >
+                {HEADING_WEIGHT_OPTIONS.map((o) => (
+                  <option key={o.id} value={o.id}>{o.label}</option>
+                ))}
+              </Select>
+            </Field>
+            <Field label="Letter spacing">
+              <Select
+                value={draft.letterSpacing}
+                onChange={(e) => patch({ letterSpacing: e.target.value })}
+              >
+                {LETTER_SPACING_OPTIONS.map((o) => (
+                  <option key={o.id} value={o.id}>{o.label}</option>
+                ))}
+              </Select>
+            </Field>
+          </div>
+
+          <div>
+            <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-zinc-500">Style</span>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Card style">
+                <Select value={draft.cardStyle} onChange={(e) => patch({ cardStyle: e.target.value })}>
+                  {CARD_STYLE_OPTIONS.map((o) => (
+                    <option key={o.id} value={o.id}>{o.label}</option>
+                  ))}
+                </Select>
+              </Field>
+              <Field label="Button style">
+                <Select value={draft.buttonStyle} onChange={(e) => patch({ buttonStyle: e.target.value })}>
+                  {BUTTON_STYLE_OPTIONS.map((o) => (
+                    <option key={o.id} value={o.id}>{o.label}</option>
+                  ))}
+                </Select>
+              </Field>
+              <Field label="Border radius">
+                <Select value={draft.borderRadius} onChange={(e) => patch({ borderRadius: e.target.value })}>
+                  {BORDER_RADIUS_OPTIONS.map((o) => (
+                    <option key={o.id} value={o.id}>{o.label}</option>
+                  ))}
+                </Select>
+              </Field>
+              <Field label="Shadow intensity">
+                <Select value={draft.shadowIntensity} onChange={(e) => patch({ shadowIntensity: e.target.value })}>
+                  {SHADOW_INTENSITY_OPTIONS.map((o) => (
+                    <option key={o.id} value={o.id}>{o.label}</option>
+                  ))}
+                </Select>
+              </Field>
+              <Field label="Spacing" className="col-span-2">
+                <Select value={draft.spacingScale} onChange={(e) => patch({ spacingScale: e.target.value })}>
+                  {SPACING_SCALE_OPTIONS.map((o) => (
+                    <option key={o.id} value={o.id}>{o.label}</option>
+                  ))}
+                </Select>
+              </Field>
+            </div>
+          </div>
+
+          <div>
+            <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
+              Live preview
+            </span>
+            <BrandLivePreview draft={draft} />
           </div>
 
           {/* Not a <Field> here (unlike the other fields on this row): Field
