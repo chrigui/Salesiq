@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { X, ScreenShare, BarChart3 } from "lucide-react";
+import { X, ScreenShare, BarChart3, Tv } from "lucide-react";
 import type { Answers, IndustryPack } from "@/core/types";
 import type { ScoredItem } from "@/core/engine/scoring";
 import { useSession } from "@/core/store/session";
@@ -28,7 +28,18 @@ const BADGE_LABEL: Record<string, string> = {
  * (already generic/pairwise) against whichever item in *this* group scores
  * highest, not necessarily the pack's global top pick.
  */
-export function ComparisonExperience({ pack, scored }: { pack: IndustryPack; scored: ScoredItem[] }) {
+export function ComparisonExperience({
+  pack,
+  scored,
+  onDisplayControl,
+}: {
+  pack: IndustryPack;
+  scored: ScoredItem[];
+  /** Present only in Decision Room contexts — opens the Display Control
+   * action sheet for that specific item. Omitted (the plain Explorer's
+   * Compare tab) simply hides the per-card "Display" trigger. */
+  onDisplayControl?: (item: ScoredItem) => void;
+}) {
   const session = useSession();
   const [breakdownFor, setBreakdownFor] = useState<ScoredItem | null>(null);
   const group = useMemo(
@@ -93,6 +104,7 @@ export function ComparisonExperience({ pack, scored }: { pack: IndustryPack; sco
             badgeLabels={badgeFor(s.item.id)}
             onRemove={() => removeItem(s.item.id)}
             onShowBreakdown={() => setBreakdownFor(s)}
+            onDisplayControl={onDisplayControl ? () => onDisplayControl(s) : undefined}
           />
         ))}
       </div>
@@ -113,6 +125,7 @@ function ComparisonCard({
   badgeLabels,
   onRemove,
   onShowBreakdown,
+  onDisplayControl,
 }: {
   pack: IndustryPack;
   scored: ScoredItem;
@@ -122,6 +135,7 @@ function ComparisonCard({
   badgeLabels: string[];
   onRemove: () => void;
   onShowBreakdown: () => void;
+  onDisplayControl?: () => void;
 }) {
   const attrs = readPropertyAttributes(pack, s.item);
   const availability = deriveAvailabilityLabel(s.item);
@@ -226,13 +240,24 @@ function ComparisonCard({
             <li className="text-xs text-ink-faint">Matched fewer priorities than the top pick here.</li>
           )}
         </ul>
-        <button
-          onClick={onShowBreakdown}
-          className="mt-3 flex items-center gap-1.5 text-[11px] font-medium text-ink-faint transition hover:text-ink"
-        >
-          <BarChart3 className="h-3 w-3" />
-          Decision breakdown
-        </button>
+        <div className="mt-3 flex items-center gap-4">
+          <button
+            onClick={onShowBreakdown}
+            className="flex items-center gap-1.5 text-[11px] font-medium text-ink-faint transition hover:text-ink"
+          >
+            <BarChart3 className="h-3 w-3" />
+            Decision breakdown
+          </button>
+          {onDisplayControl && (
+            <button
+              onClick={onDisplayControl}
+              className="flex items-center gap-1.5 text-[11px] font-medium text-ink-faint transition hover:text-ink"
+            >
+              <Tv className="h-3 w-3" />
+              Display
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

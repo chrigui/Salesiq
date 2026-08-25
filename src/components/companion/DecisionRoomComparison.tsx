@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useSession } from "@/core/store/session";
 import { ComparisonExperience } from "./explore/ComparisonExperience";
+import { DisplayControl } from "./DisplayControl";
 import type { ScoredItem } from "@/core/engine/scoring";
 import type { IndustryPack } from "@/core/types";
 
@@ -30,6 +32,7 @@ export function DecisionRoomComparison({
 }) {
   const session = useSession();
   const atCap = session.compareItemIds.length >= MAX_COMPARE;
+  const [displayControlFor, setDisplayControlFor] = useState<ScoredItem | null>(null);
 
   return (
     <div className="bg-aurora min-h-screen px-4 pb-10 pt-6 sm:px-6">
@@ -42,7 +45,7 @@ export function DecisionRoomComparison({
           Back to shortlist
         </button>
 
-        <ComparisonExperience pack={pack} scored={scored} />
+        <ComparisonExperience pack={pack} scored={scored} onDisplayControl={setDisplayControlFor} />
 
         {atCap && (
           <p className="mt-4 text-center text-xs text-ink-faint">
@@ -50,6 +53,10 @@ export function DecisionRoomComparison({
           </p>
         )}
       </div>
+
+      {displayControlFor && (
+        <DisplayControl item={displayControlFor} onClose={() => setDisplayControlFor(null)} />
+      )}
     </div>
   );
 }

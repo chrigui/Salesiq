@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import QRCode from "qrcode";
 import { Smartphone, X, Check, Wifi, WifiOff, ChevronDown } from "lucide-react";
@@ -19,9 +19,16 @@ export function PairingOverlay() {
   const { role, room, status, companionUrl } = useSync();
   const [open, setOpen] = useState(true);
   const [qr, setQr] = useState<string | null>(null);
+  // Distinguishes a genuine mid-session drop ("DISPLAY RECONNECTING") from
+  // the normal pre-first-pairing invite state ("Pair phone · CODE") — both
+  // are "not paired," but only one of them is actually a reconnect.
+  const everPaired = useRef(false);
 
   useEffect(() => {
-    if (status === "paired") setOpen(false);
+    if (status === "paired") {
+      everPaired.current = true;
+      setOpen(false);
+    }
   }, [status]);
 
   useEffect(() => {
@@ -38,6 +45,7 @@ export function PairingOverlay() {
   if (role !== "display" || !room) return null;
 
   const paired = status === "paired";
+  const reconnecting = !paired && everPaired.current;
 
   return (
     <>
@@ -48,12 +56,18 @@ export function PairingOverlay() {
           "fixed left-1/2 top-3 z-[60] flex -translate-x-1/2 items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-medium backdrop-blur-xl transition",
           paired
             ? "border-emerald-400/40 bg-emerald-500/15 text-emerald-200"
-            : "border-white/15 bg-black/40 text-white/80 hover:bg-black/60",
+            : reconnecting
+              ? "border-amber-400/40 bg-amber-500/15 text-amber-200"
+              : "border-white/15 bg-black/40 text-white/80 hover:bg-black/60",
         )}
       >
         {paired ? (
           <>
             <Smartphone className="h-3.5 w-3.5" /> Phone connected
+          </>
+        ) : reconnecting ? (
+          <>
+            <Wifi className="h-3.5 w-3.5" /> Phone reconnecting…
           </>
         ) : (
           <>
@@ -117,15 +131,17 @@ export function PairingOverlay() {
                 <StatusDot status={status} />
                 {status === "paired"
                   ? "Phone connected"
-                  : status === "connecting"
-                    ? "Waiting for your phone…"
-                    : status === "connected"
-                      ? "Ready — waiting for your phone…"
-                      : status === "offline"
-                        ? "Offline — will reconnect automatically"
-                        : status === "error"
-                          ? "Connection issue — retrying…"
-                          : "Starting…"}
+                  : reconnecting
+                    ? "Phone reconnecting…"
+                    : status === "connecting"
+                      ? "Waiting for your phone…"
+                      : status === "connected"
+                        ? "Ready — waiting for your phone…"
+                        : status === "offline"
+                          ? "Offline — will reconnect automatically"
+                          : status === "error"
+                            ? "Connection issue — retrying…"
+                            : "Starting…"}
               </div>
             </motion.div>
           </motion.div>
@@ -142,9 +158,19 @@ export function CompanionSyncBar() {
   const { role, room, status, setRoom } = useSync();
   const [code, setCode] = useState("");
   const [details, setDetails] = useState(false);
+  // Same "was it ever actually paired" distinction as PairingOverlay — a
+  // mid-session drop reads as "DISPLAY RECONNECTING", never the pre-first-
+  // pairing "Connecting to {room}…" copy.
+  const everPaired = useRef(false);
+
+  useEffect(() => {
+    if (status === "paired") everPaired.current = true;
+  }, [status]);
+
   if (role !== "companion") return null;
 
   const paired = status === "paired";
+  const reconnecting = !paired && everPaired.current;
 
   // No room yet — offer to join by code.
   if (!room) {
@@ -181,11 +207,11 @@ export function CompanionSyncBar() {
         <StatusDot status={status} />
         {paired ? (
           <>
-            <Check className="h-3.5 w-3.5" /> Connected to display · {room}
+            <Check className="h-3.5 w-3.5" /> DISPLAY CONNECTED · {room}
           </>
-        ) : status === "offline" ? (
+        ) : reconnecting ? (
           <>
-            <WifiOff className="h-3.5 w-3.5" /> Offline · changes will sync when reconnected
+            <WifiOff className="h-3.5 w-3.5" /> DISPLAY RECONNECTING · changes will sync when reconnected
           </>
         ) : (
           <>Connecting to {room}…</>
