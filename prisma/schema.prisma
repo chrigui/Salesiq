@@ -85,6 +85,7 @@ enum DisplayTemplate {
   Lifestyle
   Investment
   LuxuryCinematic
+  Cinematic
   Masterplan
   Custom
   Dashboard

@@ -43,6 +43,7 @@ export type DisplayTemplateId =
   | "Lifestyle"
   | "Investment"
   | "LuxuryCinematic"
+  | "Cinematic"
   | "Masterplan"
   | "Custom"
   | "Dashboard";
@@ -97,6 +98,10 @@ const TEMPLATE_ORDER: Record<DisplayTemplateId, WidgetType[]> = {
   Lifestyle: ["hero", "gallery", "neighborhood", "highlights", "aiPromptTicker", "continueQr", "specs", "masterplan", "documents", "investment", "comparables", "trustBadges", "leadCapture", ...TIER2_TAIL],
   Investment: ["hero", "investment", "comparables", "specs", "highlights", "trustBadges", "gallery", "neighborhood", "masterplan", "documents", "aiPromptTicker", "continueQr", "leadCapture", ...TIER2_TAIL],
   LuxuryCinematic: ["hero", "gallery", "highlights", "trustBadges", "continueQr", "specs", "neighborhood", "masterplan", "documents", "investment", "comparables", "aiPromptTicker", "leadCapture", ...TIER2_TAIL],
+  // Gallery/hero-forward, image-led, minimal chrome — the leanest starting
+  // composition of any template, on purpose: this one is meant to be
+  // experienced, not read.
+  Cinematic: ["hero", "gallery", "highlights", "neighborhood", "specs", "masterplan", "documents", "investment", "comparables", "aiPromptTicker", "trustBadges", "continueQr", "leadCapture", ...TIER2_TAIL],
   Masterplan: ["hero", "masterplan", "documents", "neighborhood", "gallery", "highlights", "specs", "investment", "comparables", "aiPromptTicker", "trustBadges", "continueQr", "leadCapture", ...TIER2_TAIL],
   Custom: ["hero", "gallery", "highlights", "specs", "neighborhood", "masterplan", "documents", "investment", "comparables", "aiPromptTicker", "trustBadges", "continueQr", "leadCapture", ...TIER2_TAIL],
   Dashboard: [
@@ -139,6 +144,8 @@ const TEMPLATE_ENABLED_COUNT: Record<DisplayTemplateId, number> = {
   Lifestyle: 6,
   Investment: 6,
   LuxuryCinematic: 5,
+  // The leanest of any template on purpose — see TEMPLATE_ORDER.Cinematic.
+  Cinematic: 2,
   Masterplan: 5,
   Custom: 1,
   Dashboard: 8,

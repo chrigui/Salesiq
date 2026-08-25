@@ -37,6 +37,7 @@ const TEMPLATES: DisplayTemplate[] = [
   "Lifestyle",
   "Investment",
   "LuxuryCinematic",
+  "Cinematic",
   "Masterplan",
   "Custom",
   "Dashboard",

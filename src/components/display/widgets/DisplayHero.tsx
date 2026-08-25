@@ -31,7 +31,7 @@ export function DisplayHero({ item, pack, template, motion }: DisplayWidgetConte
           <h1
             className={cx(
               "max-w-2xl text-white",
-              template === "LuxuryCinematic"
+              template === "LuxuryCinematic" || template === "Cinematic"
                 ? "font-serif text-4xl font-medium tracking-tight sm:text-6xl"
                 : template === "Minimal"
                   ? "text-2xl font-medium tracking-tight sm:text-4xl"

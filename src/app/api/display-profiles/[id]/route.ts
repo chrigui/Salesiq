@@ -44,6 +44,7 @@ const patchSchema = z.object({
       "Lifestyle",
       "Investment",
       "LuxuryCinematic",
+      "Cinematic",
       "Masterplan",
       "Custom",
       "Dashboard",

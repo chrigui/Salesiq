@@ -10,6 +10,7 @@ export type DisplayTemplate =
   | "Lifestyle"
   | "Investment"
   | "LuxuryCinematic"
+  | "Cinematic"
   | "Masterplan"
   | "Custom"
   | "Dashboard";

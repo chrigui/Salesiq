@@ -39,6 +39,7 @@ const createSchema = z.object({
       "Lifestyle",
       "Investment",
       "LuxuryCinematic",
+      "Cinematic",
       "Masterplan",
       "Custom",
       "Dashboard",
@@ -73,6 +74,10 @@ export async function POST(request: Request) {
         // The Dashboard template is the one preset that implies the grid
         // layout by default — every other template keeps today's stack.
         layout: template === "Dashboard" ? "Grid" : "Stack",
+        // Explicit for Cinematic — its whole premise is immersive motion —
+        // even though it happens to match the column's own schema default;
+        // every other template still relies on that same default.
+        ...(template === "Cinematic" ? { motion: { preset: "Cinematic" } as Prisma.InputJsonValue } : {}),
         sections: defaultDisplaySections(template) as unknown as Prisma.InputJsonValue,
         status: "Draft",
         createdById: ctx.userId,
