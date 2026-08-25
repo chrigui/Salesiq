@@ -2,9 +2,12 @@
 
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Sparkles, MapPin, TrendingUp, Check, Star, Smartphone } from "lucide-react";
+import { Sparkles, MapPin, TrendingUp, Check, Star, Smartphone, Circle, X } from "lucide-react";
 import { useSession } from "@/core/store/session";
 import { useLivePack } from "@/core/store/packs";
+import { useBuyerProfile } from "@/core/store/buyerProfiles";
+import { rankPriorities, computePriorityPerformance, type PriorityPerformanceStatus } from "@/core/buyerIntelligence/priorityOrder";
+import type { BuyerPriority } from "@/core/buyerIntelligence/priorityWeights";
 import { useResolvedDisplayProfile } from "@/core/store/displayProfiles";
 import { resolveMotionConfig } from "@/core/display/motionPresets";
 import { useDeviceIdleProfile } from "@/core/store/displayDevice";
@@ -19,6 +22,7 @@ import { Icon } from "@/lib/icon";
 import { deriveAvailabilityLabel } from "@/lib/availability";
 import { readPropertyAttributes } from "@/components/companion/explore/attributeDisplay";
 import { computeCompareBadges } from "@/components/companion/explore/compareBadges";
+import { labelForRequirement } from "@/components/companion/answerSummary";
 import { LifestyleMap } from "./LifestyleMap";
 import { DisplayNarration } from "./DisplayNarration";
 import { WhyThisStage } from "./WhyThisStage";
@@ -67,8 +71,10 @@ export function DisplayStage({
     compareItemIds,
     workLocationLat,
     workLocationLng,
+    buyerProfileId,
   } = useSession();
   const pack = useLivePack(packId);
+  const { buyerProfile } = useBuyerProfile(buyerProfileId);
   const [qrOpen, setQrOpen] = useState(false);
 
   const scored = useMemo(
@@ -214,6 +220,7 @@ export function DisplayStage({
                 pack={pack}
                 answers={answers}
                 itemIds={compareItemIds}
+                priorities={buyerProfile?.priorities}
               />
             )}
 
@@ -816,21 +823,41 @@ function CompareStage({
  * uses — the Display never recomputes anything, it just presents the same
  * real numbers. CompareStage (the hardcoded auto-top-3) stays untouched.
  */
+const PRIORITY_STATUS_ICON: Record<PriorityPerformanceStatus, React.ReactNode> = {
+  met: <Check className="mx-auto h-4 w-4 text-emerald-400" />,
+  partial: <Circle className="mx-auto h-3.5 w-3.5 text-brand" />,
+  unmet: <X className="mx-auto h-4 w-4 text-ink-faint" />,
+};
+
+function priorityKey(priority: BuyerPriority): string {
+  return priority.questionId ?? `req:${priority.requirement}`;
+}
+
 function CompareGroupStage({
   scored,
   pack,
   answers,
   itemIds,
+  priorities,
 }: {
   scored: ScoredItem[];
   pack: IndustryPack;
   answers: Record<string, AnswerValue>;
   itemIds: string[];
+  priorities: BuyerPriority[] | null | undefined;
 }) {
   const group = itemIds
     .map((id) => scored.find((s) => s.item.id === id))
     .filter((s): s is ScoredItem => Boolean(s));
   if (group.length < 2) return null;
+
+  const rankedPriorities = rankPriorities(priorities);
+  const priorityPerformanceByItem = new Map(
+    group.map((s) => [
+      s.item.id,
+      new Map(computePriorityPerformance(priorities, s, pack).map((p) => [priorityKey(p.priority), p.status])),
+    ]),
+  );
 
   const badges = computeCompareBadges(pack, answers, group);
   const winner = group.reduce((best, s) => (s.score > best.score ? s : best), group[0]);
@@ -931,6 +958,46 @@ function CompareGroupStage({
           );
         })}
       </div>
+
+      {rankedPriorities.length > 0 && (
+        <div className="mx-auto mt-10 max-w-3xl">
+          <h3 className="mb-4 text-center text-sm font-semibold uppercase tracking-wide text-ink-faint">
+            You said these matter most
+          </h3>
+          <div className="overflow-hidden rounded-2xl border border-white/10">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-white/10 bg-white/[0.03] text-xs text-ink-faint">
+                  <th className="px-4 py-2.5 text-left font-medium">Priority</th>
+                  {group.map((s) => (
+                    <th key={s.item.id} className="px-4 py-2.5 text-center font-medium">
+                      {s.item.name}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {rankedPriorities.map((priority, i) => {
+                  const key = priorityKey(priority);
+                  return (
+                    <tr key={key || i} className="border-b border-white/5 last:border-0">
+                      <td className="px-4 py-2.5 text-ink-muted">{labelForRequirement(priority.requirement, pack)}</td>
+                      {group.map((s) => {
+                        const status = priorityPerformanceByItem.get(s.item.id)?.get(key);
+                        return (
+                          <td key={s.item.id} className="px-4 py-2.5">
+                            {status ? PRIORITY_STATUS_ICON[status] : <span className="block text-center text-ink-faint">—</span>}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 }

@@ -11,6 +11,7 @@ import { PropertyPreview } from "./explore/PropertyPreview";
 import { PropertyDetails } from "./explore/PropertyDetails";
 import { ProgressJourney } from "./explore/ProgressJourney";
 import { DecisionRoomComparison } from "./DecisionRoomComparison";
+import { PrioritiesPanel } from "./PrioritiesPanel";
 import type { ScoredItem } from "@/core/engine/scoring";
 import type { IndustryPack } from "@/core/types";
 
@@ -67,12 +68,23 @@ export function DecisionRoom() {
   }
 
   if (step === "compare") {
-    return <DecisionRoomComparison pack={pack} scored={scored} onBack={() => setStep("enter")} />;
+    return (
+      <DecisionRoomComparison
+        pack={pack}
+        scored={scored}
+        onBack={() => setStep("enter")}
+        onShowPriorities={() => setStep("priorities")}
+      />
+    );
   }
 
-  // "priorities"/"recommend" steps are filled in over the next Decision Room
-  // PRs — this stub keeps the step reachable and gives a way back rather
-  // than a dead end.
+  if (step === "priorities") {
+    const group = scored.filter((s) => session.compareItemIds.includes(s.item.id));
+    return <PrioritiesPanel pack={pack} group={group} onBack={() => setStep("compare")} />;
+  }
+
+  // "recommend" step is filled in over the next Decision Room PR — this
+  // stub keeps the step reachable and gives a way back rather than a dead end.
   return (
     <div className="bg-aurora flex min-h-screen flex-col items-center justify-center gap-4 px-6 text-center">
       {journey}

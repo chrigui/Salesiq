@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ListChecks } from "lucide-react";
 import { useSession } from "@/core/store/session";
 import { ComparisonExperience } from "./explore/ComparisonExperience";
 import { DisplayControl } from "./DisplayControl";
@@ -17,18 +17,20 @@ const MAX_COMPARE = 4;
  * The Decision Room's "compare" step — mounts the real, shared
  * ComparisonExperience unchanged (so the plain Explorer's Compare tab and
  * this screen never drift), and adds only the Decision-Room-specific chrome
- * around it. Toolbar entries for Decision Breakdown/Display Control/What
- * If/Priorities are added by later Decision Room PRs as each ships, rather
- * than stubbed here ahead of time.
+ * around it. Toolbar entries for Decision Breakdown/Display Control/What If
+ * are added by later Decision Room PRs as each ships, rather than stubbed
+ * here ahead of time.
  */
 export function DecisionRoomComparison({
   pack,
   scored,
   onBack,
+  onShowPriorities,
 }: {
   pack: IndustryPack;
   scored: ScoredItem[];
   onBack: () => void;
+  onShowPriorities: () => void;
 }) {
   const session = useSession();
   const atCap = session.compareItemIds.length >= MAX_COMPARE;
@@ -37,13 +39,22 @@ export function DecisionRoomComparison({
   return (
     <div className="bg-aurora min-h-screen px-4 pb-10 pt-6 sm:px-6">
       <div className="mx-auto max-w-4xl">
-        <button
-          onClick={onBack}
-          className="mb-3 flex items-center gap-1 text-sm font-medium text-ink-muted transition hover:text-ink"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to shortlist
-        </button>
+        <div className="mb-3 flex items-center justify-between">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-1 text-sm font-medium text-ink-muted transition hover:text-ink"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to shortlist
+          </button>
+          <button
+            onClick={onShowPriorities}
+            className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-medium text-ink-muted transition hover:bg-white/10"
+          >
+            <ListChecks className="h-3.5 w-3.5 text-brand" />
+            Priorities
+          </button>
+        </div>
 
         <ComparisonExperience pack={pack} scored={scored} onDisplayControl={setDisplayControlFor} />
 

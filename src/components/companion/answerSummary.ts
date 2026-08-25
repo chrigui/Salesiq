@@ -78,7 +78,7 @@ export function buildAnswerSummary(pack: IndustryPack, answers: Answers): Summar
  * chips ranked via the wizard) or an already-human label (the existing
  * conversation-note priorityLabel/secondaryLabel mechanism) — resolve the
  * former against the pack, and pass the latter through untouched. */
-function labelForRequirement(requirement: string, pack: IndustryPack): string {
+export function labelForRequirement(requirement: string, pack: IndustryPack): string {
   for (const q of pack.questions) {
     const label = optionLabel(q, requirement);
     if (label) return label;

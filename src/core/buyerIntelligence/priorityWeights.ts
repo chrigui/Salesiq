@@ -8,7 +8,7 @@ export interface BuyerPriority {
   importance: PriorityImportance;
 }
 
-const IMPORTANCE_MULTIPLIER: Record<PriorityImportance, number> = {
+export const IMPORTANCE_MULTIPLIER: Record<PriorityImportance, number> = {
   must: 2,
   important: 1.5,
   preferred: 1,

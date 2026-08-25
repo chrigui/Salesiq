@@ -14,6 +14,9 @@ import { computeCompareBadges } from "./compareBadges";
 import { deriveAvailabilityLabel } from "@/lib/availability";
 import { useItemAssets } from "./useItemAssets";
 import { DecisionBreakdown } from "./DecisionBreakdown";
+import { useBuyerProfile } from "@/core/store/buyerProfiles";
+import { computePriorityPerformance } from "@/core/buyerIntelligence/priorityOrder";
+import type { BuyerPriority } from "@/core/buyerIntelligence/priorityWeights";
 
 const BADGE_LABEL: Record<string, string> = {
   bestMatchId: "Best match",
@@ -21,6 +24,40 @@ const BADGE_LABEL: Record<string, string> = {
   bestInvestmentId: "Best investment",
   bestLifestyleId: "Best lifestyle",
 };
+
+type Strength = "Strong" | "Good" | "Moderate";
+
+const STRENGTH_STYLE: Record<Strength, string> = {
+  Strong: "text-emerald-400",
+  Good: "text-brand",
+  Moderate: "text-ink-faint",
+};
+
+/**
+ * "Lifestyle Fit" scoped to rules whose underlying question belongs to the
+ * pack's own "lifestyle" section — the same contribution/weight bucketing
+ * DecisionBreakdown uses, aggregated across only that subset. A pack with
+ * no lifestyle-section rules configured (real-estate's demo pack included:
+ * its "lifestyle" section has no scoring rule wired to it yet) honestly
+ * has nothing to report here, rather than reusing an unrelated rule.
+ */
+function lifestyleFit(pack: IndustryPack, scored: ScoredItem): Strength | null {
+  const specs = (pack.ruleSpecs ?? []).filter(
+    (spec) => pack.questions.find((q) => q.id === spec.questionId)?.section === "lifestyle",
+  );
+  if (specs.length === 0) return null;
+  let weight = 0;
+  let contribution = 0;
+  for (const spec of specs) {
+    const entry = scored.breakdown.find((b) => b.ruleId === spec.id);
+    if (!entry || spec.weight <= 0) continue;
+    weight += spec.weight;
+    contribution += entry.contribution;
+  }
+  if (weight === 0) return null;
+  const ratio = contribution / weight;
+  return ratio >= 0.8 ? "Strong" : ratio >= 0.5 ? "Good" : "Moderate";
+}
 
 /**
  * Compares whatever real fields the group's items actually carry — never a
@@ -41,6 +78,7 @@ export function ComparisonExperience({
   onDisplayControl?: (item: ScoredItem) => void;
 }) {
   const session = useSession();
+  const { buyerProfile } = useBuyerProfile(session.buyerProfileId);
   const [breakdownFor, setBreakdownFor] = useState<ScoredItem | null>(null);
   const group = useMemo(
     () => session.compareItemIds.map((id) => scored.find((s) => s.item.id === id)).filter((s): s is ScoredItem => Boolean(s)),
@@ -105,6 +143,7 @@ export function ComparisonExperience({
             onRemove={() => removeItem(s.item.id)}
             onShowBreakdown={() => setBreakdownFor(s)}
             onDisplayControl={onDisplayControl ? () => onDisplayControl(s) : undefined}
+            priorities={buyerProfile?.priorities}
           />
         ))}
       </div>
@@ -126,6 +165,7 @@ function ComparisonCard({
   onRemove,
   onShowBreakdown,
   onDisplayControl,
+  priorities,
 }: {
   pack: IndustryPack;
   scored: ScoredItem;
@@ -136,6 +176,7 @@ function ComparisonCard({
   onRemove: () => void;
   onShowBreakdown: () => void;
   onDisplayControl?: () => void;
+  priorities?: BuyerPriority[] | null;
 }) {
   const attrs = readPropertyAttributes(pack, s.item);
   const availability = deriveAvailabilityLabel(s.item);
@@ -143,6 +184,9 @@ function ComparisonCard({
   const { assets, loading: assetsLoading } = useItemAssets(pack.id, s.item.id);
   const hasPaymentPlan = assets.length > 0;
   const view = typeof s.item.attributes.view === "string" ? s.item.attributes.view : null;
+  const fit = lifestyleFit(pack, s);
+  const performance = computePriorityPerformance(priorities, s, pack);
+  const metCount = performance.filter((p) => p.status === "met").length;
 
   return (
     <div className="glass-strong flex flex-col rounded-[1.6rem] p-4 ring-1 ring-white/10">
@@ -211,6 +255,16 @@ function ComparisonCard({
         <div className="flex justify-between">
           <dt className="text-ink-faint">Payment plan</dt>
           <dd className="text-ink">{assetsLoading ? "…" : hasPaymentPlan ? "Available" : "Not on file"}</dd>
+        </div>
+        <div className="flex justify-between">
+          <dt className="text-ink-faint">Lifestyle fit</dt>
+          <dd className={fit ? STRENGTH_STYLE[fit] : "text-ink"}>{fit ?? "Not scored"}</dd>
+        </div>
+        <div className="flex justify-between">
+          <dt className="text-ink-faint">Buyer match</dt>
+          <dd className="text-ink">
+            {performance.length > 0 ? `${metCount}/${performance.length} priorities met` : "No priorities set"}
+          </dd>
         </div>
       </dl>
 
