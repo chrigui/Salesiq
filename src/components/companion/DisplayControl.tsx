@@ -7,6 +7,8 @@ import {
   ScreenShare,
   GitCompareArrows,
   Sparkles,
+  Ban,
+  Palmtree,
   TrendingUp,
   LandPlot,
   MapPin,
@@ -26,6 +28,8 @@ const ACTIONS: ControlAction[] = [
   { label: "Show this property", icon: ScreenShare, view: "item" },
   { label: "Show comparison", icon: GitCompareArrows, view: "compareGroup" },
   { label: "Show why", icon: Sparkles, view: "whyThis" },
+  { label: "Show why not", icon: Ban, view: "whyNot" },
+  { label: "Show lifestyle", icon: Palmtree, view: "lifestyle" },
   { label: "Show investment", icon: TrendingUp, view: "investment" },
   { label: "Show floor plan", icon: LandPlot, view: "floorPlan" },
   { label: "Show location", icon: MapPin, view: "location" },
@@ -34,12 +38,13 @@ const ACTIONS: ControlAction[] = [
 ];
 
 /**
- * Spec section 11: a small contextual control, never all 8 actions exposed
- * in the main UI simultaneously — it opens as a bottom sheet for whichever
- * property the salesperson tapped "Display" on, and every action routes
- * through the single presentItem() atomic action (or setView for the
- * item-agnostic "Show comparison") so the Display never flashes through an
- * intermediate view.
+ * A small contextual control, never every action exposed in the main UI
+ * simultaneously — it opens as a bottom sheet for whichever property the
+ * salesperson tapped "Display" on, and every action routes through the
+ * single presentItem() atomic action (or setView for the item-agnostic
+ * "Show comparison") so the Display never flashes through an intermediate
+ * view. "Show why not" and "Show lifestyle" reach the existing WhyNotStage/
+ * LifestyleStage views, which previously had no trigger anywhere.
  */
 export function DisplayControl({ item, onClose }: { item: ScoredItem; onClose: () => void }) {
   const session = useSession();

@@ -11,9 +11,9 @@ import type { ScoredItem } from "@/core/engine/scoring";
  * section 21's "THE NEXT STEP". [RECOMMEND] and every Next Step action route
  * through the same real presentItem() atomic action Display Control uses
  * (never a second Display-targeting mechanism), so the Display never
- * flashes through an intermediate view. [CREATE LUMMA RECAP] stays visibly
- * disabled — Recap is explicitly the next stage, not built here, and
- * nothing should pretend otherwise.
+ * flashes through an intermediate view. [CREATE LUMMA RECAP] stays
+ * disabled until at least one property has actually been added to
+ * session.recapItemIds — it never claims a recap exists before one does.
  */
 export function DecisionRoomRecommend({
   group,
@@ -24,8 +24,9 @@ export function DecisionRoomRecommend({
 }) {
   const session = useSession();
   const [presented, setPresented] = useState(false);
-  const [addedToRecap, setAddedToRecap] = useState(false);
   const winner = group.length > 0 ? group.reduce((best, s) => (s.score > best.score ? s : best), group[0]) : null;
+  const hasRecapItems = session.recapItemIds.length > 0;
+  const addedToRecap = winner ? session.recapItemIds.includes(winner.item.id) : false;
 
   if (!winner) {
     return (
@@ -116,23 +117,21 @@ export function DecisionRoomRecommend({
           </div>
 
           <button
-            onClick={() => {
-              session.addToRecap(winner.item.id);
-              setAddedToRecap(true);
-            }}
-            className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-medium text-ink-muted transition hover:bg-white/10"
+            onClick={() => session.addToRecap(winner.item.id)}
+            disabled={addedToRecap}
+            className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-medium text-ink-muted transition hover:bg-white/10 disabled:opacity-60"
           >
             <ClipboardPlus className="h-3.5 w-3.5 text-brand" />
             {addedToRecap ? "Added to recap" : "Add to recap"}
           </button>
 
           <button
-            disabled
-            title="Coming soon"
-            className="mt-2 flex w-full cursor-not-allowed items-center justify-center gap-1.5 rounded-full border border-white/5 bg-white/[0.02] px-4 py-3 text-sm font-semibold text-ink-faint opacity-50"
+            onClick={() => session.setView("recap")}
+            disabled={!hasRecapItems}
+            title={hasRecapItems ? undefined : "Add a property to recap first"}
+            className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-full bg-brand px-4 py-3 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:border disabled:border-white/5 disabled:bg-white/[0.02] disabled:text-ink-faint disabled:opacity-50 disabled:hover:brightness-100"
           >
             Create LUMMA recap
-            <span className="text-[10px] font-normal uppercase tracking-wide">Coming soon</span>
           </button>
         </div>
       </div>
