@@ -17,6 +17,7 @@ import {
   type DisplayTemplate,
 } from "@/core/store/displayProfiles";
 import { WIDGET_LABELS } from "@/components/display/registry";
+import { defaultDisplaySections, type DisplayTemplateId } from "@/lib/displayProfiles/sections";
 import { useBrandProfiles } from "@/core/store/brandProfiles";
 import { DisplayProfileRenderer, type WidgetSpan } from "@/components/display/DisplayProfileRenderer";
 import {
@@ -261,11 +262,17 @@ function HistoryTab({ id }: { id: string }) {
 
 function WidgetsTab({ id, profile }: { id: string; profile: DisplayProfile }) {
   const [sections, setSections] = useState(profile.sections);
+  const [resetOpen, setResetOpen] = useState(false);
   useEffect(() => setSections(profile.sections), [profile.sections]);
 
   const commit = (next: typeof sections) => {
     setSections(next);
     updateDisplayProfile(id, { sections: next });
+  };
+
+  const resetToTemplate = () => {
+    commit(defaultDisplaySections(profile.template as DisplayTemplateId));
+    setResetOpen(false);
   };
 
   const move = (index: number, dir: -1 | 1) => {
@@ -377,7 +384,39 @@ function WidgetsTab({ id, profile }: { id: string; profile: DisplayProfile }) {
           Templates are starting points, not locked designs — switching template doesn&apos;t change the widgets
           above once you&apos;ve edited them.
         </p>
+        <button
+          onClick={() => setResetOpen(true)}
+          className="mt-3 inline-flex items-center gap-1.5 rounded-xl border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-600 transition hover:bg-zinc-50"
+        >
+          <RotateCcw className="h-3.5 w-3.5" /> Reset widgets to &ldquo;{profile.template}&rdquo; defaults
+        </button>
       </Panel>
+
+      {resetOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setResetOpen(false)}>
+          <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-base font-semibold text-zinc-900">Reset widgets to template defaults?</h3>
+            <p className="mt-1 text-xs text-zinc-400">
+              Replaces the widget composition above with &ldquo;{profile.template}&rdquo;&rsquo;s starting layout —
+              which widgets are enabled and their order. Brand, motion, and idle settings are untouched.
+            </p>
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                onClick={() => setResetOpen(false)}
+                className="rounded-xl border border-zinc-200 px-3 py-2 text-sm text-zinc-600 transition hover:bg-zinc-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={resetToTemplate}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-zinc-900 px-3 py-2 text-sm font-semibold text-white transition hover:brightness-110"
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <DocumentsPanel profileId={id} />
       </div>
