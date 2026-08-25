@@ -23,6 +23,15 @@ const BEATS: Partial<Record<DisplayView, string[]>> = {
   item: ["Why this one fits."],
   matching: ["Searching your matches."],
   matches: ["Here's what stood out."],
+  whyThis: ["Here's why."],
+  whyNot: ["Weighing every option."],
+  investment: ["The investment case."],
+  lifestyle: ["Picture life here."],
+  floorPlan: ["Walk the floor plan."],
+  location: ["Getting to know the area."],
+  payment: ["Let's talk numbers."],
+  proposal: ["Prepared just for you."],
+  recap: ["Your LUMMA recap."],
 };
 
 const BEAT_MS = 1500;
