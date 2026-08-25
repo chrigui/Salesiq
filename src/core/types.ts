@@ -82,6 +82,8 @@ export interface InventoryItem {
   /** Admin-entered availability — never inferred/fabricated. Both optional and independent: a project can report units left without a known total. */
   unitsLeft?: number;
   totalUnits?: number;
+  /** Admin-entered explicit status — never inferred. Takes precedence over unitsLeft when set (see deriveAvailabilityLabel). */
+  availabilityStatus?: "Available" | "Reserved" | "Booked" | "Sold";
 }
 
 /** A real nearby amenity found via OpenStreetMap, shown as a plain informational list. */

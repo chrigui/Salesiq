@@ -7,6 +7,7 @@ import { formatMoney } from "@/core/engine/explain";
 import { ItemImage } from "@/components/ui/ItemImage";
 import { deriveAvailabilityLabel } from "@/lib/availability";
 import { readPropertyAttributes } from "@/components/companion/explore/attributeDisplay";
+import { usePriceChangeFlash } from "@/core/display/usePriceChangeFlash";
 import { cx } from "@/components/ui/primitives";
 
 const spring = { type: "spring", stiffness: 260, damping: 30 } as const;
@@ -39,42 +40,52 @@ export function MatchesStage({ pack, scored }: { pack: IndustryPack; scored: Sco
           top.length <= 2 ? "md:grid-cols-2" : top.length <= 4 ? "md:grid-cols-2 lg:grid-cols-3" : "md:grid-cols-3",
         )}
       >
-        {top.map((s, i) => {
-          const attrs = readPropertyAttributes(pack, s.item);
-          const availability = deriveAvailabilityLabel(s.item);
-          return (
-            <motion.div
-              key={s.item.id}
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1, ...spring }}
-              className="glass overflow-hidden rounded-3xl"
-            >
-              <ItemImage image={s.item.image} photo={s.item.photo} className="h-40">
-                <div className="absolute right-3 top-3 z-10 grid h-11 w-11 place-items-center rounded-full bg-black/40 text-sm font-bold text-white backdrop-blur">
-                  {s.score}%
-                </div>
-              </ItemImage>
-              <div className="p-5">
-                <h3 className="text-xl font-semibold">{s.item.name}</h3>
-                <p className="text-sm text-ink-faint">{s.item.location?.label ?? s.item.subtitle}</p>
-                <p className="mt-2 text-lg font-semibold">{formatMoney(s.item.price, s.item.currency)}</p>
-                <div className="mt-1 text-xs text-ink-faint">
-                  {[
-                    attrs.bedrooms !== null ? `${attrs.bedrooms} bed` : null,
-                    attrs.bathrooms !== null ? `${attrs.bathrooms} bath` : null,
-                    (attrs.areaSqm ?? attrs.plotSize) !== null
-                      ? `${attrs.areaSqm ?? attrs.plotSize} m²`
-                      : null,
-                    availability,
-                  ]
-                    .filter(Boolean)
-                    .join(" · ")}
-                </div>
-              </div>
-            </motion.div>
-          );
-        })}
+        {top.map((s, i) => (
+          <MatchCard key={s.item.id} pack={pack} scored={s} delay={i * 0.1} />
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
+function MatchCard({ pack, scored: s, delay }: { pack: IndustryPack; scored: ScoredItem; delay: number }) {
+  const attrs = readPropertyAttributes(pack, s.item);
+  const availability = deriveAvailabilityLabel(s.item);
+  const priceChanged = usePriceChangeFlash(s.item.id, s.item.price);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay, ...spring }}
+      className="glass overflow-hidden rounded-3xl"
+    >
+      <ItemImage image={s.item.image} photo={s.item.photo} className="h-40">
+        <div className="absolute right-3 top-3 z-10 grid h-11 w-11 place-items-center rounded-full bg-black/40 text-sm font-bold text-white backdrop-blur">
+          {s.score}%
+        </div>
+      </ItemImage>
+      <div className="p-5">
+        <h3 className="text-xl font-semibold">{s.item.name}</h3>
+        <p className="text-sm text-ink-faint">{s.item.location?.label ?? s.item.subtitle}</p>
+        <div className="mt-2 flex items-center gap-2">
+          <p className="text-lg font-semibold">{formatMoney(s.item.price, s.item.currency)}</p>
+          {priceChanged && (
+            <span className="rounded-full bg-brand/20 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-brand">
+              Price updated
+            </span>
+          )}
+        </div>
+        <div className="mt-1 text-xs text-ink-faint">
+          {[
+            attrs.bedrooms !== null ? `${attrs.bedrooms} bed` : null,
+            attrs.bathrooms !== null ? `${attrs.bathrooms} bath` : null,
+            (attrs.areaSqm ?? attrs.plotSize) !== null ? `${attrs.areaSqm ?? attrs.plotSize} m²` : null,
+            availability,
+          ]
+            .filter(Boolean)
+            .join(" · ")}
+        </div>
       </div>
     </motion.div>
   );

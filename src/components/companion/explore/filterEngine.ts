@@ -98,7 +98,7 @@ export function priceBounds(pack: IndustryPack): { min: number; max: number } | 
 }
 
 export function hasAnyAvailabilityData(pack: IndustryPack): boolean {
-  return pack.inventory.some((i) => i.unitsLeft !== undefined);
+  return pack.inventory.some((i) => i.unitsLeft !== undefined || i.availabilityStatus !== undefined);
 }
 
 function matchesFilters(pack: IndustryPack, item: InventoryItem, filters: ExploreFilters): boolean {
@@ -114,7 +114,15 @@ function matchesFilters(pack: IndustryPack, item: InventoryItem, filters: Explor
     return false;
   }
   if (filters.features.length > 0 && !filters.features.every((f) => item.attributes[f] === true)) return false;
-  if (filters.status && deriveAvailabilityLabel(item) !== filters.status) return false;
+  if (filters.status) {
+    const label = deriveAvailabilityLabel(item);
+    // "Sold" (explicit admin status) and "Sold out" (unitsLeft-inferred)
+    // are the same real-world bucket for this filter toggle — Reserved/
+    // Booked items match neither today, which just leaves them out of
+    // both toggles rather than misclassifying them.
+    const matchesSoldOut = filters.status === "Sold out" && (label === "Sold out" || label === "Sold");
+    if (label !== filters.status && !matchesSoldOut) return false;
+  }
   return true;
 }
 

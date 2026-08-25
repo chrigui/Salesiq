@@ -29,7 +29,7 @@ import {
 import { cx, GRADIENTS } from "@/components/ui/primitives";
 import { getEffectivePack, saveInventory } from "@/core/store/packs";
 import type { InventoryItem, NearbyAmenity } from "@/core/types";
-import { Field, NumberInput, TextInput } from "./fields";
+import { Field, NumberInput, Select, TextInput } from "./fields";
 import { LifestyleEditor } from "./LifestyleEditor";
 
 const GRADIENT_TOKENS = Object.keys(GRADIENTS);
@@ -254,6 +254,28 @@ function ItemRow({
               />
             </Field>
           </div>
+
+          <Field
+            label="Availability status"
+            hint="Optional — overrides Units left when set (e.g. a fully-available listing that's been Reserved)"
+          >
+            <Select
+              value={item.availabilityStatus ?? ""}
+              onChange={(e) =>
+                onChange({
+                  availabilityStatus: e.target.value
+                    ? (e.target.value as InventoryItem["availabilityStatus"])
+                    : undefined,
+                })
+              }
+            >
+              <option value="">Not set</option>
+              <option value="Available">Available</option>
+              <option value="Reserved">Reserved</option>
+              <option value="Booked">Booked</option>
+              <option value="Sold">Sold</option>
+            </Select>
+          </Field>
 
           <Field label="Photo URL" hint="Falls back to the gradient if it fails to load">
             <TextInput
