@@ -23,6 +23,14 @@ export const GOLDEN_DEMO_PACK_ID = "real-estate-bahrain";
  */
 export const GOLDEN_DEMO_HERO_ITEM_ID = "bh-9";
 
+/**
+ * A second real Bahrain-pack listing (also a villa, id "bh-8") used to give
+ * the Decision Room stages a genuine 2-property shortlist to curate and
+ * compare — not the hero item alone, which CompareGroupStage requires at
+ * least 2 items to render at all.
+ */
+const GOLDEN_DEMO_RUNNER_UP_ITEM_ID = "bh-8";
+
 const GOLDEN_DEMO_ANSWERS: Record<string, AnswerValue> = {
   household: "family",
   budget: { min: 260000, max: 400000 },
@@ -56,6 +64,9 @@ export interface GoldenDemoSession {
   focusItem: (itemId: string | null) => void;
   updateCustomer: (patch: Partial<{ name: string; phone: string; email: string; notes: string }>) => void;
   addStakeholder: (stakeholder: { name: string; role: string; influence: "high" | "medium" | "low"; notes: string }) => void;
+  presentItem: (itemId: string, view: DisplayView) => void;
+  addToCompare: (itemId: string) => void;
+  addToRecap: (itemId: string) => void;
 }
 
 export interface GoldenDemoUi {
@@ -138,6 +149,73 @@ export function buildGoldenDemoSteps(session: GoldenDemoSession, ui: GoldenDemoU
       run: () => {
         ui.closeAllPanels();
         session.setView("compare");
+      },
+    },
+    {
+      title: "The Decision Room",
+      script: `"When it's down to real contenders, the Decision Room curates the exact shortlist they're weighing — not just the auto-scored top 3."`,
+      run: () => {
+        ui.closeAllPanels();
+        session.addToCompare(GOLDEN_DEMO_HERO_ITEM_ID);
+        session.addToCompare(GOLDEN_DEMO_RUNNER_UP_ITEM_ID);
+        session.setView("compareGroup");
+      },
+    },
+    {
+      title: "Why this one",
+      script: `"And every reason it's winning traces back to something they actually told us — never a generic 'our AI recommends'."`,
+      run: () => {
+        ui.closeAllPanels();
+        session.presentItem(GOLDEN_DEMO_HERO_ITEM_ID, "whyThis");
+      },
+    },
+    {
+      title: "The investment case",
+      script: `"If appreciation and yield matter to them, we show only the numbers that are actually verified — never a fabricated projection."`,
+      run: () => {
+        ui.closeAllPanels();
+        session.presentItem(GOLDEN_DEMO_HERO_ITEM_ID, "investment");
+      },
+    },
+    {
+      title: "Life there",
+      script: `"And it's not just the unit — it's the neighbourhood, the commute, the school run. This is what living there actually looks like."`,
+      run: () => {
+        ui.closeAllPanels();
+        session.presentItem(GOLDEN_DEMO_HERO_ITEM_ID, "lifestyle");
+      },
+    },
+    {
+      title: "Walk the floor plan",
+      run: () => {
+        ui.closeAllPanels();
+        session.presentItem(GOLDEN_DEMO_HERO_ITEM_ID, "floorPlan");
+      },
+      script: `"They can walk the actual floor plan on the big screen — zoom in on the room that matters to them."`,
+    },
+    {
+      title: "The numbers",
+      script: `"And when they're ready to talk numbers, the real payment structure goes straight on screen — nothing invented."`,
+      run: () => {
+        ui.closeAllPanels();
+        session.presentItem(GOLDEN_DEMO_HERO_ITEM_ID, "payment");
+      },
+    },
+    {
+      title: "Recommend it",
+      script: `"One deliberate moment — this is the property we're putting our name behind, and it goes straight into their recap."`,
+      run: () => {
+        ui.closeAllPanels();
+        session.presentItem(GOLDEN_DEMO_HERO_ITEM_ID, "recommendation");
+        session.addToRecap(GOLDEN_DEMO_HERO_ITEM_ID);
+      },
+    },
+    {
+      title: "Your LUMMA recap",
+      script: `"And when the meeting ends, they don't just remember it — they scan a code and take the entire experience home on their own phone."`,
+      run: () => {
+        ui.closeAllPanels();
+        session.setView("recap");
       },
     },
     {
