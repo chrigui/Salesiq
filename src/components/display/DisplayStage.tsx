@@ -23,6 +23,12 @@ import { LifestyleMap } from "./LifestyleMap";
 import { DisplayNarration } from "./DisplayNarration";
 import { WhyThisStage } from "./WhyThisStage";
 import { WhyNotStage } from "./WhyNotStage";
+import { InvestmentStage } from "./InvestmentStage";
+import { LifestyleStage } from "./LifestyleStage";
+import { FloorPlanStage } from "./FloorPlanStage";
+import { LocationStage } from "./LocationStage";
+import { PaymentStage } from "./PaymentStage";
+import { useDecisionRoomWidgetContext } from "./useDecisionRoomWidgetContext";
 import { DEFAULT_IDLE_TIMEOUT_MS, IdleScreen, useIdleGate } from "./IdleMode";
 import { ContinueQrModal } from "./ContinueQr";
 import type {
@@ -59,6 +65,8 @@ export function DisplayStage({
     proposalText,
     proposalEngine,
     compareItemIds,
+    workLocationLat,
+    workLocationLng,
   } = useSession();
   const pack = useLivePack(packId);
   const [qrOpen, setQrOpen] = useState(false);
@@ -245,6 +253,23 @@ export function DisplayStage({
                 answers={answers}
               />
             )}
+
+            {(view === "investment" ||
+              view === "lifestyle" ||
+              view === "floorPlan" ||
+              view === "location" ||
+              view === "payment") &&
+              focusedItem && (
+                <DecisionRoomModeStage
+                  key={`mode-${view}-${focusedItem.id}`}
+                  view={view}
+                  item={focusedItem}
+                  pack={pack}
+                  scored={scored}
+                  workLocationLat={workLocationLat}
+                  workLocationLng={workLocationLng}
+                />
+              )}
 
             {view === "item" && focusedItem && displayProfile && (
               <motion.div
@@ -910,6 +935,42 @@ function CompareGroupStage({
   );
 }
 
+/**
+ * Thin dispatcher for the Decision Room's five cinematic modes — a single
+ * place to call the (unconditional-hooks-requiring) useDecisionRoomWidgetContext
+ * once, since each individual Stage component just takes an already-resolved
+ * context prop.
+ */
+function DecisionRoomModeStage({
+  view,
+  item,
+  pack,
+  scored,
+  workLocationLat,
+  workLocationLng,
+}: {
+  view: "investment" | "lifestyle" | "floorPlan" | "location" | "payment";
+  item: InventoryItem;
+  pack: IndustryPack;
+  scored: ScoredItem[];
+  workLocationLat: number | null;
+  workLocationLng: number | null;
+}) {
+  const context = useDecisionRoomWidgetContext(pack, item, scored);
+  switch (view) {
+    case "investment":
+      return <InvestmentStage context={context} />;
+    case "lifestyle":
+      return <LifestyleStage context={context} />;
+    case "floorPlan":
+      return <FloorPlanStage context={context} />;
+    case "location":
+      return <LocationStage context={context} workLocationLat={workLocationLat} workLocationLng={workLocationLng} />;
+    case "payment":
+      return <PaymentStage context={context} />;
+  }
+}
+
 function ProposalStage({
   scored,
   pack,
@@ -1074,30 +1135,67 @@ function ItemStage({
         )}
       </div>
       <div>
-        <h2 className="text-5xl font-semibold tracking-tight">{item.name}</h2>
-        <p className="mt-2 text-xl text-ink-muted">{item.subtitle}</p>
+        {/* Cinematic presentation (spec section 12): a calm, staged reveal —
+            name, then location, then price, then highlights, then why it
+            fits — rather than every element appearing at once. Same
+            per-element delayed-spring pattern CompareGroupStage already
+            uses for its staggered card entrance. */}
+        <motion.h2
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, ...spring }}
+          className="text-5xl font-semibold tracking-tight"
+        >
+          {item.name}
+        </motion.h2>
+        <motion.p
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.18, ...spring }}
+          className="mt-2 text-xl text-ink-muted"
+        >
+          {item.subtitle}
+        </motion.p>
         {item.location && (
-          <div className="mt-3 flex items-center gap-2 text-ink-faint">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.26, ...spring }}
+            className="mt-3 flex items-center gap-2 text-ink-faint"
+          >
             <MapPin className="h-4 w-4" /> {item.location.label}
-          </div>
+          </motion.div>
         )}
-        <p className="mt-6 text-4xl font-semibold text-gradient">
+        <motion.p
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.34, ...spring }}
+          className="mt-6 text-4xl font-semibold text-gradient"
+        >
           {formatMoney(item.price, item.currency)}
-        </p>
+        </motion.p>
         <div className="mt-7 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-          {item.highlights.map((h) => (
-            <div
+          {item.highlights.map((h, i) => (
+            <motion.div
               key={h}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.42 + i * 0.06, ...spring }}
               className="glass flex items-center gap-2.5 rounded-2xl px-4 py-3 text-sm"
             >
               <Check className="h-4 w-4 shrink-0 text-brand" /> {h}
-            </div>
+            </motion.div>
           ))}
         </div>
         {reasons.length > 0 && (
-          <p className="mt-6 text-sm text-ink-faint">
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.42 + item.highlights.length * 0.06 + 0.1, ...spring }}
+            className="mt-6 text-sm text-ink-faint"
+          >
             Matches you: {reasons.slice(0, 3).join(" · ")}
-          </p>
+          </motion.p>
         )}
       </div>
     </motion.div>
