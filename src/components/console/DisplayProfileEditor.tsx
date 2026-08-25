@@ -16,7 +16,7 @@ import {
   type DisplayProfile,
   type DisplayTemplate,
 } from "@/core/store/displayProfiles";
-import { WIDGET_LABELS } from "@/components/display/registry";
+import { WIDGET_LABELS, WIDGET_DESCRIPTIONS, WIDGET_CATEGORIES, WIDGET_CATEGORY } from "@/components/display/registry";
 import { defaultDisplaySections, type DisplayTemplateId } from "@/lib/displayProfiles/sections";
 import { useBrandProfiles } from "@/core/store/brandProfiles";
 import { DisplayProfileRenderer, type WidgetSpan } from "@/components/display/DisplayProfileRenderer";
@@ -286,6 +286,10 @@ function WidgetsTab({ id, profile }: { id: string; profile: DisplayProfile }) {
   const toggle = (idx: number) =>
     commit(sections.map((s, i) => (i === idx ? { ...s, enabled: !s.enabled } : s)));
 
+  /** The Widget Library groups by category (not array order), so it addresses a widget by type rather than index — every template seeds exactly one section per type, so this is unambiguous. */
+  const toggleByType = (type: string) =>
+    commit(sections.map((s) => (s.type === type ? { ...s, enabled: !s.enabled } : s)));
+
   const setSpan = (idx: number, span: WidgetSpan) =>
     commit(sections.map((s, i) => (i === idx ? { ...s, config: { ...s.config, span } } : s)));
 
@@ -316,8 +320,9 @@ function WidgetsTab({ id, profile }: { id: string; profile: DisplayProfile }) {
           widget at once as a dashboard of cards — set each widget&apos;s size below.
         </p>
       </Panel>
+      <WidgetLibraryPanel sections={sections} onToggle={toggleByType} />
       <div className="grid gap-4 lg:grid-cols-2">
-      <Panel title="Widgets">
+      <Panel title="Widget order">
         <div className="space-y-2">
           {sections.map((s, i) => (
             <div
@@ -421,6 +426,81 @@ function WidgetsTab({ id, profile }: { id: string; profile: DisplayProfile }) {
       <DocumentsPanel profileId={id} />
       </div>
     </div>
+  );
+}
+
+/**
+ * The browsable widget catalog — every widget a template could ever seed,
+ * grouped by category with a name/description/Add-Added state. This is a
+ * different view onto the exact same `sections` array the ordered list
+ * below edits (there's no separate "add a widget" mechanism — every widget
+ * type already has a slot from creation, per defaultDisplaySections()), so
+ * toggling a card here and toggling the same widget's checkbox below always
+ * agree.
+ */
+function WidgetLibraryPanel({
+  sections,
+  onToggle,
+}: {
+  sections: DisplayProfile["sections"];
+  onToggle: (type: string) => void;
+}) {
+  const byType = new Map(sections.map((s) => [s.type, s]));
+  return (
+    <Panel title="Widget library">
+      <p className="mb-3 text-xs text-zinc-400">
+        Every widget the Customer Display can show, grouped by category. Add one to enable it — where it appears is
+        set below in Widget order.
+      </p>
+      <div className="space-y-4">
+        {WIDGET_CATEGORIES.map((category) => {
+          const types = Object.keys(WIDGET_CATEGORY).filter((t) => WIDGET_CATEGORY[t] === category && byType.has(t));
+          if (types.length === 0) return null;
+          return (
+            <div key={category}>
+              <span className="mb-2 block text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
+                {category}
+              </span>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                {types.map((type) => {
+                  const section = byType.get(type)!;
+                  return (
+                    <div
+                      key={type}
+                      className={cx(
+                        "flex flex-col gap-2 rounded-2xl border p-3",
+                        section.enabled ? "border-emerald-200 bg-emerald-50/40" : "border-zinc-200 bg-white",
+                      )}
+                    >
+                      <div className="text-sm font-medium text-zinc-900">{WIDGET_LABELS[type] ?? type}</div>
+                      <p className="flex-1 text-xs text-zinc-400">{WIDGET_DESCRIPTIONS[type] ?? ""}</p>
+                      <button
+                        onClick={() => onToggle(type)}
+                        aria-label={`${section.enabled ? "Remove" : "Add"} ${WIDGET_LABELS[type] ?? type}`}
+                        className={cx(
+                          "inline-flex items-center justify-center gap-1.5 self-start rounded-lg px-2.5 py-1 text-xs font-medium transition",
+                          section.enabled
+                            ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
+                            : "border border-zinc-200 text-zinc-600 hover:bg-zinc-50",
+                        )}
+                      >
+                        {section.enabled ? (
+                          <>
+                            <Check className="h-3 w-3" /> Added
+                          </>
+                        ) : (
+                          "Add"
+                        )}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </Panel>
   );
 }
 
