@@ -112,6 +112,7 @@ export function DisplayProfileRenderer({ profile, pack, item, mode, deviceId, de
         matchScore={matchScore ?? null}
         sessionView={sessionView}
         hasProposal={hasProposal}
+        config={s.config}
       />
     );
     if (motionConfig.reduceMotion) {

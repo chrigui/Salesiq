@@ -64,4 +64,6 @@ export interface DisplayWidgetContext {
   sessionView?: DisplayView;
   /** Whether a proposal has actually been generated for this session — real signal, never inferred. */
   hasProposal?: boolean;
+  /** This section's own per-widget settings (DisplaySection.config), e.g. Match Score's displayStyle — untyped Json bag, each widget reads only the keys it recognizes and falls back to its existing default behavior when absent. */
+  config?: Record<string, unknown>;
 }

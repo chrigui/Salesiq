@@ -2,8 +2,9 @@ import { Building2 } from "lucide-react";
 import type { DisplayWidgetContext } from "../types";
 
 /** Purely admin-entered availability (InventoryBuilder's "Units left"/"Total units"/"Status") — never inferred. */
-export function DisplayAvailability({ item, mode }: DisplayWidgetContext) {
+export function DisplayAvailability({ item, mode, config }: DisplayWidgetContext) {
   const { unitsLeft, totalUnits, availabilityStatus } = item;
+  const showNumericBar = config?.showNumericBar !== false;
 
   if (unitsLeft == null && !availabilityStatus) {
     if (mode === "preview") {
@@ -47,7 +48,7 @@ export function DisplayAvailability({ item, mode }: DisplayWidgetContext) {
           {totalUnits != null && (
             <>
               <div className="mt-1 text-xs text-white/50">of {totalUnits} total</div>
-              {pct != null && (
+              {showNumericBar && pct != null && (
                 <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/10">
                   <div className="h-full rounded-full bg-brand" style={{ width: `${pct}%` }} />
                 </div>

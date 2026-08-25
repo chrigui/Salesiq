@@ -3,7 +3,17 @@ import { formatMoney } from "@/core/engine/explain";
 import { cx } from "@/components/ui/primitives";
 import type { DisplayWidgetContext } from "../types";
 
-export function DisplayHero({ item, pack, template, motion }: DisplayWidgetContext) {
+function readConfig(config: Record<string, unknown> | undefined) {
+  return {
+    showPrice: config?.showPrice !== false,
+    showBedrooms: config?.showBedrooms === true,
+    showLocation: config?.showLocation === true,
+  };
+}
+
+export function DisplayHero({ item, pack, template, motion, config }: DisplayWidgetContext) {
+  const { showPrice, showBedrooms, showLocation } = readConfig(config);
+  const bedrooms = typeof item.attributes.bedrooms === "number" ? item.attributes.bedrooms : null;
   return (
     <section className="relative">
       <ItemImage
@@ -41,8 +51,20 @@ export function DisplayHero({ item, pack, template, motion }: DisplayWidgetConte
             {item.name}
           </h1>
           <p className="mt-2 max-w-xl text-sm text-white/80 sm:text-base">{item.subtitle}</p>
-          <div className="mt-4 text-2xl font-semibold text-white sm:text-3xl">
-            {formatMoney(item.price, item.currency)}
+          {showLocation && item.location?.label && (
+            <p className="mt-1 text-xs text-white/60 sm:text-sm">{item.location.label}</p>
+          )}
+          <div className="mt-4 flex flex-wrap items-baseline gap-3">
+            {showPrice && (
+              <div className="text-2xl font-semibold text-white sm:text-3xl">
+                {formatMoney(item.price, item.currency)}
+              </div>
+            )}
+            {showBedrooms && bedrooms != null && (
+              <div className="text-sm text-white/70">
+                {bedrooms} {bedrooms === 1 ? "bedroom" : "bedrooms"}
+              </div>
+            )}
           </div>
         </div>
       </ItemImage>

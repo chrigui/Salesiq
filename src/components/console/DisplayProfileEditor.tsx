@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import useSWR, { mutate as globalMutate } from "swr";
-import { ArrowLeft, GripVertical, Loader2, Eye, Upload, FileText, Trash2, RotateCcw, Check, Copy } from "lucide-react";
+import { ArrowLeft, GripVertical, Loader2, Eye, Upload, FileText, Trash2, RotateCcw, Check, Copy, Settings2 } from "lucide-react";
 import { motion, useDragControls, type PanInfo } from "framer-motion";
 import { Panel } from "@/components/console/light-ui";
 import { cx } from "@/components/ui/primitives";
@@ -261,9 +261,13 @@ function HistoryTab({ id }: { id: string }) {
   );
 }
 
+/** Widget types with a per-widget settings drawer in the Widget order list — the extensible pattern; more types can be added here as they grow settings of their own. */
+const WIDGETS_WITH_SETTINGS = new Set(["matchScore", "hero", "investment", "availability"]);
+
 function WidgetsTab({ id, profile }: { id: string; profile: DisplayProfile }) {
   const [sections, setSections] = useState(profile.sections);
   const [resetOpen, setResetOpen] = useState(false);
+  const [settingsOpenId, setSettingsOpenId] = useState<string | null>(null);
   useEffect(() => setSections(profile.sections), [profile.sections]);
 
   const commit = (next: typeof sections) => {
@@ -321,6 +325,9 @@ function WidgetsTab({ id, profile }: { id: string; profile: DisplayProfile }) {
   const setSpan = (idx: number, span: WidgetSpan) =>
     commit(sections.map((s, i) => (i === idx ? { ...s, config: { ...s.config, span } } : s)));
 
+  const setConfig = (idx: number, patch: Record<string, unknown>) =>
+    commit(sections.map((s, i) => (i === idx ? { ...s, config: { ...s.config, ...patch } } : s)));
+
   const isGrid = profile.layout === "Grid";
 
   return (
@@ -357,32 +364,49 @@ function WidgetsTab({ id, profile }: { id: string; profile: DisplayProfile }) {
             <DraggableWidgetRow key={s.id} registerRef={(el) => registerRowRef(s.id, el)} onDragEnd={(y) => reorder(s.id, y)}>
               <div
                 className={cx(
-                  "flex items-center gap-2 rounded-2xl border px-3 py-2.5",
+                  "rounded-2xl border",
                   s.enabled ? "border-zinc-200 bg-white" : "border-zinc-100 bg-zinc-50",
                 )}
               >
-                <label className="flex flex-1 items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={s.enabled}
-                    onChange={() => toggle(i)}
-                    className="h-4 w-4 rounded border-zinc-300"
-                  />
-                  <span className={cx("text-sm font-medium", !s.enabled && "text-zinc-400")}>
-                    {WIDGET_LABELS[s.type] ?? s.type}
-                  </span>
-                </label>
-                {isGrid && (
-                  <select
-                    value={(s.config?.span as WidgetSpan | undefined) ?? "lg"}
-                    onChange={(e) => setSpan(i, e.target.value as WidgetSpan)}
-                    className="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs text-zinc-600"
-                    aria-label={`${WIDGET_LABELS[s.type] ?? s.type} card size`}
-                  >
-                    <option value="sm">Small</option>
-                    <option value="md">Medium</option>
-                    <option value="lg">Full width</option>
-                  </select>
+                <div className="flex items-center gap-2 px-3 py-2.5">
+                  <label className="flex flex-1 items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={s.enabled}
+                      onChange={() => toggle(i)}
+                      className="h-4 w-4 rounded border-zinc-300"
+                    />
+                    <span className={cx("text-sm font-medium", !s.enabled && "text-zinc-400")}>
+                      {WIDGET_LABELS[s.type] ?? s.type}
+                    </span>
+                  </label>
+                  {WIDGETS_WITH_SETTINGS.has(s.type) && (
+                    <button
+                      onClick={() => setSettingsOpenId(settingsOpenId === s.id ? null : s.id)}
+                      aria-label={`${WIDGET_LABELS[s.type] ?? s.type} settings`}
+                      className={cx(
+                        "rounded-lg p-1.5 transition",
+                        settingsOpenId === s.id ? "bg-zinc-900 text-white" : "text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600",
+                      )}
+                    >
+                      <Settings2 className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                  {isGrid && (
+                    <select
+                      value={(s.config?.span as WidgetSpan | undefined) ?? "lg"}
+                      onChange={(e) => setSpan(i, e.target.value as WidgetSpan)}
+                      className="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs text-zinc-600"
+                      aria-label={`${WIDGET_LABELS[s.type] ?? s.type} card size`}
+                    >
+                      <option value="sm">Small</option>
+                      <option value="md">Medium</option>
+                      <option value="lg">Full width</option>
+                    </select>
+                  )}
+                </div>
+                {settingsOpenId === s.id && (
+                  <WidgetSettingsDrawer type={s.type} config={s.config} onChange={(patch) => setConfig(i, patch)} />
                 )}
               </div>
             </DraggableWidgetRow>
@@ -448,6 +472,94 @@ function WidgetsTab({ id, profile }: { id: string; profile: DisplayProfile }) {
       <DocumentsPanel profileId={id} />
       </div>
     </div>
+  );
+}
+
+/**
+ * Per-widget settings drawer, shown under a widget's row in the Widget order
+ * list when it's expanded. Only wired for the 4 widget types in
+ * WIDGETS_WITH_SETTINGS today — this switch is the extensible pattern for
+ * adding more widget types' settings later, not a generic settings engine.
+ */
+function WidgetSettingsDrawer({
+  type,
+  config,
+  onChange,
+}: {
+  type: string;
+  config: Record<string, unknown> | undefined;
+  onChange: (patch: Record<string, unknown>) => void;
+}) {
+  return (
+    <div className="space-y-3 border-t border-zinc-100 px-3 py-3">
+      {type === "matchScore" && (
+        <>
+          <Field label="Display style">
+            <select
+              value={(config?.displayStyle as string | undefined) ?? "Ring"}
+              onChange={(e) => onChange({ displayStyle: e.target.value })}
+              className="w-full rounded-lg border border-zinc-200 bg-white px-2 py-1.5 text-xs text-zinc-700"
+            >
+              <option value="Ring">Ring</option>
+              <option value="Bar">Bar</option>
+              <option value="Number">Number</option>
+              <option value="Minimal">Minimal</option>
+            </select>
+          </Field>
+          <SettingsCheckbox
+            label="Show reason text"
+            checked={config?.showReasons !== false}
+            onChange={(v) => onChange({ showReasons: v })}
+          />
+        </>
+      )}
+      {type === "hero" && (
+        <>
+          <SettingsCheckbox label="Show price" checked={config?.showPrice !== false} onChange={(v) => onChange({ showPrice: v })} />
+          <SettingsCheckbox
+            label="Show bedrooms"
+            checked={config?.showBedrooms === true}
+            onChange={(v) => onChange({ showBedrooms: v })}
+          />
+          <SettingsCheckbox
+            label="Show location"
+            checked={config?.showLocation === true}
+            onChange={(v) => onChange({ showLocation: v })}
+          />
+        </>
+      )}
+      {type === "investment" && (
+        <>
+          <SettingsCheckbox label="Show ROI" checked={config?.showRoi !== false} onChange={(v) => onChange({ showRoi: v })} />
+          <SettingsCheckbox
+            label="Show rental yield"
+            checked={config?.showRentalYield !== false}
+            onChange={(v) => onChange({ showRentalYield: v })}
+          />
+        </>
+      )}
+      {type === "availability" && (
+        <SettingsCheckbox
+          label="Show numeric progress bar"
+          checked={config?.showNumericBar !== false}
+          onChange={(v) => onChange({ showNumericBar: v })}
+        />
+      )}
+    </div>
+  );
+}
+
+function SettingsCheckbox({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <label className="flex items-center gap-2 text-xs text-zinc-600">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="h-3.5 w-3.5 rounded border-zinc-300"
+      />
+      {label}
+    </label>
   );
 }
 
