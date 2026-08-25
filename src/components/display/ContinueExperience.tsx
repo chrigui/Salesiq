@@ -12,6 +12,7 @@ import { narrate, formatMoney } from "@/core/engine/explain";
 import { ItemImage } from "@/components/ui/ItemImage";
 import { cx } from "@/components/ui/primitives";
 import { useDecisionRoomWidgetContext } from "./useDecisionRoomWidgetContext";
+import { toCustomerSafeItem, toCustomerSafeCustomerName } from "@/lib/customerSafe";
 import { DisplayPriceSummary } from "./widgets/DisplayPriceSummary";
 import { DisplayInvestment } from "./widgets/DisplayInvestment";
 import { DisplayDocuments } from "./widgets/DisplayDocuments";
@@ -35,7 +36,10 @@ export function ContinueExperience() {
   const [waitedLong, setWaitedLong] = useState(false);
 
   const hasAnswers = Object.keys(answers).length > 0;
-  const scored = scoreInventory(pack, answers);
+  // Same customerSafe seam DisplayStage.tsx applies — this public,
+  // unauthenticated page must never trust an item field to stay safe by
+  // convention alone.
+  const scored = scoreInventory(pack, answers).map((s) => ({ ...s, item: toCustomerSafeItem(s.item) }));
 
   // Once a salesperson has curated a real recap, this becomes the actual
   // "LUMMA Recap" continuation (spec sections 27-28) — the shortlist they
@@ -79,7 +83,7 @@ export function ContinueExperience() {
     );
   }
 
-  const firstName = customer.name.trim().split(" ")[0];
+  const firstName = toCustomerSafeCustomerName(customer).trim().split(" ")[0];
 
   return (
     <div className="bg-aurora min-h-screen px-5 py-8">

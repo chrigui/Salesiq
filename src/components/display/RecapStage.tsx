@@ -6,6 +6,7 @@ import { useSync } from "@/components/providers/SyncProvider";
 import { useContinueQrDataUrl } from "./ContinueQr";
 import { formatMoney } from "@/core/engine/explain";
 import { ItemImage } from "@/components/ui/ItemImage";
+import { toCustomerSafeItem } from "@/lib/customerSafe";
 import type { ScoredItem } from "@/core/engine/scoring";
 
 const spring = { type: "spring", stiffness: 260, damping: 30 } as const;
@@ -18,9 +19,12 @@ const spring = { type: "spring", stiffness: 260, damping: 30 } as const;
  * "Also considered." Reuses ContinueQr's own QR generation against the
  * live sync room rather than a second QR mechanism.
  */
-export function RecapStage({ recapItems }: { recapItems: ScoredItem[] }) {
+export function RecapStage({ recapItems: rawRecapItems }: { recapItems: ScoredItem[] }) {
   const { room, continueUrl } = useSync();
   const qr = useContinueQrDataUrl(continueUrl);
+  // Self-contained customerSafe seam — defends this public-facing stage
+  // even if a future caller passes it un-sanitized items.
+  const recapItems = rawRecapItems.map((s) => ({ ...s, item: toCustomerSafeItem(s.item) }));
 
   if (recapItems.length === 0) {
     return (

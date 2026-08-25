@@ -21,6 +21,7 @@ import { cx } from "@/components/ui/primitives";
 import { ItemImage } from "@/components/ui/ItemImage";
 import { Icon } from "@/lib/icon";
 import { deriveAvailabilityLabel } from "@/lib/availability";
+import { toCustomerSafeItem, toCustomerSafeCustomerName } from "@/lib/customerSafe";
 import { readPropertyAttributes } from "@/components/companion/explore/attributeDisplay";
 import { computeCompareBadges } from "@/components/companion/explore/compareBadges";
 import { labelForRequirement } from "@/components/companion/answerSummary";
@@ -82,12 +83,17 @@ export function DisplayStage({
   const { buyerProfile } = useBuyerProfile(buyerProfileId);
   const [qrOpen, setQrOpen] = useState(false);
 
+  // Route every InventoryItem reaching this customer-facing stage through
+  // the single customerSafe allowlist seam (see src/lib/customerSafe.ts) —
+  // a no-op today, but the one place a future internal-only item field
+  // would need to be stripped, rather than trusting every stage below.
   const scored = useMemo(
-    () => scoreInventory(pack, answers),
+    () => scoreInventory(pack, answers).map((s) => ({ ...s, item: toCustomerSafeItem(s.item) })),
     [pack, answers],
   );
   const activeQuestion = pack.questions.find((q) => q.id === activeQuestionId);
-  const focusedItem = pack.inventory.find((i) => i.id === focusedItemId);
+  const rawFocusedItem = pack.inventory.find((i) => i.id === focusedItemId);
+  const focusedItem = rawFocusedItem ? toCustomerSafeItem(rawFocusedItem) : undefined;
 
   // Display Studio seam: when the salesperson focuses an item that has a
   // Published display profile, the customer sees that configured cinematic
@@ -251,7 +257,7 @@ export function DisplayStage({
                 key="proposal"
                 scored={scored}
                 pack={pack}
-                customerName={customer.name}
+                customerName={toCustomerSafeCustomerName(customer)}
                 proposalText={proposalText}
                 proposalEngine={proposalEngine}
               />
