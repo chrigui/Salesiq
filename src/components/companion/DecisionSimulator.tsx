@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, Sliders, RotateCcw, ArrowRight, TrendingUp } from "lucide-react";
-import { scoreInventory, isVisible } from "@/core/engine/scoring";
+import { scoreInventory, isVisible, type ScoreInventoryOptions } from "@/core/engine/scoring";
 import { formatMoney } from "@/core/engine/explain";
 import { cx } from "@/components/ui/primitives";
 import { Stepper, SingleSlider, BudgetControl } from "./CompanionApp";
@@ -24,11 +24,20 @@ export function DecisionSimulator({
   onClose,
   pack,
   answers,
+  opts,
 }: {
   open: boolean;
   onClose: () => void;
   pack: IndustryPack;
   answers: Answers;
+  /**
+   * The same real priorityWeights/excludeItemIds/commute/locationPreferences
+   * bundle useScoredInventory() assembles elsewhere — without it, this
+   * simulator's baseline could silently disagree with what the salesperson
+   * sees everywhere else in the app. Optional only so a caller with no
+   * buyer-profile context yet doesn't have to fabricate one.
+   */
+  opts?: ScoreInventoryOptions;
 }) {
   const [overrides, setOverrides] = useState<Answers>(answers);
 
@@ -40,8 +49,8 @@ export function DecisionSimulator({
     (q) => SIMULATABLE.includes(q.type as (typeof SIMULATABLE)[number]) && isVisible(q, overrides),
   );
 
-  const baseline = scoreInventory(pack, answers);
-  const simulated = scoreInventory(pack, overrides);
+  const baseline = scoreInventory(pack, answers, opts);
+  const simulated = scoreInventory(pack, overrides, opts);
   const baselineTop = baseline[0];
   const simulatedTop = simulated[0];
   const changed = baselineTop && simulatedTop && baselineTop.item.id !== simulatedTop.item.id;

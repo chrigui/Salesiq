@@ -198,15 +198,18 @@ export function CompanionApp() {
     () => deriveLocationPreferencesOption(session.answers),
     [session.answers],
   );
+  const scoreOpts = useMemo(
+    () => ({
+      priorityWeights,
+      excludeItemIds,
+      commute: commuteOption,
+      locationPreferences: locationPreferencesOption,
+    }),
+    [priorityWeights, excludeItemIds, commuteOption, locationPreferencesOption],
+  );
   const scored = useMemo(
-    () =>
-      scoreInventory(pack, session.answers, {
-        priorityWeights,
-        excludeItemIds,
-        commute: commuteOption,
-        locationPreferences: locationPreferencesOption,
-      }),
-    [pack, session.answers, priorityWeights, excludeItemIds, commuteOption, locationPreferencesOption],
+    () => scoreInventory(pack, session.answers, scoreOpts),
+    [pack, session.answers, scoreOpts],
   );
   const copilotSignals = useMemo(
     () => detectSignals(pack, session.answers, session.timeline, session.bookmarks, scored),
@@ -582,6 +585,7 @@ export function CompanionApp() {
         onClose={() => setSimulatorOpen(false)}
         pack={pack}
         answers={session.answers}
+        opts={scoreOpts}
       />
 
       <BuyerIntelligencePanel

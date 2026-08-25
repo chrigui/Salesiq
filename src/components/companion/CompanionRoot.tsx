@@ -10,6 +10,7 @@ import { MeetCustomerScreen } from "./MeetCustomerScreen";
 import { DiscoveryWizard } from "./DiscoveryWizard";
 import { RequirementConfirmation } from "./RequirementConfirmation";
 import { PropertyExplorer } from "./explore/PropertyExplorer";
+import { DecisionRoom } from "./DecisionRoom";
 import { useMeetingFlow } from "./meetingFlow";
 
 /**
@@ -18,9 +19,9 @@ import { useMeetingFlow } from "./meetingFlow";
  * dashboard-provisioned account — same self-gating pattern
  * `/dashboard/page.tsx` already uses (useSessionStatus() + LoginScreen), no
  * new auth system, no self-signup. Once signed in, the guided
- * Start -> Meet -> Discover -> Confirm -> Explore journey runs before the
- * existing, untouched full Companion app, reachable as an explicit escape
- * hatch from the Explorer.
+ * Start -> Meet -> Discover -> Confirm -> Explore -> Decide journey runs
+ * before the existing, untouched full Companion app, reachable as an
+ * explicit escape hatch from the Explorer.
  */
 export function CompanionRoot() {
   const org = useOrganization();
@@ -58,6 +59,8 @@ export function CompanionRoot() {
       return <RequirementConfirmation />;
     case "explore":
       return <PropertyExplorer />;
+    case "decide":
+      return <DecisionRoom />;
     case "workspace":
     default:
       return <CompanionApp />;

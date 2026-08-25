@@ -18,7 +18,19 @@ export type DisplayView =
   | "compare" // the existing, unrelated auto-compare of the top-3 scored items
   | "compareGroup" // a salesperson-curated compareItemIds group (Property Explorer)
   | "item"
-  | "proposal";
+  | "proposal"
+  // The Decision Room's cinematic modes, additive to the union above — see
+  // its own plan doc for the full conceptual mapping onto these 7 original
+  // values plus these 8 new ones. Each is driven by presentItem(), never a
+  // second scoring/data path.
+  | "whyThis"
+  | "whyNot"
+  | "investment"
+  | "lifestyle"
+  | "floorPlan"
+  | "location"
+  | "payment"
+  | "recap";
 
 export interface CustomerInfo {
   name: string;
@@ -61,6 +73,8 @@ export type TimelineEventKind =
   | "bookmark-remove"
   | "compare-add"
   | "compare-remove"
+  | "recap-add"
+  | "recap-remove"
   | "customer"
   | "proposal"
   | "lead"
@@ -99,6 +113,13 @@ export interface SessionState {
    * Experience can be pushed to the Customer Display.
    */
   compareItemIds: string[];
+  /**
+   * Items the salesperson has flagged for the (not-yet-built) LUMMA Recap
+   * stage — same shape/plumbing as `compareItemIds`, kept separate because
+   * "in the current comparison" and "worth recapping" are different
+   * memberships (a property can leave the compare group but stay recap-worthy).
+   */
+  recapItemIds: string[];
   customer: CustomerInfo;
   /**
    * The persistent Buyer Intelligence identity this session has resolved to,
@@ -139,11 +160,21 @@ interface SessionActions {
   setActiveQuestion: (questionId: string | null) => void;
   setView: (view: DisplayView) => void;
   focusItem: (itemId: string | null) => void;
+  /**
+   * Sets the subject property AND the Display view it should present in,
+   * as one atomic update/publish — unlike composing focusItem()+setView(),
+   * which are two separate network messages and could let a remote Display
+   * briefly render the wrong intermediate view under real latency.
+   */
+  presentItem: (itemId: string, view: DisplayView) => void;
   toggleBookmark: (itemId: string) => void;
   addToCompare: (itemId: string) => void;
   removeFromCompare: (itemId: string) => void;
   clearCompare: () => void;
   reorderCompare: (itemIds: string[]) => void;
+  addToRecap: (itemId: string) => void;
+  removeFromRecap: (itemId: string) => void;
+  clearRecap: () => void;
   updateCustomer: (patch: Partial<CustomerInfo>) => void;
   linkBuyerProfile: (buyerProfileId: string | null) => void;
   setWorkLocationGeo: (lat: number | null, lng: number | null) => void;
@@ -199,6 +230,7 @@ function initialState(): SessionState {
     focusedItemId: null,
     bookmarks: [],
     compareItemIds: [],
+    recapItemIds: [],
     customer: { name: "", phone: "", email: "", notes: "" },
     buyerProfileId: null,
     workLocationLat: null,
@@ -221,6 +253,7 @@ function snapshot(s: SessionState & SessionActions): SessionState {
     focusedItemId: s.focusedItemId,
     bookmarks: s.bookmarks,
     compareItemIds: s.compareItemIds,
+    recapItemIds: s.recapItemIds,
     customer: s.customer,
     buyerProfileId: s.buyerProfileId,
     workLocationLat: s.workLocationLat,
@@ -258,6 +291,7 @@ export const useSession = create<SessionState & SessionActions>((set, get) => {
         focusedItemId: null,
         bookmarks: [],
         compareItemIds: [],
+        recapItemIds: [],
         timeline: pushEvent(get().timeline, { kind: "pack", packId }),
       }),
 
@@ -296,6 +330,13 @@ export const useSession = create<SessionState & SessionActions>((set, get) => {
         focusedItemId: itemId,
         view: itemId ? "item" : "recommendation",
         timeline: pushEvent(get().timeline, { kind: "focus", itemId }),
+      }),
+
+    presentItem: (itemId, view) =>
+      bump({
+        focusedItemId: itemId,
+        view,
+        timeline: pushEvent(get().timeline, { kind: "focus", itemId, view }),
       }),
 
     toggleBookmark: (itemId) => {
@@ -348,6 +389,36 @@ export const useSession = create<SessionState & SessionActions>((set, get) => {
     reorderCompare: (itemIds) => {
       // Not logged to the timeline — a display-order tweak, not a new interaction.
       set((s) => ({ compareItemIds: itemIds, revision: s.revision + 1 }));
+      publish();
+    },
+
+    addToRecap: (itemId) => {
+      set((s) => {
+        if (s.recapItemIds.includes(itemId)) return s;
+        return {
+          recapItemIds: [...s.recapItemIds, itemId],
+          timeline: pushEvent(s.timeline, { kind: "recap-add", itemId }),
+          revision: s.revision + 1,
+        };
+      });
+      publish();
+    },
+
+    removeFromRecap: (itemId) => {
+      set((s) => ({
+        recapItemIds: s.recapItemIds.filter((id) => id !== itemId),
+        timeline: pushEvent(s.timeline, { kind: "recap-remove", itemId }),
+        revision: s.revision + 1,
+      }));
+      publish();
+    },
+
+    clearRecap: () => {
+      set((s) => ({
+        recapItemIds: [],
+        timeline: pushEvent(s.timeline, { kind: "recap-remove", detail: "Cleared recap" }),
+        revision: s.revision + 1,
+      }));
       publish();
     },
 
@@ -456,6 +527,7 @@ export const useSession = create<SessionState & SessionActions>((set, get) => {
         focusedItemId: null,
         bookmarks: [],
         compareItemIds: [],
+        recapItemIds: [],
         buyerProfileId: null,
         customer: {
           name: "Sara Haddad",
@@ -492,6 +564,7 @@ export const useSession = create<SessionState & SessionActions>((set, get) => {
         workLocationLat: state.workLocationLat ?? null,
         workLocationLng: state.workLocationLng ?? null,
         compareItemIds: state.compareItemIds ?? [],
+        recapItemIds: state.recapItemIds ?? [],
       }),
 
     _hydrate: () => {
@@ -507,6 +580,7 @@ export const useSession = create<SessionState & SessionActions>((set, get) => {
           workLocationLat: env.state.workLocationLat ?? null,
           workLocationLng: env.state.workLocationLng ?? null,
           compareItemIds: env.state.compareItemIds ?? [],
+          recapItemIds: env.state.recapItemIds ?? [],
         });
       }
     },

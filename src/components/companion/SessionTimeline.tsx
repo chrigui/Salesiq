@@ -20,6 +20,8 @@ import {
   Clock,
   GitCompareArrows,
   GitCompare,
+  ClipboardList,
+  ClipboardX,
 } from "lucide-react";
 import type { IndustryPack } from "@/core/types";
 import type { TimelineEvent } from "@/core/store/session";
@@ -36,6 +38,8 @@ const ICONS: Record<TimelineEvent["kind"], typeof History> = {
   "bookmark-remove": BookmarkX,
   "compare-add": GitCompareArrows,
   "compare-remove": GitCompare,
+  "recap-add": ClipboardList,
+  "recap-remove": ClipboardX,
   customer: UserPlus,
   proposal: FileText,
   lead: UserPlus,

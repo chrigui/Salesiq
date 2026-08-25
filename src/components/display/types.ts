@@ -1,6 +1,7 @@
 import type { InventoryItem } from "@/core/types";
 import type { DisplayProfileAssetMeta } from "@/lib/serializers/displayProfile";
 import type { MotionConfig } from "@/core/display/motionPresets";
+import type { DisplayView } from "@/core/store/session";
 
 export interface DisplayBranding {
   name: string;
@@ -56,8 +57,8 @@ export interface DisplayWidgetContext {
   deviceToken?: string;
   /** This item's real score/reasons/narrative against the current live customer's answers (scoreInventory/narrate) — null when there's no active session to score against (idle mode, editor preview). Never fabricated: absent rather than guessed. */
   matchScore?: { score: number; reasons: string[]; narrative: string } | null;
-  /** The shared session's actual current view (welcome/question/recommendation/compare/item/proposal) — undefined outside a live session (idle mode, editor preview). */
-  sessionView?: "welcome" | "question" | "recommendation" | "compare" | "item" | "proposal";
+  /** The shared session's actual current view — undefined outside a live session (idle mode, editor preview). */
+  sessionView?: DisplayView;
   /** Whether a proposal has actually been generated for this session — real signal, never inferred. */
   hasProposal?: boolean;
 }
