@@ -19,12 +19,16 @@ const SIMULATABLE = ["budget", "counter", "slider", "toggle"] as const;
  * never writes to the shared session, so exploring "what if" never risks
  * corrupting the live interview a customer is actually answering.
  */
+/** The same "score >= 60" tier narrate() (explain.ts) already calls "a strong match" — reused here, never a second threshold. */
+const STRONG_MATCH_SCORE = 60;
+
 export function DecisionSimulator({
   open,
   onClose,
   pack,
   answers,
   opts,
+  groupItemIds,
 }: {
   open: boolean;
   onClose: () => void;
@@ -38,6 +42,13 @@ export function DecisionSimulator({
    * buyer-profile context yet doesn't have to fabricate one.
    */
   opts?: ScoreInventoryOptions;
+  /**
+   * Scopes the simulated ranking to this set of item ids — the Decision
+   * Room's compare group, so sliding a budget shows how *this* group
+   * re-ranks rather than the whole pack. Omitted (today's global entry
+   * point in CompanionApp.tsx) keeps the full-pack ranking unchanged.
+   */
+  groupItemIds?: string[];
 }) {
   const [overrides, setOverrides] = useState<Answers>(answers);
 
@@ -49,12 +60,23 @@ export function DecisionSimulator({
     (q) => SIMULATABLE.includes(q.type as (typeof SIMULATABLE)[number]) && isVisible(q, overrides),
   );
 
-  const baseline = scoreInventory(pack, answers, opts);
-  const simulated = scoreInventory(pack, overrides, opts);
+  const baselineFull = scoreInventory(pack, answers, opts);
+  const simulatedFull = scoreInventory(pack, overrides, opts);
+  const scoped = (list: typeof baselineFull) =>
+    groupItemIds ? list.filter((s) => groupItemIds.includes(s.item.id)) : list;
+  const baseline = scoped(baselineFull);
+  const simulated = scoped(simulatedFull);
   const baselineTop = baseline[0];
   const simulatedTop = simulated[0];
   const changed = baselineTop && simulatedTop && baselineTop.item.id !== simulatedTop.item.id;
   const dirty = JSON.stringify(overrides) !== JSON.stringify(answers);
+
+  const baselineStrongIds = new Set(
+    baseline.filter((s) => s.score >= STRONG_MATCH_SCORE).map((s) => s.item.id),
+  );
+  const newlyStrongCount = simulated.filter(
+    (s) => s.score >= STRONG_MATCH_SCORE && !baselineStrongIds.has(s.item.id),
+  ).length;
 
   return (
     <AnimatePresence>
@@ -177,6 +199,13 @@ export function DecisionSimulator({
                 ) : (
                   <p className="mb-3 text-xs text-ink-faint">
                     Top pick stays {simulatedTop?.item.name ?? "the same"} under these conditions.
+                  </p>
+                )}
+
+                {dirty && newlyStrongCount > 0 && (
+                  <p className="mb-3 text-xs text-brand">
+                    With these conditions, {newlyStrongCount} additional propert
+                    {newlyStrongCount === 1 ? "y becomes" : "ies become"} a strong match.
                   </p>
                 )}
 

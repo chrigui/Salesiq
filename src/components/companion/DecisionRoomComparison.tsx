@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, ListChecks } from "lucide-react";
+import { ArrowLeft, ListChecks, Sliders } from "lucide-react";
 import { useSession } from "@/core/store/session";
+import { useScoreOptions } from "./discoveryScoring";
 import { ComparisonExperience } from "./explore/ComparisonExperience";
 import { DisplayControl } from "./DisplayControl";
+import { DecisionSimulator } from "./DecisionSimulator";
 import type { ScoredItem } from "@/core/engine/scoring";
 import type { IndustryPack } from "@/core/types";
 
@@ -17,9 +19,10 @@ const MAX_COMPARE = 4;
  * The Decision Room's "compare" step — mounts the real, shared
  * ComparisonExperience unchanged (so the plain Explorer's Compare tab and
  * this screen never drift), and adds only the Decision-Room-specific chrome
- * around it. Toolbar entries for Decision Breakdown/Display Control/What If
- * are added by later Decision Room PRs as each ships, rather than stubbed
- * here ahead of time.
+ * around it. "What if" opens the same DecisionSimulator CompanionApp uses,
+ * scoped to this compare group via groupItemIds so a budget slide shows how
+ * *this* shortlist re-ranks rather than the whole pack — it never touches
+ * session.answers, so closing it leaves the real comparison untouched.
  */
 export function DecisionRoomComparison({
   pack,
@@ -33,8 +36,10 @@ export function DecisionRoomComparison({
   onShowPriorities: () => void;
 }) {
   const session = useSession();
+  const opts = useScoreOptions(pack);
   const atCap = session.compareItemIds.length >= MAX_COMPARE;
   const [displayControlFor, setDisplayControlFor] = useState<ScoredItem | null>(null);
+  const [whatIfOpen, setWhatIfOpen] = useState(false);
 
   return (
     <div className="bg-aurora min-h-screen px-4 pb-10 pt-6 sm:px-6">
@@ -47,13 +52,22 @@ export function DecisionRoomComparison({
             <ArrowLeft className="h-4 w-4" />
             Back to shortlist
           </button>
-          <button
-            onClick={onShowPriorities}
-            className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-medium text-ink-muted transition hover:bg-white/10"
-          >
-            <ListChecks className="h-3.5 w-3.5 text-brand" />
-            Priorities
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setWhatIfOpen(true)}
+              className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-medium text-ink-muted transition hover:bg-white/10"
+            >
+              <Sliders className="h-3.5 w-3.5 text-brand" />
+              What if
+            </button>
+            <button
+              onClick={onShowPriorities}
+              className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-medium text-ink-muted transition hover:bg-white/10"
+            >
+              <ListChecks className="h-3.5 w-3.5 text-brand" />
+              Priorities
+            </button>
+          </div>
         </div>
 
         <ComparisonExperience pack={pack} scored={scored} onDisplayControl={setDisplayControlFor} />
@@ -68,6 +82,15 @@ export function DecisionRoomComparison({
       {displayControlFor && (
         <DisplayControl item={displayControlFor} onClose={() => setDisplayControlFor(null)} />
       )}
+
+      <DecisionSimulator
+        open={whatIfOpen}
+        onClose={() => setWhatIfOpen(false)}
+        pack={pack}
+        answers={session.answers}
+        opts={opts}
+        groupItemIds={session.compareItemIds}
+      />
     </div>
   );
 }

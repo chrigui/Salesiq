@@ -8,7 +8,7 @@
  */
 import { useMemo } from "react";
 import type { Answers, IndustryPack, NearbyAmenity } from "@/core/types";
-import { scoreInventory, type ScoredItem } from "@/core/engine/scoring";
+import { scoreInventory, type ScoredItem, type ScoreInventoryOptions } from "@/core/engine/scoring";
 import { useSession } from "@/core/store/session";
 import { useBuyerProfile, useBuyerRejectedItems } from "@/core/store/buyerProfiles";
 import { toPriorityWeights } from "@/core/buyerIntelligence/priorityWeights";
@@ -97,7 +97,7 @@ export function deriveLocationPreferencesOption(
  * has to re-derive it slightly differently and drift out of sync with what
  * the salesperson already saw during discovery/confirmation.
  */
-export function useScoredInventory(pack: IndustryPack): ScoredItem[] {
+export function useScoreOptions(pack: IndustryPack): ScoreInventoryOptions {
   const session = useSession();
   const { buyerProfile } = useBuyerProfile(session.buyerProfileId);
   const priorityWeights = useMemo(
@@ -121,13 +121,18 @@ export function useScoredInventory(pack: IndustryPack): ScoredItem[] {
     [session.answers],
   );
   return useMemo(
-    () =>
-      scoreInventory(pack, session.answers, {
-        priorityWeights,
-        excludeItemIds,
-        commute: commuteOption,
-        locationPreferences: locationPreferencesOption,
-      }),
-    [pack, session.answers, priorityWeights, excludeItemIds, commuteOption, locationPreferencesOption],
+    () => ({
+      priorityWeights,
+      excludeItemIds,
+      commute: commuteOption,
+      locationPreferences: locationPreferencesOption,
+    }),
+    [priorityWeights, excludeItemIds, commuteOption, locationPreferencesOption],
   );
+}
+
+export function useScoredInventory(pack: IndustryPack): ScoredItem[] {
+  const session = useSession();
+  const opts = useScoreOptions(pack);
+  return useMemo(() => scoreInventory(pack, session.answers, opts), [pack, session.answers, opts]);
 }
