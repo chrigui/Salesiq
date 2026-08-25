@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import useSWR, { mutate as globalMutate } from "swr";
-import { ArrowLeft, ArrowUp, ArrowDown, Loader2, Eye, Upload, FileText, Trash2, RotateCcw, Check, Copy } from "lucide-react";
+import { ArrowLeft, GripVertical, Loader2, Eye, Upload, FileText, Trash2, RotateCcw, Check, Copy } from "lucide-react";
+import { motion, useDragControls, type PanInfo } from "framer-motion";
 import { Panel } from "@/components/console/light-ui";
 import { cx } from "@/components/ui/primitives";
 import { Field, TextInput } from "@/components/console/builder/fields";
@@ -275,11 +276,38 @@ function WidgetsTab({ id, profile }: { id: string; profile: DisplayProfile }) {
     setResetOpen(false);
   };
 
-  const move = (index: number, dir: -1 | 1) => {
-    const to = index + dir;
-    if (to < 0 || to >= sections.length) return;
+  const rowRefs = useRef(new Map<string, HTMLDivElement>());
+  const registerRowRef = (id: string, el: HTMLDivElement | null) => {
+    if (el) rowRefs.current.set(id, el);
+    else rowRefs.current.delete(id);
+  };
+
+  /**
+   * Reorders by hit-testing the drop point's y against every other row's
+   * current on-screen rect — same technique as the Companion's drag-to-
+   * compare grid (DraggableCard/PropertyGrid), adapted to a single vertical
+   * axis: find the first row whose vertical midpoint is below the drop
+   * point and insert before it (or append, if the drop lands below every
+   * row).
+   */
+  const reorder = (draggedId: string, dropY: number) => {
+    const draggedIdx = sections.findIndex((s) => s.id === draggedId);
+    if (draggedIdx === -1) return;
+    let targetIdx = sections.length;
+    for (let i = 0; i < sections.length; i++) {
+      if (sections[i].id === draggedId) continue;
+      const el = rowRefs.current.get(sections[i].id);
+      if (!el) continue;
+      const rect = el.getBoundingClientRect();
+      if (dropY < rect.top + rect.height / 2) {
+        targetIdx = i;
+        break;
+      }
+    }
+    if (targetIdx === draggedIdx || targetIdx === draggedIdx + 1) return;
     const next = [...sections];
-    [next[index], next[to]] = [next[to], next[index]];
+    const [moved] = next.splice(draggedIdx, 1);
+    next.splice(targetIdx > draggedIdx ? targetIdx - 1 : targetIdx, 0, moved);
     commit(next.map((s, i) => ({ ...s, order: i })));
   };
 
@@ -323,47 +351,41 @@ function WidgetsTab({ id, profile }: { id: string; profile: DisplayProfile }) {
       <WidgetLibraryPanel sections={sections} onToggle={toggleByType} />
       <div className="grid gap-4 lg:grid-cols-2">
       <Panel title="Widget order">
+        <p className="mb-2 text-[11px] text-zinc-400">Drag a row by its handle to reorder.</p>
         <div className="space-y-2">
           {sections.map((s, i) => (
-            <div
-              key={s.id}
-              className={cx(
-                "flex items-center gap-2 rounded-2xl border px-3 py-2.5",
-                s.enabled ? "border-zinc-200 bg-white" : "border-zinc-100 bg-zinc-50",
-              )}
-            >
-              <label className="flex flex-1 items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={s.enabled}
-                  onChange={() => toggle(i)}
-                  className="h-4 w-4 rounded border-zinc-300"
-                />
-                <span className={cx("text-sm font-medium", !s.enabled && "text-zinc-400")}>
-                  {WIDGET_LABELS[s.type] ?? s.type}
-                </span>
-              </label>
-              {isGrid && (
-                <select
-                  value={(s.config?.span as WidgetSpan | undefined) ?? "lg"}
-                  onChange={(e) => setSpan(i, e.target.value as WidgetSpan)}
-                  className="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs text-zinc-600"
-                  aria-label={`${WIDGET_LABELS[s.type] ?? s.type} card size`}
-                >
-                  <option value="sm">Small</option>
-                  <option value="md">Medium</option>
-                  <option value="lg">Full width</option>
-                </select>
-              )}
-              <div className="flex items-center gap-0.5">
-                <IconBtn label="Move up" disabled={i === 0} onClick={() => move(i, -1)}>
-                  <ArrowUp className="h-3.5 w-3.5" />
-                </IconBtn>
-                <IconBtn label="Move down" disabled={i === sections.length - 1} onClick={() => move(i, 1)}>
-                  <ArrowDown className="h-3.5 w-3.5" />
-                </IconBtn>
+            <DraggableWidgetRow key={s.id} registerRef={(el) => registerRowRef(s.id, el)} onDragEnd={(y) => reorder(s.id, y)}>
+              <div
+                className={cx(
+                  "flex items-center gap-2 rounded-2xl border px-3 py-2.5",
+                  s.enabled ? "border-zinc-200 bg-white" : "border-zinc-100 bg-zinc-50",
+                )}
+              >
+                <label className="flex flex-1 items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={s.enabled}
+                    onChange={() => toggle(i)}
+                    className="h-4 w-4 rounded border-zinc-300"
+                  />
+                  <span className={cx("text-sm font-medium", !s.enabled && "text-zinc-400")}>
+                    {WIDGET_LABELS[s.type] ?? s.type}
+                  </span>
+                </label>
+                {isGrid && (
+                  <select
+                    value={(s.config?.span as WidgetSpan | undefined) ?? "lg"}
+                    onChange={(e) => setSpan(i, e.target.value as WidgetSpan)}
+                    className="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs text-zinc-600"
+                    aria-label={`${WIDGET_LABELS[s.type] ?? s.type} card size`}
+                  >
+                    <option value="sm">Small</option>
+                    <option value="md">Medium</option>
+                    <option value="lg">Full width</option>
+                  </select>
+                )}
               </div>
-            </div>
+            </DraggableWidgetRow>
           ))}
         </div>
       </Panel>
@@ -1001,25 +1023,53 @@ function PreviewTab({
   );
 }
 
-function IconBtn({
-  label,
-  disabled,
-  onClick,
+/**
+ * A vertical-reorder row using the same real drag gesture (framer-motion's
+ * native `drag`, no new library) and drop-point hit-testing technique as
+ * the Companion's drag-to-compare grid (DraggableCard/PropertyGrid) —
+ * adapted from free 2D drag onto a compare target to axis-locked vertical
+ * drag with the drop point tested against sibling rows' midpoints. Drag
+ * only starts from the grip handle (`dragListener={false}` + manual
+ * `dragControls.start()`), so the checkbox and size `<select>` inside stay
+ * normal interactive elements instead of accidentally triggering a drag.
+ */
+function DraggableWidgetRow({
+  registerRef,
+  onDragEnd,
   children,
 }: {
-  label: string;
-  disabled?: boolean;
-  onClick: () => void;
+  registerRef: (el: HTMLDivElement | null) => void;
+  onDragEnd: (dropY: number) => void;
   children: React.ReactNode;
 }) {
+  const controls = useDragControls();
+
+  const handleDragEnd = (_e: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    onDragEnd(info.point.y - window.scrollY);
+  };
+
   return (
-    <button
-      aria-label={label}
-      disabled={disabled}
-      onClick={onClick}
-      className="grid h-7 w-7 place-items-center rounded-lg text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-900 disabled:opacity-30 disabled:hover:bg-transparent"
+    <motion.div
+      ref={registerRef}
+      drag="y"
+      dragListener={false}
+      dragControls={controls}
+      dragMomentum={false}
+      dragElastic={0.08}
+      dragSnapToOrigin
+      whileDrag={{ scale: 1.02, zIndex: 20, boxShadow: "0 12px 32px rgba(0,0,0,0.2)" }}
+      onDragEnd={handleDragEnd}
+      className="flex items-center gap-1 touch-none"
     >
-      {children}
-    </button>
+      <button
+        type="button"
+        onPointerDown={(e) => controls.start(e)}
+        aria-label="Drag to reorder"
+        className="grid h-7 w-5 shrink-0 cursor-grab place-items-center text-zinc-300 transition hover:text-zinc-500 active:cursor-grabbing"
+      >
+        <GripVertical className="h-4 w-4" />
+      </button>
+      <div className="min-w-0 flex-1">{children}</div>
+    </motion.div>
   );
 }
