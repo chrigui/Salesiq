@@ -55,7 +55,7 @@ export function BrandTokenScope({
   } as CSSProperties;
 
   return (
-    <div style={style} className={className}>
+    <div style={style} className={className} data-brand-scope="true">
       <BrandFontsLoader fontHeading={brand?.fontHeading} fontBody={brand?.fontBody} />
       {children}
     </div>

@@ -33,6 +33,11 @@ const patchSchema = z.object({
   logoDataBase64: z.string().min(1).optional(),
   logoMimeType: z.enum(["image/png", "image/jpeg", "image/webp"]).optional(),
   removeLogo: z.boolean().optional(),
+  // Whole-Display default brand (Theme-PR3) — setting true clears every
+  // other kit's isDefault for this tenant in the same transaction, so
+  // "exactly one default" holds without a DB-level constraint (same
+  // convention as Published DisplayProfile resolution).
+  setDefault: z.boolean().optional(),
 });
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -44,8 +49,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       return NextResponse.json({ error: "invalid-request" }, { status: 400 });
     }
 
-    const { logoDataBase64, logoMimeType, removeLogo, ...rest } = parsed.data;
-    const data: typeof rest & { logoData?: Uint8Array<ArrayBuffer> | null; logoMimeType?: string | null } = { ...rest };
+    const { logoDataBase64, logoMimeType, removeLogo, setDefault, ...rest } = parsed.data;
+    const data: typeof rest & { logoData?: Uint8Array<ArrayBuffer> | null; logoMimeType?: string | null; isDefault?: boolean } = {
+      ...rest,
+    };
 
     if (removeLogo) {
       data.logoData = null;
@@ -61,14 +68,21 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       data.logoData = Uint8Array.from(buffer) as Uint8Array<ArrayBuffer>;
       data.logoMimeType = logoMimeType;
     }
+    if (setDefault !== undefined) data.isDefault = setDefault;
 
-    const result = await prisma.brandProfile.updateMany({
-      where: { id, tenantId: ctx.tenantId },
-      data,
+    const brandProfile = await prisma.$transaction(async (tx) => {
+      if (setDefault) {
+        await tx.brandProfile.updateMany({
+          where: { tenantId: ctx.tenantId, isDefault: true, id: { not: id } },
+          data: { isDefault: false },
+        });
+      }
+      const result = await tx.brandProfile.updateMany({ where: { id, tenantId: ctx.tenantId }, data });
+      if (result.count === 0) return null;
+      return tx.brandProfile.findUniqueOrThrow({ where: { id } });
     });
-    if (result.count === 0) return NextResponse.json({ error: "not-found" }, { status: 404 });
+    if (!brandProfile) return NextResponse.json({ error: "not-found" }, { status: 404 });
 
-    const brandProfile = await prisma.brandProfile.findUniqueOrThrow({ where: { id } });
     return NextResponse.json({ brandProfile: toBrandProfileDTO(brandProfile) });
   } catch (err) {
     if (err instanceof AuthError) return NextResponse.json({ error: err.message }, { status: err.status });

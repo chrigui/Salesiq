@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Check, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/primitives";
 import type { DisplayWidgetContext } from "../types";
 
 /** Compact card variant of DisplayLeadCapture — same real submission path, stacked inputs to fit a grid card. */
@@ -64,14 +65,15 @@ export function DisplayLeadCaptureCard({ item, pack, mode, deviceId, deviceToken
           className="w-full rounded-lg border border-white/15 bg-white/5 px-2.5 py-1.5 text-xs text-white placeholder:text-white/40"
         />
       </div>
-      <button
+      <Button
         onClick={submit}
+        variant="brand"
         disabled={!name.trim() || status === "submitting"}
-        className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-black transition disabled:opacity-40"
+        className="mt-2 w-full text-xs"
       >
         {status === "submitting" && <Loader2 className="h-3 w-3 animate-spin" />}
         Request a callback
-      </button>
+      </Button>
       {status === "error" && <p className="mt-1.5 text-[10px] text-red-400">Something went wrong — try again.</p>}
     </div>
   );

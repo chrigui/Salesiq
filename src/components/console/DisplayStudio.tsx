@@ -437,7 +437,14 @@ function BrandProfileRow({
           <Palette className="h-4 w-4" />
         </div>
         <div className="min-w-0 flex-1">
-          <div className="truncate text-sm font-medium text-zinc-900">{brandProfile.name}</div>
+          <div className="flex items-center gap-1.5">
+            <div className="truncate text-sm font-medium text-zinc-900">{brandProfile.name}</div>
+            {brandProfile.isDefault && (
+              <span className="shrink-0 rounded-full bg-zinc-900 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
+                Default
+              </span>
+            )}
+          </div>
         </div>
       </button>
 
@@ -553,12 +560,31 @@ function BrandProfileRow({
             </Field>
           </div>
 
-          <button
-            onClick={() => deleteBrandProfile(brandProfile.id)}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 px-3 py-1.5 text-xs text-red-600 transition hover:bg-red-50"
-          >
-            <Trash2 className="h-3.5 w-3.5" /> Delete brand profile
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => updateBrandProfile(brandProfile.id, { setDefault: !brandProfile.isDefault })}
+              title={
+                brandProfile.isDefault
+                  ? "Stop theming the whole Customer Display with this kit"
+                  : "Theme the whole Customer Display (Welcome, Matches, Recap, etc.) with this kit — not just profiles it's attached to"
+              }
+              className={cx(
+                "inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-medium transition",
+                brandProfile.isDefault
+                  ? "border-zinc-900 bg-zinc-900 text-white hover:brightness-110"
+                  : "border-zinc-200 text-zinc-600 hover:bg-zinc-50",
+              )}
+            >
+              <MonitorPlay className="h-3.5 w-3.5" />
+              {brandProfile.isDefault ? "Default for whole Display" : "Set as default"}
+            </button>
+            <button
+              onClick={() => deleteBrandProfile(brandProfile.id)}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 px-3 py-1.5 text-xs text-red-600 transition hover:bg-red-50"
+            >
+              <Trash2 className="h-3.5 w-3.5" /> Delete brand profile
+            </button>
+          </div>
         </div>
       )}
     </div>

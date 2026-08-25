@@ -70,7 +70,7 @@ export async function updateBrandProfile(
       | "spacingScale"
       | "defaultMotionPreset"
     >
-  > & { logoDataBase64?: string; logoMimeType?: string; removeLogo?: boolean },
+  > & { logoDataBase64?: string; logoMimeType?: string; removeLogo?: boolean; setDefault?: boolean },
 ): Promise<BrandProfile | null> {
   const res = await fetch(`${KEY}/${id}`, {
     method: "PATCH",
@@ -81,6 +81,22 @@ export async function updateBrandProfile(
   if (!res.ok) return null;
   const { brandProfile } = await res.json();
   return brandProfile as BrandProfile;
+}
+
+/**
+ * The whole-Display default brand kit (Theme-PR3) — polled the same way
+ * displayDevice.ts polls its own config, so a "Set as default" change in
+ * the admin console reaches an already-open kiosk without a reload. Public
+ * route (no auth) — the live Display has no login of its own, same as
+ * every other Display-facing resolver.
+ */
+export function useDefaultBrandProfile(): BrandProfile | null {
+  const { data } = useSWR<{ brandProfile: BrandProfile | null }>(
+    "/api/public/brand-profiles/default",
+    fetcher,
+    { refreshInterval: 30_000 },
+  );
+  return data?.brandProfile ?? null;
 }
 
 export async function deleteBrandProfile(id: string): Promise<boolean> {

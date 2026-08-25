@@ -5,6 +5,8 @@ import { PairingOverlay } from "@/components/sync/Pairing";
 import { DisplayKiosk } from "./DisplayKiosk";
 import { DevicePairingPrompt } from "./DevicePairingPrompt";
 import { useDisplayDevice } from "@/core/store/displayDevice";
+import { useDefaultBrandProfile } from "@/core/store/brandProfiles";
+import { BrandTokenScope } from "./BrandTokenScope";
 
 /**
  * Single shared owner of this browser's Display device identity. DisplayStage
@@ -17,9 +19,10 @@ import { useDisplayDevice } from "@/core/store/displayDevice";
  */
 export function DisplayRoot() {
   const device = useDisplayDevice();
+  const defaultBrand = useDefaultBrandProfile();
 
   return (
-    <>
+    <BrandTokenScope brand={defaultBrand}>
       <DisplayStage deviceId={device.deviceId} deviceToken={device.token} />
       <PairingOverlay />
       <DisplayKiosk />
@@ -29,6 +32,6 @@ export function DisplayRoot() {
         claimError={device.claimError}
         claim={device.claim}
       />
-    </>
+    </BrandTokenScope>
   );
 }
