@@ -28,7 +28,7 @@ import {
 import type { IndustryPack, InventoryItem } from "@/core/types";
 
 const TABS = ["Widgets", "Brand", "Motion", "History", "Preview"] as const;
-type Tab = (typeof TABS)[number];
+export type Tab = (typeof TABS)[number];
 
 const TEMPLATES: DisplayTemplate[] = [
   "Minimal",
@@ -43,9 +43,9 @@ const TEMPLATES: DisplayTemplate[] = [
   "Dashboard",
 ];
 
-export function DisplayProfileEditor({ id, onBack }: { id: string; onBack: () => void }) {
+export function DisplayProfileEditor({ id, onBack, initialTab }: { id: string; onBack: () => void; initialTab?: Tab }) {
   const { profile, isLoading } = useDisplayProfile(id);
-  const [tab, setTab] = useState<Tab>("Widgets");
+  const [tab, setTab] = useState<Tab>(initialTab ?? "Widgets");
   const [publishDialogOpen, setPublishDialogOpen] = useState(false);
 
   if (isLoading || !profile) {
@@ -135,7 +135,7 @@ export function DisplayProfileEditor({ id, onBack }: { id: string; onBack: () =>
   );
 }
 
-function PublishDialog({ onClose, onPublish }: { onClose: () => void; onPublish: (changeReason: string) => void }) {
+export function PublishDialog({ onClose, onPublish }: { onClose: () => void; onPublish: (changeReason: string) => void }) {
   const [reason, setReason] = useState("");
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>

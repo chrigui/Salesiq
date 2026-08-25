@@ -2,13 +2,16 @@
 
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
-import { MonitorPlay, Plus, Loader2, Eye, EyeOff, FileEdit, Radio, Copy, Check } from "lucide-react";
+import { MonitorPlay, Plus, Loader2, Eye, EyeOff, FileEdit, Radio, Copy, Check, RotateCcw, Rocket } from "lucide-react";
 import { Panel } from "@/components/console/light-ui";
 import { cx } from "@/components/ui/primitives";
 import { PACKS } from "@/core/industries";
 import {
   createDisplayProfile,
+  updateDisplayProfile,
+  revertDisplayProfile,
   useDisplayProfiles,
+  useDisplayProfileVersions,
   type DisplayProfile,
   type DisplayProfileStatus,
   type DisplayTemplate,
@@ -21,7 +24,7 @@ import {
   useBrandProfiles,
   type BrandProfile,
 } from "@/core/store/brandProfiles";
-import { DisplayProfileEditor } from "@/components/console/DisplayProfileEditor";
+import { DisplayProfileEditor, PublishDialog, type Tab as EditorTab } from "@/components/console/DisplayProfileEditor";
 import { Field, TextInput, Select } from "@/components/console/builder/fields";
 import { Palette, Trash2, Upload, X as XIcon } from "lucide-react";
 import { FONT_OPTIONS, fontStack } from "@/core/display/brandFonts";
@@ -98,10 +101,16 @@ export function DisplayStudio() {
   const [tab, setTab] = useState<"profiles" | "displays" | "brand">("profiles");
   const { profiles, isLoading } = useDisplayProfiles();
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedTab, setSelectedTab] = useState<EditorTab | undefined>(undefined);
   const [pickerOpen, setPickerOpen] = useState(false);
 
+  const openProfile = (id: string, initialTab?: EditorTab) => {
+    setSelectedId(id);
+    setSelectedTab(initialTab);
+  };
+
   if (selectedId) {
-    return <DisplayProfileEditor id={selectedId} onBack={() => setSelectedId(null)} />;
+    return <DisplayProfileEditor id={selectedId} initialTab={selectedTab} onBack={() => setSelectedId(null)} />;
   }
 
   return (
@@ -150,10 +159,20 @@ export function DisplayStudio() {
               No display profiles yet. Create one for a listing to shape what the Customer Display shows.
             </p>
           ) : (
-            <div className="space-y-2">
-              {profiles.map((p) => (
-                <ProfileRow key={p.id} profile={p} onOpen={() => setSelectedId(p.id)} />
-              ))}
+            <div className="space-y-4">
+              <CurrentProfileCard profile={profiles[0]} onOpen={openProfile} />
+              {profiles.length > 1 && (
+                <div>
+                  <span className="mb-2 block text-[11px] font-semibold uppercase tracking-wide text-zinc-500">
+                    Other profiles
+                  </span>
+                  <div className="space-y-2">
+                    {profiles.slice(1).map((p) => (
+                      <ProfileRow key={p.id} profile={p} onOpen={() => openProfile(p.id)} />
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </Panel>
@@ -1067,6 +1086,126 @@ function PairingCodeDialog({ display, onClose }: { display: Display; onClose: ()
           Done
         </button>
       </div>
+    </div>
+  );
+}
+
+/**
+ * The most-recently-created profile, presented as a premium hero card with
+ * one-click actions — the "current profile" a client is actively working on
+ * shouldn't require opening the editor just to publish or check status.
+ * Everything here calls the exact same store functions/routes the editor's
+ * own controls do, so there is no separate "quick action" code path to keep
+ * in sync.
+ */
+function CurrentProfileCard({
+  profile,
+  onOpen,
+}: {
+  profile: DisplayProfile;
+  onOpen: (id: string, initialTab?: EditorTab) => void;
+}) {
+  const pack = PACKS.find((p) => p.id === profile.packId);
+  const item = pack?.inventory.find((i) => i.id === profile.itemId);
+  const { versions } = useDisplayProfileVersions(profile.id);
+  const rollbackTarget = versions.find((v) => !v.isCurrent) ?? null;
+
+  const [publishOpen, setPublishOpen] = useState(false);
+  const [rollbackOpen, setRollbackOpen] = useState(false);
+  const [rollingBack, setRollingBack] = useState(false);
+
+  return (
+    <div className="rounded-2xl border border-zinc-200 bg-gradient-to-br from-white to-zinc-50 p-5 shadow-sm">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <span className="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-zinc-400">
+            Current profile
+          </span>
+          <div className="text-lg font-semibold text-zinc-900">{profile.name}</div>
+          <div className="mt-0.5 text-xs text-zinc-400">
+            {item?.name ?? "Listing removed"} · {pack?.label ?? profile.packId} · {profile.template}
+          </div>
+        </div>
+        <div className="flex flex-col items-end gap-1">
+          <span className={cx("shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium", STATUS_STYLE[profile.status])}>
+            {profile.status}
+          </span>
+          <span className="text-[11px] text-zinc-400">Updated {new Date(profile.updatedAt).toLocaleString()}</span>
+        </div>
+      </div>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        <button
+          onClick={() => onOpen(profile.id)}
+          className="inline-flex items-center gap-1.5 rounded-xl bg-zinc-900 px-3 py-2 text-xs font-semibold text-white transition hover:brightness-110"
+        >
+          <FileEdit className="h-3.5 w-3.5" /> Edit
+        </button>
+        <button
+          onClick={() => onOpen(profile.id, "Preview")}
+          className="inline-flex items-center gap-1.5 rounded-xl border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-600 transition hover:bg-zinc-50"
+        >
+          <Eye className="h-3.5 w-3.5" /> Preview
+        </button>
+        <button
+          onClick={() => setPublishOpen(true)}
+          className="inline-flex items-center gap-1.5 rounded-xl border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-600 transition hover:bg-zinc-50"
+        >
+          <Rocket className="h-3.5 w-3.5" /> Publish
+        </button>
+        <button
+          disabled={!rollbackTarget}
+          title={rollbackTarget ? undefined : "No earlier published version to roll back to"}
+          onClick={() => setRollbackOpen(true)}
+          className="inline-flex items-center gap-1.5 rounded-xl border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-600 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          <RotateCcw className="h-3.5 w-3.5" /> Rollback
+        </button>
+      </div>
+
+      {publishOpen && (
+        <PublishDialog
+          onClose={() => setPublishOpen(false)}
+          onPublish={(changeReason) => {
+            updateDisplayProfile(profile.id, { status: "Published", changeReason });
+            setPublishOpen(false);
+          }}
+        />
+      )}
+
+      {rollbackOpen && rollbackTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setRollbackOpen(false)}>
+          <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-base font-semibold text-zinc-900">Roll back to v{rollbackTarget.version}?</h3>
+            <p className="mt-1 text-xs text-zinc-400">
+              Published {new Date(rollbackTarget.createdAt).toLocaleString()}
+              {rollbackTarget.changeReason ? ` — "${rollbackTarget.changeReason}"` : ""}. This creates a new version
+              identical to it — the real Customer Display updates on its next poll, with no engineering involved.
+            </p>
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                onClick={() => setRollbackOpen(false)}
+                className="rounded-xl border border-zinc-200 px-3 py-2 text-sm text-zinc-600 transition hover:bg-zinc-50"
+              >
+                Cancel
+              </button>
+              <button
+                disabled={rollingBack}
+                onClick={async () => {
+                  setRollingBack(true);
+                  await revertDisplayProfile(profile.id, rollbackTarget.id);
+                  setRollingBack(false);
+                  setRollbackOpen(false);
+                }}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-zinc-900 px-3 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-50"
+              >
+                {rollingBack && <Loader2 className="h-4 w-4 animate-spin" />}
+                Roll back
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
