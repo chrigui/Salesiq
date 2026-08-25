@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion, type Transition } from "framer-motion";
-import { Sparkles, MapPin, TrendingUp, Check, Star, Smartphone, Circle, X, Maximize, Minimize } from "lucide-react";
+import { Sparkles, MapPin, TrendingUp, Check, Star, Smartphone, Circle, X, Maximize, Minimize, Hand } from "lucide-react";
 import { useFullscreen } from "./DisplayKiosk";
 import { useSession } from "@/core/store/session";
 import { useLivePack } from "@/core/store/packs";
@@ -122,14 +122,6 @@ export function DisplayStage({
     view === "item" ? (focusedItemId ?? null) : null,
   );
 
-  // Idle Mode: only arm the attract loop while nobody has started a session —
-  // any answer or a view change away from "welcome" keeps it fully disabled.
-  const { isIdle, wake } = useIdleGate({
-    enabled: view === "welcome" && Object.keys(answers).length === 0,
-    timeoutMs: readIdleTimeoutMs(),
-    resetKey: revision,
-  });
-
   // Display Studio seam #2: if this physical Display has been claimed (see
   // DevicePairingPrompt) and assigned an idle profile, the attract loop
   // shows that configured composition instead of the hardcoded IdleScreen
@@ -139,6 +131,17 @@ export function DisplayStage({
   const idleProfile = useDeviceIdleProfile(deviceId, deviceToken);
   const idlePack = useLivePack(idleProfile?.packId ?? packId);
   const idleItem = idleProfile ? idlePack.inventory.find((i) => i.id === idleProfile.itemId) : undefined;
+  const idleConfig = (idleProfile?.idle ?? null) as { durationMs?: number; headline?: string; subheadline?: string; ctaLabel?: string } | null;
+
+  // Idle Mode: only arm the attract loop while nobody has started a session —
+  // any answer or a view change away from "welcome" keeps it fully disabled.
+  // A number set on the assigned idle profile (PR11) overrides the generic
+  // URL-param/default timeout.
+  const { isIdle, wake } = useIdleGate({
+    enabled: view === "welcome" && Object.keys(answers).length === 0,
+    timeoutMs: idleConfig?.durationMs ?? readIdleTimeoutMs(),
+    resetKey: revision,
+  });
 
   // Display Studio's own transition, in place of the hardcoded spring, for
   // the two profile-driven wrappers below only — every other stage transition
@@ -405,6 +408,24 @@ export function DisplayStage({
               deviceId={deviceId ?? undefined}
               deviceToken={deviceToken ?? undefined}
             />
+            {(idleConfig?.headline || idleConfig?.subheadline || idleConfig?.ctaLabel) && (
+              <div className="pointer-events-none fixed inset-x-0 bottom-10 z-[81] flex flex-col items-center gap-3 px-8 text-center">
+                {idleConfig?.headline && (
+                  <h2 className="max-w-2xl text-2xl font-semibold text-white drop-shadow-lg sm:text-3xl">
+                    {idleConfig.headline}
+                  </h2>
+                )}
+                {idleConfig?.subheadline && (
+                  <p className="max-w-xl text-sm text-white/80 drop-shadow">{idleConfig.subheadline}</p>
+                )}
+                <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-5 py-2.5 text-white/90 backdrop-blur-xl">
+                  <Hand className="h-4 w-4" />
+                  <span className="text-xs font-medium uppercase tracking-[0.2em]">
+                    {idleConfig?.ctaLabel || "Touch to begin"}
+                  </span>
+                </div>
+              </div>
+            )}
           </motion.div>
         ) : isIdle ? (
           <IdleScreen pack={pack} onWake={wake} />

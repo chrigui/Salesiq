@@ -63,6 +63,15 @@ const patchSchema = z.object({
       imageZoom: z.number().optional(),
     })
     .optional(),
+  idle: z
+    .object({
+      durationMs: z.number().min(5_000).max(300_000).optional(),
+      headline: z.string().max(200).optional(),
+      subheadline: z.string().max(300).optional(),
+      ctaLabel: z.string().max(60).optional(),
+    })
+    .nullable()
+    .optional(),
   status: z.enum(["Draft", "Published", "Archived"]).optional(),
   changeReason: z.string().max(500).optional(),
 });

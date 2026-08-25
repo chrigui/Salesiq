@@ -30,7 +30,7 @@ import {
 } from "@/core/display/motionPresets";
 import type { IndustryPack, InventoryItem } from "@/core/types";
 
-const TABS = ["Widgets", "Brand", "Motion", "History", "Preview"] as const;
+const TABS = ["Widgets", "Brand", "Motion", "Idle", "History", "Preview"] as const;
 export type Tab = (typeof TABS)[number];
 
 const TEMPLATES: DisplayTemplate[] = [
@@ -146,6 +146,7 @@ export function DisplayProfileEditor({
       {tab === "Widgets" && <WidgetsTab id={id} profile={profile} />}
       {tab === "Brand" && <BrandTab id={id} profile={profile} />}
       {tab === "Motion" && <MotionTab id={id} profile={profile} />}
+      {tab === "Idle" && <IdleTab id={id} profile={profile} />}
       {tab === "History" && <HistoryTab id={id} />}
       {tab === "Preview" && pack && item && <PreviewTab profile={profile} pack={pack} item={item} />}
 
@@ -1089,6 +1090,114 @@ function MotionTab({ id, profile }: { id: string; profile: DisplayProfile }) {
           </div>
         </Panel>
       )}
+    </div>
+  );
+}
+
+interface IdleConfig {
+  durationMs?: number;
+  headline?: string;
+  subheadline?: string;
+  ctaLabel?: string;
+}
+
+const DEFAULT_IDLE_DURATION_MS = 45_000;
+
+/**
+ * Configures this profile's attract-loop experience for whichever Display
+ * it's assigned to as an idle profile (Displays tab) — DisplayStage.tsx
+ * applies durationMs to the idle timeout and renders headline/subheadline/
+ * ctaLabel as an overlay banner on top of the profile's own composition.
+ * Leaving a field blank keeps the existing generic copy/default timeout.
+ */
+function IdleTab({ id, profile }: { id: string; profile: DisplayProfile }) {
+  const idle = (profile.idle ?? {}) as IdleConfig;
+  const [durationSec, setDurationSec] = useState(Math.round((idle.durationMs ?? DEFAULT_IDLE_DURATION_MS) / 1000));
+  const [headline, setHeadline] = useState(idle.headline ?? "");
+  const [subheadline, setSubheadline] = useState(idle.subheadline ?? "");
+  const [ctaLabel, setCtaLabel] = useState(idle.ctaLabel ?? "");
+  useEffect(() => {
+    const next = (profile.idle ?? {}) as IdleConfig;
+    setDurationSec(Math.round((next.durationMs ?? DEFAULT_IDLE_DURATION_MS) / 1000));
+    setHeadline(next.headline ?? "");
+    setSubheadline(next.subheadline ?? "");
+    setCtaLabel(next.ctaLabel ?? "");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile.id]);
+
+  const commit = (patch: Partial<IdleConfig>) => {
+    const next: IdleConfig = {
+      durationMs: patch.durationMs ?? durationSec * 1000,
+      headline: patch.headline ?? headline,
+      subheadline: patch.subheadline ?? subheadline,
+      ctaLabel: patch.ctaLabel ?? ctaLabel,
+    };
+    updateDisplayProfile(id, { idle: next as unknown as DisplayProfile["idle"] });
+  };
+
+  return (
+    <div className="grid gap-4 lg:grid-cols-2">
+      <Panel title="Attract-loop timing">
+        <Field label={`Idle timeout — ${durationSec}s of no activity`}>
+          <input
+            type="range"
+            min={10}
+            max={180}
+            step={5}
+            value={durationSec}
+            onChange={(e) => {
+              const sec = Number(e.target.value);
+              setDurationSec(sec);
+              commit({ durationMs: sec * 1000 });
+            }}
+            className="w-full"
+          />
+        </Field>
+        <p className="mt-3 text-[11px] text-zinc-400">
+          Only applies when this profile is assigned as a Display&apos;s idle profile (Displays tab) — how long the
+          screen waits with nobody interacting before showing this attract loop.
+        </p>
+      </Panel>
+      <Panel title="Attract-loop copy">
+        <div className="space-y-3">
+          <Field label="Headline">
+            <TextInput
+              value={headline}
+              onChange={(e) => {
+                setHeadline(e.target.value);
+                commit({ headline: e.target.value });
+              }}
+              placeholder="Let's find the one that's right for you"
+              className="w-full"
+            />
+          </Field>
+          <Field label="Subheadline">
+            <TextInput
+              value={subheadline}
+              onChange={(e) => {
+                setSubheadline(e.target.value);
+                commit({ subheadline: e.target.value });
+              }}
+              placeholder="Optional supporting line"
+              className="w-full"
+            />
+          </Field>
+          <Field label="Call-to-action label">
+            <TextInput
+              value={ctaLabel}
+              onChange={(e) => {
+                setCtaLabel(e.target.value);
+                commit({ ctaLabel: e.target.value });
+              }}
+              placeholder="Touch to begin"
+              className="w-full"
+            />
+          </Field>
+        </div>
+        <p className="mt-3 text-[11px] text-zinc-400">
+          Blank fields fall back to the Customer Display&apos;s default attract-loop copy.
+        </p>
+      </Panel>
     </div>
   );
 }
