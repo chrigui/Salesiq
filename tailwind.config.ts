@@ -23,6 +23,16 @@ const config: Config = {
           DEFAULT: "rgb(var(--surface) / <alpha-value>)",
           raised: "rgb(var(--surface-raised) / <alpha-value>)",
         },
+        // Semantic status colors — brand-overridable (BrandTokenScope sets
+        // --success/--warning/--danger only when a kit specifies them), with
+        // a nested var() fallback to today's exact hardcoded emerald/amber/
+        // red so an unbranded subtree renders identically to before.
+        // "muted" chains to the existing, always-set --ink-muted default
+        // rather than duplicating a fallback value.
+        muted: "rgb(var(--text-muted, var(--ink-muted)) / <alpha-value>)",
+        success: "rgb(var(--success, 52 211 153) / <alpha-value>)",
+        warning: "rgb(var(--warning, 251 191 36) / <alpha-value>)",
+        danger: "rgb(var(--danger, 248 113 113) / <alpha-value>)",
       },
       fontFamily: {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],

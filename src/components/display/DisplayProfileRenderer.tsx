@@ -55,11 +55,36 @@ export function DisplayProfileRenderer({ profile, pack, item, mode, deviceId, de
     },
   };
 
+  // Deep-theming tokens (background/text/muted/status colors, card/button
+  // style, radius/shadow/spacing, typography) have no per-profile override
+  // today — only brand/brandSoft above do — so they come straight from the
+  // attached kit, same as fonts/logo.
+  const brandTokenInput = {
+    brand,
+    brandSoft,
+    fontHeading: resolvedBrand?.fontHeading,
+    fontBody: resolvedBrand?.fontBody,
+    backgroundColor: resolvedBrand?.backgroundColor,
+    textColor: resolvedBrand?.textColor,
+    mutedTextColor: resolvedBrand?.mutedTextColor,
+    surfaceColor: resolvedBrand?.surfaceColor,
+    successColor: resolvedBrand?.successColor,
+    warningColor: resolvedBrand?.warningColor,
+    dangerColor: resolvedBrand?.dangerColor,
+    cardStyle: resolvedBrand?.cardStyle,
+    buttonStyle: resolvedBrand?.buttonStyle,
+    borderRadius: resolvedBrand?.borderRadius,
+    shadowIntensity: resolvedBrand?.shadowIntensity,
+    spacingScale: resolvedBrand?.spacingScale,
+    headingWeight: resolvedBrand?.headingWeight,
+    letterSpacing: resolvedBrand?.letterSpacing,
+  };
+
   const enabled = profile.sections.filter((s) => s.enabled).sort((a, b) => a.order - b.order);
 
   if (enabled.length === 0) {
     return (
-      <BrandTokenScope brand={{ brand, brandSoft, fontHeading: resolvedBrand?.fontHeading, fontBody: resolvedBrand?.fontBody }} className="grid min-h-[50vh] place-items-center bg-zinc-950">
+      <BrandTokenScope brand={brandTokenInput} className="grid min-h-[50vh] place-items-center bg-zinc-950">
         <p className="text-sm text-white/40">No widgets enabled for this profile yet.</p>
       </BrandTokenScope>
     );
@@ -115,7 +140,7 @@ export function DisplayProfileRenderer({ profile, pack, item, mode, deviceId, de
 
   if (profile.layout === "Grid") {
     return (
-      <BrandTokenScope brand={{ brand, brandSoft, fontHeading: resolvedBrand?.fontHeading, fontBody: resolvedBrand?.fontBody }} className="min-h-screen bg-zinc-950 p-6">
+      <BrandTokenScope brand={brandTokenInput} className="min-h-screen bg-zinc-950 p-6">
         <div className="grid grid-cols-4 gap-4">
           {widgets.map((w) =>
             w ? (
@@ -130,7 +155,7 @@ export function DisplayProfileRenderer({ profile, pack, item, mode, deviceId, de
   }
 
   return (
-    <BrandTokenScope brand={{ brand, brandSoft, fontHeading: resolvedBrand?.fontHeading, fontBody: resolvedBrand?.fontBody }} className="min-h-screen bg-zinc-950">
+    <BrandTokenScope brand={brandTokenInput} className="min-h-screen bg-zinc-950">
       {widgets.map((w) => (w ? w.node : null))}
     </BrandTokenScope>
   );

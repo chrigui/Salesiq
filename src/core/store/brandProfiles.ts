@@ -15,11 +15,18 @@ export interface BrandProfile {
   fontBody: string | null;
   backgroundColor: string | null;
   textColor: string | null;
+  mutedTextColor: string | null;
+  surfaceColor: string | null;
+  successColor: string | null;
+  warningColor: string | null;
+  dangerColor: string | null;
   cardStyle: string;
   buttonStyle: string;
   borderRadius: string;
   shadowIntensity: string;
   spacingScale: string;
+  headingWeight: string;
+  letterSpacing: string;
   defaultMotionPreset: string | null;
   isDefault: boolean;
 }
@@ -63,11 +70,18 @@ export async function updateBrandProfile(
       | "fontBody"
       | "backgroundColor"
       | "textColor"
+      | "mutedTextColor"
+      | "surfaceColor"
+      | "successColor"
+      | "warningColor"
+      | "dangerColor"
       | "cardStyle"
       | "buttonStyle"
       | "borderRadius"
       | "shadowIntensity"
       | "spacingScale"
+      | "headingWeight"
+      | "letterSpacing"
       | "defaultMotionPreset"
     >
   > & { logoDataBase64?: string; logoMimeType?: string; removeLogo?: boolean; setDefault?: boolean },

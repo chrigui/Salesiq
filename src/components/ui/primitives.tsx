@@ -49,8 +49,11 @@ export const Button = forwardRef<
   const base =
     "inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium transition-all duration-200 active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60";
   const variants: Record<ButtonVariant, string> = {
+    // btn-primary is a stable hook for BrandTokenScope's data-button-style
+    // CSS overrides (see globals.css) — purely a scoping class, no styling
+    // of its own.
     brand:
-      "bg-brand text-white shadow-lg shadow-brand/30 hover:shadow-brand/50 hover:brightness-110",
+      "btn-primary bg-brand text-white shadow-lg shadow-brand/30 hover:shadow-brand/50 hover:brightness-110",
     ghost: cx(
       "text-ink-muted hover:text-ink hover:bg-white/5",
       active && "bg-white/10 text-ink",

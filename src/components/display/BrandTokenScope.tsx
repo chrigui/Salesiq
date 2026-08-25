@@ -10,9 +10,18 @@ export interface BrandTokenInput {
   brandSoft?: string | null;
   backgroundColor?: string | null;
   textColor?: string | null;
+  mutedTextColor?: string | null;
+  surfaceColor?: string | null;
+  successColor?: string | null;
+  warningColor?: string | null;
+  dangerColor?: string | null;
   borderRadius?: string | null;
   shadowIntensity?: string | null;
   spacingScale?: string | null;
+  headingWeight?: string | null;
+  letterSpacing?: string | null;
+  cardStyle?: string | null;
+  buttonStyle?: string | null;
   fontHeading?: string | null;
   fontBody?: string | null;
 }
@@ -46,16 +55,29 @@ export function BrandTokenScope({
     ...(brand?.brandSoft ? { "--brand-soft": brand.brandSoft } : {}),
     ...(brand?.backgroundColor ? { "--bg": brand.backgroundColor } : {}),
     ...(brand?.textColor ? { "--text": brand.textColor } : {}),
+    ...(brand?.mutedTextColor ? { "--text-muted": brand.mutedTextColor } : {}),
+    ...(brand?.surfaceColor ? { "--surface": brand.surfaceColor } : {}),
+    ...(brand?.successColor ? { "--success": brand.successColor } : {}),
+    ...(brand?.warningColor ? { "--warning": brand.warningColor } : {}),
+    ...(brand?.dangerColor ? { "--danger": brand.dangerColor } : {}),
     ...(headingFont ? { "--font-heading": headingFont } : {}),
     ...(bodyFont ? { "--font-body": bodyFont, fontFamily: bodyFont } : {}),
     "--radius": tokens.radius,
     "--radius-sm": tokens.radiusSm,
     "--shadow-color": tokens.shadow,
     "--space-unit": tokens.spaceUnit,
+    "--font-heading-weight": tokens.headingWeight,
+    "--letter-spacing-heading": tokens.letterSpacingHeading,
   } as CSSProperties;
 
   return (
-    <div style={style} className={className} data-brand-scope="true">
+    <div
+      style={style}
+      className={className}
+      data-brand-scope="true"
+      data-card-style={brand?.cardStyle || undefined}
+      data-button-style={brand?.buttonStyle || undefined}
+    >
       <BrandFontsLoader fontHeading={brand?.fontHeading} fontBody={brand?.fontBody} />
       {children}
     </div>

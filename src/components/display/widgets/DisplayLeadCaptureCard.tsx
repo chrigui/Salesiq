@@ -26,7 +26,7 @@ export function DisplayLeadCaptureCard({ item, pack, mode, deviceId, deviceToken
   if (status === "done") {
     return (
       <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-xs text-white">
-        <Check className="h-4 w-4 shrink-0 text-brand" /> Thanks — someone will follow up shortly.
+        <Check className="h-4 w-4 shrink-0 text-success" /> Thanks — someone will follow up shortly.
       </div>
     );
   }
@@ -74,7 +74,7 @@ export function DisplayLeadCaptureCard({ item, pack, mode, deviceId, deviceToken
         {status === "submitting" && <Loader2 className="h-3 w-3 animate-spin" />}
         Request a callback
       </Button>
-      {status === "error" && <p className="mt-1.5 text-[10px] text-red-400">Something went wrong — try again.</p>}
+      {status === "error" && <p className="mt-1.5 text-[10px] text-danger">Something went wrong — try again.</p>}
     </div>
   );
 }

@@ -28,14 +28,52 @@ export async function publishDisplayProfileVersion(params: {
     const overrides = profile.brandOverrides as { brand?: string; brandSoft?: string } | null;
     const brand = overrides?.brand ?? profile.brandProfile?.brand ?? null;
     const brandSoft = overrides?.brandSoft ?? profile.brandProfile?.brandSoft ?? null;
-    // Fonts/logo have no per-profile override today (only brand/brandSoft
-    // do) — snapshot the attached brand kit's own values directly.
-    const logoMimeType = profile.brandProfile?.logoMimeType ?? null;
-    const fontHeading = profile.brandProfile?.fontHeading ?? null;
-    const fontBody = profile.brandProfile?.fontBody ?? null;
-    const brandSnapshot =
-      brand || brandSoft || logoMimeType || fontHeading || fontBody
-        ? { brand, brandSoft, logoMimeType, fontHeading, fontBody, brandProfileId: profile.brandProfileId }
+    // Everything else (fonts/logo/deep-theming tokens) has no per-profile
+    // override today (only brand/brandSoft do) — snapshot the attached
+    // brand kit's own values directly.
+    const bp = profile.brandProfile;
+    const logoMimeType = bp?.logoMimeType ?? null;
+    const fontHeading = bp?.fontHeading ?? null;
+    const fontBody = bp?.fontBody ?? null;
+    const backgroundColor = bp?.backgroundColor ?? null;
+    const textColor = bp?.textColor ?? null;
+    const mutedTextColor = bp?.mutedTextColor ?? null;
+    const surfaceColor = bp?.surfaceColor ?? null;
+    const successColor = bp?.successColor ?? null;
+    const warningColor = bp?.warningColor ?? null;
+    const dangerColor = bp?.dangerColor ?? null;
+    const cardStyle = bp?.cardStyle ?? null;
+    const buttonStyle = bp?.buttonStyle ?? null;
+    const borderRadius = bp?.borderRadius ?? null;
+    const shadowIntensity = bp?.shadowIntensity ?? null;
+    const spacingScale = bp?.spacingScale ?? null;
+    const headingWeight = bp?.headingWeight ?? null;
+    const letterSpacing = bp?.letterSpacing ?? null;
+    const brandSnapshot = bp
+      ? {
+          brand,
+          brandSoft,
+          logoMimeType,
+          fontHeading,
+          fontBody,
+          backgroundColor,
+          textColor,
+          mutedTextColor,
+          surfaceColor,
+          successColor,
+          warningColor,
+          dangerColor,
+          cardStyle,
+          buttonStyle,
+          borderRadius,
+          shadowIntensity,
+          spacingScale,
+          headingWeight,
+          letterSpacing,
+          brandProfileId: profile.brandProfileId,
+        }
+      : brand || brandSoft
+        ? { brand, brandSoft, logoMimeType: null, fontHeading: null, fontBody: null, brandProfileId: profile.brandProfileId }
         : null;
 
     const last = await tx.displayProfileVersion.findFirst({

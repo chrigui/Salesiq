@@ -50,6 +50,20 @@ export interface DisplayProfileDTO {
     logoMimeType?: string | null;
     fontHeading?: string | null;
     fontBody?: string | null;
+    backgroundColor?: string | null;
+    textColor?: string | null;
+    mutedTextColor?: string | null;
+    surfaceColor?: string | null;
+    successColor?: string | null;
+    warningColor?: string | null;
+    dangerColor?: string | null;
+    cardStyle?: string | null;
+    buttonStyle?: string | null;
+    borderRadius?: string | null;
+    shadowIntensity?: string | null;
+    spacingScale?: string | null;
+    headingWeight?: string | null;
+    letterSpacing?: string | null;
   } | null;
   brandOverrides: { brand?: string; brandSoft?: string } | null;
   motion: DisplayMotionConfig;
@@ -85,6 +99,20 @@ export function toDisplayProfileDTO(
           logoMimeType: row.brandProfile.logoMimeType,
           fontHeading: row.brandProfile.fontHeading,
           fontBody: row.brandProfile.fontBody,
+          backgroundColor: row.brandProfile.backgroundColor,
+          textColor: row.brandProfile.textColor,
+          mutedTextColor: row.brandProfile.mutedTextColor,
+          surfaceColor: row.brandProfile.surfaceColor,
+          successColor: row.brandProfile.successColor,
+          warningColor: row.brandProfile.warningColor,
+          dangerColor: row.brandProfile.dangerColor,
+          cardStyle: row.brandProfile.cardStyle,
+          buttonStyle: row.brandProfile.buttonStyle,
+          borderRadius: row.brandProfile.borderRadius,
+          shadowIntensity: row.brandProfile.shadowIntensity,
+          spacingScale: row.brandProfile.spacingScale,
+          headingWeight: row.brandProfile.headingWeight,
+          letterSpacing: row.brandProfile.letterSpacing,
         }
       : null,
     brandOverrides: (row.brandOverrides as { brand?: string; brandSoft?: string } | null) ?? null,
@@ -114,6 +142,20 @@ export function toPublishedDisplayProfileDTO(
     logoMimeType?: string | null;
     fontHeading?: string | null;
     fontBody?: string | null;
+    backgroundColor?: string | null;
+    textColor?: string | null;
+    mutedTextColor?: string | null;
+    surfaceColor?: string | null;
+    successColor?: string | null;
+    warningColor?: string | null;
+    dangerColor?: string | null;
+    cardStyle?: string | null;
+    buttonStyle?: string | null;
+    borderRadius?: string | null;
+    shadowIntensity?: string | null;
+    spacingScale?: string | null;
+    headingWeight?: string | null;
+    letterSpacing?: string | null;
     brandProfileId?: string | null;
   } | null;
   return {
@@ -124,7 +166,8 @@ export function toPublishedDisplayProfileDTO(
     resolvedBrandProfile: brandSnapshot
       ? {
           // Logo bytes stay live (fetched by id), never duplicated into this
-          // JSON snapshot — frozen only means brand/brandSoft/fonts here.
+          // JSON snapshot — frozen only means brand/brandSoft/fonts/deep-theming
+          // tokens here.
           id: brandSnapshot.brandProfileId ?? undefined,
           brand: brandSnapshot.brand ?? null,
           brandSoft: brandSnapshot.brandSoft ?? null,
@@ -132,6 +175,20 @@ export function toPublishedDisplayProfileDTO(
           logoMimeType: brandSnapshot.logoMimeType ?? null,
           fontHeading: brandSnapshot.fontHeading ?? null,
           fontBody: brandSnapshot.fontBody ?? null,
+          backgroundColor: brandSnapshot.backgroundColor ?? null,
+          textColor: brandSnapshot.textColor ?? null,
+          mutedTextColor: brandSnapshot.mutedTextColor ?? null,
+          surfaceColor: brandSnapshot.surfaceColor ?? null,
+          successColor: brandSnapshot.successColor ?? null,
+          warningColor: brandSnapshot.warningColor ?? null,
+          dangerColor: brandSnapshot.dangerColor ?? null,
+          cardStyle: brandSnapshot.cardStyle ?? null,
+          buttonStyle: brandSnapshot.buttonStyle ?? null,
+          borderRadius: brandSnapshot.borderRadius ?? null,
+          shadowIntensity: brandSnapshot.shadowIntensity ?? null,
+          spacingScale: brandSnapshot.spacingScale ?? null,
+          headingWeight: brandSnapshot.headingWeight ?? null,
+          letterSpacing: brandSnapshot.letterSpacing ?? null,
         }
       : base.resolvedBrandProfile,
     // Already flattened into resolvedBrandProfile above — applying the

@@ -22,11 +22,18 @@ const patchSchema = z.object({
   fontBody: z.enum(FONT_OPTION_IDS).nullable().optional(),
   backgroundColor: z.string().max(20).nullable().optional(),
   textColor: z.string().max(20).nullable().optional(),
+  mutedTextColor: z.string().max(20).nullable().optional(),
+  surfaceColor: z.string().max(20).nullable().optional(),
+  successColor: z.string().max(20).nullable().optional(),
+  warningColor: z.string().max(20).nullable().optional(),
+  dangerColor: z.string().max(20).nullable().optional(),
   cardStyle: z.enum(["Glass", "Solid", "Outlined"]).optional(),
   buttonStyle: z.enum(["Filled", "Outline", "Ghost"]).optional(),
   borderRadius: z.enum(["Sharp", "Soft", "Round"]).optional(),
   shadowIntensity: z.enum(["Flat", "Subtle", "Elevated"]).optional(),
   spacingScale: z.enum(["Compact", "Comfortable", "Spacious"]).optional(),
+  headingWeight: z.enum(["Regular", "Medium", "Semibold", "Bold"]).optional(),
+  letterSpacing: z.enum(["Tight", "Normal", "Wide"]).optional(),
   defaultMotionPreset: z.string().max(20).nullable().optional(),
   // Logo upload/removal — a base64 data URL body, same convention as
   // DisplayProfileAsset's POST route (no multipart parsing needed).

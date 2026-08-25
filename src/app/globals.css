@@ -74,6 +74,56 @@ body {
   border: 1px solid rgb(255 255 255 / 0.12);
 }
 
+/* Display Studio no-code control center: cardStyle (Glass is the default
+   above, untouched) — Solid sets --card-bg to a flat, opaque surface color
+   (picked up by both .glass rules' existing var(--card-bg, ...) fallback
+   chain, no new selector needed there); Outlined drops the fill entirely in
+   favor of a visible border, on both variants explicitly since each needs
+   its own backdrop-filter/border reset. */
+[data-card-style="Solid"] {
+  --card-bg: rgb(var(--surface));
+}
+[data-card-style="Solid"] .glass,
+[data-card-style="Solid"] .glass-strong {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+[data-card-style="Outlined"] .glass,
+[data-card-style="Outlined"] .glass-strong {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid rgb(var(--brand) / 0.35);
+}
+
+/* buttonStyle: Filled (today's default "brand" Button variant) needs no
+   override. Button's "brand" variant carries a stable .btn-primary class
+   purely for this scoping — Outline/Ghost strip the filled background in
+   favor of a bordered or bare treatment, reusing --brand for the outline/
+   text color so the button still reads as "primary" at a glance. */
+[data-button-style="Outline"] .btn-primary {
+  background-color: transparent;
+  box-shadow: none;
+  border: 1px solid rgb(var(--brand) / 0.6);
+  color: rgb(var(--brand));
+}
+[data-button-style="Ghost"] .btn-primary {
+  background-color: transparent;
+  box-shadow: none;
+  border: none;
+  color: rgb(var(--brand));
+}
+
+/* Bounded typography controls (headingWeight/letterSpacing) — scoped to a
+   brand-themed subtree only, so admin/dashboard headings elsewhere are
+   never affected. */
+[data-brand-scope] h1,
+[data-brand-scope] h2,
+[data-brand-scope] h3 {
+  font-weight: var(--font-heading-weight, 600);
+  letter-spacing: var(--letter-spacing-heading, normal);
+}
+
 .text-gradient {
   background: linear-gradient(
     120deg,

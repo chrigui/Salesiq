@@ -889,11 +889,29 @@ model BrandProfile {
   // today's exact look via resolveBrandTokens().
   backgroundColor     String?
   textColor           String?
+  // Display Studio no-code control center: the rest of the semantic color
+  // system (Primary/Accent are brand/brandSoft above; Background/Text are
+  // backgroundColor/textColor above). Muted text and status colors are new
+  // here — nullable rgb-triplet strings, same convention, falling back to
+  // today's hardcoded neutrals/status colors when unset. "Surface" and
+  // "Glass" from the spec aren't separate color fields: surfaceColor backs
+  // a Solid cardStyle's flat background, and Glass is what cardStyle="Glass"
+  // already means — a literal --glass color would just duplicate cardStyle.
+  mutedTextColor      String?
+  surfaceColor        String?
+  successColor        String?
+  warningColor        String?
+  dangerColor         String?
   cardStyle           BrandCardStyle       @default(Glass)
   buttonStyle         BrandButtonStyle     @default(Filled)
   borderRadius        BrandBorderRadius    @default(Soft)
   shadowIntensity     BrandShadowIntensity @default(Elevated)
   spacingScale        BrandSpacingScale    @default(Comfortable)
+  // Bounded typography controls (not independent heading/body scale sliders
+  // — see plan's explicit scoping) applied to heading elements via
+  // BrandTokenScope's --font-heading-weight/--letter-spacing-heading.
+  headingWeight       BrandHeadingWeight   @default(Semibold)
+  letterSpacing       BrandLetterSpacing   @default(Normal)
   defaultMotionPreset String?
   // Exactly one BrandProfile per tenant may be the whole-Display default
   // (Theme-PR3); enforced in application code (clear the others in the same
@@ -938,6 +956,19 @@ enum BrandSpacingScale {
   Compact
   Comfortable
   Spacious
+}
+
+enum BrandHeadingWeight {
+  Regular
+  Medium
+  Semibold
+  Bold
+}
+
+enum BrandLetterSpacing {
+  Tight
+  Normal
+  Wide
 }
 
 // Document Center attachment (floor plans, masterplans, spec sheets) for a

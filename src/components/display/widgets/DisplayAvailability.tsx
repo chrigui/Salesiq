@@ -18,14 +18,16 @@ export function DisplayAvailability({ item, mode }: DisplayWidgetContext) {
 
   // An explicit Reserved/Booked/Sold status overrides the numeric bar
   // below — it's a real state change (never stale inventory) that a plain
-  // "N units left" count can't express on its own.
+  // "N units left" count can't express on its own. Reserved/Booked read as
+  // a caution (still real interest to convert around); Sold is final.
   if (availabilityStatus && availabilityStatus !== "Available") {
+    const statusColor = availabilityStatus === "Sold" ? "text-danger" : "text-warning";
     return (
       <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
         <div className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-white/50">
           <Building2 className="h-3.5 w-3.5" /> Availability
         </div>
-        <div className="text-2xl font-semibold text-white">{availabilityStatus}</div>
+        <div className={`text-2xl font-semibold ${statusColor}`}>{availabilityStatus}</div>
       </div>
     );
   }

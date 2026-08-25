@@ -7,6 +7,8 @@
 export type BrandBorderRadius = "Sharp" | "Soft" | "Round";
 export type BrandShadowIntensity = "Flat" | "Subtle" | "Elevated";
 export type BrandSpacingScale = "Compact" | "Comfortable" | "Spacious";
+export type BrandHeadingWeight = "Regular" | "Medium" | "Semibold" | "Bold";
+export type BrandLetterSpacing = "Tight" | "Normal" | "Wide";
 
 export interface BrandTokens {
   /** Border radius for large surfaces (cards, sheets) — today's hardcoded rounded-3xl. */
@@ -17,15 +19,23 @@ export interface BrandTokens {
   shadow: string;
   /** Spacing multiplier, as a bare number string usable in calc(var(--space-unit) * Nrem). */
   spaceUnit: string;
+  /** CSS font-weight for heading elements. */
+  headingWeight: string;
+  /** CSS letter-spacing for heading elements. */
+  letterSpacingHeading: string;
 }
 
 const BORDER_RADIUS_IDS: BrandBorderRadius[] = ["Sharp", "Soft", "Round"];
 const SHADOW_INTENSITY_IDS: BrandShadowIntensity[] = ["Flat", "Subtle", "Elevated"];
 const SPACING_SCALE_IDS: BrandSpacingScale[] = ["Compact", "Comfortable", "Spacious"];
+const HEADING_WEIGHT_IDS: BrandHeadingWeight[] = ["Regular", "Medium", "Semibold", "Bold"];
+const LETTER_SPACING_IDS: BrandLetterSpacing[] = ["Tight", "Normal", "Wide"];
 
 const DEFAULT_BORDER_RADIUS: BrandBorderRadius = "Soft";
 const DEFAULT_SHADOW_INTENSITY: BrandShadowIntensity = "Elevated";
 const DEFAULT_SPACING_SCALE: BrandSpacingScale = "Comfortable";
+const DEFAULT_HEADING_WEIGHT: BrandHeadingWeight = "Semibold";
+const DEFAULT_LETTER_SPACING: BrandLetterSpacing = "Normal";
 
 const RADIUS: Record<BrandBorderRadius, { radius: string; radiusSm: string }> = {
   Sharp: { radius: "0.5rem", radiusSm: "0.375rem" },
@@ -45,6 +55,19 @@ const SPACING: Record<BrandSpacingScale, string> = {
   Spacious: "1.2",
 };
 
+const HEADING_WEIGHT: Record<BrandHeadingWeight, string> = {
+  Regular: "400",
+  Medium: "500",
+  Semibold: "600",
+  Bold: "700",
+};
+
+const LETTER_SPACING: Record<BrandLetterSpacing, string> = {
+  Tight: "-0.01em",
+  Normal: "normal",
+  Wide: "0.02em",
+};
+
 /**
  * Resolves a brand kit's stored (possibly absent/legacy) style fields into a
  * complete, concrete BrandTokens every consumer can rely on. Mirrors
@@ -56,6 +79,8 @@ export function resolveBrandTokens(brand?: {
   borderRadius?: string | null;
   shadowIntensity?: string | null;
   spacingScale?: string | null;
+  headingWeight?: string | null;
+  letterSpacing?: string | null;
 } | null): BrandTokens {
   const borderRadius = BORDER_RADIUS_IDS.includes(brand?.borderRadius as BrandBorderRadius)
     ? (brand!.borderRadius as BrandBorderRadius)
@@ -66,10 +91,18 @@ export function resolveBrandTokens(brand?: {
   const spacingScale = SPACING_SCALE_IDS.includes(brand?.spacingScale as BrandSpacingScale)
     ? (brand!.spacingScale as BrandSpacingScale)
     : DEFAULT_SPACING_SCALE;
+  const headingWeight = HEADING_WEIGHT_IDS.includes(brand?.headingWeight as BrandHeadingWeight)
+    ? (brand!.headingWeight as BrandHeadingWeight)
+    : DEFAULT_HEADING_WEIGHT;
+  const letterSpacing = LETTER_SPACING_IDS.includes(brand?.letterSpacing as BrandLetterSpacing)
+    ? (brand!.letterSpacing as BrandLetterSpacing)
+    : DEFAULT_LETTER_SPACING;
 
   return {
     ...RADIUS[borderRadius],
     shadow: SHADOW[shadowIntensity],
     spaceUnit: SPACING[spacingScale],
+    headingWeight: HEADING_WEIGHT[headingWeight],
+    letterSpacingHeading: LETTER_SPACING[letterSpacing],
   };
 }
