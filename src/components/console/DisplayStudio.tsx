@@ -26,6 +26,7 @@ import {
   type BrandProfile,
 } from "@/core/store/brandProfiles";
 import { DisplayProfileEditor, PublishDialog, type Tab as EditorTab } from "@/components/console/DisplayProfileEditor";
+import { validateDisplayProfileForPublish } from "@/lib/displayProfiles/validation";
 import { Field, TextInput, Select } from "@/components/console/builder/fields";
 import { Palette, Trash2, Upload, X as XIcon } from "lucide-react";
 import { FONT_OPTIONS, fontStack } from "@/core/display/brandFonts";
@@ -1160,6 +1161,7 @@ function CurrentProfileCard({
 }) {
   const pack = PACKS.find((p) => p.id === profile.packId);
   const item = pack?.inventory.find((i) => i.id === profile.itemId);
+  const validation = item ? validateDisplayProfileForPublish(profile.sections, item, profile.assets) : undefined;
   const { versions } = useDisplayProfileVersions(profile.id);
   const rollbackTarget = versions.find((v) => !v.isCurrent) ?? null;
 
@@ -1236,6 +1238,7 @@ function CurrentProfileCard({
             updateDisplayProfile(profile.id, { status: "Published", changeReason });
             setPublishOpen(false);
           }}
+          validation={validation}
         />
       )}
 

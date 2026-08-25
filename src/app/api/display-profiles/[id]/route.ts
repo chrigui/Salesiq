@@ -3,8 +3,10 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { Prisma } from "@/generated/prisma/client";
 import { requireCapability, serverCan, AuthError } from "@/lib/auth/server";
-import { toDisplayProfileDTO } from "@/lib/serializers/displayProfile";
+import { toDisplayProfileDTO, type DisplaySection } from "@/lib/serializers/displayProfile";
 import { publishDisplayProfileVersion } from "@/lib/displayProfiles/publish";
+import { validateDisplayProfileForPublish } from "@/lib/displayProfiles/validation";
+import { PACKS } from "@/core/industries";
 import { logTenantAudit } from "@/lib/audit";
 
 export const runtime = "nodejs";
@@ -117,6 +119,22 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
 
     if (status === "Published") {
+      const draft = await prisma.displayProfile.findUniqueOrThrow({
+        where: { id },
+        include: { assets: { select: { mimeType: true } } },
+      });
+      const pack = PACKS.find((p) => p.id === draft.packId);
+      const item = pack?.inventory.find((i) => i.id === draft.itemId);
+      if (item) {
+        const { hardBlocks } = validateDisplayProfileForPublish(
+          draft.sections as unknown as DisplaySection[],
+          item,
+          draft.assets,
+        );
+        if (hardBlocks.length > 0) {
+          return NextResponse.json({ error: "validation-failed", hardBlocks }, { status: 422 });
+        }
+      }
       await publishDisplayProfileVersion({ tenantId: ctx.tenantId, profileId: id, authorId: ctx.userId, changeReason });
       await logTenantAudit({
         tenantId: ctx.tenantId,

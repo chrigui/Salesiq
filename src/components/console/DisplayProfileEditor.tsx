@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import useSWR, { mutate as globalMutate } from "swr";
-import { ArrowLeft, GripVertical, Loader2, Eye, Upload, FileText, Trash2, RotateCcw, Check, Copy, Settings2 } from "lucide-react";
+import { ArrowLeft, GripVertical, Loader2, Eye, Upload, FileText, Trash2, RotateCcw, Check, Copy, Settings2, AlertTriangle } from "lucide-react";
 import { motion, useDragControls, type PanInfo } from "framer-motion";
 import { Panel } from "@/components/console/light-ui";
 import { cx } from "@/components/ui/primitives";
@@ -29,6 +29,7 @@ import {
   type MotionPresetId,
 } from "@/core/display/motionPresets";
 import type { IndustryPack, InventoryItem } from "@/core/types";
+import { validateDisplayProfileForPublish, type DisplayProfileValidationResult } from "@/lib/displayProfiles/validation";
 
 const TABS = ["Widgets", "Brand", "Motion", "Idle", "History", "Preview"] as const;
 export type Tab = (typeof TABS)[number];
@@ -74,6 +75,9 @@ export function DisplayProfileEditor({
 
   const pack = PACKS.find((p) => p.id === profile.packId);
   const item = pack?.inventory.find((i) => i.id === profile.itemId);
+  const validation = item
+    ? validateDisplayProfileForPublish(profile.sections, item, profile.assets)
+    : undefined;
 
   return (
     <div className="space-y-4">
@@ -158,6 +162,7 @@ export function DisplayProfileEditor({
             updateDisplayProfile(id, { status: "Published", changeReason });
             setPublishDialogOpen(false);
           }}
+          validation={validation}
         />
       )}
 
@@ -166,8 +171,19 @@ export function DisplayProfileEditor({
   );
 }
 
-export function PublishDialog({ onClose, onPublish }: { onClose: () => void; onPublish: (changeReason: string) => void }) {
+export function PublishDialog({
+  onClose,
+  onPublish,
+  validation,
+}: {
+  onClose: () => void;
+  onPublish: (changeReason: string) => void;
+  /** Omitted when the caller couldn't resolve item/pack (e.g. listing removed) — the dialog just skips the checklist rather than blocking on missing context. */
+  validation?: DisplayProfileValidationResult;
+}) {
   const [reason, setReason] = useState("");
+  const hardBlocked = Boolean(validation && validation.hardBlocks.length > 0);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
       <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
@@ -175,6 +191,37 @@ export function PublishDialog({ onClose, onPublish }: { onClose: () => void; onP
         <p className="mt-1 text-xs text-zinc-400">
           Freezes the current draft as a new version — the real Customer Display picks it up on its next poll.
         </p>
+
+        {validation && (validation.hardBlocks.length > 0 || validation.warnings.length > 0) && (
+          <div
+            className={cx(
+              "mt-4 rounded-xl border p-3",
+              hardBlocked ? "border-red-200 bg-red-50" : "border-amber-200 bg-amber-50",
+            )}
+          >
+            <div
+              className={cx(
+                "mb-1.5 flex items-center gap-1.5 text-xs font-semibold",
+                hardBlocked ? "text-red-700" : "text-amber-700",
+              )}
+            >
+              <AlertTriangle className="h-3.5 w-3.5" /> Display profile needs attention
+            </div>
+            <ul className="space-y-1 text-xs">
+              {validation.hardBlocks.map((msg) => (
+                <li key={msg} className="text-red-700">
+                  {msg}
+                </li>
+              ))}
+              {validation.warnings.map((msg) => (
+                <li key={msg} className="text-amber-700">
+                  {msg}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         <label className="mt-4 block">
           <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-zinc-400">
             Change reason (optional)
@@ -191,8 +238,9 @@ export function PublishDialog({ onClose, onPublish }: { onClose: () => void; onP
             Cancel
           </button>
           <button
+            disabled={hardBlocked}
             onClick={() => onPublish(reason.trim())}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-zinc-900 px-3 py-2 text-sm font-semibold text-white transition hover:brightness-110"
+            className="inline-flex items-center gap-1.5 rounded-xl bg-zinc-900 px-3 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
           >
             Publish
           </button>
