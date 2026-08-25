@@ -1224,11 +1224,14 @@ type PreviewFrameId = (typeof PREVIEW_FRAMES)[number]["id"];
  */
 function PreviewDisplayModal({ profileId, onClose }: { profileId: string; onClose: () => void }) {
   const [frameId, setFrameId] = useState<PreviewFrameId>("tv");
+  const [showDefaultBrand, setShowDefaultBrand] = useState(false);
   const frame = PREVIEW_FRAMES.find((f) => f.id === frameId) ?? PREVIEW_FRAMES[0];
+
+  const src = `/display?previewProfileId=${encodeURIComponent(profileId)}${showDefaultBrand ? "&brand=default" : ""}`;
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-black/80 backdrop-blur-sm" onClick={onClose}>
-      <div className="flex items-center justify-between gap-3 p-4" onClick={(e) => e.stopPropagation()}>
+      <div className="flex flex-wrap items-center justify-between gap-3 p-4" onClick={(e) => e.stopPropagation()}>
         <div className="flex gap-1">
           {PREVIEW_FRAMES.map((f) => (
             <button
@@ -1243,12 +1246,34 @@ function PreviewDisplayModal({ profileId, onClose }: { profileId: string; onClos
             </button>
           ))}
         </div>
-        <button
-          onClick={onClose}
-          className="inline-flex items-center gap-1.5 rounded-xl border border-white/20 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-white/10"
-        >
-          Close
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="flex rounded-lg bg-white/10 p-0.5">
+            <button
+              onClick={() => setShowDefaultBrand(false)}
+              className={cx(
+                "rounded-md px-3 py-1.5 text-xs font-medium transition",
+                !showDefaultBrand ? "bg-white text-zinc-900" : "text-white/70 hover:text-white",
+              )}
+            >
+              Your Brand
+            </button>
+            <button
+              onClick={() => setShowDefaultBrand(true)}
+              className={cx(
+                "rounded-md px-3 py-1.5 text-xs font-medium transition",
+                showDefaultBrand ? "bg-white text-zinc-900" : "text-white/70 hover:text-white",
+              )}
+            >
+              LUMMA Default
+            </button>
+          </div>
+          <button
+            onClick={onClose}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-white/20 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-white/10"
+          >
+            Close
+          </button>
+        </div>
       </div>
       <div
         className="flex flex-1 items-center justify-center overflow-auto p-4"
@@ -1261,11 +1286,7 @@ function PreviewDisplayModal({ profileId, onClose }: { profileId: string; onClos
             frame.aspectClass,
           )}
         >
-          <iframe
-            src={`/display?previewProfileId=${encodeURIComponent(profileId)}`}
-            className="h-full w-full border-0 bg-zinc-950"
-            title="Customer Display preview"
-          />
+          <iframe key={src} src={src} className="h-full w-full border-0 bg-zinc-950" title="Customer Display preview" />
         </div>
       </div>
       <p className="p-3 text-center text-[11px] text-white/40" onClick={(e) => e.stopPropagation()}>

@@ -24,7 +24,7 @@ import { BrandTokenScope } from "./BrandTokenScope";
  * other Display concern (pairing, idle, companion sync) — this is a
  * read-only content preview, not a real kiosk session.
  */
-function DisplayPreview({ profileId }: { profileId: string }) {
+function DisplayPreview({ profileId, forceDefaultBrand }: { profileId: string; forceDefaultBrand: boolean }) {
   const { profile, isLoading } = useDisplayProfile(profileId);
   const pack = profile ? PACKS.find((p) => p.id === profile.packId) : undefined;
   const item = pack?.inventory.find((i) => i.id === profile?.itemId);
@@ -38,12 +38,19 @@ function DisplayPreview({ profileId }: { profileId: string }) {
     );
   }
 
+  // "LUMMA Default" toggle (PR14): strips this profile's own brand kit/
+  // overrides for the render only, so DisplayProfileRenderer's internal
+  // brand resolution falls through to the pack's own out-of-the-box
+  // branding — the same "no client kit attached" baseline used everywhere
+  // else in this app — instead of whatever's actually attached to it.
+  const effectiveProfile = forceDefaultBrand ? { ...profile, brandOverrides: null, resolvedBrandProfile: null } : profile;
+
   return (
     <div className="relative min-h-screen bg-zinc-950">
       <div className="pointer-events-none fixed left-1/2 top-3 z-[90] -translate-x-1/2 rounded-full bg-amber-500/90 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-black">
         Preview — draft, not published
       </div>
-      <DisplayProfileRenderer profile={profile} pack={pack} item={item} mode="preview" />
+      <DisplayProfileRenderer profile={effectiveProfile} pack={pack} item={item} mode="preview" />
     </div>
   );
 }
@@ -62,8 +69,11 @@ export function DisplayRoot() {
   // already uses for its own `?pair=` param — rather than next/navigation's
   // useSearchParams(), which would force this route into a Suspense boundary.
   const [previewProfileId, setPreviewProfileId] = useState<string | null>(null);
+  const [previewForceDefaultBrand, setPreviewForceDefaultBrand] = useState(false);
   useEffect(() => {
-    setPreviewProfileId(new URLSearchParams(window.location.search).get("previewProfileId"));
+    const params = new URLSearchParams(window.location.search);
+    setPreviewProfileId(params.get("previewProfileId"));
+    setPreviewForceDefaultBrand(params.get("brand") === "default");
   }, []);
 
   const device = useDisplayDevice();
@@ -81,11 +91,11 @@ export function DisplayRoot() {
   // with ?previewProfileId=X — render the authenticated draft preview and
   // skip every other Display concern (pairing, idle, device claim) entirely.
   if (previewProfileId) {
-    return <DisplayPreview profileId={previewProfileId} />;
+    return <DisplayPreview profileId={previewProfileId} forceDefaultBrand={previewForceDefaultBrand} />;
   }
 
   return (
-    <BrandTokenScope brand={defaultBrand}>
+    <BrandTokenScope brand={previewForceDefaultBrand ? null : defaultBrand}>
       {liveProfile && liveItem ? (
         <DisplayProfileRenderer
           profile={liveProfile}
