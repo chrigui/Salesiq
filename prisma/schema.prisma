@@ -873,6 +873,24 @@ model BrandProfile {
   fontHeading String?
   fontBody    String?
 
+  // Deep theming (Customer Display Experience, Theme-PR1). backgroundColor/
+  // textColor stay nullable rgb-triplet strings like brand/brandSoft above
+  // (unset = fall back to the app's default dark surface); the style enums
+  // carry real defaults so an unthemed BrandProfile row still resolves to
+  // today's exact look via resolveBrandTokens().
+  backgroundColor     String?
+  textColor           String?
+  cardStyle           BrandCardStyle       @default(Glass)
+  buttonStyle         BrandButtonStyle     @default(Filled)
+  borderRadius        BrandBorderRadius    @default(Soft)
+  shadowIntensity     BrandShadowIntensity @default(Elevated)
+  spacingScale        BrandSpacingScale    @default(Comfortable)
+  defaultMotionPreset String?
+  // Exactly one BrandProfile per tenant may be the whole-Display default
+  // (Theme-PR3); enforced in application code (clear the others in the same
+  // transaction), same convention as Published DisplayProfile resolution.
+  isDefault           Boolean              @default(false)
+
   createdById String?
   createdBy   User?    @relation(fields: [createdById], references: [id], onDelete: SetNull)
   createdAt   DateTime @default(now())
@@ -881,6 +899,36 @@ model BrandProfile {
   profiles DisplayProfile[]
 
   @@index([tenantId])
+}
+
+enum BrandCardStyle {
+  Glass
+  Solid
+  Outlined
+}
+
+enum BrandButtonStyle {
+  Filled
+  Outline
+  Ghost
+}
+
+enum BrandBorderRadius {
+  Sharp
+  Soft
+  Round
+}
+
+enum BrandShadowIntensity {
+  Flat
+  Subtle
+  Elevated
+}
+
+enum BrandSpacingScale {
+  Compact
+  Comfortable
+  Spacious
 }
 
 // Document Center attachment (floor plans, masterplans, spec sheets) for a

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { WIDGET_REGISTRY } from "./registry";
 import type { DisplayPackSummary, DisplayWidgetContext } from "./types";
@@ -8,6 +8,7 @@ import type { DisplayProfileDTO } from "@/lib/serializers/displayProfile";
 import type { IndustryPack, InventoryItem } from "@/core/types";
 import { resolveMotionConfig } from "@/core/display/motionPresets";
 import { nearestComparables } from "@/lib/comparables";
+import { BrandTokenScope } from "./BrandTokenScope";
 
 export interface DisplayProfileRendererProps {
   profile: DisplayProfileDTO;
@@ -35,7 +36,6 @@ export interface DisplayProfileRendererProps {
 export function DisplayProfileRenderer({ profile, pack, item, mode, deviceId, deviceToken, matchScore, sessionView, hasProposal }: DisplayProfileRendererProps) {
   const brand = profile.brandOverrides?.brand || profile.resolvedBrandProfile?.brand || pack.branding.brand;
   const brandSoft = profile.brandOverrides?.brandSoft || profile.resolvedBrandProfile?.brandSoft || pack.branding.brandSoft;
-  const brandVars = { "--brand": brand, "--brand-soft": brandSoft } as CSSProperties;
 
   const packSummary: DisplayPackSummary = {
     id: pack.id,
@@ -55,9 +55,9 @@ export function DisplayProfileRenderer({ profile, pack, item, mode, deviceId, de
 
   if (enabled.length === 0) {
     return (
-      <div style={brandVars} className="grid min-h-[50vh] place-items-center bg-zinc-950">
+      <BrandTokenScope brand={{ brand, brandSoft }} className="grid min-h-[50vh] place-items-center bg-zinc-950">
         <p className="text-sm text-white/40">No widgets enabled for this profile yet.</p>
-      </div>
+      </BrandTokenScope>
     );
   }
 
@@ -111,7 +111,7 @@ export function DisplayProfileRenderer({ profile, pack, item, mode, deviceId, de
 
   if (profile.layout === "Grid") {
     return (
-      <div style={brandVars} className="min-h-screen bg-zinc-950 p-6">
+      <BrandTokenScope brand={{ brand, brandSoft }} className="min-h-screen bg-zinc-950 p-6">
         <div className="grid grid-cols-4 gap-4">
           {widgets.map((w) =>
             w ? (
@@ -121,14 +121,14 @@ export function DisplayProfileRenderer({ profile, pack, item, mode, deviceId, de
             ) : null,
           )}
         </div>
-      </div>
+      </BrandTokenScope>
     );
   }
 
   return (
-    <div style={brandVars} className="min-h-screen bg-zinc-950">
+    <BrandTokenScope brand={{ brand, brandSoft }} className="min-h-screen bg-zinc-950">
       {widgets.map((w) => (w ? w.node : null))}
-    </div>
+    </BrandTokenScope>
   );
 }
 

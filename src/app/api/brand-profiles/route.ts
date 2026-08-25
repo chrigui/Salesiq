@@ -30,6 +30,14 @@ const createSchema = z.object({
   logoGlyph: z.string().max(10).optional(),
   fontHeading: z.string().max(100).optional(),
   fontBody: z.string().max(100).optional(),
+  backgroundColor: z.string().max(20).optional(),
+  textColor: z.string().max(20).optional(),
+  cardStyle: z.enum(["Glass", "Solid", "Outlined"]).optional(),
+  buttonStyle: z.enum(["Filled", "Outline", "Ghost"]).optional(),
+  borderRadius: z.enum(["Sharp", "Soft", "Round"]).optional(),
+  shadowIntensity: z.enum(["Flat", "Subtle", "Elevated"]).optional(),
+  spacingScale: z.enum(["Compact", "Comfortable", "Spacious"]).optional(),
+  defaultMotionPreset: z.string().max(20).optional(),
 });
 
 export async function POST(request: Request) {

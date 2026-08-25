@@ -9,19 +9,26 @@ function cx(...parts: (string | false | undefined | null)[]): string {
 
 export { cx };
 
-/** Frosted-glass card — the platform's signature surface. */
+/**
+ * Frosted-glass card — the platform's signature surface. Radius/shadow read
+ * the brand token CSS vars (see BrandTokenScope) with today's exact
+ * hardcoded values as the fallback, so this renders identically until a
+ * subtree is actually brand-scoped.
+ */
 export function GlassCard({
   className,
   strong,
+  style,
   ...props
 }: HTMLAttributes<HTMLDivElement> & { strong?: boolean }) {
   return (
     <div
-      className={cx(
-        strong ? "glass-strong" : "glass",
-        "rounded-3xl shadow-2xl shadow-black/40",
-        className,
-      )}
+      className={cx(strong ? "glass-strong" : "glass", className)}
+      style={{
+        borderRadius: "var(--radius, 1.5rem)",
+        boxShadow: "var(--shadow-color, 0 25px 50px -12px rgb(0 0 0 / 0.4))",
+        ...style,
+      }}
       {...props}
     />
   );
@@ -36,11 +43,11 @@ export const Button = forwardRef<
     active?: boolean;
   }
 >(function Button(
-  { className, variant = "ghost", active, ...props },
+  { className, variant = "ghost", active, style, ...props },
   ref,
 ) {
   const base =
-    "inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-medium transition-all duration-200 active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60";
+    "inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium transition-all duration-200 active:scale-[0.98] disabled:opacity-40 disabled:pointer-events-none focus:outline-none focus-visible:ring-2 focus-visible:ring-brand/60";
   const variants: Record<ButtonVariant, string> = {
     brand:
       "bg-brand text-white shadow-lg shadow-brand/30 hover:shadow-brand/50 hover:brightness-110",
@@ -54,7 +61,14 @@ export const Button = forwardRef<
     ),
   };
   return (
-    <button ref={ref} className={cx(base, variants[variant], className)} {...props} />
+    <button
+      ref={ref}
+      className={cx(base, variants[variant], className)}
+      // Radius reads the brand token CSS var (see BrandTokenScope) with
+      // today's exact hardcoded rounded-2xl as the fallback.
+      style={{ borderRadius: "var(--radius-sm, 1rem)", ...style }}
+      {...props}
+    />
   );
 });
 

@@ -15,6 +15,14 @@ const patchSchema = z.object({
   logoGlyph: z.string().max(10).nullable().optional(),
   fontHeading: z.string().max(100).nullable().optional(),
   fontBody: z.string().max(100).nullable().optional(),
+  backgroundColor: z.string().max(20).nullable().optional(),
+  textColor: z.string().max(20).nullable().optional(),
+  cardStyle: z.enum(["Glass", "Solid", "Outlined"]).optional(),
+  buttonStyle: z.enum(["Filled", "Outline", "Ghost"]).optional(),
+  borderRadius: z.enum(["Sharp", "Soft", "Round"]).optional(),
+  shadowIntensity: z.enum(["Flat", "Subtle", "Elevated"]).optional(),
+  spacingScale: z.enum(["Compact", "Comfortable", "Spacious"]).optional(),
+  defaultMotionPreset: z.string().max(20).nullable().optional(),
 });
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {

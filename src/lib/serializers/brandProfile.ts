@@ -11,6 +11,15 @@ export interface BrandProfileDTO {
   logoGlyph: string | null;
   fontHeading: string | null;
   fontBody: string | null;
+  backgroundColor: string | null;
+  textColor: string | null;
+  cardStyle: string;
+  buttonStyle: string;
+  borderRadius: string;
+  shadowIntensity: string;
+  spacingScale: string;
+  defaultMotionPreset: string | null;
+  isDefault: boolean;
 }
 
 export function toBrandProfileDTO(row: PrismaBrandProfile): BrandProfileDTO {
@@ -24,5 +33,14 @@ export function toBrandProfileDTO(row: PrismaBrandProfile): BrandProfileDTO {
     logoGlyph: row.logoGlyph,
     fontHeading: row.fontHeading,
     fontBody: row.fontBody,
+    backgroundColor: row.backgroundColor,
+    textColor: row.textColor,
+    cardStyle: row.cardStyle,
+    buttonStyle: row.buttonStyle,
+    borderRadius: row.borderRadius,
+    shadowIntensity: row.shadowIntensity,
+    spacingScale: row.spacingScale,
+    defaultMotionPreset: row.defaultMotionPreset,
+    isDefault: row.isDefault,
   };
 }
