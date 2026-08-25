@@ -33,14 +33,16 @@ export function ProgressJourney({
   compareCount: number;
   hasProposal: boolean;
 }) {
-  const reachedExplore = stage === "explore" || stage === "workspace";
-  const engagedBeyondList = compareCount > 0 || hasProposal;
+  const pastDiscovery = stage === "explore" || stage === "decide" || stage === "workspace";
+  const inDecisionRoom = stage === "decide";
+  const engagedBeyondList = inDecisionRoom || compareCount > 0 || hasProposal;
+  const comparing = compareCount >= 2;
 
   const states: Record<string, StepState> = {
-    discover: reachedExplore ? "done" : "upcoming",
-    match: !reachedExplore ? "upcoming" : engagedBeyondList ? "done" : "current",
-    compare: compareCount >= 2 ? "done" : compareCount === 1 ? "current" : "upcoming",
-    decide: hasProposal ? "done" : compareCount >= 2 ? "current" : "upcoming",
+    discover: pastDiscovery ? "done" : "upcoming",
+    match: !pastDiscovery ? "upcoming" : engagedBeyondList ? "done" : "current",
+    compare: comparing ? "done" : inDecisionRoom || compareCount === 1 ? "current" : "upcoming",
+    decide: hasProposal ? "done" : inDecisionRoom && comparing ? "current" : "upcoming",
     recap: hasProposal ? "current" : "upcoming",
   };
 

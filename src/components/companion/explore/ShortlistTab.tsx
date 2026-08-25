@@ -1,9 +1,11 @@
 "use client";
 
 import { useMemo } from "react";
+import { ArrowRight } from "lucide-react";
 import type { IndustryPack } from "@/core/types";
 import type { ScoredItem } from "@/core/engine/scoring";
 import { useSession } from "@/core/store/session";
+import { useMeetingFlow } from "../meetingFlow";
 import { PropertyCard } from "./PropertyCard";
 
 /**
@@ -23,10 +25,12 @@ export function ShortlistTab({
   onSelect: (item: ScoredItem) => void;
 }) {
   const session = useSession();
+  const flow = useMeetingFlow();
   const shortlisted = useMemo(
     () => scored.filter((s) => session.bookmarks.includes(s.item.id)),
     [scored, session.bookmarks],
   );
+  const readyForDecisionRoom = shortlisted.length >= 2 && shortlisted.length <= 5;
 
   if (shortlisted.length === 0) {
     return (
@@ -38,8 +42,19 @@ export function ShortlistTab({
 
   return (
     <div>
-      <div className="mb-3 text-xs font-semibold uppercase tracking-wide text-ink-faint">
-        Shortlist · {shortlisted.length}
+      <div className="mb-3 flex items-center justify-between">
+        <div className="text-xs font-semibold uppercase tracking-wide text-ink-faint">
+          Shortlist · {shortlisted.length}
+        </div>
+        {readyForDecisionRoom && (
+          <button
+            onClick={() => flow.goTo("decide")}
+            className="flex items-center gap-1.5 rounded-full bg-brand px-3.5 py-1.5 text-xs font-semibold text-white transition hover:brightness-110"
+          >
+            Enter Decision Room
+            <ArrowRight className="h-3.5 w-3.5" />
+          </button>
+        )}
       </div>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {shortlisted.map((s) => (

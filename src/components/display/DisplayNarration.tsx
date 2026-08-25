@@ -19,7 +19,7 @@ import type { DisplayView } from "@/core/store/session";
 const BEATS: Partial<Record<DisplayView, string[]>> = {
   recommendation: ["We heard you.", "Here's what we found."],
   compare: ["Your top options, side by side."],
-  compareGroup: ["Comparing your options."],
+  compareGroup: ["Let's compare.", "Comparing your options."],
   item: ["Why this one fits."],
 };
 
