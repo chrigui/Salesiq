@@ -36,6 +36,9 @@ export interface DisplayProfileRendererProps {
 export function DisplayProfileRenderer({ profile, pack, item, mode, deviceId, deviceToken, matchScore, sessionView, hasProposal }: DisplayProfileRendererProps) {
   const brand = profile.brandOverrides?.brand || profile.resolvedBrandProfile?.brand || pack.branding.brand;
   const brandSoft = profile.brandOverrides?.brandSoft || profile.resolvedBrandProfile?.brandSoft || pack.branding.brandSoft;
+  const resolvedBrand = profile.resolvedBrandProfile;
+  const logoUrl =
+    resolvedBrand?.id && resolvedBrand.logoMimeType ? `/api/public/brand-profiles/${resolvedBrand.id}/logo` : null;
 
   const packSummary: DisplayPackSummary = {
     id: pack.id,
@@ -48,6 +51,7 @@ export function DisplayProfileRenderer({ profile, pack, item, mode, deviceId, de
       brand,
       brandSoft,
       logoGlyph: pack.branding.logoGlyph,
+      logoUrl,
     },
   };
 
@@ -55,7 +59,7 @@ export function DisplayProfileRenderer({ profile, pack, item, mode, deviceId, de
 
   if (enabled.length === 0) {
     return (
-      <BrandTokenScope brand={{ brand, brandSoft }} className="grid min-h-[50vh] place-items-center bg-zinc-950">
+      <BrandTokenScope brand={{ brand, brandSoft, fontHeading: resolvedBrand?.fontHeading, fontBody: resolvedBrand?.fontBody }} className="grid min-h-[50vh] place-items-center bg-zinc-950">
         <p className="text-sm text-white/40">No widgets enabled for this profile yet.</p>
       </BrandTokenScope>
     );
@@ -111,7 +115,7 @@ export function DisplayProfileRenderer({ profile, pack, item, mode, deviceId, de
 
   if (profile.layout === "Grid") {
     return (
-      <BrandTokenScope brand={{ brand, brandSoft }} className="min-h-screen bg-zinc-950 p-6">
+      <BrandTokenScope brand={{ brand, brandSoft, fontHeading: resolvedBrand?.fontHeading, fontBody: resolvedBrand?.fontBody }} className="min-h-screen bg-zinc-950 p-6">
         <div className="grid grid-cols-4 gap-4">
           {widgets.map((w) =>
             w ? (
@@ -126,7 +130,7 @@ export function DisplayProfileRenderer({ profile, pack, item, mode, deviceId, de
   }
 
   return (
-    <BrandTokenScope brand={{ brand, brandSoft }} className="min-h-screen bg-zinc-950">
+    <BrandTokenScope brand={{ brand, brandSoft, fontHeading: resolvedBrand?.fontHeading, fontBody: resolvedBrand?.fontBody }} className="min-h-screen bg-zinc-950">
       {widgets.map((w) => (w ? w.node : null))}
     </BrandTokenScope>
   );

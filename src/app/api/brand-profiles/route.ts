@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { requireCapability, AuthError } from "@/lib/auth/server";
 import { toBrandProfileDTO } from "@/lib/serializers/brandProfile";
 import { logTenantAudit } from "@/lib/audit";
+import { FONT_OPTION_IDS } from "@/core/display/brandFonts";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -28,8 +29,8 @@ const createSchema = z.object({
   brand: z.string().max(20).optional(),
   brandSoft: z.string().max(20).optional(),
   logoGlyph: z.string().max(10).optional(),
-  fontHeading: z.string().max(100).optional(),
-  fontBody: z.string().max(100).optional(),
+  fontHeading: z.enum(FONT_OPTION_IDS).optional(),
+  fontBody: z.enum(FONT_OPTION_IDS).optional(),
   backgroundColor: z.string().max(20).optional(),
   textColor: z.string().max(20).optional(),
   cardStyle: z.enum(["Glass", "Solid", "Outlined"]).optional(),

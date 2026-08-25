@@ -22,8 +22,9 @@ import {
   type BrandProfile,
 } from "@/core/store/brandProfiles";
 import { DisplayProfileEditor } from "@/components/console/DisplayProfileEditor";
-import { Field, TextInput } from "@/components/console/builder/fields";
-import { Palette, Trash2 } from "lucide-react";
+import { Field, TextInput, Select } from "@/components/console/builder/fields";
+import { Palette, Trash2, Upload, X as XIcon } from "lucide-react";
+import { FONT_OPTIONS } from "@/core/display/brandFonts";
 
 const STATUS_STYLE: Record<DisplayProfileStatus, string> = {
   Draft: "bg-zinc-200 text-zinc-500",
@@ -388,6 +389,9 @@ function BrandProfilesPanel() {
   );
 }
 
+const MAX_LOGO_BYTES = 8 * 1024 * 1024;
+const ALLOWED_LOGO_MIME = new Set(["image/png", "image/jpeg", "image/webp"]);
+
 function BrandProfileRow({
   brandProfile,
   expanded,
@@ -399,10 +403,29 @@ function BrandProfileRow({
 }) {
   const [brand, setBrand] = useState(brandProfile.brand ?? "16 185 129");
   const [brandSoft, setBrandSoft] = useState(brandProfile.brandSoft ?? "52 211 153");
+  const [logoError, setLogoError] = useState<string | null>(null);
+  const [logoUploading, setLogoUploading] = useState(false);
   useEffect(() => {
     setBrand(brandProfile.brand ?? "16 185 129");
     setBrandSoft(brandProfile.brandSoft ?? "52 211 153");
   }, [brandProfile.id, brandProfile.brand, brandProfile.brandSoft]);
+
+  const uploadLogo = async (file: File) => {
+    setLogoError(null);
+    if (!ALLOWED_LOGO_MIME.has(file.type)) {
+      setLogoError("PNG, JPEG, or WEBP only.");
+      return;
+    }
+    if (file.size > MAX_LOGO_BYTES) {
+      setLogoError("Logo must be under 8MB.");
+      return;
+    }
+    setLogoUploading(true);
+    const buffer = await file.arrayBuffer();
+    const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+    await updateBrandProfile(brandProfile.id, { logoDataBase64: base64, logoMimeType: file.type });
+    setLogoUploading(false);
+  };
 
   return (
     <div className="rounded-2xl border border-zinc-200 bg-white">
@@ -466,6 +489,70 @@ function BrandProfileRow({
               />
             </div>
           </Field>
+
+          <Field label="Logo" hint="PNG, JPEG, or WEBP, up to 8MB — replaces the emoji/text glyph wherever this brand renders">
+            <div className="flex items-center gap-3">
+              {brandProfile.logoMimeType ? (
+                <div className="flex items-center gap-2">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`/api/brand-profiles/${brandProfile.id}/logo?v=${brandProfile.updatedAt}`}
+                    alt="Brand logo"
+                    className="h-10 w-10 rounded-lg border border-zinc-200 object-contain"
+                  />
+                  <button
+                    onClick={() => updateBrandProfile(brandProfile.id, { removeLogo: true })}
+                    className="inline-flex items-center gap-1 rounded-lg border border-zinc-200 px-2 py-1 text-[11px] text-zinc-600 transition hover:bg-zinc-50"
+                  >
+                    <XIcon className="h-3 w-3" /> Remove
+                  </button>
+                </div>
+              ) : (
+                <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-600 transition hover:bg-zinc-50">
+                  <Upload className="h-3.5 w-3.5" />
+                  {logoUploading ? "Uploading…" : "Upload logo"}
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    className="hidden"
+                    disabled={logoUploading}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) void uploadLogo(file);
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+              )}
+            </div>
+            {logoError && <p className="mt-1 text-[11px] text-red-600">{logoError}</p>}
+          </Field>
+
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Heading font">
+              <Select
+                value={brandProfile.fontHeading ?? ""}
+                onChange={(e) => updateBrandProfile(brandProfile.id, { fontHeading: e.target.value || null })}
+              >
+                <option value="">Default</option>
+                {FONT_OPTIONS.map((f) => (
+                  <option key={f.id} value={f.id}>{f.label}</option>
+                ))}
+              </Select>
+            </Field>
+            <Field label="Body font">
+              <Select
+                value={brandProfile.fontBody ?? ""}
+                onChange={(e) => updateBrandProfile(brandProfile.id, { fontBody: e.target.value || null })}
+              >
+                <option value="">Default</option>
+                {FONT_OPTIONS.map((f) => (
+                  <option key={f.id} value={f.id}>{f.label}</option>
+                ))}
+              </Select>
+            </Field>
+          </div>
+
           <button
             onClick={() => deleteBrandProfile(brandProfile.id)}
             className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 px-3 py-1.5 text-xs text-red-600 transition hover:bg-red-50"

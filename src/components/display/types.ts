@@ -9,6 +9,8 @@ export interface DisplayBranding {
   brand: string;
   brandSoft: string;
   logoGlyph: string;
+  /** A real uploaded brand-kit logo (Theme-PR2) — takes precedence over logoGlyph when set. */
+  logoUrl?: string | null;
 }
 
 export interface DisplayPackSummary {

@@ -2,6 +2,8 @@
 
 import type { CSSProperties, ReactNode } from "react";
 import { resolveBrandTokens } from "@/core/display/brandTokens";
+import { fontStack } from "@/core/display/brandFonts";
+import { BrandFontsLoader } from "./BrandFontsLoader";
 
 export interface BrandTokenInput {
   brand?: string | null;
@@ -11,6 +13,8 @@ export interface BrandTokenInput {
   borderRadius?: string | null;
   shadowIntensity?: string | null;
   spacingScale?: string | null;
+  fontHeading?: string | null;
+  fontBody?: string | null;
 }
 
 /**
@@ -34,12 +38,16 @@ export function BrandTokenScope({
   children: ReactNode;
 }) {
   const tokens = resolveBrandTokens(brand);
+  const headingFont = fontStack(brand?.fontHeading);
+  const bodyFont = fontStack(brand?.fontBody);
 
   const style: CSSProperties = {
     ...(brand?.brand ? { "--brand": brand.brand } : {}),
     ...(brand?.brandSoft ? { "--brand-soft": brand.brandSoft } : {}),
     ...(brand?.backgroundColor ? { "--bg": brand.backgroundColor } : {}),
     ...(brand?.textColor ? { "--text": brand.textColor } : {}),
+    ...(headingFont ? { "--font-heading": headingFont } : {}),
+    ...(bodyFont ? { "--font-body": bodyFont, fontFamily: bodyFont } : {}),
     "--radius": tokens.radius,
     "--radius-sm": tokens.radiusSm,
     "--shadow-color": tokens.shadow,
@@ -48,6 +56,7 @@ export function BrandTokenScope({
 
   return (
     <div style={style} className={className}>
+      <BrandFontsLoader fontHeading={brand?.fontHeading} fontBody={brand?.fontBody} />
       {children}
     </div>
   );

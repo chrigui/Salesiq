@@ -9,6 +9,8 @@ export interface BrandProfileDTO {
   brand: string | null;
   brandSoft: string | null;
   logoGlyph: string | null;
+  /** Presence flag only — the actual bytes are served from /api/brand-profiles/[id]/logo, never inlined here. */
+  logoMimeType: string | null;
   fontHeading: string | null;
   fontBody: string | null;
   backgroundColor: string | null;
@@ -31,6 +33,7 @@ export function toBrandProfileDTO(row: PrismaBrandProfile): BrandProfileDTO {
     brand: row.brand,
     brandSoft: row.brandSoft,
     logoGlyph: row.logoGlyph,
+    logoMimeType: row.logoMimeType,
     fontHeading: row.fontHeading,
     fontBody: row.fontBody,
     backgroundColor: row.backgroundColor,

@@ -870,6 +870,15 @@ model BrandProfile {
   brand       String?
   brandSoft   String?
   logoGlyph   String?
+  // Theme-PR2: a real uploaded logo image, mirroring DisplayProfileAsset's
+  // blob-storage tradeoff (no object storage configured for this app yet).
+  // Nullable/paired so a kit with no logo uploaded stays valid — logoGlyph
+  // above stays the emoji/text fallback when neither is set.
+  logoData     Bytes?
+  logoMimeType String?
+  // fontHeading/fontBody store a curated font-option id (see
+  // src/core/display/brandFonts.ts), validated server-side against that
+  // allowlist on write — never a freeform font-family string.
   fontHeading String?
   fontBody    String?
 

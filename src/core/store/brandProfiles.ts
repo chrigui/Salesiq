@@ -10,8 +10,18 @@ export interface BrandProfile {
   brand: string | null;
   brandSoft: string | null;
   logoGlyph: string | null;
+  logoMimeType: string | null;
   fontHeading: string | null;
   fontBody: string | null;
+  backgroundColor: string | null;
+  textColor: string | null;
+  cardStyle: string;
+  buttonStyle: string;
+  borderRadius: string;
+  shadowIntensity: string;
+  spacingScale: string;
+  defaultMotionPreset: string | null;
+  isDefault: boolean;
 }
 
 const KEY = "/api/brand-profiles";
@@ -42,7 +52,25 @@ export async function createBrandProfile(input: {
 
 export async function updateBrandProfile(
   id: string,
-  patch: Partial<Pick<BrandProfile, "name" | "brand" | "brandSoft" | "logoGlyph" | "fontHeading" | "fontBody">>,
+  patch: Partial<
+    Pick<
+      BrandProfile,
+      | "name"
+      | "brand"
+      | "brandSoft"
+      | "logoGlyph"
+      | "fontHeading"
+      | "fontBody"
+      | "backgroundColor"
+      | "textColor"
+      | "cardStyle"
+      | "buttonStyle"
+      | "borderRadius"
+      | "shadowIntensity"
+      | "spacingScale"
+      | "defaultMotionPreset"
+    >
+  > & { logoDataBase64?: string; logoMimeType?: string; removeLogo?: boolean },
 ): Promise<BrandProfile | null> {
   const res = await fetch(`${KEY}/${id}`, {
     method: "PATCH",

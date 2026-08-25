@@ -16,9 +16,16 @@ export function DisplayHero({ item, pack, template, motion }: DisplayWidgetConte
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/10" />
         <div className="absolute inset-x-0 bottom-0 p-6 sm:p-10">
           <div className="mb-3 flex items-center gap-2 text-white/90">
-            <span className="grid h-8 w-8 place-items-center rounded-xl bg-white/15 text-lg backdrop-blur">
-              {pack.branding.logoGlyph}
-            </span>
+            {pack.branding.logoUrl ? (
+              <span className="grid h-8 w-8 place-items-center overflow-hidden rounded-xl bg-white/15 backdrop-blur">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={pack.branding.logoUrl} alt="Brand logo" className="h-full w-full object-contain p-1" />
+              </span>
+            ) : (
+              <span className="grid h-8 w-8 place-items-center rounded-xl bg-white/15 text-lg backdrop-blur">
+                {pack.branding.logoGlyph}
+              </span>
+            )}
             <span className="text-sm font-medium">{pack.branding.name}</span>
           </div>
           <h1

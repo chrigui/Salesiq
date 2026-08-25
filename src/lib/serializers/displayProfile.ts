@@ -42,7 +42,15 @@ export interface DisplayProfileDTO {
   // yet — see PR1's schema comment) so editing a shared brand kit is
   // reflected immediately everywhere it's attached. Renderer resolution
   // order: brandOverrides -> resolvedBrandProfile -> pack branding.
-  resolvedBrandProfile: { brand: string | null; brandSoft: string | null; logoGlyph: string | null } | null;
+  resolvedBrandProfile: {
+    id?: string;
+    brand: string | null;
+    brandSoft: string | null;
+    logoGlyph: string | null;
+    logoMimeType?: string | null;
+    fontHeading?: string | null;
+    fontBody?: string | null;
+  } | null;
   brandOverrides: { brand?: string; brandSoft?: string } | null;
   motion: DisplayMotionConfig;
   idle: Record<string, unknown> | null;
@@ -69,7 +77,15 @@ export function toDisplayProfileDTO(
     sections: (row.sections as unknown as DisplaySection[]) ?? [],
     brandProfileId: row.brandProfileId,
     resolvedBrandProfile: row.brandProfile
-      ? { brand: row.brandProfile.brand, brandSoft: row.brandProfile.brandSoft, logoGlyph: row.brandProfile.logoGlyph }
+      ? {
+          id: row.brandProfile.id,
+          brand: row.brandProfile.brand,
+          brandSoft: row.brandProfile.brandSoft,
+          logoGlyph: row.brandProfile.logoGlyph,
+          logoMimeType: row.brandProfile.logoMimeType,
+          fontHeading: row.brandProfile.fontHeading,
+          fontBody: row.brandProfile.fontBody,
+        }
       : null,
     brandOverrides: (row.brandOverrides as { brand?: string; brandSoft?: string } | null) ?? null,
     motion: (row.motion as unknown as DisplayMotionConfig) ?? { preset: "Cinematic" },
@@ -92,14 +108,31 @@ export function toPublishedDisplayProfileDTO(
   version: PrismaDisplayProfileVersion,
 ): DisplayProfileDTO {
   const base = toDisplayProfileDTO(row);
-  const brandSnapshot = version.brandSnapshot as { brand?: string | null; brandSoft?: string | null } | null;
+  const brandSnapshot = version.brandSnapshot as {
+    brand?: string | null;
+    brandSoft?: string | null;
+    logoMimeType?: string | null;
+    fontHeading?: string | null;
+    fontBody?: string | null;
+    brandProfileId?: string | null;
+  } | null;
   return {
     ...base,
     sections: (version.sections as unknown as DisplaySection[]) ?? [],
     motion: (version.motion as unknown as DisplayMotionConfig) ?? { preset: "Cinematic" },
     idle: (version.idle as Record<string, unknown> | null) ?? null,
     resolvedBrandProfile: brandSnapshot
-      ? { brand: brandSnapshot.brand ?? null, brandSoft: brandSnapshot.brandSoft ?? null, logoGlyph: null }
+      ? {
+          // Logo bytes stay live (fetched by id), never duplicated into this
+          // JSON snapshot — frozen only means brand/brandSoft/fonts here.
+          id: brandSnapshot.brandProfileId ?? undefined,
+          brand: brandSnapshot.brand ?? null,
+          brandSoft: brandSnapshot.brandSoft ?? null,
+          logoGlyph: null,
+          logoMimeType: brandSnapshot.logoMimeType ?? null,
+          fontHeading: brandSnapshot.fontHeading ?? null,
+          fontBody: brandSnapshot.fontBody ?? null,
+        }
       : base.resolvedBrandProfile,
     // Already flattened into resolvedBrandProfile above — applying the
     // live draft's brandOverrides on top of a frozen version would let an

@@ -28,7 +28,15 @@ export async function publishDisplayProfileVersion(params: {
     const overrides = profile.brandOverrides as { brand?: string; brandSoft?: string } | null;
     const brand = overrides?.brand ?? profile.brandProfile?.brand ?? null;
     const brandSoft = overrides?.brandSoft ?? profile.brandProfile?.brandSoft ?? null;
-    const brandSnapshot = brand || brandSoft ? { brand, brandSoft } : null;
+    // Fonts/logo have no per-profile override today (only brand/brandSoft
+    // do) — snapshot the attached brand kit's own values directly.
+    const logoMimeType = profile.brandProfile?.logoMimeType ?? null;
+    const fontHeading = profile.brandProfile?.fontHeading ?? null;
+    const fontBody = profile.brandProfile?.fontBody ?? null;
+    const brandSnapshot =
+      brand || brandSoft || logoMimeType || fontHeading || fontBody
+        ? { brand, brandSoft, logoMimeType, fontHeading, fontBody, brandProfileId: profile.brandProfileId }
+        : null;
 
     const last = await tx.displayProfileVersion.findFirst({
       where: { profileId },
