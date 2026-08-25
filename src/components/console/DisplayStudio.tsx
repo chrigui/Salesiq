@@ -25,6 +25,17 @@ import { DisplayProfileEditor } from "@/components/console/DisplayProfileEditor"
 import { Field, TextInput, Select } from "@/components/console/builder/fields";
 import { Palette, Trash2, Upload, X as XIcon } from "lucide-react";
 import { FONT_OPTIONS } from "@/core/display/brandFonts";
+import { MOTION_PRESET_IDS, MOTION_PRESET_LABELS, MOTION_PRESET_BLURBS, type MotionPresetId } from "@/core/display/motionPresets";
+
+/**
+ * BrandProfile.defaultMotionPreset stores a bare preset id string — unlike
+ * DisplayProfile.motion (a full Json blob), it has no schema support for
+ * per-value Custom overrides, so "Custom" is excluded here: picking it would
+ * silently resolve to the same values as Cinematic (resolveMotionConfig's
+ * Custom branch has nothing stored to override), which would only confuse
+ * an admin picking a kit-wide default.
+ */
+const BRAND_MOTION_PRESET_IDS = MOTION_PRESET_IDS.filter((p): p is Exclude<MotionPresetId, "Custom"> => p !== "Custom");
 
 const STATUS_STYLE: Record<DisplayProfileStatus, string> = {
   Draft: "bg-zinc-200 text-zinc-500",
@@ -558,6 +569,49 @@ function BrandProfileRow({
                 ))}
               </Select>
             </Field>
+          </div>
+
+          {/* Not a <Field> here (unlike the other fields on this row): Field
+              wraps its children in a <label>, and <button> is a labelable
+              HTML element — with several buttons inside one <label>, each
+              one's accessible name would absorb the whole label's text plus
+              every sibling button's text, making them indistinguishable to
+              assistive tech (and to role-based test queries). */}
+          <div className="block">
+            <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-zinc-400">
+              Motion preset
+            </span>
+            <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
+              <button
+                onClick={() => updateBrandProfile(brandProfile.id, { defaultMotionPreset: null })}
+                className={cx(
+                  "rounded-lg border px-2.5 py-1.5 text-left text-xs font-medium transition",
+                  !brandProfile.defaultMotionPreset
+                    ? "border-zinc-900 bg-zinc-900 text-white"
+                    : "border-zinc-200 text-zinc-600 hover:bg-zinc-50",
+                )}
+              >
+                Default
+              </button>
+              {BRAND_MOTION_PRESET_IDS.map((p) => (
+                <button
+                  key={p}
+                  onClick={() => updateBrandProfile(brandProfile.id, { defaultMotionPreset: p })}
+                  title={MOTION_PRESET_BLURBS[p]}
+                  className={cx(
+                    "rounded-lg border px-2.5 py-1.5 text-left text-xs font-medium transition",
+                    brandProfile.defaultMotionPreset === p
+                      ? "border-zinc-900 bg-zinc-900 text-white"
+                      : "border-zinc-200 text-zinc-600 hover:bg-zinc-50",
+                  )}
+                >
+                  {MOTION_PRESET_LABELS[p]}
+                </button>
+              ))}
+            </div>
+            <span className="mt-1 block text-[11px] text-zinc-400">
+              Applied wherever this kit is the tenant&rsquo;s default — the timing/easing of the hardcoded Display&rsquo;s scene transitions
+            </span>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, type Transition } from "framer-motion";
 import { Sparkles, MapPin, TrendingUp, Check, Star, Smartphone, Circle, X, Maximize, Minimize } from "lucide-react";
 import { useFullscreen } from "./DisplayKiosk";
 import { useSession } from "@/core/store/session";
@@ -12,6 +12,7 @@ import type { BuyerPriority } from "@/core/buyerIntelligence/priorityWeights";
 import { useResolvedDisplayProfile } from "@/core/store/displayProfiles";
 import { resolveMotionConfig } from "@/core/display/motionPresets";
 import { useDeviceIdleProfile } from "@/core/store/displayDevice";
+import { useDefaultBrandProfile } from "@/core/store/brandProfiles";
 import { DisplayProfileRenderer } from "./DisplayProfileRenderer";
 import { scoreInventory, isVisible } from "@/core/engine/scoring";
 import type { ScoredItem } from "@/core/engine/scoring";
@@ -82,6 +83,20 @@ export function DisplayStage({
   const pack = useLivePack(packId);
   const { buyerProfile } = useBuyerProfile(buyerProfileId);
   const [qrOpen, setQrOpen] = useState(false);
+  const defaultBrand = useDefaultBrandProfile();
+
+  // The tenant's default brand kit can make the hardcoded shell's own
+  // transition (previously always the fixed `spring` below) brand-configurable,
+  // the same recipe as displayProfileTransition/idleProfileTransition just
+  // above for Display-Studio-profile-driven views. No default kit, or no
+  // motion preset set on it -> unchanged `spring`, so every existing session
+  // keeps rendering exactly as it does today.
+  const sceneTransition: Transition = defaultBrand?.defaultMotionPreset
+    ? (() => {
+        const cfg = resolveMotionConfig({ preset: defaultBrand.defaultMotionPreset });
+        return { duration: cfg.transition.durationMs / 1000, ease: cfg.transition.ease };
+      })()
+    : spring;
 
   // Route every InventoryItem reaching this customer-facing stage through
   // the single customerSafe allowlist seam (see src/lib/customerSafe.ts) —
@@ -207,7 +222,7 @@ export function DisplayStage({
         <div className="absolute inset-0 grid place-items-center px-10 pb-14 pt-24">
           <AnimatePresence mode="wait">
             {view === "welcome" && (
-              <Welcome key="welcome" pack={pack} />
+              <Welcome key="welcome" pack={pack} transition={sceneTransition} />
             )}
 
             {view === "matching" && (
@@ -224,6 +239,7 @@ export function DisplayStage({
                 question={activeQuestion}
                 answer={answers[activeQuestion.id]}
                 pack={pack}
+                transition={sceneTransition}
               />
             )}
 
@@ -234,11 +250,12 @@ export function DisplayStage({
                 packVertical={pack.vertical}
                 pack={pack}
                 focusedItemId={focusedItemId}
+                transition={sceneTransition}
               />
             )}
 
             {view === "compare" && (
-              <CompareStage key="compare" scored={scored} pack={pack} answers={answers} />
+              <CompareStage key="compare" scored={scored} pack={pack} answers={answers} transition={sceneTransition} />
             )}
 
             {view === "compareGroup" && (
@@ -249,6 +266,7 @@ export function DisplayStage({
                 answers={answers}
                 itemIds={compareItemIds}
                 priorities={buyerProfile?.priorities}
+                transition={sceneTransition}
               />
             )}
 
@@ -260,6 +278,7 @@ export function DisplayStage({
                 customerName={toCustomerSafeCustomerName(customer)}
                 proposalText={proposalText}
                 proposalEngine={proposalEngine}
+                transition={sceneTransition}
               />
             )}
 
@@ -349,6 +368,7 @@ export function DisplayStage({
                 reasons={
                   scored.find((s) => s.item.id === focusedItem.id)?.reasons ?? []
                 }
+                transition={sceneTransition}
               />
             )}
           </AnimatePresence>
@@ -449,19 +469,19 @@ function BrandHeader({
   );
 }
 
-function Welcome({ pack }: { pack: IndustryPack }) {
+function Welcome({ pack, transition }: { pack: IndustryPack; transition: Transition }) {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.96 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 1.02 }}
-      transition={spring}
+      transition={transition}
       className="text-center"
     >
       <motion.div
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.1, ...spring }}
+        transition={{ delay: 0.1, ...transition }}
         className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-ink-muted"
       >
         <Sparkles className="h-4 w-4 text-brand" /> Guided by your advisor
@@ -543,17 +563,19 @@ function QuestionStage({
   question,
   answer,
   pack,
+  transition,
 }: {
   question: Question;
   answer: AnswerValue | undefined;
   pack: IndustryPack;
+  transition: Transition;
 }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      transition={spring}
+      transition={transition}
       className="w-full max-w-5xl text-center"
     >
       <div className="mb-3 text-sm font-medium uppercase tracking-[0.2em] text-brand">
@@ -564,7 +586,7 @@ function QuestionStage({
       </h2>
 
       <div className="mt-12">
-        <AnswerVisual question={question} answer={answer} />
+        <AnswerVisual question={question} answer={answer} transition={transition} />
       </div>
     </motion.div>
   );
@@ -573,9 +595,11 @@ function QuestionStage({
 function AnswerVisual({
   question,
   answer,
+  transition,
 }: {
   question: Question;
   answer: AnswerValue | undefined;
+  transition: Transition;
 }) {
   if (question.type === "single" || question.type === "multi") {
     const selected = Array.isArray(answer)
@@ -593,7 +617,7 @@ function AnswerVisual({
               layout
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05, ...spring }}
+              transition={{ delay: i * 0.05, ...transition }}
               className={cx(
                 "flex min-w-[10rem] flex-col items-center gap-3 rounded-3xl px-8 py-7 transition-all duration-300",
                 on
@@ -644,7 +668,7 @@ function AnswerVisual({
         key={value}
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        transition={spring}
+        transition={transition}
         className="glass-strong mx-auto grid h-44 w-44 place-items-center rounded-full ring-2 ring-brand/40"
       >
         <span className="text-7xl font-semibold text-gradient">{value}</span>
@@ -668,6 +692,7 @@ function AnswerVisual({
           max={question.max ?? 0}
           from={b.min}
           to={b.max}
+          transition={transition}
         />
       </div>
     );
@@ -685,6 +710,7 @@ function AnswerVisual({
         max={question.max ?? 100}
         from={question.min ?? 0}
         to={value}
+        transition={transition}
       />
     </div>
   );
@@ -695,11 +721,13 @@ function RangeBar({
   max,
   from,
   to,
+  transition,
 }: {
   min: number;
   max: number;
   from: number;
   to: number;
+  transition: Transition;
 }) {
   const span = Math.max(1, max - min);
   const left = ((from - min) / span) * 100;
@@ -710,7 +738,7 @@ function RangeBar({
         className="h-full rounded-full bg-gradient-to-r from-brand to-brand-soft"
         initial={{ x: `${left}%`, width: 0 }}
         animate={{ x: `${left}%`, width: `${Math.max(width, 2)}%` }}
-        transition={spring}
+        transition={transition}
       />
     </div>
   );
@@ -720,6 +748,7 @@ function RecommendationStage({
   scored,
   pack,
   focusedItemId,
+  transition,
 }: {
   scored: ReturnType<typeof scoreInventory>;
   packVertical: string;
@@ -732,6 +761,7 @@ function RecommendationStage({
    * focusedItemId, so its behavior is unchanged.
    */
   focusedItemId?: string | null;
+  transition: Transition;
 }) {
   const best = (focusedItemId ? scored.find((s) => s.item.id === focusedItemId) : undefined) ?? scored[0];
   if (!best) return null;
@@ -741,7 +771,7 @@ function RecommendationStage({
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      transition={spring}
+      transition={transition}
       className="grid w-full max-w-6xl grid-cols-1 gap-8 lg:grid-cols-2 lg:items-center"
     >
       <ItemHero item={best.item} score={best.score} />
@@ -790,10 +820,12 @@ function CompareStage({
   scored,
   pack,
   answers,
+  transition,
 }: {
   scored: ReturnType<typeof scoreInventory>;
   pack: IndustryPack;
   answers: Record<string, AnswerValue>;
+  transition: Transition;
 }) {
   const top = scored.slice(0, 3);
   const winner = top[0];
@@ -802,7 +834,7 @@ function CompareStage({
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      transition={spring}
+      transition={transition}
       className="w-full max-w-6xl"
     >
       <h2 className="mb-8 text-center text-4xl font-semibold tracking-tight">
@@ -814,7 +846,7 @@ function CompareStage({
             key={s.item.id}
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1, ...spring }}
+            transition={{ delay: i * 0.1, ...transition }}
             className={cx(
               "glass overflow-hidden rounded-3xl",
               i === 0 && "ring-2 ring-brand",
@@ -893,12 +925,14 @@ function CompareGroupStage({
   answers,
   itemIds,
   priorities,
+  transition,
 }: {
   scored: ScoredItem[];
   pack: IndustryPack;
   answers: Record<string, AnswerValue>;
   itemIds: string[];
   priorities: BuyerPriority[] | null | undefined;
+  transition: Transition;
 }) {
   const group = itemIds
     .map((id) => scored.find((s) => s.item.id === id))
@@ -931,7 +965,7 @@ function CompareGroupStage({
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      transition={spring}
+      transition={transition}
       className="w-full max-w-6xl"
     >
       <h2 className="mb-8 text-center text-4xl font-semibold tracking-tight">
@@ -950,7 +984,7 @@ function CompareGroupStage({
               key={s.item.id}
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1, ...spring }}
+              transition={{ delay: i * 0.1, ...transition }}
               className={cx("glass overflow-hidden rounded-3xl", isWinner && "ring-2 ring-brand")}
             >
               <ItemImage image={s.item.image} photo={s.item.photo} className="h-36">
@@ -1098,12 +1132,14 @@ function ProposalStage({
   customerName,
   proposalText,
   proposalEngine,
+  transition,
 }: {
   scored: ReturnType<typeof scoreInventory>;
   pack: IndustryPack;
   customerName: string;
   proposalText: string | null;
   proposalEngine: string | null;
+  transition: Transition;
 }) {
   const best = scored[0];
   if (!best) return null;
@@ -1127,7 +1163,7 @@ function ProposalStage({
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      transition={spring}
+      transition={transition}
       className="w-full max-w-6xl"
     >
       <div className="glass-strong overflow-hidden rounded-[2rem]">
@@ -1215,10 +1251,12 @@ function ItemStage({
   item,
   score,
   reasons,
+  transition,
 }: {
   item: InventoryItem;
   score: number;
   reasons: string[];
+  transition: Transition;
 }) {
   const photos = [item.photo, ...(item.gallery ?? [])].filter(
     (p): p is string => !!p,
@@ -1230,7 +1268,7 @@ function ItemStage({
       initial={{ opacity: 0, scale: 0.97 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 1.02 }}
-      transition={spring}
+      transition={transition}
       className="grid w-full max-w-6xl grid-cols-1 gap-8 lg:grid-cols-2 lg:items-center"
     >
       <div>
@@ -1264,7 +1302,7 @@ function ItemStage({
         <motion.h2
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1, ...spring }}
+          transition={{ delay: 0.1, ...transition }}
           className="text-5xl font-semibold tracking-tight"
         >
           {item.name}
@@ -1272,7 +1310,7 @@ function ItemStage({
         <motion.p
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.18, ...spring }}
+          transition={{ delay: 0.18, ...transition }}
           className="mt-2 text-xl text-ink-muted"
         >
           {item.subtitle}
@@ -1281,7 +1319,7 @@ function ItemStage({
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.26, ...spring }}
+            transition={{ delay: 0.26, ...transition }}
             className="mt-3 flex items-center gap-2 text-ink-faint"
           >
             <MapPin className="h-4 w-4" /> {item.location.label}
@@ -1290,7 +1328,7 @@ function ItemStage({
         <motion.p
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.34, ...spring }}
+          transition={{ delay: 0.34, ...transition }}
           className="mt-6 text-4xl font-semibold text-gradient"
         >
           {formatMoney(item.price, item.currency)}
@@ -1301,7 +1339,7 @@ function ItemStage({
               key={h}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.42 + i * 0.06, ...spring }}
+              transition={{ delay: 0.42 + i * 0.06, ...transition }}
               className="glass flex items-center gap-2.5 rounded-2xl px-4 py-3 text-sm"
             >
               <Check className="h-4 w-4 shrink-0 text-brand" /> {h}
@@ -1312,7 +1350,7 @@ function ItemStage({
           <motion.p
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.42 + item.highlights.length * 0.06 + 0.1, ...spring }}
+            transition={{ delay: 0.42 + item.highlights.length * 0.06 + 0.1, ...transition }}
             className="mt-6 text-sm text-ink-faint"
           >
             Matches you: {reasons.slice(0, 3).join(" · ")}

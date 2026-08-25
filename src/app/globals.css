@@ -35,13 +35,20 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Ambient premium backdrop */
+/* Ambient premium backdrop — --bg/--text are Theme-PR4 hooks (see
+   BrandTokenScope): unset by default, so this renders the identical
+   gradient/ink color everywhere until a tenant's default brand kit sets a
+   background/text override, which then replaces the aurora effect wholesale
+   rather than tinting it. */
 .bg-aurora {
-  background:
+  background: var(
+    --bg,
     radial-gradient(60rem 40rem at 15% -10%, rgb(var(--brand) / 0.18), transparent 60%),
     radial-gradient(50rem 40rem at 100% 0%, rgb(var(--brand-soft) / 0.12), transparent 55%),
     radial-gradient(40rem 40rem at 50% 120%, rgb(var(--brand) / 0.1), transparent 60%),
-    rgb(var(--surface));
+    rgb(var(--surface))
+  );
+  color: var(--text, rgb(var(--ink)));
 }
 
 /* --card-bg is a Theme-PR1 hook (see BrandTokenScope) — unset by default,
