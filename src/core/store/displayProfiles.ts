@@ -125,6 +125,14 @@ export function useDisplayProfileVersions(id: string | null): { versions: Displa
   return { versions: data?.versions ?? [], isLoading: isLoading && data === undefined };
 }
 
+export async function duplicateDisplayProfile(id: string): Promise<DisplayProfile | null> {
+  const res = await fetch(`${PROFILES_KEY}/${id}/duplicate`, { method: "POST" });
+  if (!res.ok) return null;
+  const { profile } = await res.json();
+  globalMutate(PROFILES_KEY);
+  return profile as DisplayProfile;
+}
+
 export async function revertDisplayProfile(id: string, versionId: string): Promise<DisplayProfile | null> {
   const res = await fetch(`${PROFILES_KEY}/${id}/versions/${versionId}/revert`, { method: "POST" });
   globalMutate(`${PROFILES_KEY}/${id}`);

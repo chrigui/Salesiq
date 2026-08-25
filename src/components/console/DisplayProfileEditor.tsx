@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import useSWR, { mutate as globalMutate } from "swr";
-import { ArrowLeft, ArrowUp, ArrowDown, Loader2, Eye, Upload, FileText, Trash2, RotateCcw, Check } from "lucide-react";
+import { ArrowLeft, ArrowUp, ArrowDown, Loader2, Eye, Upload, FileText, Trash2, RotateCcw, Check, Copy } from "lucide-react";
 import { Panel } from "@/components/console/light-ui";
 import { cx } from "@/components/ui/primitives";
 import { Field, TextInput } from "@/components/console/builder/fields";
@@ -12,6 +12,7 @@ import {
   updateDisplayProfile,
   useDisplayProfileVersions,
   revertDisplayProfile,
+  duplicateDisplayProfile,
   type DisplayProfile,
   type DisplayTemplate,
 } from "@/core/store/displayProfiles";
@@ -43,10 +44,22 @@ const TEMPLATES: DisplayTemplate[] = [
   "Dashboard",
 ];
 
-export function DisplayProfileEditor({ id, onBack, initialTab }: { id: string; onBack: () => void; initialTab?: Tab }) {
+export function DisplayProfileEditor({
+  id,
+  onBack,
+  initialTab,
+  onDuplicated,
+}: {
+  id: string;
+  onBack: () => void;
+  initialTab?: Tab;
+  /** Called with the new copy's id after a successful Duplicate — lets the caller jump straight into editing it. Omit to just return to the list. */
+  onDuplicated?: (id: string) => void;
+}) {
   const { profile, isLoading } = useDisplayProfile(id);
   const [tab, setTab] = useState<Tab>(initialTab ?? "Widgets");
   const [publishDialogOpen, setPublishDialogOpen] = useState(false);
+  const [duplicating, setDuplicating] = useState(false);
 
   if (isLoading || !profile) {
     return (
@@ -92,6 +105,18 @@ export function DisplayProfileEditor({ id, onBack, initialTab }: { id: string; o
             <option value="Published">Published</option>
             <option value="Archived">Archived</option>
           </select>
+          <button
+            disabled={duplicating}
+            onClick={async () => {
+              setDuplicating(true);
+              const copy = await duplicateDisplayProfile(id);
+              setDuplicating(false);
+              if (copy) onDuplicated?.(copy.id);
+            }}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-zinc-200 px-3 py-2 text-sm font-medium text-zinc-600 transition hover:bg-zinc-50 disabled:opacity-50"
+          >
+            {duplicating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Copy className="h-4 w-4" />} Duplicate
+          </button>
           <button
             onClick={() => setTab("Preview")}
             className="inline-flex items-center gap-1.5 rounded-xl bg-zinc-900 px-3 py-2 text-sm font-semibold text-white transition hover:brightness-110"

@@ -10,6 +10,7 @@ import {
   createDisplayProfile,
   updateDisplayProfile,
   revertDisplayProfile,
+  duplicateDisplayProfile,
   useDisplayProfiles,
   useDisplayProfileVersions,
   type DisplayProfile,
@@ -110,7 +111,14 @@ export function DisplayStudio() {
   };
 
   if (selectedId) {
-    return <DisplayProfileEditor id={selectedId} initialTab={selectedTab} onBack={() => setSelectedId(null)} />;
+    return (
+      <DisplayProfileEditor
+        id={selectedId}
+        initialTab={selectedTab}
+        onBack={() => setSelectedId(null)}
+        onDuplicated={(newId) => openProfile(newId)}
+      />
+    );
   }
 
   return (
@@ -1113,6 +1121,7 @@ function CurrentProfileCard({
   const [publishOpen, setPublishOpen] = useState(false);
   const [rollbackOpen, setRollbackOpen] = useState(false);
   const [rollingBack, setRollingBack] = useState(false);
+  const [duplicating, setDuplicating] = useState(false);
 
   return (
     <div className="rounded-2xl border border-zinc-200 bg-gradient-to-br from-white to-zinc-50 p-5 shadow-sm">
@@ -1160,6 +1169,18 @@ function CurrentProfileCard({
           className="inline-flex items-center gap-1.5 rounded-xl border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-600 transition hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <RotateCcw className="h-3.5 w-3.5" /> Rollback
+        </button>
+        <button
+          disabled={duplicating}
+          onClick={async () => {
+            setDuplicating(true);
+            const copy = await duplicateDisplayProfile(profile.id);
+            setDuplicating(false);
+            if (copy) onOpen(copy.id);
+          }}
+          className="inline-flex items-center gap-1.5 rounded-xl border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-600 transition hover:bg-zinc-50 disabled:opacity-50"
+        >
+          {duplicating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Copy className="h-3.5 w-3.5" />} Duplicate
         </button>
       </div>
 
