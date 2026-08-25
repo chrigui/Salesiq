@@ -32,6 +32,7 @@ import { LifestyleStage } from "./LifestyleStage";
 import { FloorPlanStage } from "./FloorPlanStage";
 import { LocationStage } from "./LocationStage";
 import { PaymentStage } from "./PaymentStage";
+import { RecapStage } from "./RecapStage";
 import { useDecisionRoomWidgetContext } from "./useDecisionRoomWidgetContext";
 import { DEFAULT_IDLE_TIMEOUT_MS, IdleScreen, useIdleGate } from "./IdleMode";
 import { ContinueQrModal } from "./ContinueQr";
@@ -137,8 +138,16 @@ export function DisplayStage({
   // a generic fallback.
   const mapView =
     view === "welcome" || view === "recommendation" || (view === "item" && !displayProfile);
+  // Spec section 19/PR9: a presentItem(id, "recommendation") target (e.g.
+  // the Decision Room's compare-group winner) must win here too, not just
+  // for "item" — otherwise this map takeover would silently discard the
+  // salesperson's chosen recommendation and fall back to the pack's
+  // global scored[0], the same class of bug the "item" branch already
+  // guards against.
   const mapTarget =
-    view === "item" && focusedItem?.lifestyle && !displayProfile ? focusedItem : scored[0]?.item;
+    (view === "item" || view === "recommendation") && focusedItem?.lifestyle && !displayProfile
+      ? focusedItem
+      : scored[0]?.item;
 
   const showMapStage = mapView && !!mapTarget?.lifestyle;
 
@@ -206,6 +215,7 @@ export function DisplayStage({
                 scored={scored}
                 packVertical={pack.vertical}
                 pack={pack}
+                focusedItemId={focusedItemId}
               />
             )}
 
@@ -234,6 +244,8 @@ export function DisplayStage({
                 proposalEngine={proposalEngine}
               />
             )}
+
+            {view === "recap" && <RecapStage key="recap" />}
 
             {view === "whyThis" && focusedItem && (
               <WhyThisStage
@@ -674,12 +686,21 @@ function RangeBar({
 function RecommendationStage({
   scored,
   pack,
+  focusedItemId,
 }: {
   scored: ReturnType<typeof scoreInventory>;
   packVertical: string;
   pack: IndustryPack;
+  /**
+   * Spec section 19/PR9: reached via presentItem(id, "recommendation") from
+   * the Decision Room, this picks a specific winner (e.g. the compare
+   * group's top pick) instead of always the pack's global scored[0]. The
+   * existing post-Discovery auto-recommendation flow never sets
+   * focusedItemId, so its behavior is unchanged.
+   */
+  focusedItemId?: string | null;
 }) {
-  const best = scored[0];
+  const best = (focusedItemId ? scored.find((s) => s.item.id === focusedItemId) : undefined) ?? scored[0];
   if (!best) return null;
   const narrative = narrate(best, pack);
   return (
@@ -693,7 +714,7 @@ function RecommendationStage({
       <ItemHero item={best.item} score={best.score} />
       <div>
         <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-brand/15 px-4 py-2 text-sm font-medium text-brand ring-1 ring-brand/30">
-          <Sparkles className="h-4 w-4" /> AI recommendation
+          <Sparkles className="h-4 w-4" /> Your best match
         </div>
         <h2 className="text-4xl font-semibold tracking-tight">
           {best.item.name}

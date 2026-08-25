@@ -12,6 +12,7 @@ import { PropertyDetails } from "./explore/PropertyDetails";
 import { ProgressJourney } from "./explore/ProgressJourney";
 import { DecisionRoomComparison } from "./DecisionRoomComparison";
 import { PrioritiesPanel } from "./PrioritiesPanel";
+import { DecisionRoomRecommend } from "./DecisionRoomRecommend";
 import type { ScoredItem } from "@/core/engine/scoring";
 import type { IndustryPack } from "@/core/types";
 
@@ -74,6 +75,7 @@ export function DecisionRoom() {
         scored={scored}
         onBack={() => setStep("enter")}
         onShowPriorities={() => setStep("priorities")}
+        onShowRecommend={() => setStep("recommend")}
       />
     );
   }
@@ -83,20 +85,8 @@ export function DecisionRoom() {
     return <PrioritiesPanel pack={pack} group={group} onBack={() => setStep("compare")} />;
   }
 
-  // "recommend" step is filled in over the next Decision Room PR — this
-  // stub keeps the step reachable and gives a way back rather than a dead end.
-  return (
-    <div className="bg-aurora flex min-h-screen flex-col items-center justify-center gap-4 px-6 text-center">
-      {journey}
-      <p className="text-sm text-ink-faint">This part of the Decision Room is being built.</p>
-      <button
-        onClick={() => setStep("enter")}
-        className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-medium text-ink-muted transition hover:bg-white/10"
-      >
-        Back to shortlist
-      </button>
-    </div>
-  );
+  const group = scored.filter((s) => session.compareItemIds.includes(s.item.id));
+  return <DecisionRoomRecommend group={group} onBack={() => setStep("compare")} />;
 }
 
 function EnterStep({

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, ListChecks, Sliders } from "lucide-react";
+import { ArrowLeft, ListChecks, Sliders, Trophy } from "lucide-react";
 import { useSession } from "@/core/store/session";
 import { useScoreOptions } from "./discoveryScoring";
 import { ComparisonExperience } from "./explore/ComparisonExperience";
@@ -29,11 +29,13 @@ export function DecisionRoomComparison({
   scored,
   onBack,
   onShowPriorities,
+  onShowRecommend,
 }: {
   pack: IndustryPack;
   scored: ScoredItem[];
   onBack: () => void;
   onShowPriorities: () => void;
+  onShowRecommend: () => void;
 }) {
   const session = useSession();
   const opts = useScoreOptions(pack);
@@ -77,6 +79,14 @@ export function DecisionRoomComparison({
             Comparing {MAX_COMPARE} at a time in the Decision Room — remove one to add another.
           </p>
         )}
+
+        <button
+          onClick={onShowRecommend}
+          className="mt-5 flex w-full items-center justify-center gap-1.5 rounded-full bg-brand py-3 text-sm font-semibold text-white transition hover:brightness-110"
+        >
+          <Trophy className="h-4 w-4" />
+          Recommend
+        </button>
       </div>
 
       {displayControlFor && (
