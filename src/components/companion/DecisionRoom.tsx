@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ArrowLeft, GitCompareArrows, Compass } from "lucide-react";
+import { GitCompareArrows, Compass } from "lucide-react";
 import { useSession } from "@/core/store/session";
 import { useLivePack } from "@/core/store/packs";
 import { useScoredInventory } from "./discoveryScoring";
@@ -10,10 +10,14 @@ import { PropertyCard } from "./explore/PropertyCard";
 import { PropertyPreview } from "./explore/PropertyPreview";
 import { PropertyDetails } from "./explore/PropertyDetails";
 import { ProgressJourney } from "./explore/ProgressJourney";
+import { DecisionRoomComparison } from "./DecisionRoomComparison";
 import type { ScoredItem } from "@/core/engine/scoring";
 import type { IndustryPack } from "@/core/types";
 
 type DecisionRoomStep = "enter" | "compare" | "priorities" | "recommend";
+
+/** Decision Room supports 2-4 properties in a comparison (spec section 3). */
+const MAX_COMPARE = 4;
 
 /**
  * The Decision Room — where the salesperson stops browsing and starts
@@ -48,6 +52,12 @@ export function DecisionRoom() {
         shortlisted={shortlisted}
         pack={pack}
         onCompare={() => {
+          // Seed the comparison group from the shortlist itself (capped at
+          // MAX_COMPARE) rather than whatever compareItemIds happened to
+          // hold from an earlier Explorer session — "Compare" from the
+          // Decision Room's entering screen means "compare my shortlist."
+          session.clearCompare();
+          shortlisted.slice(0, MAX_COMPARE).forEach((s) => session.addToCompare(s.item.id));
           session.setView("compareGroup");
           setStep("compare");
         }}
@@ -56,9 +66,13 @@ export function DecisionRoom() {
     );
   }
 
-  // "compare"/"priorities"/"recommend" steps are filled in over the next
-  // Decision Room PRs — this stub keeps the step reachable and gives a way
-  // back rather than a dead end.
+  if (step === "compare") {
+    return <DecisionRoomComparison pack={pack} scored={scored} onBack={() => setStep("enter")} />;
+  }
+
+  // "priorities"/"recommend" steps are filled in over the next Decision Room
+  // PRs — this stub keeps the step reachable and gives a way back rather
+  // than a dead end.
   return (
     <div className="bg-aurora flex min-h-screen flex-col items-center justify-center gap-4 px-6 text-center">
       {journey}
@@ -67,7 +81,6 @@ export function DecisionRoom() {
         onClick={() => setStep("enter")}
         className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-medium text-ink-muted transition hover:bg-white/10"
       >
-        <ArrowLeft className="h-3.5 w-3.5" />
         Back to shortlist
       </button>
     </div>

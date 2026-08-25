@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   ChevronLeft,
   MapPin,
@@ -32,14 +32,7 @@ import { metersToMinutes } from "../discoveryScoring";
 import { ItemImage } from "@/components/ui/ItemImage";
 import { cx } from "@/components/ui/primitives";
 import { readPropertyAttributes } from "./attributeDisplay";
-
-interface ItemAsset {
-  id: string;
-  name: string;
-  mimeType: string;
-  sizeBytes: number;
-  createdAt: number;
-}
+import { useItemAssets } from "./useItemAssets";
 
 function formatBytes(n: number): string {
   if (n < 1024) return `${n} B`;
@@ -91,26 +84,7 @@ export function PropertyDetails({
   const [activePhoto, setActivePhoto] = useState(item.photo);
   const photos = [item.photo, ...(item.gallery ?? [])].filter((p): p is string => !!p);
 
-  const [assets, setAssets] = useState<ItemAsset[]>([]);
-  const [assetsLoading, setAssetsLoading] = useState(true);
-  useEffect(() => {
-    let cancelled = false;
-    setAssetsLoading(true);
-    fetch(`/api/inventory-items/${pack.id}/${item.id}/assets`)
-      .then((res) => (res.ok ? res.json() : { assets: [] }))
-      .then((data) => {
-        if (!cancelled) setAssets(data.assets ?? []);
-      })
-      .catch(() => {
-        if (!cancelled) setAssets([]);
-      })
-      .finally(() => {
-        if (!cancelled) setAssetsLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [pack.id, item.id]);
+  const { assets, loading: assetsLoading } = useItemAssets(pack.id, item.id);
 
   // Amenities: every toggle-type question the pack itself defines, shown
   // only when this item's own attributes actually say yes — never a
