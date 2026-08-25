@@ -61,6 +61,7 @@ export function DisplayProfileEditor({
   const { profile, isLoading } = useDisplayProfile(id);
   const [tab, setTab] = useState<Tab>(initialTab ?? "Widgets");
   const [publishDialogOpen, setPublishDialogOpen] = useState(false);
+  const [previewModalOpen, setPreviewModalOpen] = useState(false);
   const [duplicating, setDuplicating] = useState(false);
 
   if (isLoading || !profile) {
@@ -120,7 +121,7 @@ export function DisplayProfileEditor({
             {duplicating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Copy className="h-4 w-4" />} Duplicate
           </button>
           <button
-            onClick={() => setTab("Preview")}
+            onClick={() => setPreviewModalOpen(true)}
             className="inline-flex items-center gap-1.5 rounded-xl bg-zinc-900 px-3 py-2 text-sm font-semibold text-white transition hover:brightness-110"
           >
             <Eye className="h-4 w-4" /> Preview
@@ -159,6 +160,8 @@ export function DisplayProfileEditor({
           }}
         />
       )}
+
+      {previewModalOpen && <PreviewDisplayModal profileId={id} onClose={() => setPreviewModalOpen(false)} />}
     </div>
   );
 }
@@ -1209,6 +1212,69 @@ const PREVIEW_FRAMES = [
   { id: "mobile", label: "Mobile", widthClass: "max-w-[280px]", aspectClass: "aspect-[9/19.5]" },
 ] as const;
 type PreviewFrameId = (typeof PREVIEW_FRAMES)[number]["id"];
+
+/**
+ * Full-screen "what the real Customer Display shows" preview — iframes the
+ * actual /display route (with ?previewProfileId=) instead of re-rendering
+ * DisplayProfileRenderer inline, so this is structurally guaranteed to
+ * match production rather than an approximation that could quietly drift.
+ * The iframe is same-origin, so the admin's own session cookie rides along
+ * automatically — the authenticated draft-preview route (DisplayRoot.tsx)
+ * is what actually gates this to signed-in Display Studio access.
+ */
+function PreviewDisplayModal({ profileId, onClose }: { profileId: string; onClose: () => void }) {
+  const [frameId, setFrameId] = useState<PreviewFrameId>("tv");
+  const frame = PREVIEW_FRAMES.find((f) => f.id === frameId) ?? PREVIEW_FRAMES[0];
+
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col bg-black/80 backdrop-blur-sm" onClick={onClose}>
+      <div className="flex items-center justify-between gap-3 p-4" onClick={(e) => e.stopPropagation()}>
+        <div className="flex gap-1">
+          {PREVIEW_FRAMES.map((f) => (
+            <button
+              key={f.id}
+              onClick={() => setFrameId(f.id)}
+              className={cx(
+                "rounded-lg px-3 py-1.5 text-xs font-medium transition",
+                frameId === f.id ? "bg-white text-zinc-900" : "text-white/70 hover:bg-white/10",
+              )}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={onClose}
+          className="inline-flex items-center gap-1.5 rounded-xl border border-white/20 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-white/10"
+        >
+          Close
+        </button>
+      </div>
+      <div
+        className="flex flex-1 items-center justify-center overflow-auto p-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div
+          className={cx(
+            "overflow-hidden rounded-2xl border border-white/10 shadow-2xl",
+            frame.widthClass,
+            frame.aspectClass,
+          )}
+        >
+          <iframe
+            src={`/display?previewProfileId=${encodeURIComponent(profileId)}`}
+            className="h-full w-full border-0 bg-zinc-950"
+            title="Customer Display preview"
+          />
+        </div>
+      </div>
+      <p className="p-3 text-center text-[11px] text-white/40" onClick={(e) => e.stopPropagation()}>
+        This is the real /display route rendering your current draft — nothing here is published until you publish
+        it.
+      </p>
+    </div>
+  );
+}
 
 function PreviewTab({
   profile,
