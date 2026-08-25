@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Search, SlidersHorizontal, Settings2 } from "lucide-react";
+import { Search, SlidersHorizontal, Settings2, ScreenShare } from "lucide-react";
 import { useSession } from "@/core/store/session";
 import { useLivePack } from "@/core/store/packs";
 import { logBuyerActivity } from "@/core/store/buyerProfiles";
@@ -102,13 +102,24 @@ export function PropertyExplorer() {
             <h1 className="text-xl font-semibold text-ink">Your matches</h1>
             <p className="mt-0.5 text-xs text-ink-faint">{headerText}</p>
           </div>
-          <button
-            onClick={() => flow.goTo("workspace")}
-            className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-ink-muted transition hover:bg-white/10"
-          >
-            <Settings2 className="h-3.5 w-3.5" />
-            Full toolset
-          </button>
+          <div className="flex shrink-0 items-center gap-2">
+            {tab === "matches" && (
+              <button
+                onClick={() => session.setView("matches")}
+                className="flex items-center gap-1.5 rounded-full bg-brand px-3 py-1.5 text-xs font-semibold text-white transition hover:brightness-110"
+              >
+                <ScreenShare className="h-3.5 w-3.5" />
+                Show to customer
+              </button>
+            )}
+            <button
+              onClick={() => flow.goTo("workspace")}
+              className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-ink-muted transition hover:bg-white/10"
+            >
+              <Settings2 className="h-3.5 w-3.5" />
+              Full toolset
+            </button>
+          </div>
         </div>
 
         <div className="mt-3">

@@ -30,7 +30,13 @@ export type DisplayView =
   | "floorPlan"
   | "location"
   | "payment"
-  | "recap";
+  | "recap"
+  // Customer Display Experience: the cinematic hand-off from Discovery to
+  // the Matches grid (spec sections 8-9). "matching" is a short, honest
+  // real-count narrowing sequence; "matches" is a neutral top-picks grid,
+  // distinct from "compare"'s auto-top-3-with-why-behind-winner framing.
+  | "matching"
+  | "matches";
 
 export interface CustomerInfo {
   name: string;

@@ -33,6 +33,8 @@ import { FloorPlanStage } from "./FloorPlanStage";
 import { LocationStage } from "./LocationStage";
 import { PaymentStage } from "./PaymentStage";
 import { RecapStage } from "./RecapStage";
+import { MatchingStage } from "./MatchingStage";
+import { MatchesStage } from "./MatchesStage";
 import { useDecisionRoomWidgetContext } from "./useDecisionRoomWidgetContext";
 import { DEFAULT_IDLE_TIMEOUT_MS, IdleScreen, useIdleGate } from "./IdleMode";
 import { ContinueQrModal } from "./ContinueQr";
@@ -198,6 +200,14 @@ export function DisplayStage({
           <AnimatePresence mode="wait">
             {view === "welcome" && (
               <Welcome key="welcome" pack={pack} />
+            )}
+
+            {view === "matching" && (
+              <MatchingStage key="matching" pack={pack} scored={scored} />
+            )}
+
+            {view === "matches" && (
+              <MatchesStage key="matches" pack={pack} scored={scored} />
             )}
 
             {view === "question" && activeQuestion && (

@@ -21,6 +21,8 @@ const BEATS: Partial<Record<DisplayView, string[]>> = {
   compare: ["Your top options, side by side."],
   compareGroup: ["Let's compare.", "Comparing your options."],
   item: ["Why this one fits."],
+  matching: ["Searching your matches."],
+  matches: ["Here's what stood out."],
 };
 
 const BEAT_MS = 1500;

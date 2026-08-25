@@ -11,6 +11,7 @@ import { narrativeForMatchCount } from "@/core/engine/explain";
 import { deriveCommuteOption, deriveLocationPreferencesOption } from "./discoveryScoring";
 import { buildAnswerSummary, buildPriorityEntries } from "./answerSummary";
 import { useMeetingFlow } from "./meetingFlow";
+import { MATCHING_DURATION_MS } from "@/components/display/MatchingStage";
 
 /**
  * The compact "Here's what we heard" recap between the end of discovery and
@@ -108,7 +109,15 @@ export function RequirementConfirmation() {
             Edit
           </button>
           <button
-            onClick={() => flow.goTo("explore")}
+            onClick={() => {
+              // The Companion's own screen moves immediately; the Display
+              // runs the cinematic MATCHING sequence and lands on MATCHES
+              // on its own timer (spec sections 8-9) — one atomic setView
+              // per stage, no intermediate-view flash risk.
+              session.setView("matching");
+              setTimeout(() => session.setView("matches"), MATCHING_DURATION_MS);
+              flow.goTo("explore");
+            }}
             className="flex-1 rounded-2xl bg-brand py-3 text-sm font-semibold text-white transition hover:brightness-110"
           >
             Look at your matches
