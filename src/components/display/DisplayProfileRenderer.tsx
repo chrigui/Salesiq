@@ -8,6 +8,7 @@ import type { DisplayProfileDTO } from "@/lib/serializers/displayProfile";
 import type { IndustryPack, InventoryItem } from "@/core/types";
 import { resolveMotionConfig } from "@/core/display/motionPresets";
 import { nearestComparables } from "@/lib/comparables";
+import { isWidgetRelevant } from "@/lib/displayProfiles/widgetRelevance";
 import { BrandTokenScope } from "./BrandTokenScope";
 
 export interface DisplayProfileRendererProps {
@@ -80,7 +81,23 @@ export function DisplayProfileRenderer({ profile, pack, item, mode, deviceId, de
     letterSpacing: resolvedBrand?.letterSpacing,
   };
 
-  const enabled = profile.sections.filter((s) => s.enabled).sort((a, b) => a.order - b.order);
+  /**
+   * Visibility (config.visibility, default "always") is a second gate on
+   * top of `enabled` — "never" hides a widget outright regardless of the
+   * toggle above, and "whenRelevant" defers to isWidgetRelevant() so a
+   * widget with no supporting data on this listing (e.g. Investment with
+   * no appreciation figure) simply doesn't render rather than showing an
+   * empty state.
+   */
+  const enabled = profile.sections
+    .filter((s) => s.enabled)
+    .filter((s) => {
+      const visibility = s.config?.visibility;
+      if (visibility === "never") return false;
+      if (visibility === "whenRelevant") return isWidgetRelevant(s.type, item, pack, profile.assets);
+      return true;
+    })
+    .sort((a, b) => a.order - b.order);
 
   if (enabled.length === 0) {
     return (

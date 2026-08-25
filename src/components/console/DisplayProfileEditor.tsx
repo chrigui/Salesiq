@@ -264,6 +264,8 @@ function HistoryTab({ id }: { id: string }) {
 /** Widget types with a per-widget settings drawer in the Widget order list — the extensible pattern; more types can be added here as they grow settings of their own. */
 const WIDGETS_WITH_SETTINGS = new Set(["matchScore", "hero", "investment", "availability"]);
 
+type WidgetVisibility = "always" | "whenRelevant" | "never";
+
 function WidgetsTab({ id, profile }: { id: string; profile: DisplayProfile }) {
   const [sections, setSections] = useState(profile.sections);
   const [resetOpen, setResetOpen] = useState(false);
@@ -327,6 +329,8 @@ function WidgetsTab({ id, profile }: { id: string; profile: DisplayProfile }) {
 
   const setConfig = (idx: number, patch: Record<string, unknown>) =>
     commit(sections.map((s, i) => (i === idx ? { ...s, config: { ...s.config, ...patch } } : s)));
+
+  const setVisibility = (idx: number, visibility: WidgetVisibility) => setConfig(idx, { visibility });
 
   const isGrid = profile.layout === "Grid";
 
@@ -392,6 +396,16 @@ function WidgetsTab({ id, profile }: { id: string; profile: DisplayProfile }) {
                       <Settings2 className="h-3.5 w-3.5" />
                     </button>
                   )}
+                  <select
+                    value={(s.config?.visibility as WidgetVisibility | undefined) ?? "always"}
+                    onChange={(e) => setVisibility(i, e.target.value as WidgetVisibility)}
+                    className="rounded-lg border border-zinc-200 bg-white px-2 py-1 text-xs text-zinc-600"
+                    aria-label={`${WIDGET_LABELS[s.type] ?? s.type} visibility`}
+                  >
+                    <option value="always">Always</option>
+                    <option value="whenRelevant">When relevant</option>
+                    <option value="never">Never</option>
+                  </select>
                   {isGrid && (
                     <select
                       value={(s.config?.span as WidgetSpan | undefined) ?? "lg"}

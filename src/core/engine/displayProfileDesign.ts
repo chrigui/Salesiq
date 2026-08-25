@@ -3,6 +3,7 @@ import type { AiSettingsShape } from "@/core/data/aiSettingsShared";
 import { WIDGET_TYPES, type WidgetType } from "@/lib/displayProfiles/sections";
 import { MOTION_PRESET_IDS, type MotionPresetId } from "@/core/display/motionPresets";
 import type { DisplaySection } from "@/lib/serializers/displayProfile";
+import { isWidgetRelevant } from "@/lib/displayProfiles/widgetRelevance";
 
 export interface DisplayDesignAsset {
   name: string;
@@ -100,49 +101,19 @@ export function deterministicDisplayDesign(
   pack: IndustryPack,
   assets: DisplayDesignAsset[],
 ): DisplayDesignResult {
+  // Presentation-only booleans for the human-readable rationale below —
+  // widget enablement itself comes from isWidgetRelevant(), the single
+  // shared source of truth also used by the editor's "When relevant"
+  // widget-visibility option.
   const hasPhotos = [item.photo, ...(item.gallery ?? [])].filter(Boolean).length > 1;
-  const hasHighlights = item.highlights.length > 0;
-  const hasSpecs = Object.keys(item.attributes).length > 0;
   const hasLifestyle = Boolean(item.lifestyle);
-  const hasImageDoc = assets.some((a) => a.mimeType.startsWith("image/"));
   const hasDocs = assets.length > 0;
   const hasAppreciation = item.appreciation != null;
   const hasComparables = pack.inventory.length > 1;
-  const hasNearbyAmenities = (item.nearbyAmenities?.length ?? 0) > 0;
-  const hasLocation = Boolean(item.location);
-  const hasScoring = pack.rules.length > 0;
-  const hasAvailability = item.unitsLeft != null;
 
-  const enabled: Record<WidgetType, boolean> = {
-    hero: true,
-    gallery: hasPhotos,
-    highlights: hasHighlights,
-    specs: hasSpecs,
-    neighborhood: hasLifestyle,
-    masterplan: hasImageDoc,
-    documents: hasDocs,
-    investment: hasAppreciation,
-    comparables: hasComparables,
-    aiPromptTicker: true,
-    trustBadges: hasPhotos || hasDocs || hasLifestyle || hasSpecs,
-    continueQr: true,
-    leadCapture: true,
-    heroCard: true,
-    matchScore: hasScoring,
-    nearbyPlaces: hasNearbyAmenities,
-    investmentSnapshot: hasAppreciation,
-    galleryCard: hasPhotos,
-    locationMap: hasLocation,
-    priceSummary: true,
-    availability: hasAvailability,
-    comparisonMini: hasComparables,
-    comparisonTable: hasComparables,
-    documentsCard: hasDocs,
-    saveShare: true,
-    leadCaptureCard: true,
-    progressSteps: true,
-    aiInsight: hasScoring,
-  };
+  const enabled: Record<WidgetType, boolean> = Object.fromEntries(
+    WIDGET_TYPES.map((type) => [type, isWidgetRelevant(type, item, pack, assets)]),
+  ) as Record<WidgetType, boolean>;
 
   const preset: Exclude<MotionPresetId, "Custom"> = /jet|yacht|luxury/i.test(pack.vertical)
     ? "Luxury"
