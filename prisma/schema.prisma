@@ -997,6 +997,12 @@ enum DisplayStatus {
   Archived
 }
 
+enum DisplayDefaultExperience {
+  Welcome
+  PropertyHero
+  CustomIntro
+}
+
 // A physical kiosk/browser's persistent identity — independent of the
 // ephemeral MQTT room code src/core/sync minted per page load for the live
 // companion<->display session sync. An admin registers a Display here (gets
@@ -1018,11 +1024,12 @@ model Display {
   idleProfileId String?
   idleProfile   DisplayProfile? @relation("IdleProfile", fields: [idleProfileId], references: [id], onDelete: SetNull)
   // Optional pin to a specific profile regardless of what the companion
-  // focuses live — e.g. a single-listing showroom screen. Not consumed by
-  // any route yet (PR2 only wires idleProfile); reserved so later PRs don't
-  // need another migration for it.
+  // focuses live — e.g. a single-listing showroom screen.
   liveProfileId String?
   liveProfile   DisplayProfile? @relation("LiveProfile", fields: [liveProfileId], references: [id], onDelete: SetNull)
+  // Only consulted when liveProfileId is unset: which DisplayView a brand new
+  // companion session should open this screen on, once one starts.
+  defaultExperience DisplayDefaultExperience @default(Welcome)
 
   status          DisplayStatus @default(Pending)
   lastSeenAt      DateTime?

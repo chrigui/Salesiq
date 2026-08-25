@@ -3,6 +3,7 @@
 import useSWR, { mutate as globalMutate } from "swr";
 
 export type DisplayStatus = "Pending" | "Active" | "Archived";
+export type DisplayDefaultExperience = "Welcome" | "PropertyHero" | "CustomIntro";
 
 export interface Display {
   id: string;
@@ -14,6 +15,7 @@ export interface Display {
   claimed: boolean;
   idleProfileId: string | null;
   liveProfileId: string | null;
+  defaultExperience: DisplayDefaultExperience;
   status: DisplayStatus;
   lastSeenAt: number | null;
   online: boolean;
@@ -44,7 +46,7 @@ export async function createDisplay(input: { name: string; branchId?: string }):
 
 export async function updateDisplay(
   id: string,
-  patch: Partial<Pick<Display, "name" | "branchId" | "idleProfileId" | "liveProfileId" | "status">>,
+  patch: Partial<Pick<Display, "name" | "branchId" | "idleProfileId" | "liveProfileId" | "defaultExperience" | "status">>,
 ): Promise<Display | null> {
   const res = await fetch(`${DISPLAYS_KEY}/${id}`, {
     method: "PATCH",

@@ -337,6 +337,51 @@ function DisplayRow({
             )}
           </label>
 
+          <label className="block">
+            <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-zinc-400">
+              Live profile
+            </span>
+            <select
+              value={display.liveProfileId ?? ""}
+              onChange={(e) => updateDisplay(display.id, { liveProfileId: e.target.value || null })}
+              className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900"
+            >
+              <option value="">None — driven by the Companion session</option>
+              {profiles
+                .filter((p) => p.status === "Published")
+                .map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+            </select>
+            <span className="mt-1 block text-[11px] text-zinc-400">
+              Pins this screen to one listing continuously — e.g. an Investment Center showroom — regardless of what
+              the Companion focuses. Leave unset for normal Companion-driven behavior.
+            </span>
+          </label>
+
+          <label className="block">
+            <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-zinc-400">
+              Default experience
+            </span>
+            <select
+              value={display.defaultExperience}
+              onChange={(e) =>
+                updateDisplay(display.id, { defaultExperience: e.target.value as Display["defaultExperience"] })
+              }
+              className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900"
+            >
+              <option value="Welcome">Welcome — the default splash</option>
+              <option value="PropertyHero">Property hero — opens on the top recommendation</option>
+              <option value="CustomIntro">Custom intro — opens on the idle profile&apos;s listing</option>
+            </select>
+            <span className="mt-1 block text-[11px] text-zinc-400">
+              What a brand new Companion session opens this screen on. Only applies when no live profile is pinned
+              above.
+            </span>
+          </label>
+
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setShowCode(true)}

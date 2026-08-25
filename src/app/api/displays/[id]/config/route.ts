@@ -33,18 +33,22 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json({ error: "invalid-token" }, { status: 401 });
   }
 
-  let idleProfile = null;
-  if (display.idleProfileId) {
+  async function resolvePublishedProfile(profileId: string | null) {
+    if (!profileId) return null;
     const profile = await prisma.displayProfile.findFirst({
-      where: { id: display.idleProfileId, tenantId: display.tenantId, status: "Published" },
+      where: { id: profileId, tenantId: display!.tenantId, status: "Published" },
       include: {
         assets: { select: { id: true, name: true, mimeType: true, sizeBytes: true } },
         versions: { where: { isCurrent: true }, take: 1 },
       },
     });
     const currentVersion = profile?.versions[0];
-    if (profile && currentVersion) idleProfile = toPublishedDisplayProfileDTO(profile, currentVersion);
+    return profile && currentVersion ? toPublishedDisplayProfileDTO(profile, currentVersion) : null;
   }
+
+  const idleProfile = await resolvePublishedProfile(display.idleProfileId);
+  // Only consulted when no liveProfile is pinned — see Display.defaultExperience.
+  const liveProfile = await resolvePublishedProfile(display.liveProfileId);
 
   await prisma.display.update({
     where: { id },
@@ -54,5 +58,5 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     },
   });
 
-  return NextResponse.json({ display: toDisplayDTO(display), idleProfile });
+  return NextResponse.json({ display: toDisplayDTO(display), idleProfile, liveProfile });
 }

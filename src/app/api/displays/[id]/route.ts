@@ -26,6 +26,7 @@ const patchSchema = z.object({
   branchId: z.string().min(1).max(100).nullable().optional(),
   idleProfileId: z.string().min(1).max(100).nullable().optional(),
   liveProfileId: z.string().min(1).max(100).nullable().optional(),
+  defaultExperience: z.enum(["Welcome", "PropertyHero", "CustomIntro"]).optional(),
   status: z.enum(["Pending", "Active", "Archived"]).optional(),
 });
 

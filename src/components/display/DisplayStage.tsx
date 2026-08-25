@@ -11,7 +11,7 @@ import { rankPriorities, computePriorityPerformance, type PriorityPerformanceSta
 import type { BuyerPriority } from "@/core/buyerIntelligence/priorityWeights";
 import { useResolvedDisplayProfile } from "@/core/store/displayProfiles";
 import { resolveMotionConfig } from "@/core/display/motionPresets";
-import { useDeviceIdleProfile } from "@/core/store/displayDevice";
+import { useDeviceIdleProfile, useDeviceDefaultExperience } from "@/core/store/displayDevice";
 import { useDefaultBrandProfile } from "@/core/store/brandProfiles";
 import { DisplayProfileRenderer } from "./DisplayProfileRenderer";
 import { scoreInventory, isVisible } from "@/core/engine/scoring";
@@ -68,8 +68,8 @@ export function DisplayStage({
     packId,
     answers,
     activeQuestionId,
-    view,
-    focusedItemId,
+    view: rawView,
+    focusedItemId: rawFocusedItemId,
     revision,
     customer,
     proposalText,
@@ -98,6 +98,42 @@ export function DisplayStage({
       })()
     : spring;
 
+  // Display Studio seam #2: if this physical Display has been claimed (see
+  // DevicePairingPrompt) and assigned an idle profile, the attract loop
+  // shows that configured composition instead of the hardcoded IdleScreen
+  // carousel below. Unclaimed, or no idle profile assigned -> unchanged
+  // existing behavior. Resolved against whatever pack the idle profile
+  // targets, which may differ from the live session's current pack.
+  const idleProfile = useDeviceIdleProfile(deviceId, deviceToken);
+  const idlePack = useLivePack(idleProfile?.packId ?? packId);
+  const idleItem = idleProfile ? idlePack.inventory.find((i) => i.id === idleProfile.itemId) : undefined;
+  const idleConfig = (idleProfile?.idle ?? null) as { durationMs?: number; headline?: string; subheadline?: string; ctaLabel?: string } | null;
+
+  // Display Studio seam #3 (PR12): a fresh, not-yet-started session (nobody's
+  // touched the companion — same "nobody started a session" gate the idle
+  // timer above uses) opens on this Display's configured defaultExperience
+  // instead of the hardcoded Welcome splash. Purely a local rendering
+  // choice — never written back to the shared session store, so a real
+  // companion action always wins the instant it happens. Only meaningful
+  // when no liveProfileId is pinned (DisplayRoot never mounts this
+  // component at all when one is).
+  const defaultExperience = useDeviceDefaultExperience(deviceId, deviceToken);
+  const sessionIsFresh = rawView === "welcome" && Object.keys(answers).length === 0;
+  let view = rawView;
+  let focusedItemId = rawFocusedItemId;
+  if (sessionIsFresh && defaultExperience === "PropertyHero") {
+    view = "recommendation";
+  } else if (
+    sessionIsFresh &&
+    defaultExperience === "CustomIntro" &&
+    idleProfile &&
+    idleProfile.packId === pack.id &&
+    idleItem
+  ) {
+    view = "item";
+    focusedItemId = idleItem.id;
+  }
+
   // Route every InventoryItem reaching this customer-facing stage through
   // the single customerSafe allowlist seam (see src/lib/customerSafe.ts) —
   // a no-op today, but the one place a future internal-only item field
@@ -122,23 +158,14 @@ export function DisplayStage({
     view === "item" ? (focusedItemId ?? null) : null,
   );
 
-  // Display Studio seam #2: if this physical Display has been claimed (see
-  // DevicePairingPrompt) and assigned an idle profile, the attract loop
-  // shows that configured composition instead of the hardcoded IdleScreen
-  // carousel below. Unclaimed, or no idle profile assigned -> unchanged
-  // existing behavior. Resolved against whatever pack the idle profile
-  // targets, which may differ from the live session's current pack.
-  const idleProfile = useDeviceIdleProfile(deviceId, deviceToken);
-  const idlePack = useLivePack(idleProfile?.packId ?? packId);
-  const idleItem = idleProfile ? idlePack.inventory.find((i) => i.id === idleProfile.itemId) : undefined;
-  const idleConfig = (idleProfile?.idle ?? null) as { durationMs?: number; headline?: string; subheadline?: string; ctaLabel?: string } | null;
-
   // Idle Mode: only arm the attract loop while nobody has started a session —
   // any answer or a view change away from "welcome" keeps it fully disabled.
-  // A number set on the assigned idle profile (PR11) overrides the generic
-  // URL-param/default timeout.
+  // Gated on the raw/unoverridden session state — a defaultExperience swap
+  // above must never suppress the attract loop. A number set on the
+  // assigned idle profile (PR11) overrides the generic URL-param/default
+  // timeout.
   const { isIdle, wake } = useIdleGate({
-    enabled: view === "welcome" && Object.keys(answers).length === 0,
+    enabled: sessionIsFresh,
     timeoutMs: idleConfig?.durationMs ?? readIdleTimeoutMs(),
     resetKey: revision,
   });

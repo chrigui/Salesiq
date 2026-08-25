@@ -106,6 +106,18 @@ export function useDisplayDevice(): {
 
 interface DeviceConfigResponse {
   idleProfile: DisplayProfileDTO | null;
+  liveProfile: DisplayProfileDTO | null;
+  display: { defaultExperience: "Welcome" | "PropertyHero" | "CustomIntro" };
+}
+
+function useDeviceConfig(deviceId: string | null, token: string | null): DeviceConfigResponse | undefined {
+  const key = deviceId && token ? `/api/displays/${deviceId}/config?token=${encodeURIComponent(token)}` : null;
+  const { data } = useSWR<DeviceConfigResponse>(
+    key,
+    (url: string) => fetch(url).then((res) => (res.ok ? res.json() : { idleProfile: null, liveProfile: null, display: { defaultExperience: "Welcome" } })),
+    { refreshInterval: 30_000 },
+  );
+  return data;
 }
 
 /**
@@ -117,11 +129,24 @@ interface DeviceConfigResponse {
  * updating lastSeenAt on every successful call.
  */
 export function useDeviceIdleProfile(deviceId: string | null, token: string | null): DisplayProfileDTO | null {
-  const key = deviceId && token ? `/api/displays/${deviceId}/config?token=${encodeURIComponent(token)}` : null;
-  const { data } = useSWR<DeviceConfigResponse>(
-    key,
-    (url: string) => fetch(url).then((res) => (res.ok ? res.json() : { idleProfile: null })),
-    { refreshInterval: 30_000 },
-  );
-  return data?.idleProfile ?? null;
+  return useDeviceConfig(deviceId, token)?.idleProfile ?? null;
+}
+
+/**
+ * Mirrors useDeviceIdleProfile — this Display's pinned "live" profile
+ * (Display.liveProfileId), when set: a dedicated single-listing screen that
+ * renders continuously regardless of what the Companion focuses, e.g. an
+ * Investment Center showroom display. Shares the same poll (same SWR key),
+ * so this costs no extra network round-trip beyond useDeviceIdleProfile's.
+ */
+export function useDeviceLiveProfile(deviceId: string | null, token: string | null): DisplayProfileDTO | null {
+  return useDeviceConfig(deviceId, token)?.liveProfile ?? null;
+}
+
+/** This Display's configured default experience — only meaningful when no live profile is pinned (see useDeviceLiveProfile). */
+export function useDeviceDefaultExperience(
+  deviceId: string | null,
+  token: string | null,
+): "Welcome" | "PropertyHero" | "CustomIntro" {
+  return useDeviceConfig(deviceId, token)?.display.defaultExperience ?? "Welcome";
 }

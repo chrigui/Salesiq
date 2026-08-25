@@ -11,6 +11,7 @@ export interface DisplayDTO {
   claimed: boolean;
   idleProfileId: string | null;
   liveProfileId: string | null;
+  defaultExperience: PrismaDisplay["defaultExperience"];
   status: PrismaDisplay["status"];
   lastSeenAt: number | null;
   online: boolean;
@@ -31,6 +32,7 @@ export function toDisplayDTO(row: PrismaDisplay): DisplayDTO {
     claimed: Boolean(row.deviceToken),
     idleProfileId: row.idleProfileId,
     liveProfileId: row.liveProfileId,
+    defaultExperience: row.defaultExperience,
     status: row.status,
     lastSeenAt,
     online: lastSeenAt !== null && Date.now() - lastSeenAt < ONLINE_WINDOW_MS,
