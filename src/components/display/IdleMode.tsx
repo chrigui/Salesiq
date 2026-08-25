@@ -102,6 +102,16 @@ export function IdleScreen({
 
   const current = items[index];
 
+  // Spec section 2: enter fullscreen kiosk mode on the first real tap —
+  // browsers require an actual user gesture to grant fullscreen, and this
+  // is the one place a real one already exists on the generic shell.
+  const handleWake = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    }
+    onWake();
+  };
+
   return (
     <motion.div
       key="idle"
@@ -109,7 +119,7 @@ export function IdleScreen({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.6 }}
-      onClick={onWake}
+      onClick={handleWake}
       role="button"
       tabIndex={0}
       aria-label="Tap to begin"

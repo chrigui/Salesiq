@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Sparkles, MapPin, TrendingUp, Check, Star, Smartphone, Circle, X } from "lucide-react";
+import { Sparkles, MapPin, TrendingUp, Check, Star, Smartphone, Circle, X, Maximize, Minimize } from "lucide-react";
+import { useFullscreen } from "./DisplayKiosk";
 import { useSession } from "@/core/store/session";
 import { useLivePack } from "@/core/store/packs";
 import { useBuyerProfile } from "@/core/store/buyerProfiles";
@@ -394,6 +395,7 @@ function BrandHeader({
   /** Show the "Continue on your phone" trigger once a session is underway. */
   onContinue?: () => void;
 }) {
+  const [fullscreen, toggleFullscreen] = useFullscreen();
   return (
     <div className="absolute left-0 right-0 top-0 z-10 flex items-center justify-between px-10 py-7">
       <div className="flex items-center gap-3">
@@ -406,6 +408,13 @@ function BrandHeader({
         </div>
       </div>
       <div className="flex items-center gap-2">
+        <button
+          onClick={toggleFullscreen}
+          aria-label={fullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+          className="grid h-8 w-8 place-items-center rounded-full border border-white/10 bg-white/5 text-ink-muted transition hover:bg-white/10"
+        >
+          {fullscreen ? <Minimize className="h-3.5 w-3.5" /> : <Maximize className="h-3.5 w-3.5" />}
+        </button>
         {onContinue && (
           <button
             onClick={onContinue}
