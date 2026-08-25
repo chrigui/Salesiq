@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
-import { X, ScreenShare } from "lucide-react";
+import { useMemo, useState } from "react";
+import { X, ScreenShare, BarChart3 } from "lucide-react";
 import type { Answers, IndustryPack } from "@/core/types";
 import type { ScoredItem } from "@/core/engine/scoring";
 import { useSession } from "@/core/store/session";
@@ -13,6 +13,7 @@ import { readPropertyAttributes } from "./attributeDisplay";
 import { computeCompareBadges } from "./compareBadges";
 import { deriveAvailabilityLabel } from "@/lib/availability";
 import { useItemAssets } from "./useItemAssets";
+import { DecisionBreakdown } from "./DecisionBreakdown";
 
 const BADGE_LABEL: Record<string, string> = {
   bestMatchId: "Best match",
@@ -29,6 +30,7 @@ const BADGE_LABEL: Record<string, string> = {
  */
 export function ComparisonExperience({ pack, scored }: { pack: IndustryPack; scored: ScoredItem[] }) {
   const session = useSession();
+  const [breakdownFor, setBreakdownFor] = useState<ScoredItem | null>(null);
   const group = useMemo(
     () => session.compareItemIds.map((id) => scored.find((s) => s.item.id === id)).filter((s): s is ScoredItem => Boolean(s)),
     [session.compareItemIds, scored],
@@ -90,9 +92,14 @@ export function ComparisonExperience({ pack, scored }: { pack: IndustryPack; sco
             winner={winner}
             badgeLabels={badgeFor(s.item.id)}
             onRemove={() => removeItem(s.item.id)}
+            onShowBreakdown={() => setBreakdownFor(s)}
           />
         ))}
       </div>
+
+      {breakdownFor && (
+        <DecisionBreakdown pack={pack} scored={breakdownFor} onClose={() => setBreakdownFor(null)} />
+      )}
     </div>
   );
 }
@@ -105,6 +112,7 @@ function ComparisonCard({
   winner,
   badgeLabels,
   onRemove,
+  onShowBreakdown,
 }: {
   pack: IndustryPack;
   scored: ScoredItem;
@@ -113,6 +121,7 @@ function ComparisonCard({
   winner: ScoredItem | null;
   badgeLabels: string[];
   onRemove: () => void;
+  onShowBreakdown: () => void;
 }) {
   const attrs = readPropertyAttributes(pack, s.item);
   const availability = deriveAvailabilityLabel(s.item);
@@ -217,6 +226,13 @@ function ComparisonCard({
             <li className="text-xs text-ink-faint">Matched fewer priorities than the top pick here.</li>
           )}
         </ul>
+        <button
+          onClick={onShowBreakdown}
+          className="mt-3 flex items-center gap-1.5 text-[11px] font-medium text-ink-faint transition hover:text-ink"
+        >
+          <BarChart3 className="h-3 w-3" />
+          Decision breakdown
+        </button>
       </div>
     </div>
   );

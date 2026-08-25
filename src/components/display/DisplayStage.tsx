@@ -21,6 +21,8 @@ import { readPropertyAttributes } from "@/components/companion/explore/attribute
 import { computeCompareBadges } from "@/components/companion/explore/compareBadges";
 import { LifestyleMap } from "./LifestyleMap";
 import { DisplayNarration } from "./DisplayNarration";
+import { WhyThisStage } from "./WhyThisStage";
+import { WhyNotStage } from "./WhyNotStage";
 import { DEFAULT_IDLE_TIMEOUT_MS, IdleScreen, useIdleGate } from "./IdleMode";
 import { ContinueQrModal } from "./ContinueQr";
 import type {
@@ -215,6 +217,32 @@ export function DisplayStage({
                 customerName={customer.name}
                 proposalText={proposalText}
                 proposalEngine={proposalEngine}
+              />
+            )}
+
+            {view === "whyThis" && focusedItem && (
+              <WhyThisStage
+                key="whyThis"
+                item={focusedItem}
+                entry={scored.find((s) => s.item.id === focusedItem.id)}
+              />
+            )}
+
+            {view === "whyNot" && focusedItem && (
+              <WhyNotStage
+                key="whyNot"
+                item={focusedItem}
+                candidate={scored.find((s) => s.item.id === focusedItem.id)}
+                winner={(() => {
+                  const group = compareItemIds
+                    .map((id) => scored.find((s) => s.item.id === id))
+                    .filter((s): s is ScoredItem => Boolean(s));
+                  return group.length >= 2
+                    ? group.reduce((best, s) => (s.score > best.score ? s : best))
+                    : scored[0];
+                })()}
+                pack={pack}
+                answers={answers}
               />
             )}
 
