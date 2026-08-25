@@ -17,6 +17,7 @@ export const dynamic = "force-dynamic";
 const bodySchema = z.object({
   profileId: z.string().min(1).max(100),
   settings: z.record(z.string(), z.unknown()).optional(),
+  intent: z.string().max(500).optional(),
 });
 
 /**
@@ -50,16 +51,18 @@ export async function POST(request: Request) {
     const settings = resolveAiSettings(parsed.data.settings as Partial<AiSettingsShape> | undefined);
     const assets = profile.assets.map((a) => ({ name: a.name, mimeType: a.mimeType }));
 
+    const intent = parsed.data.intent;
+
     if (process.env.ANTHROPIC_API_KEY) {
       try {
-        const result = await designWithClaude(item, pack, assets, settings);
+        const result = await designWithClaude(item, pack, assets, settings, intent);
         if (result) return NextResponse.json({ ...result, engine: "claude+writer" });
       } catch (err) {
         console.error("Claude display design failed, using deterministic writer:", err);
       }
     }
 
-    const result = deterministicDisplayDesign(item, pack, assets);
+    const result = deterministicDisplayDesign(item, pack, assets, intent);
     return NextResponse.json({ ...result, engine: "deterministic-writer" });
   } catch (err) {
     if (err instanceof AuthError) return NextResponse.json({ error: err.message }, { status: err.status });
@@ -72,6 +75,7 @@ async function designWithClaude(
   pack: Parameters<typeof buildDisplayDesignPrompt>[1],
   assets: Parameters<typeof buildDisplayDesignPrompt>[2],
   settings: AiSettingsShape,
+  intent?: string,
 ): Promise<DisplayDesignResult | null> {
   const { default: Anthropic } = await import("@anthropic-ai/sdk");
   const client = new Anthropic();
@@ -80,7 +84,7 @@ async function designWithClaude(
     model: "claude-opus-4-8",
     max_tokens: 700,
     temperature: settings.creativity,
-    messages: [{ role: "user", content: buildDisplayDesignPrompt(item, pack, assets, settings) }],
+    messages: [{ role: "user", content: buildDisplayDesignPrompt(item, pack, assets, settings, intent) }],
   });
 
   const text = message.content

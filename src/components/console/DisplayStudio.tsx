@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
-import { MonitorPlay, Plus, Loader2, Eye, EyeOff, FileEdit, Radio, Copy, Check, RotateCcw, Rocket } from "lucide-react";
+import { MonitorPlay, Plus, Loader2, Eye, EyeOff, FileEdit, Radio, Copy, Check, RotateCcw, Rocket, Sparkles } from "lucide-react";
 import { Panel } from "@/components/console/light-ui";
 import { cx } from "@/components/ui/primitives";
 import { PACKS } from "@/core/industries";
@@ -1316,8 +1316,43 @@ function NewProfilePicker({ onClose, onCreated }: { onClose: () => void; onCreat
   const [itemId, setItemId] = useState(pack?.inventory[0]?.id ?? "");
   const [template, setTemplate] = useState<DisplayTemplate>("Minimal");
   const [submitting, setSubmitting] = useState(false);
+  const [intent, setIntent] = useState("");
+  const [aiSubmitting, setAiSubmitting] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
 
   const items = pack?.inventory ?? [];
+
+  async function createWithAi() {
+    setAiSubmitting(true);
+    setAiError(null);
+    try {
+      const profile = await createDisplayProfile({ packId, itemId, template });
+      if (!profile) {
+        setAiError("Could not create the draft. Try again.");
+        return;
+      }
+      try {
+        const res = await fetch("/api/ai/display-profile", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ profileId: profile.id, intent: intent.trim() || undefined }),
+        });
+        if (res.ok) {
+          const design = await res.json();
+          await updateDisplayProfile(profile.id, {
+            sections: design.sections,
+            motion: { ...profile.motion, preset: design.motion.preset, reduceMotion: design.motion.reduceMotion },
+            ...(design.template ? { template: design.template } : {}),
+          });
+        }
+      } catch {
+        // AI composition failed — the profile still exists as a normal blank draft, fully editable.
+      }
+      onCreated(profile.id);
+    } finally {
+      setAiSubmitting(false);
+    }
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
@@ -1380,6 +1415,22 @@ function NewProfilePicker({ onClose, onCreated }: { onClose: () => void; onCreat
               ))}
             </div>
           </div>
+
+          <label className="block">
+            <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-zinc-400">Describe it (optional)</span>
+            <textarea
+              value={intent}
+              onChange={(e) => setIntent(e.target.value)}
+              placeholder="e.g. a premium dark experience for a luxury waterfront development"
+              rows={2}
+              maxLength={500}
+              className="w-full resize-none rounded-xl border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900"
+            />
+            <span className="mt-1 block text-[11px] text-zinc-400">
+              LUMMA will pick widgets, motion, and a template from this listing&apos;s real data — it never invents facts.
+            </span>
+          </label>
+          {aiError && <p className="text-xs text-red-600">{aiError}</p>}
         </div>
 
         <div className="mt-5 flex justify-end gap-2">
@@ -1390,17 +1441,25 @@ function NewProfilePicker({ onClose, onCreated }: { onClose: () => void; onCreat
             Cancel
           </button>
           <button
-            disabled={!packId || !itemId || submitting}
+            disabled={!packId || !itemId || submitting || aiSubmitting}
             onClick={async () => {
               setSubmitting(true);
               const profile = await createDisplayProfile({ packId, itemId, template });
               setSubmitting(false);
               if (profile) onCreated(profile.id);
             }}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-zinc-900 px-3 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-xl border border-zinc-200 px-3 py-2 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-50 disabled:opacity-50"
           >
             {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
             Create
+          </button>
+          <button
+            disabled={!packId || !itemId || submitting || aiSubmitting}
+            onClick={createWithAi}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-zinc-900 px-3 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-50"
+          >
+            {aiSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+            Create with AI
           </button>
         </div>
       </div>
