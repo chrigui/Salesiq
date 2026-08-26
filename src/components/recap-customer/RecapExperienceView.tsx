@@ -1,10 +1,13 @@
 import { Sparkles } from "lucide-react";
 import { buildAnswerSummary } from "@/components/companion/answerSummary";
 import { RECAP_TERM } from "@/lib/recaps/term";
+import { computeRecapDiff, isUnavailableStatus } from "@/lib/recaps/diff";
 import { RecapHero } from "./RecapHero";
 import { RecapJourneyTimeline, type RecapJourneyStep } from "./RecapJourneyTimeline";
+import { SinceYourLastVisit } from "./SinceYourLastVisit";
 import { RecapBestMatch } from "./RecapBestMatch";
 import { RecapPropertyCard } from "./RecapPropertyCard";
+import { NoLongerAvailableAlternatives } from "./NoLongerAvailableAlternatives";
 import { RecapNextSteps } from "./RecapNextSteps";
 import type { PublicRecapDTO } from "@/lib/recaps/resolve";
 import type { Answers } from "@/core/types";
@@ -46,6 +49,8 @@ export function RecapExperienceView({ recap }: { recap: PublicRecapDTO }) {
     (s) => s.item.id !== recap.finalRecommendation?.item.id,
   );
 
+  const recapDiff = computeRecapDiff(recap.lastViewedSnapshot, recap);
+
   const steps: RecapJourneyStep[] = [
     summary.length > 0 && show("requirements") ? { id: "told-us", label: "What you told us" } : null,
     show("shortlist") && recap.shortlistedProperties.length > 0 ? { id: "shortlist", label: "Your shortlist" } : null,
@@ -67,8 +72,9 @@ export function RecapExperienceView({ recap }: { recap: PublicRecapDTO }) {
         />
       )}
 
-      <div className="mt-4">
+      <div className="mt-4 space-y-4">
         <RecapJourneyTimeline steps={steps} />
+        <SinceYourLastVisit diff={recapDiff} />
       </div>
 
       {summary.length > 0 && show("requirements") && (
@@ -98,13 +104,21 @@ export function RecapExperienceView({ recap }: { recap: PublicRecapDTO }) {
 
       {show("finalRecommendation") && recap.finalRecommendation && (
         <section id="best-match" className="mt-8 scroll-mt-6">
-          <RecapBestMatch
-            entry={recap.finalRecommendation}
-            packId={recap.packId}
-            scored={scored}
-            showPayment={show("payment")}
-            showInvestment={show("investment")}
-          />
+          {isUnavailableStatus(recap.finalRecommendation.currentAvailability) ? (
+            <NoLongerAvailableAlternatives
+              pack={recap.pack}
+              item={recap.finalRecommendation.item}
+              currentAvailability={recap.finalRecommendation.currentAvailability}
+            />
+          ) : (
+            <RecapBestMatch
+              entry={recap.finalRecommendation}
+              packId={recap.packId}
+              scored={scored}
+              showPayment={show("payment")}
+              showInvestment={show("investment")}
+            />
+          )}
         </section>
       )}
 
@@ -114,16 +128,25 @@ export function RecapExperienceView({ recap }: { recap: PublicRecapDTO }) {
             {recap.finalRecommendation ? "Also on your shortlist" : "Your shortlist"}
           </div>
           <div className="space-y-4">
-            {otherShortlisted.map((entry) => (
-              <RecapPropertyCard
-                key={entry.item.id}
-                entry={entry}
-                packId={recap.packId}
-                scored={scored}
-                showPayment={show("payment")}
-                showInvestment={show("investment")}
-              />
-            ))}
+            {otherShortlisted.map((entry) =>
+              isUnavailableStatus(entry.currentAvailability) ? (
+                <NoLongerAvailableAlternatives
+                  key={entry.item.id}
+                  pack={recap.pack}
+                  item={entry.item}
+                  currentAvailability={entry.currentAvailability}
+                />
+              ) : (
+                <RecapPropertyCard
+                  key={entry.item.id}
+                  entry={entry}
+                  packId={recap.packId}
+                  scored={scored}
+                  showPayment={show("payment")}
+                  showInvestment={show("investment")}
+                />
+              ),
+            )}
           </div>
         </section>
       )}
@@ -133,9 +156,9 @@ export function RecapExperienceView({ recap }: { recap: PublicRecapDTO }) {
           <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-faint">You compared</div>
           <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
             <ul className="space-y-1.5">
-              {recap.comparedProperties.differences.map((diff, i) => (
+              {recap.comparedProperties.differences.map((difference, i) => (
                 <li key={i} className="text-xs text-ink-muted">
-                  {diff}
+                  {difference}
                 </li>
               ))}
             </ul>

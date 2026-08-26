@@ -5,6 +5,7 @@ import { deriveAvailabilityLabel } from "@/lib/availability";
 import { toCustomerSafeItem, toCustomerSafeCustomerName } from "@/lib/customerSafe";
 import type { IndustryPack, InventoryItem } from "@/core/types";
 import type { RecapComparedProperties, RecapShortlistedProperty } from "./types";
+import type { RecapViewedSnapshot } from "./diff";
 
 /**
  * Every column this resolver is allowed to touch — deliberately an
@@ -31,6 +32,7 @@ const PUBLIC_RECAP_SELECT = {
   sectionVisibility: true,
   brandProfileId: true,
   brandSnapshot: true,
+  lastViewedSnapshot: true,
   expiresAt: true,
   publishedAt: true,
   createdAt: true,
@@ -80,6 +82,8 @@ export interface PublicRecapDTO {
   sectionVisibility: Record<string, string>;
   brandProfileId: string | null;
   brandSnapshot: Record<string, unknown> | null;
+  /** What the customer's last real view looked like — null until a "View" event has ever recorded one (see PR13's public events route, the only writer). */
+  lastViewedSnapshot: RecapViewedSnapshot | null;
   expiresAt: number | null;
   publishedAt: number | null;
   createdAt: number;
@@ -157,6 +161,7 @@ export async function resolvePublicRecap(code: string): Promise<PublicRecapDTO |
     sectionVisibility: (row.sectionVisibility as Record<string, string>) ?? {},
     brandProfileId: row.brandProfileId,
     brandSnapshot: (row.brandSnapshot as Record<string, unknown> | null) ?? null,
+    lastViewedSnapshot: (row.lastViewedSnapshot as unknown as RecapViewedSnapshot | null) ?? null,
     expiresAt: row.expiresAt?.getTime() ?? null,
     publishedAt: row.publishedAt?.getTime() ?? null,
     createdAt: row.createdAt.getTime(),
