@@ -309,7 +309,7 @@
       <span class="mark">◈</span>
       <span class="name">SALESIQ&nbsp;/&nbsp;DECISION INTELLIGENCE PLATFORM</span>
     </div>
-    <p class="eyebrow">Product overview &middot; v0.2 working build</p>
+    <p class="eyebrow">Product overview &middot; v0.3 working build</p>
     <h1 class="title">Guide any customer through the decision that matters&nbsp;<em>most</em>.</h1>
     <p class="lede">
       An industry-agnostic platform that turns complex, high-consideration purchases
@@ -500,12 +500,56 @@
       <div class="cap-list">
         <span class="chip accent">Kiosk registry &amp; one-time pairing</span>
         <span class="chip">No-code idle profile builder</span>
-        <span class="chip">12-widget library</span>
+        <span class="chip">12-widget library, visually redesigned</span>
+        <span class="chip">Drag-and-drop widget reorder</span>
+        <span class="chip">Per-widget settings (Match Score, Hero, Investment, Availability)</span>
+        <span class="chip">Widget visibility rules (Always / When relevant / Never)</span>
         <span class="chip">Versioning &amp; rollback</span>
-        <span class="chip">Brand profiles</span>
-        <span class="chip">Motion presets</span>
-        <span class="chip">AI-assisted profile generation</span>
+        <span class="chip accent">Deep brand theming &mdash; logo, curated fonts, motion presets</span>
+        <span class="chip">Live inline brand preview</span>
+        <span class="chip">Richer idle experience (custom headline / duration)</span>
+        <span class="chip accent">Full-screen Preview Display, with a &ldquo;Preview Your Brand&rdquo; toggle</span>
+        <span class="chip">Duplicate / reset-to-template</span>
+        <span class="chip">Safe publishing validation</span>
+        <span class="chip">AI-assisted profile generation, from scratch</span>
         <span class="chip accent">Shared Experience &mdash; continue on your phone</span>
+      </div>
+    </div>
+
+    <div class="cap-group">
+      <h3>Property Discovery &amp; Decision Room</h3>
+      <div class="cap-list">
+        <span class="chip accent">Filterable, searchable property grid</span>
+        <span class="chip">Live-updating result count &amp; empty states</span>
+        <span class="chip">Property Preview &amp; Shortlist</span>
+        <span class="chip accent">Drag-to-compare, up to 4 properties</span>
+        <span class="chip">Cinematic Investment / Lifestyle / Floor Plan / Location / Payment modes</span>
+        <span class="chip accent">Why This / Why Not, on the big screen</span>
+        <span class="chip accent">What-If simulator, scoped to the compare group</span>
+        <span class="chip">Ranked buyer priorities &amp; Lifestyle Fit / Buyer Match rows</span>
+        <span class="chip">Live availability status (Available / Reserved / Booked / Sold)</span>
+        <span class="chip">&ldquo;Price updated&rdquo; transient flash on the display</span>
+        <span class="chip">Final Recommendation &amp; Next Step</span>
+      </div>
+    </div>
+
+    <div class="cap-group">
+      <h3>THE LUMMA RECAP</h3>
+      <div class="cap-list">
+        <span class="chip accent">Persistent, revisitable post-meeting link</span>
+        <span class="chip">Salesperson review &mdash; per-section edit / hide</span>
+        <span class="chip accent">Private notes, structurally unreachable by the customer</span>
+        <span class="chip">Thank-you / follow-up / personal story templates</span>
+        <span class="chip accent">Live-resolved price &amp; availability, never frozen</span>
+        <span class="chip accent">&ldquo;Since your last visit&rdquo; honest price/status diff</span>
+        <span class="chip">&ldquo;No longer available&rdquo; with real closest alternatives</span>
+        <span class="chip">Comparison Continuity (&ldquo;you compared&hellip;&rdquo;)</span>
+        <span class="chip">Customer favoriting &mdash; a pure engagement signal</span>
+        <span class="chip">Real WhatsApp / Email deep-link sharing</span>
+        <span class="chip accent">OBSERVED vs. INFERRED engagement signals</span>
+        <span class="chip">Salesperson activity feed &amp; engagement badges</span>
+        <span class="chip">Property status-sync banners on the buyer profile</span>
+        <span class="chip accent">Security-hardened public surface, probe-tested</span>
       </div>
     </div>
 
@@ -617,6 +661,12 @@
       <li class="tl-item done"><span class="tl-node">29</span><h3>Custom industries become editable, and the Companion becomes a real installable app</h3><p>A tenant admin can now edit a custom pack&rsquo;s identity &mdash; name, vertical description, currency, tagline, logo glyph, brand color &mdash; not just delete it; the shipped verticals stay code-defined either way. The Sales Companion gained a real, scoped service worker and an in-app install prompt that listens for the browser&rsquo;s own <code>beforeinstallprompt</code> event, rather than just instructing users to add it manually.</p></li>
       <li class="tl-item done"><span class="tl-node">30</span><h3>LUMMA Round 1 &mdash; the Sales Companion becomes a guided experience</h3><p>The Companion stops being a tool the salesperson operates and becomes a director&rsquo;s script: a real login gate (dashboard-provisioned accounts only, no self-signup), a Start Meeting screen, and a privacy-masked &ldquo;Meet the customer&rdquo; step, before a first discovery wizard. Everything reuses what already existed &mdash; the real login pattern, Buyer Intelligence matching, and the one real scoring engine &mdash; per an explicit &ldquo;do not build a second system&rdquo; constraint honored throughout.</p></li>
       <li class="tl-item done"><span class="tl-node">31</span><h3>LUMMA Round 2 &mdash; the full discovery journey (3 PRs)</h3><p>The minimal first wizard is replaced by the fully-specified 8-step journey &mdash; Household, Location &amp; Commute, Location Preferences, Property Type, Lifestyle, Home Features, Financial, Timing. Two genuinely new signals, real commute distance and real OpenStreetMap-sourced nearby-amenity fit, now bias the actual recommendation engine rather than sitting inert as notes; a top-3 priority ranking feeds the same existing importance-weighting mechanism Buyer Intelligence already had. A live, tap-to-edit buyer profile panel and a &ldquo;here&rsquo;s what we heard&rdquo; recap sit either side of the wizard, and the customer display now shows section checkmarks and a narrowing match count as discovery proceeds &mdash; sourced only from the pack, answers and scores, never contact details. Natural-language capture and a &ldquo;use existing profile&rdquo; shortcut round it out with the platform&rsquo;s first real BuyerProfile-to-answers reverse mapping, and a failed location lookup now offers try again / enter manually from the pack&rsquo;s own real districts / skip, instead of a dead end.</p></li>
+      <li class="tl-item done"><span class="tl-node">32</span><h3>Property Discovery Experience (6 PRs)</h3><p>Past the wizard, the Companion gains a real browsing surface: a filterable, searchable property grid with live-updating counts and honest empty states, a tap-through Property Preview, and a Shortlist tab. A drag-and-drop &ldquo;compare folder&rdquo; pulls up to four shortlisted properties into a side-by-side Comparison Experience, and a full Property Details screen renders contextual sections (specs, location, lifestyle, documents) sourced only from the real inventory item. The customer display mirrors every step with its own journey-progress indicator and narration overlays, closed out with a dedicated end-to-end acceptance test.</p></li>
+      <li class="tl-item done"><span class="tl-node">33</span><h3>Decision Room (9 PRs)</h3><p>The comparison folder becomes a full cinematic decision experience shared by phone and big screen. Entering the Decision Room pushes a live comparison to the display; a Display Control action sheet lets the salesperson trigger Why This / Why Not panels, and cinematic Investment, Lifestyle, Floor Plan, Location and Payment modes &mdash; each a full-screen display state, not a modal. A ranked Buyer Priorities panel and Lifestyle Fit / Buyer Match rows reuse Buyer Intelligence&rsquo;s own weighting; a What-If simulator recomputes the top pick locally, scoped to just the properties being compared, without ever touching the real session. The room closes with a Recommendation screen, a &ldquo;next step&rdquo; action set, and the very first stub of what would become THE LUMMA RECAP.</p></li>
+      <li class="tl-item done"><span class="tl-node">34</span><h3>Customer Display Experience &mdash; the full cinematic journey (8 PRs)</h3><p>Matching and Matches become their own real two-step, count-narrowing cinematic states rather than an instant jump to results, and the generic display shell gains a true fullscreen toggle. Live availability status &mdash; Available, Reserved, Booked, Sold, admin-entered and never inferred &mdash; drives a real status badge and a transient &ldquo;price updated&rdquo; flash when a property&rsquo;s price changes underneath a live session. Every customer-facing read (Display, Brochure, Shared Experience) now routes through one explicit <code>customerSafe.ts</code> allowlist seam, guarded by a dedicated private-field-leak Playwright test rather than by convention alone. The Golden Demo script is extended through the entire Decision Room journey, and a comprehensive 17-step acceptance test walks the whole thing start to finish &mdash; discovery through recap &mdash; verifying no blank/undefined render and no private field ever reaches the screen.</p></li>
+      <li class="tl-item done"><span class="tl-node">35</span><h3>Deep Brand Theming (4 PRs)</h3><p>A tenant&rsquo;s brand becomes a first-class, richly themeable object rather than a single accent color: a real logo upload, a curated Google Fonts allowlist, semantic color and typography tokens resolved into CSS variables at render time, and a brand-level motion preset governing every transition on the display. Every hardcoded status color and button style across the Display is retrofitted onto the new token system, and a tenant&rsquo;s own default brand now governs the whole kiosk shell &mdash; not just individual widgets.</p></li>
+      <li class="tl-item done"><span class="tl-node">36</span><h3>Display Studio matures &mdash; from control room to a full design tool (16 more PRs)</h3><p>The original 9-PR kiosk control room grows into a genuine no-code design surface. The 12-widget library gets a full visual redesign plus real drag-and-drop reordering; four widgets (Match Score, Hero, Investment, Availability) gain their own settings panels, and every widget can be scoped to Always / When relevant / Never show. A richer idle experience supports a custom headline and duration; a full-screen Preview Display modal iframes the real <code>/display</code> route, complete with a &ldquo;Preview Your Brand&rdquo; toggle so a draft can be checked in its own tenant&rsquo;s skin before publishing. Publishing itself gains safe validation, profiles can be duplicated or reset to their template defaults, and a from-scratch AI-assisted profile generator drafts a starting layout deterministically-first, Claude-optional. An 18-step acceptance test closes the loop from a blank profile to a rolled-back publish.</p></li>
+      <li class="tl-item done"><span class="tl-node">37</span><h3>THE LUMMA RECAP &mdash; a persistent, revisitable post-meeting experience (20 PRs + acceptance test)</h3><p>Every prior recap was ephemeral &mdash; tied to a live sync room, gone the moment the session ended. THE LUMMA RECAP replaces it with a real, durable database record and a short public link (<code>/r/[code]</code>) the customer can reopen for days afterward, on any device, with no login. Before it&rsquo;s created, the salesperson reviews it exactly like a real document: per-section Edit/Hide control (Customer, Requirements, Shortlist, Comparison, Final recommendation, Payment, Investment, Notes), a private-notes field that is structurally unreachable from any customer-facing code path (not merely unrendered &mdash; verified by a dedicated safety test that probes the public route for it directly), and a choice of thank-you/follow-up/personal message templates. Property ids and the salesperson&rsquo;s authored text freeze at creation, but price and availability are always re-resolved live &mdash; so a customer reopening their recap sees an honest &ldquo;since your last visit&rdquo; banner (price up/down, or &ldquo;no longer available&rdquo; with real closest alternatives) instead of stale numbers. The customer can favorite properties as a pure engagement signal that never touches the salesperson&rsquo;s official shortlist, and share the link onward via real <code>wa.me</code>/<code>mailto:</code> deep links &mdash; no messaging backend added. On the salesperson&rsquo;s side, every real interaction (a view, an expanded property, a viewed payment plan, a favorite) feeds a privacy-conscious OBSERVED/INFERRED engagement signal, a live activity feed on the buyer&rsquo;s profile, and a property status-sync banner that surfaces drift even if the customer never reopens the link. The whole feature closes with a comprehensive, real two-browser-context acceptance test covering the entire journey end to end, and a security hardening pass that probes archived/expired/unknown codes and confirms they&rsquo;re indistinguishable to a stranger.</p></li>
     </ol>
   </section>
 

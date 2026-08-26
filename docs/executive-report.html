@@ -131,16 +131,20 @@
     <div>Buyer Intelligence <span>9</span></div>
     <div>Display Studio <span>10</span></div>
     <div>LUMMA &mdash; guided Sales Companion <span>11</span></div>
-    <div>Business impact &amp; analytics <span>12</span></div>
-    <div>Brochure &amp; Microsite module <span>13</span></div>
-    <div>Deal Room &amp; Template Engine <span>14</span></div>
-    <div>Visual Builder &amp; no-code <span>15</span></div>
-    <div>Security &amp; backend <span>16</span></div>
-    <div>Category &amp; positioning <span>17</span></div>
-    <div>Platform roadmap <span>18</span></div>
-    <div>Risks &amp; honest caveats <span>19</span></div>
-    <div>The ask <span>20</span></div>
-    <div>Appendix: full feature list <span>21</span></div>
+    <div>Property Discovery &amp; the Decision Room <span>12</span></div>
+    <div>Customer Display &mdash; the full cinematic journey <span>13</span></div>
+    <div>Deep Brand Theming &amp; Display Studio matures <span>14</span></div>
+    <div>THE LUMMA RECAP <span>15</span></div>
+    <div>Business impact &amp; analytics <span>16</span></div>
+    <div>Brochure &amp; Microsite module <span>17</span></div>
+    <div>Deal Room &amp; Template Engine <span>18</span></div>
+    <div>Visual Builder &amp; no-code <span>19</span></div>
+    <div>Security &amp; backend <span>20</span></div>
+    <div>Category &amp; positioning <span>21</span></div>
+    <div>Platform roadmap <span>22</span></div>
+    <div>Risks &amp; honest caveats <span>23</span></div>
+    <div>The ask <span>24</span></div>
+    <div>Appendix: full feature list <span>25</span></div>
   </div>
 </div>
 
@@ -198,8 +202,8 @@
   <h2>Five surfaces, one decision engine</h2>
   <table>
     <tr><th>Surface</th><th>What it does</th><th>Status</th></tr>
-    <tr><td><b>Customer Experience Display</b></td><td>Interactive Lifestyle Map, ranked recommendations, live proposal presentation</td><td><span class="pill live">LIVE</span></td></tr>
-    <tr><td><b>Sales Companion</b></td><td>LUMMA guided discovery journey, Buyer Intelligence live panel, Buying Committee Intelligence</td><td><span class="pill live">LIVE</span></td></tr>
+    <tr><td><b>Customer Experience Display</b></td><td>Interactive Lifestyle Map, ranked recommendations, live proposal presentation, the full cinematic Decision Room journey</td><td><span class="pill live">LIVE</span></td></tr>
+    <tr><td><b>Sales Companion</b></td><td>LUMMA guided discovery journey, Property Discovery &amp; Decision Room, Buyer Intelligence live panel, Buying Committee Intelligence, THE LUMMA RECAP</td><td><span class="pill live">LIVE</span></td></tr>
     <tr><td><b>Company Dashboard</b></td><td>Leads/CRM, Business Impact Dashboard, Deal Probability Radar, Visual Builder</td><td><span class="pill live">LIVE</span></td></tr>
     <tr><td><b>Platform Administration</b></td><td>Multi-tenant org, users, real permissions, audit trail, security &amp; compliance</td><td><span class="pill live">LIVE</span></td></tr>
     <tr><td><b>AI Decision Engine &amp; Public API</b></td><td>The scoring/explanation engine, exposed as a public REST API</td><td><span class="pill live">LIVE</span></td></tr>
@@ -292,6 +296,77 @@
     <tr><td>Geocode fallback</td><td>Try again, enter manually from the pack's own real districts, or skip — never a dead end, never an invented location</td></tr>
   </table>
   <div class="note"><b>Status:</b> Both rounds (4 PRs total) are complete and verified live via Playwright against a running server, including a two-tab pass confirming the customer display stays in sync with discovery.</div>
+</div>
+
+<!-- PROPERTY DISCOVERY & DECISION ROOM -->
+<div class="page">
+  <span class="kick">Module · Shipped</span>
+  <h2>Property Discovery &amp; the Decision Room</h2>
+  <p>Past the discovery wizard, the Companion gains a real browsing and negotiation surface, culminating in a cinematic comparison experience shared live between the salesperson's phone and the customer's own screen.</p>
+  <table>
+    <tr><th>Capability</th><th>Real detail</th></tr>
+    <tr><td>Property Discovery grid</td><td>Filterable, searchable, with live-updating result counts and honest empty states — never a spinner masking an error</td></tr>
+    <tr><td>Shortlist &amp; Compare</td><td>Drag up to four shortlisted properties into a compare folder; a full Property Details screen renders contextual sections sourced only from the real item</td></tr>
+    <tr><td>Decision Room</td><td>Entering it pushes a live comparison to the display; a Display Control action sheet triggers Why This / Why Not and cinematic Investment, Lifestyle, Floor Plan, Location and Payment modes — full-screen display states, not modals</td></tr>
+    <tr><td>Ranked priorities</td><td>Reuses Buyer Intelligence's own importance-weighting for a Lifestyle Fit / Buyer Match row per property</td></tr>
+    <tr><td>What-If simulator</td><td>Recomputes the top pick locally, scoped to just the properties being compared — never touches the real session</td></tr>
+    <tr><td>Recommendation &amp; Next Step</td><td>Closes the room with a real recommendation and next-step action set</td></tr>
+  </table>
+  <div class="note"><b>Status:</b> 15 PRs (Property Discovery Experience, 6; Decision Room, 9), each verified live via Playwright, closing with dedicated end-to-end acceptance tests.</div>
+</div>
+
+<!-- CUSTOMER DISPLAY EXPERIENCE -->
+<div class="page">
+  <span class="kick">Module · Shipped</span>
+  <h2>Customer Display &mdash; the full cinematic journey</h2>
+  <p>The big screen's own journey matures into cinematic, honestly-stated states at every step, guarded by a single platform-wide privacy seam.</p>
+  <table>
+    <tr><th>Capability</th><th>Real detail</th></tr>
+    <tr><td>Matching &amp; Matches</td><td>A real two-step, count-narrowing cinematic sequence rather than an instant jump to results</td></tr>
+    <tr><td>Fullscreen shell</td><td>A true fullscreen toggle for the generic display shell</td></tr>
+    <tr><td>Live availability status</td><td>Available / Reserved / Booked / Sold — admin-entered, never inferred — driving a real status badge</td></tr>
+    <tr><td>Price-updated flash</td><td>A transient on-screen flash the instant a property's price changes underneath a live session</td></tr>
+    <tr><td><code>customerSafe.ts</code> seam</td><td>Every customer-facing read (Display, Brochure, Shared Experience, now the Recap) routes through one explicit allowlist, guarded by a dedicated private-field-leak Playwright test</td></tr>
+  </table>
+  <div class="note"><b>Status:</b> 8 PRs, closing with a comprehensive 17-step acceptance test walking discovery through recap with zero blank/undefined renders and zero private-field leaks.</div>
+</div>
+
+<!-- THEME & DISPLAY STUDIO MATURES -->
+<div class="page">
+  <span class="kick">Module · Shipped</span>
+  <h2>Deep Brand Theming &amp; Display Studio matures</h2>
+  <p>A tenant's brand becomes a genuinely themeable object, and the original 9-PR Display Studio control room grows into a full no-code design tool.</p>
+  <table>
+    <tr><th>Capability</th><th>Real detail</th></tr>
+    <tr><td>Deep brand theming</td><td>Real logo upload, a curated Google Fonts allowlist, semantic color/typography tokens resolved to CSS variables, a brand-level motion preset governing every display transition</td></tr>
+    <tr><td>Widget Library redesign</td><td>The 12-widget library gets a full visual redesign plus real drag-and-drop reordering</td></tr>
+    <tr><td>Per-widget settings &amp; visibility</td><td>Match Score, Hero, Investment and Availability each get a settings panel; every widget can be scoped Always / When relevant / Never</td></tr>
+    <tr><td>Richer idle experience</td><td>A custom headline and configurable duration for the attract-loop screen</td></tr>
+    <tr><td>Full-screen Preview Display</td><td>Iframes the real <code>/display</code> route, with a "Preview Your Brand" toggle to check a draft in its own tenant's skin before publishing</td></tr>
+    <tr><td>Safe publishing, duplicate, reset</td><td>Publishing runs a validation pass first; profiles can be duplicated or reset to template defaults</td></tr>
+    <tr><td>AI-assisted generation</td><td>A from-scratch idle-profile generator, deterministic-first, Claude-optional</td></tr>
+  </table>
+  <div class="note"><b>Status:</b> 20 PRs (Theme, 4; Display Studio's later expansion, 16), closing with an 18-step acceptance test from a blank profile through a rolled-back publish.</div>
+</div>
+
+<!-- THE LUMMA RECAP -->
+<div class="page">
+  <span class="kick">Module · Shipped</span>
+  <h2>THE LUMMA RECAP</h2>
+  <p>Every prior recap was ephemeral — tied to a live sync room, gone the moment the session ended. THE LUMMA RECAP is a real, durable database record with a short public link at <code>/r/[code]</code> the customer can reopen for days afterward, on any device, with no login.</p>
+  <table>
+    <tr><th>Capability</th><th>Real detail</th></tr>
+    <tr><td>Salesperson review</td><td>Per-section Edit/Hide, plus a private-notes field structurally unreachable from any customer-facing code path — not merely unrendered, verified by a dedicated safety test</td></tr>
+    <tr><td>Thank-you templates</td><td>Thank you / Follow-up / Personal note, always editable before the recap is created</td></tr>
+    <tr><td>Live price &amp; availability</td><td>Property ids and authored text freeze at creation; price and availability are always re-resolved live against the real inventory</td></tr>
+    <tr><td>"Since your last visit"</td><td>An honest diff against the customer's own last real view — a "price updated" badge, or "no longer available" with real closest alternatives</td></tr>
+    <tr><td>Comparison Continuity</td><td>"You compared…" preserved exactly as it stood at the end of the meeting — never re-run or reset</td></tr>
+    <tr><td>Customer favoriting</td><td>A pure engagement signal from an append-only event log; never mutates the salesperson's official shortlist</td></tr>
+    <tr><td>WhatsApp / Email sharing</td><td>Real <code>wa.me</code>/<code>mailto:</code> deep-links, prefilled with the real recap URL — no messaging backend added</td></tr>
+    <tr><td>Engagement signals &amp; activity feed</td><td>Every real interaction feeds a privacy-conscious OBSERVED/INFERRED engagement level, a live activity feed, and a property status-sync banner on the buyer's profile</td></tr>
+    <tr><td>Security hardening</td><td>Archived, expired and unknown codes are indistinguishable to a stranger probing them — same 404, same body</td></tr>
+  </table>
+  <div class="note"><b>Status:</b> 20 PRs plus a comprehensive acceptance test, all verified live against a running server with real API round-trips — no fabricated data at any step.</div>
 </div>
 
 <!-- BUSINESS IMPACT -->
@@ -422,6 +497,10 @@
     <div class="prod">Visual Builder</div>
     <div class="prod">Industry Builder</div>
     <div class="prod">Brochure &amp; Microsite</div>
+    <div class="prod">Property Discovery Experience</div>
+    <div class="prod">Decision Room</div>
+    <div class="prod">Deep Brand Theming</div>
+    <div class="prod">THE LUMMA RECAP</div>
     <div class="prod next">Deal Room &amp; Template Engine</div>
     <div class="prod next">Live payments</div>
     <div class="prod next">Federated SSO</div>
