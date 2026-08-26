@@ -7,6 +7,7 @@ import { formatMoney } from "@/core/engine/explain";
 import { getBasePack } from "@/core/industries";
 import { RecapPropertyDetails } from "./RecapPropertyDetails";
 import { RecapFavoriteButton } from "./RecapFavoriteButton";
+import { trackRecapEvent } from "./trackRecapEvent";
 import type { PublicRecapShortlistItem } from "@/lib/recaps/resolve";
 import type { ScoredItem } from "@/core/engine/scoring";
 
@@ -75,7 +76,11 @@ export function RecapBestMatch({
         )}
 
         <button
-          onClick={() => setExpanded((e) => !e)}
+          onClick={() => {
+            const next = !expanded;
+            setExpanded(next);
+            if (next) trackRecapEvent(code, "PropertyView", entry.item.id);
+          }}
           className="flex w-full items-center justify-center gap-1.5 rounded-full bg-brand/15 py-3 text-sm font-semibold text-brand transition hover:bg-brand/20"
         >
           {expanded ? (
@@ -97,6 +102,7 @@ export function RecapBestMatch({
               scored={scored}
               showPayment={showPayment}
               showInvestment={showInvestment}
+              code={code}
             />
           </div>
         )}

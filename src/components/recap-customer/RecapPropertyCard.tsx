@@ -7,6 +7,7 @@ import { formatMoney } from "@/core/engine/explain";
 import { getBasePack } from "@/core/industries";
 import { RecapPropertyDetails } from "./RecapPropertyDetails";
 import { RecapFavoriteButton } from "./RecapFavoriteButton";
+import { trackRecapEvent } from "./trackRecapEvent";
 import type { PublicRecapShortlistItem } from "@/lib/recaps/resolve";
 import type { ScoredItem } from "@/core/engine/scoring";
 
@@ -83,7 +84,11 @@ export function RecapPropertyCard({
         )}
 
         <button
-          onClick={() => setExpanded((e) => !e)}
+          onClick={() => {
+            const next = !expanded;
+            setExpanded(next);
+            if (next) trackRecapEvent(code, "PropertyView", entry.item.id);
+          }}
           className="flex w-full items-center justify-center gap-1.5 rounded-full border border-white/10 bg-white/5 py-2.5 text-xs font-medium text-ink-muted transition hover:bg-white/10"
         >
           {expanded ? (
@@ -105,6 +110,7 @@ export function RecapPropertyCard({
               scored={scored}
               showPayment={showPayment}
               showInvestment={showInvestment}
+              code={code}
             />
           </div>
         )}

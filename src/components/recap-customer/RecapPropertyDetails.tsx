@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useDecisionRoomWidgetContext } from "@/components/display/useDecisionRoomWidgetContext";
 import { DisplayGallery } from "@/components/display/widgets/DisplayGallery";
 import { DisplaySpecs } from "@/components/display/widgets/DisplaySpecs";
@@ -7,6 +8,7 @@ import { DisplayLocationMap } from "@/components/display/widgets/DisplayLocation
 import { DisplayPriceSummary } from "@/components/display/widgets/DisplayPriceSummary";
 import { DisplayInvestment } from "@/components/display/widgets/DisplayInvestment";
 import { DisplayDocuments } from "@/components/display/widgets/DisplayDocuments";
+import { trackRecapEvent } from "./trackRecapEvent";
 import type { ScoredItem } from "@/core/engine/scoring";
 import type { IndustryPack, InventoryItem } from "@/core/types";
 
@@ -27,14 +29,25 @@ export function RecapPropertyDetails({
   scored,
   showPayment,
   showInvestment,
+  code,
 }: {
   pack: IndustryPack;
   item: InventoryItem;
   scored: ScoredItem[];
   showPayment: boolean;
   showInvestment: boolean;
+  code: string;
 }) {
   const context = useDecisionRoomWidgetContext(pack, item, scored);
+
+  useEffect(() => {
+    trackRecapEvent(code, "GalleryView", item.id);
+    if (showPayment) trackRecapEvent(code, "PaymentView", item.id);
+    if (showInvestment) trackRecapEvent(code, "InvestmentView", item.id);
+    // Fire once per mount (i.e. once per expand) only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="space-y-3 border-t border-white/10 pt-4">
       <DisplayGallery {...context} />

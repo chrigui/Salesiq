@@ -1,4 +1,7 @@
+"use client";
+
 import { MessageCircle, Phone, ListChecks } from "lucide-react";
+import { trackRecapEvent } from "./trackRecapEvent";
 
 /** Digits-only phone for a wa.me deep link — same convention as ProposalSheet.tsx's toWhatsAppDigits. */
 function toWhatsAppDigits(phone: string): string {
@@ -10,12 +13,17 @@ function toWhatsAppDigits(phone: string): string {
  * supports: a real tel:/wa.me deep-link to the advisor phone the
  * salesperson entered at creation (never invented), the salesperson's own
  * thank-you message verbatim, and a jump back to the shortlist. No fake
- * booking/calendar affordance — nothing here that isn't real.
+ * booking/calendar affordance — nothing here that isn't real. Each real tap
+ * fires a genuine ContactClick RecapEvent (PR13's public events route) —
+ * the only two actions on this page a salesperson would recognize as "the
+ * customer reached out."
  */
 export function RecapNextSteps({
+  code,
   message,
   advisorPhone,
 }: {
+  code: string;
   message: string | null;
   advisorPhone: string | null;
 }) {
@@ -38,6 +46,7 @@ export function RecapNextSteps({
         {telHref && (
           <a
             href={telHref}
+            onClick={() => trackRecapEvent(code, "ContactClick", undefined, { method: "call" })}
             className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-brand py-3 text-sm font-semibold text-white transition hover:brightness-110"
           >
             <Phone className="h-4 w-4" />
@@ -49,6 +58,7 @@ export function RecapNextSteps({
             href={waHref}
             target="_blank"
             rel="noreferrer"
+            onClick={() => trackRecapEvent(code, "ContactClick", undefined, { method: "whatsapp" })}
             className="flex flex-1 items-center justify-center gap-1.5 rounded-full border border-white/10 bg-white/5 py-3 text-sm font-medium text-ink-muted transition hover:bg-white/10"
           >
             <MessageCircle className="h-4 w-4" />

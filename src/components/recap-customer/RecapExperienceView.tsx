@@ -12,6 +12,7 @@ import { RecapPropertyCard } from "./RecapPropertyCard";
 import { NoLongerAvailableAlternatives } from "./NoLongerAvailableAlternatives";
 import { RecapComparisonBlock } from "./RecapComparisonBlock";
 import { RecapNextSteps } from "./RecapNextSteps";
+import { RecapViewTracker } from "./RecapViewTracker";
 import type { Answers } from "@/core/types";
 import type { ScoredItem } from "@/core/engine/scoring";
 
@@ -76,6 +77,10 @@ export async function RecapExperienceView({ recap }: { recap: PublicRecapDTO }) 
 
   return (
     <div className="mx-auto max-w-2xl px-4 pb-16 pt-6 sm:px-6">
+      <RecapViewTracker
+        code={safe.code}
+        hasComparison={show("comparison") && Boolean(safe.comparedProperties) && safe.comparedProperties!.items.length > 0}
+      />
       {show("customer") && (
         <RecapHero
           customerName={safe.customerName}
@@ -177,6 +182,7 @@ export async function RecapExperienceView({ recap }: { recap: PublicRecapDTO }) 
       {show("notes") && (
         <section id="next-steps" className="mt-8 scroll-mt-6">
           <RecapNextSteps
+            code={safe.code}
             message={typeof safe.salespersonMessage?.text === "string" ? safe.salespersonMessage.text : null}
             advisorPhone={
               typeof safe.salespersonMessage?.advisorPhone === "string" ? safe.salespersonMessage.advisorPhone : null
