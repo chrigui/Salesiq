@@ -8,6 +8,7 @@ import { SinceYourLastVisit } from "./SinceYourLastVisit";
 import { RecapBestMatch } from "./RecapBestMatch";
 import { RecapPropertyCard } from "./RecapPropertyCard";
 import { NoLongerAvailableAlternatives } from "./NoLongerAvailableAlternatives";
+import { RecapComparisonBlock } from "./RecapComparisonBlock";
 import { RecapNextSteps } from "./RecapNextSteps";
 import type { PublicRecapDTO } from "@/lib/recaps/resolve";
 import type { Answers } from "@/core/types";
@@ -151,18 +152,9 @@ export function RecapExperienceView({ recap }: { recap: PublicRecapDTO }) {
         </section>
       )}
 
-      {show("comparison") && recap.comparedProperties && recap.comparedProperties.differences.length > 0 && (
+      {show("comparison") && recap.comparedProperties && recap.comparedProperties.items.length > 0 && (
         <section id="compared" className="mt-8 scroll-mt-6">
-          <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-ink-faint">You compared</div>
-          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
-            <ul className="space-y-1.5">
-              {recap.comparedProperties.differences.map((difference, i) => (
-                <li key={i} className="text-xs text-ink-muted">
-                  {difference}
-                </li>
-              ))}
-            </ul>
-          </div>
+          <RecapComparisonBlock compared={recap.comparedProperties} />
         </section>
       )}
 
