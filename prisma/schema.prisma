@@ -225,6 +225,9 @@ model Tenant {
   dealRoomApprovalSteps     DealRoomApprovalStep[]
   dealRoomSignatureRequests DealRoomSignatureRequest[]
 
+  recaps      Recap[]
+  recapEvents RecapEvent[]
+
   /// TODO(pass-2): src/core/data/knowledgeBase.ts
   knowledgeEntries    KnowledgeEntry[]
   /// TODO(pass-2): src/core/data/tenantAuditLog.ts
@@ -319,6 +322,8 @@ model User {
   assignedDealRoomTasks    DealRoomTask[]
   dealRoomMessages         DealRoomMessage[]
   dealRoomApprovalSteps    DealRoomApprovalStep[]
+
+  createdRecaps Recap[]
 
   @@unique([tenantId, email])
   @@index([tenantId, status])
@@ -481,6 +486,7 @@ model BuyerProfile {
   itemRelationships  BuyerItemRelationship[]
   conversationNotes  BuyerConversationNote[]
   activityEvents     BuyerActivityEvent[]
+  recaps             Recap[]
 
   @@index([tenantId])
   @@index([tenantId, emailNormalized])
@@ -925,6 +931,7 @@ model BrandProfile {
   updatedAt   DateTime @updatedAt
 
   profiles DisplayProfile[]
+  recaps   Recap[]
 
   @@index([tenantId])
 }
@@ -1098,6 +1105,141 @@ model SharedExperienceEvent {
 
   @@index([sharedExperienceId, createdAt(sort: Desc)])
   @@index([sharedExperienceId, kind])
+}
+
+// ---------------------------------------------------------------------
+// LUMMA Recap — the post-meeting living continuation of a Decision Room
+// session. Deliberately its own model (not a SharedExperience extension):
+// the required shape is materially richer (structured customer story,
+// section-level salesperson visibility control, private notes, comparison
+// continuity, a live-diff "since your last visit" snapshot) than
+// SharedExperience's flat itemIds+proposalText. Same trust model as
+// SharedExperience/DealRoom though — possession of the unguessable `code`
+// is the only access control, no customer login.
+//
+// What's frozen at creation vs. kept live matters: ids, authored text
+// (customerStory/salespersonMessage), and point-in-time snapshots
+// (shortlistedProperties' priceAtCreation/availabilityAtCreation,
+// lastViewedSnapshot) are the ONLY things ever stored here. Every actual
+// property fact (current price/availability/images) is re-resolved from
+// getBasePack(packId).inventory on every public open — this row must never
+// become a second inventory system.
+enum RecapStatus {
+  Draft
+  Published
+  Archived
+}
+
+enum RecapEventKind {
+  View
+  PropertyView
+  GalleryView
+  FloorPlanView
+  PaymentView
+  InvestmentView
+  ComparisonView
+  Favorite
+  Unfavorite
+  ContactClick
+  ShareClick
+  QrScan
+  LinkOpen
+}
+
+model Recap {
+  id       String      @id @default(cuid())
+  tenantId String
+  tenant   Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  code   String      @unique
+  status RecapStatus @default(Draft)
+
+  packId         String
+  buyerProfileId String?
+  buyerProfile   BuyerProfile? @relation(fields: [buyerProfileId], references: [id], onDelete: SetNull)
+  createdById    String?
+  createdBy      User?         @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  // Only a first name is ever carried — same discipline as
+  // SharedExperience.customerName ("never scoring/probability").
+  customerNameSnapshot String?
+
+  // Authored narrative sections (Welcome back / What you told us / What we
+  // found / closing) — frozen text, salesperson-editable pre-Publish.
+  customerStory Json
+
+  // Frozen summary of the Answers/priorities that drove this meeting's
+  // scoring — never re-derived from a later requirement change elsewhere.
+  requirementsSnapshot Json
+
+  // [{ itemId, order, score, reasons: string[], priceAtCreation, currency,
+  //   availabilityAtCreation }] — ids + frozen ScoredItem.reasons only;
+  // price/availability here exist solely to diff against the live-resolved
+  // values at open time, never rendered as-is to the customer.
+  shortlistedProperties Json
+
+  // { itemIds: string[], differences: string[] } from whyNotReasons() at
+  // creation time, or null when no in-meeting comparison happened.
+  comparedProperties Json?
+
+  // Winner's itemId only — its score/reasons are looked up from
+  // shortlistedProperties, never duplicated.
+  finalRecommendationItemId String?
+
+  // { templateKind: "ThankYou"|"FollowUp"|"Personal", text, advisorPhone? }
+  salespersonMessage Json?
+
+  // Closed set of real, supported actions only, e.g.
+  // ["ContactAdvisor","ViewShortlist","Share","RequestNextStep"].
+  nextSteps Json?
+
+  // Section EDIT/HIDE state from the Salesperson Review screen.
+  sectionVisibility Json
+
+  // NEVER serialized to any public DTO — internal only, see
+  // src/lib/customerSafe.ts's toCustomerSafeRecap().
+  privateNotes String?
+
+  // Tenant brand — live pointer plus an immutable flattened snapshot
+  // captured at Publish time (same "freeze what must stay stable"
+  // precedent as DisplayProfileVersion.brandSnapshot). Falls back to the
+  // tenant's live default BrandProfile when snapshot is null.
+  brandProfileId String?
+  brandProfile   BrandProfile? @relation(fields: [brandProfileId], references: [id], onDelete: SetNull)
+  brandSnapshot  Json?
+
+  // { priceByItemId, availabilityByItemId, capturedAt } — overwritten after
+  // every resolved customer view, diffed against the next live read to
+  // produce "SINCE YOUR LAST VISIT." Never a history array.
+  lastViewedSnapshot Json?
+
+  expiresAt   DateTime?
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  events RecapEvent[]
+
+  @@index([tenantId])
+  @@index([tenantId, createdAt(sort: Desc)])
+  @@index([buyerProfileId])
+}
+
+// Real analytics events only — no fabricated counts.
+model RecapEvent {
+  id       String @id @default(cuid())
+  recapId  String
+  recap    Recap  @relation(fields: [recapId], references: [id], onDelete: Cascade)
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  kind      RecapEventKind
+  itemId    String?
+  meta      Json?
+  createdAt DateTime       @default(now())
+
+  @@index([recapId, createdAt(sort: Desc)])
+  @@index([recapId, kind])
 }
 
 // ---------------------------------------------------------------------
