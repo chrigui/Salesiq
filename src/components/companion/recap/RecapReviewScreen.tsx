@@ -10,6 +10,7 @@ import { createRecap, type RecapSalespersonMessageInput } from "@/core/store/rec
 import { RECAP_SECTIONS, defaultRecapSectionVisibility, type RecapSectionVisibility } from "@/core/data/recapSections";
 import { SectionVisibilityToggle } from "./SectionVisibilityToggle";
 import { SalespersonStoryEditor } from "./SalespersonStoryEditor";
+import { RecapShareSheet } from "./RecapShareSheet";
 import { RECAP_TERM } from "@/lib/recaps/term";
 import type { ScoredItem } from "@/core/engine/scoring";
 import type { IndustryPack } from "@/core/types";
@@ -143,6 +144,18 @@ export function RecapReviewScreen({
                 {linkCopied ? <Check className="h-3.5 w-3.5 text-brand" /> : <Copy className="h-3.5 w-3.5" />}
                 {linkCopied ? "Copied" : "Copy link"}
               </button>
+            </div>
+          )}
+
+          {recapUrl && (
+            <div className="mt-5 border-t border-white/5 pt-4">
+              <RecapShareSheet
+                recapUrl={recapUrl}
+                customerName={session.customer.name}
+                customerPhone={session.customer.phone}
+                customerEmail={session.customer.email}
+                brandName={pack.branding.name}
+              />
             </div>
           )}
         </div>

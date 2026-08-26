@@ -43,7 +43,7 @@ function proposalMessage(
 }
 
 /** Digits-only phone for a wa.me deep link (WhatsApp ignores +/spaces anyway). */
-function toWhatsAppDigits(phone: string): string {
+export function toWhatsAppDigits(phone: string): string {
   return phone.replace(/[^\d]/g, "");
 }
 
