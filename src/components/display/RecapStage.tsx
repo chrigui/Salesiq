@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { ClipboardList, Trophy } from "lucide-react";
 import { useSync } from "@/components/providers/SyncProvider";
+import { useSession } from "@/core/store/session";
 import { useContinueQrDataUrl } from "./ContinueQr";
 import { formatMoney } from "@/core/engine/explain";
 import { ItemImage } from "@/components/ui/ItemImage";
@@ -16,12 +17,19 @@ const spring = { type: "spring", stiffness: 260, damping: 30 } as const;
  * carry the same experience to their phone. Reads the real, salesperson-
  * curated session.recapItemIds (never a re-derived top score) — the
  * highest-scored recap item is framed as "Your best match," the rest as
- * "Also considered." Reuses ContinueQr's own QR generation against the
- * live sync room rather than a second QR mechanism.
+ * "Also considered." Reuses ContinueQr's own QR generation, but points it
+ * at the persistent /r/[code] LUMMA Recap link (session.recapCode, set
+ * once POST /api/recaps succeeds — see RecapReviewScreen.tsx) instead of
+ * the ephemeral sync room's continueUrl whenever one exists: a persisted
+ * Recap outlives the room and survives the Companion tab closing, so it's
+ * the better link to hand the customer. Falls back to continueUrl exactly
+ * as before when no Recap was created for this meeting.
  */
 export function RecapStage({ recapItems: rawRecapItems }: { recapItems: ScoredItem[] }) {
   const { room, continueUrl } = useSync();
-  const qr = useContinueQrDataUrl(continueUrl);
+  const recapCode = useSession((s) => s.recapCode);
+  const recapUrl = recapCode && typeof window !== "undefined" ? `${window.location.origin}/r/${recapCode}` : null;
+  const qr = useContinueQrDataUrl(recapUrl ?? continueUrl);
   // Self-contained customerSafe seam — defends this public-facing stage
   // even if a future caller passes it un-sanitized items.
   const recapItems = rawRecapItems.map((s) => ({ ...s, item: toCustomerSafeItem(s.item) }));

@@ -83,6 +83,7 @@ export function RecapReviewScreen({
         return;
       }
       setCode(result.code);
+      session.setRecapCode(result.code);
       setStep("created");
     } catch {
       setCreateError("Couldn't reach the server — check your connection.");

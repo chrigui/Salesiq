@@ -155,6 +155,15 @@ export interface SessionState {
    */
   proposalText: string | null;
   proposalEngine: string | null;
+  /**
+   * The code of the persistent LUMMA Recap created for this meeting, if
+   * any — set once via setRecapCode() right after POST /api/recaps
+   * succeeds (see RecapReviewScreen.tsx). RecapStage.tsx prefers this over
+   * the live sync room's continueUrl for the Display's end-of-meeting QR:
+   * a persistent /r/[code] link outlives the ephemeral room and survives
+   * the Companion tab closing, unlike continueUrl.
+   */
+  recapCode: string | null;
   /** Bumps on every meaningful change to drive display animations. */
   revision: number;
 }
@@ -189,6 +198,8 @@ interface SessionActions {
   removeStakeholder: (id: string) => void;
   /** Push a reviewed proposal onto the customer display and switch it into view. */
   presentProposal: (text: string, engine: string | null) => void;
+  /** Records the code of the LUMMA Recap just created for this meeting, so RecapStage.tsx can point its QR at the persistent /r/[code] link. */
+  setRecapCode: (code: string | null) => void;
   /** Record a interaction not covered by another action (proposal, lead saved…). */
   logEvent: (event: Omit<TimelineEvent, "id" | "ts">) => void;
   reset: () => void;
@@ -245,6 +256,7 @@ function initialState(): SessionState {
     timeline: [],
     proposalText: null,
     proposalEngine: null,
+    recapCode: null,
     revision: 0,
   };
 }
@@ -268,6 +280,7 @@ function snapshot(s: SessionState & SessionActions): SessionState {
     timeline: s.timeline,
     proposalText: s.proposalText,
     proposalEngine: s.proposalEngine,
+    recapCode: s.recapCode,
     revision: s.revision,
   };
 }
@@ -490,6 +503,8 @@ export const useSession = create<SessionState & SessionActions>((set, get) => {
         }),
       }),
 
+    setRecapCode: (code) => bump({ recapCode: code }),
+
     logEvent: (event) => {
       set((s) => ({
         timeline: pushEvent(s.timeline, event),
@@ -566,6 +581,7 @@ export const useSession = create<SessionState & SessionActions>((set, get) => {
         stakeholders: state.stakeholders ?? [],
         proposalText: state.proposalText ?? null,
         proposalEngine: state.proposalEngine ?? null,
+        recapCode: state.recapCode ?? null,
         buyerProfileId: state.buyerProfileId ?? null,
         workLocationLat: state.workLocationLat ?? null,
         workLocationLng: state.workLocationLng ?? null,
@@ -582,6 +598,7 @@ export const useSession = create<SessionState & SessionActions>((set, get) => {
           stakeholders: env.state.stakeholders ?? [],
           proposalText: env.state.proposalText ?? null,
           proposalEngine: env.state.proposalEngine ?? null,
+          recapCode: env.state.recapCode ?? null,
           buyerProfileId: env.state.buyerProfileId ?? null,
           workLocationLat: env.state.workLocationLat ?? null,
           workLocationLng: env.state.workLocationLng ?? null,
