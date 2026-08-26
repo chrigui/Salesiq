@@ -20,9 +20,11 @@ import type { ScoredItem } from "@/core/engine/scoring";
 export function DecisionRoomRecommend({
   group,
   onBack,
+  onCreateRecap,
 }: {
   group: ScoredItem[];
   onBack: () => void;
+  onCreateRecap: () => void;
 }) {
   const session = useSession();
   const { continueUrl } = useSync();
@@ -149,7 +151,7 @@ export function DecisionRoomRecommend({
           </div>
 
           <button
-            onClick={() => session.setView("recap")}
+            onClick={onCreateRecap}
             disabled={!hasRecapItems}
             title={hasRecapItems ? undefined : "Add a property to recap first"}
             className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-full bg-brand px-4 py-3 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:border disabled:border-white/5 disabled:bg-white/[0.02] disabled:text-ink-faint disabled:opacity-50 disabled:hover:brightness-100"

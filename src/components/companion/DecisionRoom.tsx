@@ -13,10 +13,11 @@ import { ProgressJourney } from "./explore/ProgressJourney";
 import { DecisionRoomComparison } from "./DecisionRoomComparison";
 import { PrioritiesPanel } from "./PrioritiesPanel";
 import { DecisionRoomRecommend } from "./DecisionRoomRecommend";
+import { RecapReviewScreen } from "./recap/RecapReviewScreen";
 import type { ScoredItem } from "@/core/engine/scoring";
 import type { IndustryPack } from "@/core/types";
 
-type DecisionRoomStep = "enter" | "compare" | "priorities" | "recommend";
+type DecisionRoomStep = "enter" | "compare" | "priorities" | "recommend" | "recap";
 
 /** Decision Room supports 2-4 properties in a comparison (spec section 3). */
 const MAX_COMPARE = 4;
@@ -85,8 +86,26 @@ export function DecisionRoom() {
     return <PrioritiesPanel pack={pack} group={group} onBack={() => setStep("compare")} />;
   }
 
+  if (step === "recap") {
+    return <RecapReviewScreen pack={pack} scored={scored} onBack={() => setStep("recommend")} />;
+  }
+
   const group = scored.filter((s) => session.compareItemIds.includes(s.item.id));
-  return <DecisionRoomRecommend group={group} onBack={() => setStep("compare")} />;
+  return (
+    <DecisionRoomRecommend
+      group={group}
+      onBack={() => setStep("compare")}
+      onCreateRecap={() => {
+        // Keeps the existing ephemeral Display RecapStage flow intact (the
+        // big screen still flips into its own live "Your LUMMA recap" QR,
+        // paired to this session — untouched by the new persisted flow
+        // below) while the Companion opens the real review wizard that
+        // mints a durable, revisitable Recap row.
+        session.setView("recap");
+        setStep("recap");
+      }}
+    />
+  );
 }
 
 function EnterStep({
