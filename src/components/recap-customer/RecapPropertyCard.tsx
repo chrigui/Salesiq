@@ -6,6 +6,7 @@ import { ItemImage } from "@/components/ui/ItemImage";
 import { formatMoney } from "@/core/engine/explain";
 import { getBasePack } from "@/core/industries";
 import { RecapPropertyDetails } from "./RecapPropertyDetails";
+import { RecapFavoriteButton } from "./RecapFavoriteButton";
 import type { PublicRecapShortlistItem } from "@/lib/recaps/resolve";
 import type { ScoredItem } from "@/core/engine/scoring";
 
@@ -25,6 +26,8 @@ export function RecapPropertyCard({
   showPayment,
   showInvestment,
   highlight,
+  code,
+  favorited,
 }: {
   entry: PublicRecapShortlistItem;
   packId: string;
@@ -32,6 +35,8 @@ export function RecapPropertyCard({
   showPayment: boolean;
   showInvestment: boolean;
   highlight?: boolean;
+  code: string;
+  favorited: boolean;
 }) {
   const pack = getBasePack(packId);
   const [expanded, setExpanded] = useState(false);
@@ -49,8 +54,11 @@ export function RecapPropertyCard({
               <div className="text-xs text-white/70">{entry.currentAvailability}</div>
             )}
           </div>
-          <div className="rounded-full bg-brand/90 px-2.5 py-1 text-xs font-semibold text-white">
-            {entry.score}% match
+          <div className="flex items-center gap-2">
+            <div className="rounded-full bg-brand/90 px-2.5 py-1 text-xs font-semibold text-white">
+              {entry.score}% match
+            </div>
+            <RecapFavoriteButton code={code} itemId={entry.item.id} initialFavorited={favorited} />
           </div>
         </div>
       </ItemImage>

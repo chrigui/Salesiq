@@ -6,6 +6,7 @@ import { ItemImage } from "@/components/ui/ItemImage";
 import { formatMoney } from "@/core/engine/explain";
 import { getBasePack } from "@/core/industries";
 import { RecapPropertyDetails } from "./RecapPropertyDetails";
+import { RecapFavoriteButton } from "./RecapFavoriteButton";
 import type { PublicRecapShortlistItem } from "@/lib/recaps/resolve";
 import type { ScoredItem } from "@/core/engine/scoring";
 
@@ -23,12 +24,16 @@ export function RecapBestMatch({
   scored,
   showPayment,
   showInvestment,
+  code,
+  favorited,
 }: {
   entry: PublicRecapShortlistItem;
   packId: string;
   scored: ScoredItem[];
   showPayment: boolean;
   showInvestment: boolean;
+  code: string;
+  favorited: boolean;
 }) {
   const pack = getBasePack(packId);
   const [expanded, setExpanded] = useState(false);
@@ -39,6 +44,9 @@ export function RecapBestMatch({
         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
         <div className="absolute left-4 top-4 flex items-center gap-1.5 rounded-full bg-brand/90 px-3 py-1 text-xs font-semibold text-white">
           <Trophy className="h-3.5 w-3.5" /> Your best match
+        </div>
+        <div className="absolute right-4 top-4">
+          <RecapFavoriteButton code={code} itemId={entry.item.id} initialFavorited={favorited} />
         </div>
         <div className="absolute bottom-4 left-5 right-5">
           <div className="text-xl font-semibold text-white">{entry.item.name}</div>

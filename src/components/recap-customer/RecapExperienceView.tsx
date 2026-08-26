@@ -2,6 +2,7 @@ import { Sparkles } from "lucide-react";
 import { buildAnswerSummary } from "@/components/companion/answerSummary";
 import { RECAP_TERM } from "@/lib/recaps/term";
 import { computeRecapDiff, isUnavailableStatus } from "@/lib/recaps/diff";
+import { getRecapFavoriteItemIds, type PublicRecapDTO } from "@/lib/recaps/resolve";
 import { RecapHero } from "./RecapHero";
 import { RecapJourneyTimeline, type RecapJourneyStep } from "./RecapJourneyTimeline";
 import { SinceYourLastVisit } from "./SinceYourLastVisit";
@@ -10,7 +11,6 @@ import { RecapPropertyCard } from "./RecapPropertyCard";
 import { NoLongerAvailableAlternatives } from "./NoLongerAvailableAlternatives";
 import { RecapComparisonBlock } from "./RecapComparisonBlock";
 import { RecapNextSteps } from "./RecapNextSteps";
-import type { PublicRecapDTO } from "@/lib/recaps/resolve";
 import type { Answers } from "@/core/types";
 import type { ScoredItem } from "@/core/engine/scoring";
 
@@ -30,8 +30,10 @@ import type { ScoredItem } from "@/core/engine/scoring";
  * exactly how the Companion/Display already do it (useLivePack), never a
  * serialized pack object.
  */
-export function RecapExperienceView({ recap }: { recap: PublicRecapDTO }) {
+export async function RecapExperienceView({ recap }: { recap: PublicRecapDTO }) {
   const show = (key: string) => (recap.sectionVisibility[key] ?? "show") === "show";
+
+  const favoriteItemIds = new Set(await getRecapFavoriteItemIds(recap.id));
 
   const summary = buildAnswerSummary(recap.pack, recap.requirementsSnapshot as Answers);
 
@@ -118,6 +120,8 @@ export function RecapExperienceView({ recap }: { recap: PublicRecapDTO }) {
               scored={scored}
               showPayment={show("payment")}
               showInvestment={show("investment")}
+              code={recap.code}
+              favorited={favoriteItemIds.has(recap.finalRecommendation.item.id)}
             />
           )}
         </section>
@@ -145,6 +149,8 @@ export function RecapExperienceView({ recap }: { recap: PublicRecapDTO }) {
                   scored={scored}
                   showPayment={show("payment")}
                   showInvestment={show("investment")}
+                  code={recap.code}
+                  favorited={favoriteItemIds.has(entry.item.id)}
                 />
               ),
             )}

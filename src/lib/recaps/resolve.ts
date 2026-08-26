@@ -6,6 +6,7 @@ import { toCustomerSafeItem, toCustomerSafeCustomerName } from "@/lib/customerSa
 import type { IndustryPack, InventoryItem } from "@/core/types";
 import type { RecapComparedProperties, RecapShortlistedProperty } from "./types";
 import type { RecapViewedSnapshot } from "./diff";
+import { deriveFavoriteItemIds } from "./favorites";
 
 /**
  * Every column this resolver is allowed to touch — deliberately an
@@ -166,4 +167,25 @@ export async function resolvePublicRecap(code: string): Promise<PublicRecapDTO |
     publishedAt: row.publishedAt?.getTime() ?? null,
     createdAt: row.createdAt.getTime(),
   };
+}
+
+/**
+ * Reads a Recap's current customer-favorited item ids — a separate query
+ * from resolvePublicRecap (which stays a pure, event-log-free read) since
+ * this reduces the append-only Favorite/Unfavorite RecapEvent log rather
+ * than any column on Recap itself. Used to seed each property card's
+ * initial favorited state on page load.
+ */
+export async function getRecapFavoriteItemIds(recapId: string): Promise<string[]> {
+  const events = await prisma.recapEvent.findMany({
+    where: { recapId, kind: { in: ["Favorite", "Unfavorite"] } },
+    select: { kind: true, itemId: true, createdAt: true },
+  });
+  return deriveFavoriteItemIds(
+    events.map((e) => ({
+      kind: e.kind as "Favorite" | "Unfavorite",
+      itemId: e.itemId,
+      createdAt: e.createdAt.getTime(),
+    })),
+  );
 }
