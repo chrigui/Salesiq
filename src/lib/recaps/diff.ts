@@ -62,6 +62,27 @@ export function buildViewedSnapshot(
 }
 
 /**
+ * The salesperson-side counterpart to buildViewedSnapshot — the genesis
+ * baseline of what was actually shown at the meeting (priceAtCreation/
+ * availabilityAtCreation, frozen on each shortlisted item), rather than
+ * what the customer's own last real view happened to see. Lets PR17's
+ * property status-sync banner detect drift even when the customer has
+ * never opened their Recap at all (lastViewedSnapshot stays null in that
+ * case), matching the spec's "no customer interaction needed" requirement.
+ */
+export function buildCreationSnapshot(
+  recap: Pick<PublicRecapDTO, "shortlistedProperties">,
+): RecapViewedSnapshot {
+  const priceByItemId: Record<string, number> = {};
+  const availabilityByItemId: Record<string, string | null> = {};
+  for (const s of recap.shortlistedProperties) {
+    priceByItemId[s.item.id] = s.priceAtCreation;
+    availabilityByItemId[s.item.id] = s.availabilityAtCreation;
+  }
+  return { priceByItemId, availabilityByItemId, capturedAt: 0 };
+}
+
+/**
  * Compares the last captured view against what's live right now. Every
  * entry is a real, resolvable change — an item missing from the previous
  * snapshot (just added to the shortlist since) is never reported as

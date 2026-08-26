@@ -7,6 +7,7 @@ import type { BuyerSegmentCriterion } from "@/core/buyerIntelligence/segments";
 import type { SimilarBuyerMatch } from "@/core/buyerIntelligence/similarity";
 import type { Condition } from "@/core/types";
 import { useSession } from "@/core/store/session";
+import type { RecapDiff } from "@/lib/recaps/diff";
 
 export interface BuyerProfile {
   id: string;
@@ -232,6 +233,16 @@ export function useBuyerActivity(
     { refreshInterval: 15_000 },
   );
   return { events: data?.events ?? [], relationships: data?.relationships ?? [], isLoading: isLoading && data === undefined };
+}
+
+/** Polls whether this buyer's most recent Recap has drifted from what was shown at creation — see PR17's status-sync banner. */
+export function useRecapStatus(id: string | null): { diff: RecapDiff | null; recapCode: string | null } {
+  const { data } = useSWR<{ diff: RecapDiff | null; recapCode: string | null }>(
+    id ? `${BUYER_PROFILES_KEY}/${id}/recap-status` : null,
+    fetcher,
+    { refreshInterval: 15_000 },
+  );
+  return { diff: data?.diff ?? null, recapCode: data?.recapCode ?? null };
 }
 
 export interface BuyerRejectedItem {
