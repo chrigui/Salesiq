@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ArrowLeft, ClipboardCheck, Loader2, Sparkles, Smartphone, Copy, Check } from "lucide-react";
+import { ArrowLeft, ClipboardCheck, Loader2, Sparkles, Smartphone, Copy, Check, ShieldCheck } from "lucide-react";
 import { useSession } from "@/core/store/session";
 import { buildAnswerSummary } from "@/components/companion/answerSummary";
 import { formatMoney } from "@/core/engine/explain";
@@ -126,6 +126,10 @@ export function RecapReviewScreen({
           </div>
 
           <div className="mt-3 text-[11px] uppercase tracking-[0.2em] text-ink-faint">Code {code}</div>
+          <div className="mx-auto mt-2 flex max-w-[220px] items-center justify-center gap-1 text-[10px] text-ink-faint">
+            <ShieldCheck className="h-3 w-3 shrink-0" />
+            <span>No expiration set — this link stays active until you delete it.</span>
+          </div>
 
           {recapUrl && (
             <div className="mt-4 flex items-center gap-2">
