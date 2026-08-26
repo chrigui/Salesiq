@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
-import { Prisma } from "@/generated/prisma/client";
 import { requireSession, requireCapability, AuthError } from "@/lib/auth/server";
 import { buildBuyerProfileScope } from "@/lib/buyerProfiles/scope";
-import { recomputeBuyerIntelligence } from "@/lib/buyerProfiles/recompute";
+import { logBuyerActivity } from "@/lib/buyerProfiles/logActivity";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -45,13 +44,6 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   }
 }
 
-/** Every activity kind the Companion is allowed to log, and the item-relationship state (if any) it also appends. */
-const ACTIVITY_TO_RELATIONSHIP: Record<string, string> = {
-  property_viewed: "viewed",
-  item_saved: "saved",
-  proposal_generated: "proposal_created",
-};
-
 const bodySchema = z.object({
   kind: z.enum(["property_viewed", "item_saved", "comparison_made", "proposal_generated"]),
   packId: z.string().max(100).optional(),
@@ -84,26 +76,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
     const { kind, packId, itemId, meta } = parsed.data;
 
-    await prisma.buyerActivityEvent.create({
-      data: {
-        buyerProfileId: id,
-        tenantId: ctx.tenantId,
-        kind,
-        packId,
-        itemId,
-        meta: meta as Prisma.InputJsonValue | undefined,
-      },
-    });
-
-    const relationshipState = ACTIVITY_TO_RELATIONSHIP[kind];
-    if (relationshipState && packId && itemId) {
-      await prisma.buyerItemRelationship.create({
-        data: { buyerProfileId: id, tenantId: ctx.tenantId, packId, itemId, state: relationshipState },
-      });
-    }
-
-    await prisma.buyerProfile.update({ where: { id }, data: { lastInteractionAt: new Date() } });
-    await recomputeBuyerIntelligence(id);
+    await logBuyerActivity({ buyerProfileId: id, tenantId: ctx.tenantId, kind, packId, itemId, meta });
 
     return NextResponse.json({ ok: true }, { status: 201 });
   } catch (err) {
