@@ -72,6 +72,42 @@ function plural(n: number, singular: string, pluralForm: string): string {
 }
 
 /**
+ * The inverse of the public events route's RECAP_EVENT_TO_BUYER_ACTIVITY map
+ * — lets the salesperson-side Buyer Intelligence view derive the same
+ * engagement summary straight from BuyerActivityEvent.kind (already written
+ * by logBuyerActivity for any Recap linked to a real buyer, see PR13)
+ * without a second query against RecapEvent.
+ */
+const BUYER_ACTIVITY_TO_RECAP_EVENT: Record<string, keyof RecapEventCounts> = {
+  recap_opened: "View",
+  recap_property_viewed: "PropertyView",
+  recap_gallery_viewed: "GalleryView",
+  recap_floor_plan_viewed: "FloorPlanView",
+  recap_payment_viewed: "PaymentView",
+  recap_investment_viewed: "InvestmentView",
+  recap_comparison_viewed: "ComparisonView",
+  recap_favorited: "Favorite",
+  recap_unfavorited: "Unfavorite",
+  recap_contact_clicked: "ContactClick",
+  recap_share_clicked: "ShareClick",
+  recap_qr_scanned: "QrScan",
+  recap_link_opened: "LinkOpen",
+};
+
+export function isRecapActivityKind(kind: string): boolean {
+  return kind in BUYER_ACTIVITY_TO_RECAP_EVENT;
+}
+
+export function countRecapEventsFromBuyerActivity(kinds: string[]): RecapEventCounts {
+  const counts = emptyRecapEventCounts();
+  for (const kind of kinds) {
+    const mapped = BUYER_ACTIVITY_TO_RECAP_EVENT[kind];
+    if (mapped) counts[mapped] += 1;
+  }
+  return counts;
+}
+
+/**
  * Derives a salesperson-facing engagement summary from real RecapEvent
  * tallies — no invented data, no phrasing that implies purchase intent
  * (that classification lives only in Buyer Intelligence's explicit

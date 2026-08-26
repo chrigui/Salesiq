@@ -34,6 +34,7 @@ import {
 import type { BuyerField } from "@/core/buyerIntelligence/types";
 import type { BuyerPriority, PriorityImportance } from "@/core/buyerIntelligence/priorityWeights";
 import { BuyerTimeline } from "@/components/console/BuyerTimeline";
+import { RecapActivityFeed } from "@/components/console/RecapActivityFeed";
 
 const PROVENANCE_STYLE: Record<BuyerField<unknown>["provenance"], string> = {
   explicit: "bg-emerald-100 text-emerald-700",
@@ -173,6 +174,7 @@ export function BuyerIntelligenceProfile({
         <RejectedItemsPanel buyerProfileId={id} />
         <ObjectionsPanel buyerProfileId={id} />
         <SimilarBuyersPanel buyerProfileId={id} onOpenBuyer={onOpenBuyer} />
+        <RecapActivityFeed buyerProfileId={id} />
         <BuyerTimeline buyerProfileId={id} />
       </div>
     </div>

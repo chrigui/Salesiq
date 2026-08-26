@@ -229,6 +229,7 @@ export function useBuyerActivity(
   const { data, isLoading } = useSWR<{ events: BuyerActivityEvent[]; relationships: BuyerItemRelationship[] }>(
     id ? `${BUYER_PROFILES_KEY}/${id}/activity` : null,
     fetcher,
+    { refreshInterval: 15_000 },
   );
   return { events: data?.events ?? [], relationships: data?.relationships ?? [], isLoading: isLoading && data === undefined };
 }
