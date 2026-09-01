@@ -321,6 +321,12 @@ export const meliaBeachfrontPack: IndustryPack = {
       currency: "USD",
       image: "amber",
       location: { label: "Larnaca", lat: 34.9, lng: 33.63 },
+      photo: "/industries/melia-beachfront/building/hero.png",
+      gallery: [
+        "/industries/melia-beachfront/building/gallery-detail.png",
+        "/industries/melia-beachfront/building/gallery-twilight.png",
+        "/industries/melia-beachfront/building/gallery-texture.png",
+      ],
       appreciation: 9,
       attributes: {
         bedrooms: 1,
@@ -359,6 +365,12 @@ export const meliaBeachfrontPack: IndustryPack = {
       currency: "USD",
       image: "sky",
       location: { label: "Larnaca", lat: 34.9, lng: 33.63 },
+      photo: "/industries/melia-beachfront/building/hero.png",
+      gallery: [
+        "/industries/melia-beachfront/building/gallery-detail.png",
+        "/industries/melia-beachfront/building/gallery-twilight.png",
+        "/industries/melia-beachfront/building/gallery-texture.png",
+      ],
       appreciation: 14,
       attributes: {
         bedrooms: 2,
@@ -397,6 +409,12 @@ export const meliaBeachfrontPack: IndustryPack = {
       currency: "USD",
       image: "amber",
       location: { label: "Larnaca", lat: 34.9, lng: 33.63 },
+      photo: "/industries/melia-beachfront/building/hero.png",
+      gallery: [
+        "/industries/melia-beachfront/building/gallery-detail.png",
+        "/industries/melia-beachfront/building/gallery-twilight.png",
+        "/industries/melia-beachfront/building/gallery-texture.png",
+      ],
       appreciation: 10,
       attributes: {
         bedrooms: 2,
@@ -435,6 +453,12 @@ export const meliaBeachfrontPack: IndustryPack = {
       currency: "USD",
       image: "violet",
       location: { label: "Larnaca", lat: 34.9, lng: 33.63 },
+      photo: "/industries/melia-beachfront/building/hero.png",
+      gallery: [
+        "/industries/melia-beachfront/building/gallery-detail.png",
+        "/industries/melia-beachfront/building/gallery-twilight.png",
+        "/industries/melia-beachfront/building/gallery-texture.png",
+      ],
       appreciation: 17,
       attributes: {
         bedrooms: 3,
@@ -473,6 +497,12 @@ export const meliaBeachfrontPack: IndustryPack = {
       currency: "USD",
       image: "sky",
       location: { label: "Larnaca", lat: 34.9, lng: 33.63 },
+      photo: "/industries/melia-beachfront/building/hero.png",
+      gallery: [
+        "/industries/melia-beachfront/building/gallery-detail.png",
+        "/industries/melia-beachfront/building/gallery-twilight.png",
+        "/industries/melia-beachfront/building/gallery-texture.png",
+      ],
       appreciation: 15,
       attributes: {
         bedrooms: 3,
@@ -511,6 +541,12 @@ export const meliaBeachfrontPack: IndustryPack = {
       currency: "USD",
       image: "amber",
       location: { label: "Larnaca", lat: 34.9, lng: 33.63 },
+      photo: "/industries/melia-beachfront/building/hero.png",
+      gallery: [
+        "/industries/melia-beachfront/building/gallery-detail.png",
+        "/industries/melia-beachfront/building/gallery-twilight.png",
+        "/industries/melia-beachfront/building/gallery-texture.png",
+      ],
       appreciation: 8,
       attributes: {
         bedrooms: 2,
@@ -549,6 +585,12 @@ export const meliaBeachfrontPack: IndustryPack = {
       currency: "USD",
       image: "violet",
       location: { label: "Larnaca", lat: 34.9, lng: 33.63 },
+      photo: "/industries/melia-beachfront/building/hero.png",
+      gallery: [
+        "/industries/melia-beachfront/building/gallery-detail.png",
+        "/industries/melia-beachfront/building/gallery-twilight.png",
+        "/industries/melia-beachfront/building/gallery-texture.png",
+      ],
       appreciation: 12,
       attributes: {
         bedrooms: 3,
@@ -587,6 +629,12 @@ export const meliaBeachfrontPack: IndustryPack = {
       currency: "USD",
       image: "amber",
       location: { label: "Larnaca", lat: 34.9, lng: 33.63 },
+      photo: "/industries/melia-beachfront/building/hero.png",
+      gallery: [
+        "/industries/melia-beachfront/building/gallery-detail.png",
+        "/industries/melia-beachfront/building/gallery-twilight.png",
+        "/industries/melia-beachfront/building/gallery-texture.png",
+      ],
       appreciation: 8,
       attributes: {
         bedrooms: 2,
@@ -625,6 +673,12 @@ export const meliaBeachfrontPack: IndustryPack = {
       currency: "USD",
       image: "sky",
       location: { label: "Larnaca", lat: 34.9, lng: 33.63 },
+      photo: "/industries/melia-beachfront/building/hero.png",
+      gallery: [
+        "/industries/melia-beachfront/building/gallery-detail.png",
+        "/industries/melia-beachfront/building/gallery-twilight.png",
+        "/industries/melia-beachfront/building/gallery-texture.png",
+      ],
       appreciation: 13,
       attributes: {
         bedrooms: 1,
@@ -663,6 +717,12 @@ export const meliaBeachfrontPack: IndustryPack = {
       currency: "USD",
       image: "violet",
       location: { label: "Larnaca", lat: 34.9, lng: 33.63 },
+      photo: "/industries/melia-beachfront/building/hero.png",
+      gallery: [
+        "/industries/melia-beachfront/building/gallery-detail.png",
+        "/industries/melia-beachfront/building/gallery-twilight.png",
+        "/industries/melia-beachfront/building/gallery-texture.png",
+      ],
       appreciation: 19,
       attributes: {
         bedrooms: 4,
@@ -701,6 +761,12 @@ export const meliaBeachfrontPack: IndustryPack = {
       currency: "USD",
       image: "sky",
       location: { label: "Larnaca", lat: 34.9, lng: 33.63 },
+      photo: "/industries/melia-beachfront/building/hero.png",
+      gallery: [
+        "/industries/melia-beachfront/building/gallery-detail.png",
+        "/industries/melia-beachfront/building/gallery-twilight.png",
+        "/industries/melia-beachfront/building/gallery-texture.png",
+      ],
       appreciation: 16,
       attributes: {
         bedrooms: 3,
@@ -739,6 +805,12 @@ export const meliaBeachfrontPack: IndustryPack = {
       currency: "USD",
       image: "violet",
       location: { label: "Larnaca", lat: 34.9, lng: 33.63 },
+      photo: "/industries/melia-beachfront/building/hero.png",
+      gallery: [
+        "/industries/melia-beachfront/building/gallery-detail.png",
+        "/industries/melia-beachfront/building/gallery-twilight.png",
+        "/industries/melia-beachfront/building/gallery-texture.png",
+      ],
       appreciation: 18,
       attributes: {
         bedrooms: 4,
