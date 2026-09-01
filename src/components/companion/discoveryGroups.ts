@@ -23,4 +23,17 @@ export const DISCOVERY_GROUPS: Record<string, DiscoveryGroup[]> = {
     { title: "Financial profile", questionIds: ["budget", "purchaseMethod", "monthlyPayment"] },
     { title: "Timing", questionIds: ["timing"] },
   ],
+  // Identical grouping to "real-estate" — melia-beachfront.ts deliberately
+  // reuses every question id so the guided wizard needs no new logic, only
+  // this lookup entry (see the file header comment for why).
+  "melia-beachfront": [
+    { title: "About them", questionIds: ["household", "familySize", "intent"] },
+    { title: "Location & commute", questionIds: ["destinationType", "workLocation", "commuteImportance", "maxCommute"] },
+    { title: "Location preferences", questionIds: ["nearbyPreferences", "locationImportance"] },
+    { title: "Unit type", questionIds: ["propertyType", "bedrooms"] },
+    { title: "Lifestyle", questionIds: ["lifestyleStyle"] },
+    { title: "Unit features", questionIds: ["homeFeatures"] },
+    { title: "Financial profile", questionIds: ["budget", "purchaseMethod", "monthlyPayment"] },
+    { title: "Timing", questionIds: ["timing"] },
+  ],
 };

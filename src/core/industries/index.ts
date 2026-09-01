@@ -1,13 +1,14 @@
 import type { IndustryPack } from "@/core/types";
 import { realEstatePack } from "./real-estate";
 import { bahrainRealEstatePack } from "./real-estate-bahrain";
+import { meliaBeachfrontPack } from "./melia-beachfront";
 import { automotivePack } from "./automotive";
 import { privateJetsPack } from "./private-jets";
 import { yachtPack } from "./yacht";
 
 /**
  * The registry of installed industry packs. In production each tenant selects
- * (or authors) a pack; here we ship five to demonstrate that the platform is
+ * (or authors) a pack; here we ship six to demonstrate that the platform is
  * genuinely industry-agnostic — the same engine and UI power all of them.
  * Tenants can add more of their own from the dashboard's Industry Builder
  * with no code at all — see core/data/customPacks.ts.
@@ -15,6 +16,7 @@ import { yachtPack } from "./yacht";
 export const PACKS: IndustryPack[] = [
   realEstatePack,
   bahrainRealEstatePack,
+  meliaBeachfrontPack,
   automotivePack,
   privateJetsPack,
   yachtPack,
