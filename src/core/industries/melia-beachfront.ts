@@ -33,13 +33,13 @@ function pois(content: Record<string, [string, string]>): Poi[] {
 
 /** Every unit sits in the same building, so the surrounding lifestyle is identical — only the unit itself varies. */
 const MELIA_POIS = pois({
-  school: ["Larnaca International School", "9 min"],
-  park: ["Finikoudes Promenade", "3 min walk"],
-  mall: ["Metropolis Mall", "10 min"],
-  health: ["Larnaca General Hospital", "12 min"],
+  school: ["Nadeen School", "12 min"],
+  park: ["Amwaj Lagoon Promenade", "4 min walk"],
+  mall: ["Dragon City Mall", "10 min"],
+  health: ["Bahrain Specialist Hospital", "15 min"],
   cafe: ["Beachfront Café Row", "In building"],
-  beach: ["Meliá Private Beach", "Ground floor"],
-  centre: ["Larnaca Marina", "6 min walk"],
+  beach: ["Meliá Private Lagoon Beach", "Ground floor"],
+  centre: ["Bahrain International Airport", "8 min"],
 });
 
 export const meliaBeachfrontPack: IndustryPack = {
@@ -320,7 +320,7 @@ export const meliaBeachfrontPack: IndustryPack = {
       price: 220000,
       currency: "USD",
       image: "amber",
-      location: { label: "Larnaca", lat: 34.9, lng: 33.63 },
+      location: { label: "Amwaj Islands", lat: 26.317, lng: 50.652 },
       photo: "/industries/melia-beachfront/building/hero.png",
       gallery: [
         "/industries/melia-beachfront/building/gallery-detail.png",
@@ -331,7 +331,7 @@ export const meliaBeachfrontPack: IndustryPack = {
       attributes: {
         bedrooms: 1,
         schools: 1,
-        schoolMinutes: 9,
+        schoolMinutes: 12,
         garden: false,
         seaView: false,
         quiet: false,
@@ -343,7 +343,7 @@ export const meliaBeachfrontPack: IndustryPack = {
       },
       highlights: ["Entry-level price for the building", "Balcony over the courtyard", "Ground-floor café access"],
       lifestyle: {
-        district: "Meliá Beachfront, Larnaca",
+        district: "Meliá Beachfront, Amwaj Islands",
         tags: ["Compact", "Investment", "Entry-level"],
         summary: "The building's most accessible unit — full access to every shared amenity at the lowest entry price.",
         beds: 1,
@@ -364,7 +364,7 @@ export const meliaBeachfrontPack: IndustryPack = {
       price: 340000,
       currency: "USD",
       image: "sky",
-      location: { label: "Larnaca", lat: 34.9, lng: 33.63 },
+      location: { label: "Amwaj Islands", lat: 26.317, lng: 50.652 },
       photo: "/industries/melia-beachfront/building/hero.png",
       gallery: [
         "/industries/melia-beachfront/building/gallery-detail.png",
@@ -375,7 +375,7 @@ export const meliaBeachfrontPack: IndustryPack = {
       attributes: {
         bedrooms: 2,
         schools: 1,
-        schoolMinutes: 9,
+        schoolMinutes: 12,
         garden: false,
         seaView: true,
         quiet: true,
@@ -387,7 +387,7 @@ export const meliaBeachfrontPack: IndustryPack = {
       },
       highlights: ["Uninterrupted sea view", "Away from the main road", "Wide wraparound balcony"],
       lifestyle: {
-        district: "Meliá Beachfront, Larnaca",
+        district: "Meliá Beachfront, Amwaj Islands",
         tags: ["Sea view", "Quiet", "Balcony"],
         summary: "A second-floor condo facing the water, quiet side of the building.",
         beds: 2,
@@ -408,7 +408,7 @@ export const meliaBeachfrontPack: IndustryPack = {
       price: 295000,
       currency: "USD",
       image: "amber",
-      location: { label: "Larnaca", lat: 34.9, lng: 33.63 },
+      location: { label: "Amwaj Islands", lat: 26.317, lng: 50.652 },
       photo: "/industries/melia-beachfront/building/hero.png",
       gallery: [
         "/industries/melia-beachfront/building/gallery-detail.png",
@@ -419,7 +419,7 @@ export const meliaBeachfrontPack: IndustryPack = {
       attributes: {
         bedrooms: 2,
         schools: 1,
-        schoolMinutes: 9,
+        schoolMinutes: 12,
         garden: false,
         seaView: false,
         quiet: false,
@@ -431,7 +431,7 @@ export const meliaBeachfrontPack: IndustryPack = {
       },
       highlights: ["Best value 2-bed in the building", "Balcony over the boulevard", "Full building amenities included"],
       lifestyle: {
-        district: "Meliá Beachfront, Larnaca",
+        district: "Meliá Beachfront, Amwaj Islands",
         tags: ["Value", "Family", "Balcony"],
         summary: "A straightforward, well-priced apartment facing the main boulevard.",
         beds: 2,
@@ -452,7 +452,7 @@ export const meliaBeachfrontPack: IndustryPack = {
       price: 580000,
       currency: "USD",
       image: "violet",
-      location: { label: "Larnaca", lat: 34.9, lng: 33.63 },
+      location: { label: "Amwaj Islands", lat: 26.317, lng: 50.652 },
       photo: "/industries/melia-beachfront/building/hero.png",
       gallery: [
         "/industries/melia-beachfront/building/gallery-detail.png",
@@ -463,7 +463,7 @@ export const meliaBeachfrontPack: IndustryPack = {
       attributes: {
         bedrooms: 3,
         schools: 1,
-        schoolMinutes: 9,
+        schoolMinutes: 12,
         garden: false,
         seaView: true,
         quiet: true,
@@ -475,7 +475,7 @@ export const meliaBeachfrontPack: IndustryPack = {
       },
       highlights: ["Two-level duplex layout", "Private rooftop jacuzzi", "Panoramic sea view from both floors"],
       lifestyle: {
-        district: "Meliá Beachfront, Larnaca",
+        district: "Meliá Beachfront, Amwaj Islands",
         tags: ["Duplex", "Luxury", "Sea view"],
         summary: "A two-storey duplex with its own rooftop jacuzzi terrace overlooking the water.",
         beds: 3,
@@ -496,7 +496,7 @@ export const meliaBeachfrontPack: IndustryPack = {
       price: 460000,
       currency: "USD",
       image: "sky",
-      location: { label: "Larnaca", lat: 34.9, lng: 33.63 },
+      location: { label: "Amwaj Islands", lat: 26.317, lng: 50.652 },
       photo: "/industries/melia-beachfront/building/hero.png",
       gallery: [
         "/industries/melia-beachfront/building/gallery-detail.png",
@@ -507,7 +507,7 @@ export const meliaBeachfrontPack: IndustryPack = {
       attributes: {
         bedrooms: 3,
         schools: 1,
-        schoolMinutes: 9,
+        schoolMinutes: 12,
         garden: false,
         seaView: true,
         quiet: true,
@@ -519,7 +519,7 @@ export const meliaBeachfrontPack: IndustryPack = {
       },
       highlights: ["Full-floor sea views", "Family-sized layout", "Top-of-building quiet side"],
       lifestyle: {
-        district: "Meliá Beachfront, Larnaca",
+        district: "Meliá Beachfront, Amwaj Islands",
         tags: ["Family", "Sea view", "Quiet"],
         summary: "A fifth-floor family apartment on the quiet, sea-facing side of the building.",
         beds: 3,
@@ -540,7 +540,7 @@ export const meliaBeachfrontPack: IndustryPack = {
       price: 260000,
       currency: "USD",
       image: "amber",
-      location: { label: "Larnaca", lat: 34.9, lng: 33.63 },
+      location: { label: "Amwaj Islands", lat: 26.317, lng: 50.652 },
       photo: "/industries/melia-beachfront/building/hero.png",
       gallery: [
         "/industries/melia-beachfront/building/gallery-detail.png",
@@ -551,7 +551,7 @@ export const meliaBeachfrontPack: IndustryPack = {
       attributes: {
         bedrooms: 2,
         schools: 1,
-        schoolMinutes: 9,
+        schoolMinutes: 12,
         garden: false,
         seaView: false,
         quiet: false,
@@ -563,7 +563,7 @@ export const meliaBeachfrontPack: IndustryPack = {
       },
       highlights: ["Lowest-priced 2-bed in the building", "Strong rental yield profile", "No balcony — priced accordingly"],
       lifestyle: {
-        district: "Meliá Beachfront, Larnaca",
+        district: "Meliá Beachfront, Amwaj Islands",
         tags: ["Investment", "Rental", "Value"],
         summary: "A no-frills investment unit facing the main road, priced to move.",
         beds: 2,
@@ -584,7 +584,7 @@ export const meliaBeachfrontPack: IndustryPack = {
       price: 520000,
       currency: "USD",
       image: "violet",
-      location: { label: "Larnaca", lat: 34.9, lng: 33.63 },
+      location: { label: "Amwaj Islands", lat: 26.317, lng: 50.652 },
       photo: "/industries/melia-beachfront/building/hero.png",
       gallery: [
         "/industries/melia-beachfront/building/gallery-detail.png",
@@ -595,7 +595,7 @@ export const meliaBeachfrontPack: IndustryPack = {
       attributes: {
         bedrooms: 3,
         schools: 1,
-        schoolMinutes: 9,
+        schoolMinutes: 12,
         garden: false,
         seaView: false,
         quiet: false,
@@ -607,7 +607,7 @@ export const meliaBeachfrontPack: IndustryPack = {
       },
       highlights: ["Duplex layout without the sea-view premium", "Private jacuzzi terrace", "Best duplex value in the building"],
       lifestyle: {
-        district: "Meliá Beachfront, Larnaca",
+        district: "Meliá Beachfront, Amwaj Islands",
         tags: ["Duplex", "Value", "Jacuzzi"],
         summary: "The same duplex layout as the sea-view units, at a lower price on the road-facing side.",
         beds: 3,
@@ -628,7 +628,7 @@ export const meliaBeachfrontPack: IndustryPack = {
       price: 275000,
       currency: "USD",
       image: "amber",
-      location: { label: "Larnaca", lat: 34.9, lng: 33.63 },
+      location: { label: "Amwaj Islands", lat: 26.317, lng: 50.652 },
       photo: "/industries/melia-beachfront/building/hero.png",
       gallery: [
         "/industries/melia-beachfront/building/gallery-detail.png",
@@ -639,7 +639,7 @@ export const meliaBeachfrontPack: IndustryPack = {
       attributes: {
         bedrooms: 2,
         schools: 1,
-        schoolMinutes: 9,
+        schoolMinutes: 12,
         garden: false,
         seaView: false,
         quiet: false,
@@ -651,7 +651,7 @@ export const meliaBeachfrontPack: IndustryPack = {
       },
       highlights: ["Ground-floor convenience", "Direct courtyard access", "Balcony onto the boulevard"],
       lifestyle: {
-        district: "Meliá Beachfront, Larnaca",
+        district: "Meliá Beachfront, Amwaj Islands",
         tags: ["Value", "Accessible"],
         summary: "A ground-floor unit with easy access, facing the main road.",
         beds: 2,
@@ -672,7 +672,7 @@ export const meliaBeachfrontPack: IndustryPack = {
       price: 310000,
       currency: "USD",
       image: "sky",
-      location: { label: "Larnaca", lat: 34.9, lng: 33.63 },
+      location: { label: "Amwaj Islands", lat: 26.317, lng: 50.652 },
       photo: "/industries/melia-beachfront/building/hero.png",
       gallery: [
         "/industries/melia-beachfront/building/gallery-detail.png",
@@ -683,7 +683,7 @@ export const meliaBeachfrontPack: IndustryPack = {
       attributes: {
         bedrooms: 1,
         schools: 1,
-        schoolMinutes: 9,
+        schoolMinutes: 12,
         garden: false,
         seaView: true,
         quiet: true,
@@ -695,7 +695,7 @@ export const meliaBeachfrontPack: IndustryPack = {
       },
       highlights: ["Compact luxury with a full sea view", "Popular short-let profile", "Quiet, sea-facing side"],
       lifestyle: {
-        district: "Meliá Beachfront, Larnaca",
+        district: "Meliá Beachfront, Amwaj Islands",
         tags: ["Compact", "Sea view", "Rental"],
         summary: "A small but premium sea-view unit, popular with short-let investors.",
         beds: 1,
@@ -716,7 +716,7 @@ export const meliaBeachfrontPack: IndustryPack = {
       price: 890000,
       currency: "USD",
       image: "violet",
-      location: { label: "Larnaca", lat: 34.9, lng: 33.63 },
+      location: { label: "Amwaj Islands", lat: 26.317, lng: 50.652 },
       photo: "/industries/melia-beachfront/building/hero.png",
       gallery: [
         "/industries/melia-beachfront/building/gallery-detail.png",
@@ -727,7 +727,7 @@ export const meliaBeachfrontPack: IndustryPack = {
       attributes: {
         bedrooms: 4,
         schools: 1,
-        schoolMinutes: 9,
+        schoolMinutes: 12,
         garden: false,
         seaView: true,
         quiet: true,
@@ -739,7 +739,7 @@ export const meliaBeachfrontPack: IndustryPack = {
       },
       highlights: ["Top-floor duplex penthouse", "Private rooftop pool and jacuzzi", "360° sea and marina views"],
       lifestyle: {
-        district: "Meliá Beachfront, Larnaca",
+        district: "Meliá Beachfront, Amwaj Islands",
         tags: ["Penthouse", "Luxury", "Sea view"],
         summary: "The building's signature duplex penthouse, with a private rooftop pool and jacuzzi.",
         beds: 4,
@@ -760,7 +760,7 @@ export const meliaBeachfrontPack: IndustryPack = {
       price: 505000,
       currency: "USD",
       image: "sky",
-      location: { label: "Larnaca", lat: 34.9, lng: 33.63 },
+      location: { label: "Amwaj Islands", lat: 26.317, lng: 50.652 },
       photo: "/industries/melia-beachfront/building/hero.png",
       gallery: [
         "/industries/melia-beachfront/building/gallery-detail.png",
@@ -771,7 +771,7 @@ export const meliaBeachfrontPack: IndustryPack = {
       attributes: {
         bedrooms: 3,
         schools: 1,
-        schoolMinutes: 9,
+        schoolMinutes: 12,
         garden: false,
         seaView: true,
         quiet: true,
@@ -783,7 +783,7 @@ export const meliaBeachfrontPack: IndustryPack = {
       },
       highlights: ["High-floor sea view", "Family-sized condo", "Quiet, sea-facing side"],
       lifestyle: {
-        district: "Meliá Beachfront, Larnaca",
+        district: "Meliá Beachfront, Amwaj Islands",
         tags: ["Family", "Sea view", "High floor"],
         summary: "A high-floor, sea-facing condo sized for a family.",
         beds: 3,
@@ -804,7 +804,7 @@ export const meliaBeachfrontPack: IndustryPack = {
       price: 1050000,
       currency: "USD",
       image: "violet",
-      location: { label: "Larnaca", lat: 34.9, lng: 33.63 },
+      location: { label: "Amwaj Islands", lat: 26.317, lng: 50.652 },
       photo: "/industries/melia-beachfront/building/hero.png",
       gallery: [
         "/industries/melia-beachfront/building/gallery-detail.png",
@@ -815,7 +815,7 @@ export const meliaBeachfrontPack: IndustryPack = {
       attributes: {
         bedrooms: 4,
         schools: 1,
-        schoolMinutes: 9,
+        schoolMinutes: 12,
         garden: false,
         seaView: false,
         quiet: false,
@@ -827,7 +827,7 @@ export const meliaBeachfrontPack: IndustryPack = {
       },
       highlights: ["Largest unit in the building", "Private rooftop pool and jacuzzi", "Full-floor duplex layout"],
       lifestyle: {
-        district: "Meliá Beachfront, Larnaca",
+        district: "Meliá Beachfront, Amwaj Islands",
         tags: ["Penthouse", "Luxury", "Largest unit"],
         summary: "The building's largest duplex, on the boulevard-facing side, with its own rooftop pool and jacuzzi.",
         beds: 4,
