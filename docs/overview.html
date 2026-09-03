@@ -319,8 +319,8 @@
     <dl class="meta">
       <div><dt>Status</dt><dd>Shipped to GitHub</dd></div>
       <div><dt>Surfaces</dt><dd>5 live</dd></div>
-      <div><dt>Industry packs</dt><dd>4 shipped</dd></div>
-      <div><dt>Updated</dt><dd>24 Aug 2026</dd></div>
+      <div><dt>Industry packs</dt><dd>6 shipped</dd></div>
+      <div><dt>Updated</dt><dd>03 Sep 2026</dd></div>
     </dl>
   </div>
 </header>
@@ -563,7 +563,7 @@
         <span class="chip">Branding &amp; live preview</span>
         <span class="chip">Lifestyle map scenes</span>
         <span class="chip">Runtime tenant theming</span>
-        <span class="chip">Industry packs &times;4</span>
+        <span class="chip">Industry packs &times;6</span>
         <span class="chip">No-code Industry Builder</span>
         <span class="chip">Edit / delete custom industries</span>
         <span class="chip">Smart Wizard (AI-assisted setup)</span>
@@ -667,6 +667,7 @@
       <li class="tl-item done"><span class="tl-node">35</span><h3>Deep Brand Theming (4 PRs)</h3><p>A tenant&rsquo;s brand becomes a first-class, richly themeable object rather than a single accent color: a real logo upload, a curated Google Fonts allowlist, semantic color and typography tokens resolved into CSS variables at render time, and a brand-level motion preset governing every transition on the display. Every hardcoded status color and button style across the Display is retrofitted onto the new token system, and a tenant&rsquo;s own default brand now governs the whole kiosk shell &mdash; not just individual widgets.</p></li>
       <li class="tl-item done"><span class="tl-node">36</span><h3>Display Studio matures &mdash; from control room to a full design tool (16 more PRs)</h3><p>The original 9-PR kiosk control room grows into a genuine no-code design surface. The 12-widget library gets a full visual redesign plus real drag-and-drop reordering; four widgets (Match Score, Hero, Investment, Availability) gain their own settings panels, and every widget can be scoped to Always / When relevant / Never show. A richer idle experience supports a custom headline and duration; a full-screen Preview Display modal iframes the real <code>/display</code> route, complete with a &ldquo;Preview Your Brand&rdquo; toggle so a draft can be checked in its own tenant&rsquo;s skin before publishing. Publishing itself gains safe validation, profiles can be duplicated or reset to their template defaults, and a from-scratch AI-assisted profile generator drafts a starting layout deterministically-first, Claude-optional. An 18-step acceptance test closes the loop from a blank profile to a rolled-back publish.</p></li>
       <li class="tl-item done"><span class="tl-node">37</span><h3>THE LUMMA RECAP &mdash; a persistent, revisitable post-meeting experience (20 PRs + acceptance test)</h3><p>Every prior recap was ephemeral &mdash; tied to a live sync room, gone the moment the session ended. THE LUMMA RECAP replaces it with a real, durable database record and a short public link (<code>/r/[code]</code>) the customer can reopen for days afterward, on any device, with no login. Before it&rsquo;s created, the salesperson reviews it exactly like a real document: per-section Edit/Hide control (Customer, Requirements, Shortlist, Comparison, Final recommendation, Payment, Investment, Notes), a private-notes field that is structurally unreachable from any customer-facing code path (not merely unrendered &mdash; verified by a dedicated safety test that probes the public route for it directly), and a choice of thank-you/follow-up/personal message templates. Property ids and the salesperson&rsquo;s authored text freeze at creation, but price and availability are always re-resolved live &mdash; so a customer reopening their recap sees an honest &ldquo;since your last visit&rdquo; banner (price up/down, or &ldquo;no longer available&rdquo; with real closest alternatives) instead of stale numbers. The customer can favorite properties as a pure engagement signal that never touches the salesperson&rsquo;s official shortlist, and share the link onward via real <code>wa.me</code>/<code>mailto:</code> deep links &mdash; no messaging backend added. On the salesperson&rsquo;s side, every real interaction (a view, an expanded property, a viewed payment plan, a favorite) feeds a privacy-conscious OBSERVED/INFERRED engagement signal, a live activity feed on the buyer&rsquo;s profile, and a property status-sync banner that surfaces drift even if the customer never reopens the link. The whole feature closes with a comprehensive, real two-browser-context acceptance test covering the entire journey end to end, and a security hardening pass that probes archived/expired/unknown codes and confirms they&rsquo;re indistinguishable to a stranger.</p></li>
+      <li class="tl-item done"><span class="tl-node">38</span><h3>Meli&aacute; Beachfront &mdash; a sixth industry pack, proving the single-project shape</h3><p>Every prior real-estate pack modeled one agency selling separate properties across different areas. Meli&aacute; Beachfront instead models the inverse, equally common shape: one project, one address &mdash; a beachfront development on Amwaj Islands, Bahrain &mdash; with twelve units varying by bedrooms, unit type (condo, duplex, normal apartment), sea vs. main-road view, and private amenities (pool, jacuzzi, balcony). It reuses realEstatePack&rsquo;s exact question vocabulary, scoring rules and DiscoveryWizard grouping unchanged, shipping as configuration only &mdash; zero engine changes &mdash; and proving the platform handles both inventory shapes a real developer sells. Every unit carries a real photo and 3-image gallery of the shared building, illustrated as a soft-lit architectural render (graduated sky, glowing sea reflections, a lit facade) rather than a flat placeholder.</p></li>
     </ol>
   </section>
 
@@ -692,7 +693,7 @@
           <li><span><b>The rest of the localStorage stores</b> (industry pack drafts, audit logs, knowledge base, AI/SSO/billing settings) move to the same Postgres backend, following the pattern auth/users/leads already proved out.</span></li>
           <li><span><b>Real payment processing</b> &mdash; the Billing Center UI (plans, invoices, coupons) is real; wiring a live processor (e.g. Stripe) is next.</span></li>
           <li><span><b>SSO wired to a real identity provider</b> &mdash; the settings UI, enforcement toggle and audit trail are real; federated sign-in itself isn&rsquo;t yet.</span></li>
-          <li><span><b>More industry packs</b> &mdash; medical, solar, insurance, education, hospitality (four ship today).</span></li>
+          <li><span><b>More industry packs</b> &mdash; medical, solar, insurance, education, hospitality (six ship today).</span></li>
           <li><span><b>Deal Room &amp; Template Engine, PRs 2&ndash;10</b> &mdash; the visual template builder, widget library and rendering engine, currently paused after the PR 1 data model.</span></li>
         </ul>
       </div>

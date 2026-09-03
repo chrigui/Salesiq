@@ -199,9 +199,9 @@
 <section id="summary">
   <div class="kick">Strategy</div>
   <h2>Executive summary</h2>
-  <p class="lede">Enterprise buying is improvised, invisible, and CRM tells you what happened rather than what to do next. <b>SalesIQ</b> is the category built to fix that: a Decision Intelligence Platform where a live scoring engine — never a black box — turns a customer's answers into a ranked, explainable recommendation in real time, on a screen the customer is actually looking at. The same engine, the same UI, and the same admin tooling already power five completely different industries from one shared codebase, proving the "industry-agnostic" thesis isn't a slide — it's the architecture.</p>
+  <p class="lede">Enterprise buying is improvised, invisible, and CRM tells you what happened rather than what to do next. <b>SalesIQ</b> is the category built to fix that: a Decision Intelligence Platform where a live scoring engine — never a black box — turns a customer's answers into a ranked, explainable recommendation in real time, on a screen the customer is actually looking at. The same engine, the same UI, and the same admin tooling already power six industry packs across four verticals from one shared codebase, proving the "industry-agnostic" thesis isn't a slide — it's the architecture.</p>
   <div class="grid g4">
-    <div class="stat"><div class="n">5</div><div class="l">industry packs shipped from one engine — real estate ×2, automotive, private aviation, yacht charter</div></div>
+    <div class="stat"><div class="n">6</div><div class="l">industry packs shipped from one engine — real estate ×3, automotive, private aviation, yacht charter</div></div>
     <div class="stat"><div class="n">5</div><div class="l">live product surfaces — Display, Companion, Dashboard, Admin, and a public Decision Engine API</div></div>
     <div class="stat"><div class="n">0</div><div class="l">fabricated recommendations — every score traces to a real, inspectable rule</div></div>
     <div class="stat"><div class="n">3</div><div class="l">new modules shipped this phase — Buyer Intelligence (both waves), Display Studio and LUMMA, 24 PRs combined, all verified end-to-end</div></div>
@@ -274,17 +274,18 @@
 <!-- ============ PACKS ============ -->
 <section id="packs">
   <div class="kick">Industry-agnostic by design</div>
-  <h2>One engine, five verticals, zero code changes</h2>
+  <h2>One engine, six industry packs, zero code changes</h2>
   <p class="lede">An "industry pack" is a single config object — branding, questions, inventory, scoring rules. Swap the pack and the entire product becomes a different business. Nothing about the engine or UI is real-estate-specific, automotive-specific, or aviation-specific.</p>
   <table>
     <tr><th>Pack</th><th>Brand</th><th>Vertical</th><th>Currency</th><th>Inventory</th></tr>
     <tr><td><b>Real Estate</b></td><td>Green Hills Living — "Find the home your life is asking for."</td><td>Residential real estate</td><td>USD</td><td>9 hand-authored listings, full lifestyle-map data</td></tr>
     <tr><td><b>Real Estate — Bahrain</b></td><td>Pearl Coast Properties — "Find your place in the Kingdom."</td><td>Residential real estate, GCC</td><td>BHD</td><td>500 listings — the volume/scale proof point</td></tr>
+    <tr><td><b>Meliá Beachfront</b></td><td>Meliá Beachfront — "One address. Every way to live by the sea."</td><td>Single-project residential development, Amwaj Islands, Bahrain</td><td>USD</td><td>12 units — one building, varying by bedrooms, unit type, view and amenities</td></tr>
     <tr><td><b>Automotive</b></td><td>Vantage Motors — "The drive that fits your life."</td><td>Premium automotive retail</td><td>USD</td><td>8 vehicles</td></tr>
     <tr><td><b>Private Jets</b></td><td>Meridian Aviation — "Distance is no longer a constraint."</td><td>Business aviation sales</td><td>USD</td><td>7 aircraft</td></tr>
     <tr><td><b>Yacht Charter</b></td><td>Meridian Yachts — "Charter the horizon."</td><td>Luxury yacht charter &amp; brokerage</td><td>USD</td><td>7 yachts</td></tr>
   </table>
-  <div class="note"><b>Why this matters commercially:</b> a sixth vertical — medical, solar, insurance, education, hospitality — is additive config work, not a rebuild. The Bahrain real-estate pack proves the same engine holds up at 500 real inventory items, not just a curated demo set of nine.</div>
+  <div class="note"><b>Why this matters commercially:</b> a brand-new vertical — medical, solar, insurance, education, hospitality — is additive config work, not a rebuild. The Bahrain real-estate pack proves the same engine holds up at 500 real inventory items, not just a curated demo set of nine; Meliá Beachfront proves the inverse inventory shape a real developer sells — one project, many unit variations — reusing the flagship pack's exact questions and scoring rules unchanged.</div>
 </section>
 
 <!-- ============ INTELLIGENCE ============ -->
