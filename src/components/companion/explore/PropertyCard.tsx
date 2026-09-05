@@ -1,18 +1,22 @@
 "use client";
 
-import { Bed, Bath, MapPin, Star } from "lucide-react";
+import { Bed, Bath, Maximize, MapPin, Star } from "lucide-react";
 import type { IndustryPack } from "@/core/types";
 import type { ScoredItem } from "@/core/engine/scoring";
 import { narrate, formatMoney } from "@/core/engine/explain";
 import { ItemImage } from "@/components/ui/ItemImage";
 import { cx } from "@/components/ui/primitives";
+import { deriveAvailabilityLabel } from "@/lib/availability";
 import { readPropertyAttributes } from "./attributeDisplay";
 
 /**
  * The large, tappable visual card every results grid renders — image,
- * name, location, bed/bath/type where the pack actually tracks them, price,
- * up to 3 real highlights, the real match score, and a single honest
- * match-reason line. Never invents a field a pack/item doesn't carry.
+ * name, location, bed/bath/type/area where the pack actually tracks them,
+ * price, availability, up to 3 real highlights, the real match score, and
+ * a single honest match-reason line. Never invents a field a pack/item
+ * doesn't carry. Kept in parity with the Display's own MatchCard
+ * (MatchesStage.tsx) so the salesperson and customer are looking at the
+ * same facts, just laid out for their different screens.
  */
 export function PropertyCard({
   pack,
@@ -25,6 +29,7 @@ export function PropertyCard({
 }) {
   const { item, score, reasons } = scored;
   const attrs = readPropertyAttributes(pack, item);
+  const availability = deriveAvailabilityLabel(item);
   const reason = reasons[0] ?? narrate(scored, pack);
 
   return (
@@ -50,9 +55,23 @@ export function PropertyCard({
           )}
         </div>
 
-        <div className="text-lg font-semibold text-brand">{formatMoney(item.price, item.currency)}</div>
+        <div className="flex items-center gap-2">
+          <div className="text-lg font-semibold text-brand">{formatMoney(item.price, item.currency)}</div>
+          {availability && (
+            <span
+              className={cx(
+                "rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
+                availability === "Available"
+                  ? "bg-emerald-400/15 text-emerald-400"
+                  : "bg-rose-400/15 text-rose-400",
+              )}
+            >
+              {availability}
+            </span>
+          )}
+        </div>
 
-        {(attrs.propertyType || attrs.bedrooms !== null || attrs.bathrooms !== null) && (
+        {(attrs.propertyType || attrs.bedrooms !== null || attrs.bathrooms !== null || attrs.areaSqm !== null || attrs.plotSize !== null) && (
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-ink-muted">
             {attrs.propertyType && <span>{attrs.propertyType}</span>}
             {attrs.bedrooms !== null && (
@@ -65,6 +84,12 @@ export function PropertyCard({
               <span className="flex items-center gap-1">
                 <Bath className="h-3.5 w-3.5" />
                 {attrs.bathrooms}
+              </span>
+            )}
+            {(attrs.areaSqm ?? attrs.plotSize) !== null && (
+              <span className="flex items-center gap-1">
+                <Maximize className="h-3.5 w-3.5" />
+                {attrs.areaSqm ?? attrs.plotSize} m²
               </span>
             )}
           </div>

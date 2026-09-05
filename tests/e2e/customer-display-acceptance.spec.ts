@@ -42,6 +42,18 @@ async function openDisplayControlFor(companion: import("@playwright/test").Page,
   await card.getByRole("button", { name: "Display" }).click();
 }
 
+/** The five Decision-Room "deep dive" modes live behind a collapsible
+ * "Explore in depth" toggle in DisplayControl — expand it (it's a no-op if
+ * a prior deep-dive view already left it open on remount) before clicking
+ * one of Lifestyle/Investment/Floor plan/Location/Payment. */
+async function openDeepDive(companion: import("@playwright/test").Page, label: string) {
+  const button = companion.getByRole("button", { name: label, exact: true });
+  if (!(await button.isVisible().catch(() => false))) {
+    await companion.getByRole("button", { name: "Explore in depth" }).click();
+  }
+  await button.click();
+}
+
 test("Customer Display acceptance: the full 17-step journey, start to phone continuation", async ({ context }) => {
   // 1. Start meeting.
   const companion = await context.newPage();
@@ -92,27 +104,27 @@ test("Customer Display acceptance: the full 17-step journey, start to phone cont
 
   // 8. Lifestyle.
   await openDisplayControlFor(companion, /Green Hills/);
-  await companion.getByRole("button", { name: "Show lifestyle" }).click();
+  await openDeepDive(companion, "Lifestyle");
   await expect(display.getByText("Green Hills", { exact: true })).toBeVisible({ timeout: 5000 });
 
   // 9. Location.
   await openDisplayControlFor(companion, /Green Hills/);
-  await companion.getByRole("button", { name: "Show location" }).click();
+  await openDeepDive(companion, "Location");
   await expect(display.getByText("Green Hills", { exact: true })).toBeVisible({ timeout: 5000 });
 
   // 10. Investment.
   await openDisplayControlFor(companion, /Green Hills/);
-  await companion.getByRole("button", { name: "Show investment" }).click();
+  await openDeepDive(companion, "Investment");
   await expect(display.getByText(/investment/i).first()).toBeVisible({ timeout: 5000 });
 
   // 11. Floor plan.
   await openDisplayControlFor(companion, /Green Hills/);
-  await companion.getByRole("button", { name: "Show floor plan" }).click();
+  await openDeepDive(companion, "Floor plan");
   await expect(display.getByText(/floor plan/i).first()).toBeVisible({ timeout: 5000 });
 
   // 12. Payment.
   await openDisplayControlFor(companion, /Green Hills/);
-  await companion.getByRole("button", { name: "Show payment" }).click();
+  await openDeepDive(companion, "Payment");
   await expect(display.getByText(/payment/i).first()).toBeVisible({ timeout: 5000 });
 
   // 13. Recommend, and build a real, multi-item recap via the compare

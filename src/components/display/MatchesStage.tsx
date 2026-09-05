@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import type { ScoredItem } from "@/core/engine/scoring";
 import type { IndustryPack } from "@/core/types";
-import { formatMoney } from "@/core/engine/explain";
+import { narrate, formatMoney } from "@/core/engine/explain";
 import { ItemImage } from "@/components/ui/ItemImage";
 import { deriveAvailabilityLabel } from "@/lib/availability";
 import { readPropertyAttributes } from "@/components/companion/explore/attributeDisplay";
@@ -52,6 +52,7 @@ function MatchCard({ pack, scored: s, delay }: { pack: IndustryPack; scored: Sco
   const attrs = readPropertyAttributes(pack, s.item);
   const availability = deriveAvailabilityLabel(s.item);
   const priceChanged = usePriceChangeFlash(s.item.id, s.item.price);
+  const reason = s.reasons[0] ?? narrate(s, pack);
 
   return (
     <motion.div
@@ -86,6 +87,21 @@ function MatchCard({ pack, scored: s, delay }: { pack: IndustryPack; scored: Sco
             .filter(Boolean)
             .join(" · ")}
         </div>
+
+        {s.item.highlights.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {s.item.highlights.slice(0, 2).map((h) => (
+              <span
+                key={h}
+                className="rounded-full bg-white/5 px-2 py-0.5 text-[11px] text-ink-faint ring-1 ring-white/10"
+              >
+                {h}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {reason && <p className="mt-2 text-xs italic text-ink-faint">&ldquo;{reason}&rdquo;</p>}
       </div>
     </motion.div>
   );
